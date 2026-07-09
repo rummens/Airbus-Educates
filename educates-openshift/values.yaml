@@ -34,6 +34,18 @@ educates:
   # CRC wildcard ingress domain. OpenShift Router serves *.apps-crc.testing.
   ingressDomain: apps-crc.testing
 
+  # Ingress protocol + TLS. https makes Educates put TLS on every ingress (portal
+  # AND each workshop session) so the OpenShift Router edge-terminates with a real
+  # cert. tlsCertificateRef points at a wildcard cert secret; Educates copies it
+  # into each portal/session namespace. Default = the CRC Router's own wildcard
+  # (router-certs-default in openshift-ingress) so https works out of the box on
+  # CRC. Override for other clusters, or set protocol: http to disable TLS.
+  ingress:
+    protocol: https
+    tlsCertificateRef:
+      name: router-certs-default
+      namespace: openshift-ingress
+
   # Infrastructure provider profile in the Educates installer. "openshift" forces
   # SCC-based security and disables contour/cert-manager/external-dns by default.
   provider: openshift
