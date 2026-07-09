@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kapp-controller
+  namespace: openshift-gitops
+  annotations:
+    # Deploy first; on delete this is torn down last (reverse wave order).
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/rummens/Airbus-Educates
+    targetRevision: main
+    path: kapp-controller
+    helm: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kapp-controller
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true   # large CRDs; avoids client-side apply size limits
+    retry:
+      limit: 10
+      backoff:
+        duration: 15s
+        maxDuration: 5m
+        factor: 2

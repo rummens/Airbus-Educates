@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: educates-platform
+  namespace: openshift-gitops
+  annotations:
+    # After kapp-controller. On delete, removed before kapp-controller so the
+    # installer App's finalizer can run its cleanup while kapp-controller lives.
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/rummens/Airbus-Educates
+    targetRevision: main
+    path: educates-openshift
+    helm:
+      valuesObject:
+        # Platform only — workshops live in the educates-workshops app.
+        portal:
+          enabled: false
+        # Phase 2: OpenShift OAuth. existingSecret required under GitOps (no
+        # cluster access at template time). Pre-create it once (see argocd/README).
+        auth:
+          enabled: true
+          existingSecret: educates-oauth-proxy
+        # Phase 3 vcluster is enabled per-workshop in the workshops app.
+  destination:
+    server: https://kubernetes.default.svc
+    # Release namespace — oauth-proxy (phase 2) lands here. Installer creates its
+    # own educates-installer / educates namespaces regardless.
+    namespace: educates
+  # kapp-controller co-owns fields on the installer App + its tracking ConfigMap.
+  # Ignore those managers so ArgoCD does not fight kapp-controller (no SSA churn).
+  ignoreDifferences:
+    - group: kappctrl.k14s.io
+      kind: App
+      managedFieldsManagers:
+        - kapp-controller
+    - group: ""
+      kind: ConfigMap
+      name: installer.educates.dev.app
+      namespace: educates-installer
+      managedFieldsManagers:
+        - kapp
+        - kapp-controller
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
+    retry:
+      limit: 15
+      backoff:
+        duration: 15s
+        maxDuration: 5m
+        factor: 2
