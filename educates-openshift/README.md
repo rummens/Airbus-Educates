@@ -127,7 +127,7 @@ template has no cluster access, so a generated cookie would churn on every sync)
 
 ```sh
 oc create secret generic educates-oauth-proxy \
-  --from-literal=cookie-secret=$(openssl rand -base64 32) -n educates
+  --from-literal=cookie-secret=$(openssl rand -hex 16) -n educates   # 32 bytes; base64 32 = 44 bytes and fails
 # then: --set auth.enabled=true --set auth.existingSecret=educates-oauth-proxy
 ```
 

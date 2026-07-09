@@ -140,6 +140,16 @@ auth:
   #   oc create secret generic educates-oauth-proxy \
   #     --from-literal=cookie-secret=$(openssl rand -base64 32) -n <release-ns>
   existingSecret: ""
+  # Bitnami SealedSecret for the cookie secret (commit-safe encrypted value).
+  # Requires the sealed-secrets controller in the cluster. When enabled the chart
+  # renders a SealedSecret that unseals to a Secret named "educates-oauth-proxy"
+  # (so leave auth.existingSecret empty — the proxy mounts that name by default).
+  # Generate encryptedCookieSecret (namespace = the app's release namespace):
+  #   VALUE=$(openssl rand -hex 16)   # 32 bytes; base64 32 = 44 bytes and FAILS
+  #   echo -n "$VALUE" | kubeseal --raw --namespace educates --name educates-oauth-proxy
+  sealedSecret:
+    enabled: false
+    encryptedCookieSecret: ""
   # oauth-proxy image (OpenShift-native). Registry-overridable like everything else:
   # empty resolves to registry.redhat.io/openshift4/ose-oauth-proxy:<tag> or the
   # override host. Set explicitly to pin a digest.

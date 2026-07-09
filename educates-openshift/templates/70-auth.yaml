@@ -8,7 +8,7 @@
 # secret (--openshift-service-account). This means there is NO client secret to
 # template, store in git, or keep in sync with an OAuthClient CR — which is what
 # makes phase 2 safe under ArgoCD (helm template runs with no cluster access).
-{{- if not .Values.auth.existingSecret }}
+{{- if and (not .Values.auth.existingSecret) (not .Values.auth.sealedSecret.enabled) }}
 {{- /* Only a COOKIE secret is needed. Generate once; reuse via lookup for plain
        helm. Under ArgoCD, lookup returns nil each render, regenerating the cookie
        and logging users out on every sync — set auth.existingSecret to a

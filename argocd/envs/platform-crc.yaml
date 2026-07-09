@@ -1,0 +1,15 @@
+# Per-cluster values for the educates-openshift (platform) chart — CRC / OpenShift Local.
+# Use this file (instead of platform-x86.yaml) in the educates-platform Application
+# when deploying to CRC.
+educates:
+  ingressDomain: apps-crc.testing
+  ingress:
+    protocol: https
+    tlsCertificateRef:
+      name: router-certs-default
+      namespace: openshift-ingress
+portal:
+  enabled: false
+auth:
+  enabled: true
+  existingSecret: educates-oauth-proxy

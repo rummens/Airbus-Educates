@@ -11,21 +11,19 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    repoURL: https://github.com/rummens/Airbus-Educates
-    targetRevision: main
-    path: educates-openshift
-    helm:
-      valuesObject:
-        # Platform only — workshops live in the educates-workshops app.
-        portal:
-          enabled: false
-        # Phase 2: OpenShift OAuth. existingSecret required under GitOps (no
-        # cluster access at template time). Pre-create it once (see argocd/README).
-        auth:
-          enabled: true
-          existingSecret: educates-oauth-proxy
-        # Phase 3 vcluster is enabled per-workshop in the workshops app.
+  # Multi-source: the chart + a per-cluster values file. Point valueFiles at the
+  # env file for THIS cluster (platform-x86.yaml / platform-crc.yaml). This is the
+  # only place ingressDomain + cert are set — no hardcoding in the chart.
+  sources:
+    - repoURL: https://github.com/rummens/Airbus-Educates
+      targetRevision: main
+      path: educates-openshift
+      helm:
+        valueFiles:
+          - $values/argocd/envs/platform-x86.yaml
+    - repoURL: https://github.com/rummens/Airbus-Educates
+      targetRevision: main
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     # Release namespace — oauth-proxy (phase 2) lands here. Installer creates its
