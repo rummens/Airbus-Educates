@@ -1,0 +1,71 @@
+# One Workshop CR per catalog entry. Requires the training.educates.dev CRDs
+# (installed by the educates-openshift platform chart) to already exist.
+{{- $ctx := . -}}
+{{- range .Values.workshops }}
+{{- $vc := eq (include "workshops.vcluster" (dict "ctx" $ctx "ws" .)) "true" }}
+{{- $app := default dict .session.applications }}
+---
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: {{ .name }}
+  labels:
+    {{- include "workshops.labels" $ctx | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: {{ .title | quote }}
+  description: {{ .description | quote }}
+  workshop:
+    files:
+      {{- if eq .source.type "git" }}
+      - git:
+          url: {{ .source.git.url | quote }}
+          ref: {{ .source.git.ref | quote }}
+        includePaths:
+          {{- toYaml .includePaths | nindent 10 }}
+      {{- else if eq .source.type "image" }}
+      - image:
+          url: {{ include "workshops.image" (dict "ctx" $ctx "ws" .) | quote }}
+        includePaths:
+          {{- toYaml .includePaths | nindent 10 }}
+      {{- else if eq .source.type "http" }}
+      - http: {{ toYaml .source.http | nindent 10 }}
+        includePaths:
+          {{- toYaml .includePaths | nindent 10 }}
+      {{- else if eq .source.type "githubRelease" }}
+      - githubRelease: {{ toYaml .source.githubRelease | nindent 10 }}
+        includePaths:
+          {{- toYaml .includePaths | nindent 10 }}
+      {{- else }}
+      {{- fail (printf "workshop %s: unknown source.type %q (git|image|http|githubRelease)" .name .source.type) }}
+      {{- end }}
+  session:
+    namespaces:
+      budget: {{ if $vc }}{{ $ctx.Values.vcluster.budget }}{{ else }}{{ .session.budget }}{{ end }}
+      security:
+        policy: {{ if $vc }}baseline{{ else }}{{ .session.policy }}{{ end }}
+    applications:
+      {{- if $app.terminal }}
+      terminal:
+        enabled: true
+        layout: split
+      {{- end }}
+      {{- if $app.console }}
+      console:
+        enabled: true
+      {{- end }}
+      {{- if $app.editor }}
+      editor:
+        enabled: true
+      {{- end }}
+      {{- if $app.slides }}
+      slides:
+        enabled: true
+      {{- end }}
+      {{- if $vc }}
+      vcluster:
+        enabled: true
+      {{- end }}
+{{- end }}

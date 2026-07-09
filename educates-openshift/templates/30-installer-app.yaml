@@ -1,0 +1,66 @@
+# kapp-controller App that runs the Educates installer. Mirrors the upstream
+# educates-installer-app.yaml: fetch the imgpkg bundle, template with ytt using
+# our config secret, resolve images with kbld, deploy with kapp. This single App
+# installs BOTH educates-cluster-essentials and educates-training-platform.
+# Requires kapp-controller to be present on the cluster (see README prereqs).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    kapp.k14s.io/is-app: ""
+    {{- include "educates.labels" . | nindent 4 }}
+  annotations:
+    kapp.k14s.io/app-changes-use-app-label: ""
+    argocd.argoproj.io/sync-wave: "0"
+  name: installer.educates.dev.app
+  namespace: {{ .Values.educates.installer.namespace }}
+data:
+  spec: '{"labelKey":"installer","labelValue":"educates-installer.app"}'
+---
+apiVersion: kappctrl.k14s.io/v1alpha1
+kind: App
+metadata:
+  name: installer.educates.dev
+  namespace: {{ .Values.educates.installer.namespace }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  serviceAccountName: educates-installer
+  syncPeriod: 87600h
+  fetch:
+    - imgpkgBundle:
+        image: {{ include "educates.installerImage" . | quote }}
+        {{- if .Values.global.registry.pullSecret }}
+        secretRef:
+          name: {{ .Values.global.registry.pullSecret }}
+        {{- end }}
+      path: bundle
+    - inline:
+        paths:
+          # kapp-controller is a prerequisite; do not let Educates manage it.
+          disable-kapp-controller.yaml: |
+            clusterPackages:
+              kapp-controller:
+                enabled: false
+      path: values
+  template:
+    - ytt:
+        valuesFrom:
+          - path: bundle/kbld/kbld-images.yaml
+          - secretRef:
+              name: educates-installer
+          - path: values/disable-kapp-controller.yaml
+        paths:
+          - bundle/kbld/kbld-bundle.yaml
+          - bundle/config/kapp
+          - bundle/config/ytt
+    - kbld:
+        paths:
+          - bundle/.imgpkg/images.yml
+          - "-"
+  deploy:
+    - kapp:
+        rawOptions:
+          - --app-changes-max-to-keep=0

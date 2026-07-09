@@ -1,0 +1,25 @@
+{{- if .Values.portal.route.enabled }}
+# Optional explicit Route to the portal. OFF by default — Educates already
+# creates an Ingress the OpenShift Router serves at the same host; enabling both
+# conflicts. Lives in the Educates-managed portal namespace (<name>-ui).
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .Values.portal.name }}-portal
+  namespace: {{ .Values.portal.name }}-ui
+  labels:
+    {{- include "workshops.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  host: {{ .Values.portal.name }}-ui.{{ .Values.ingressDomain }}
+  to:
+    kind: Service
+    name: training-portal
+  port:
+    targetPort: 8080
+  tls:
+    termination: {{ .Values.portal.route.tls }}
+    insecureEdgeTerminationPolicy: Redirect
+{{- end }}

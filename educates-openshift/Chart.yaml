@@ -1,0 +1,22 @@
+apiVersion: v2
+name: educates-openshift
+description: >-
+  Deploys the Educates training platform onto OpenShift Local (CRC) by wrapping
+  the official Educates kapp-controller installer App. Works online today and
+  fully air-gapped by setting global.registry.host. Ships a bare portal (phase 1),
+  optional OpenShift OAuth front (phase 2), and optional per-session vcluster (phase 3).
+type: application
+# Chart version is independent of Educates. Bump on chart changes.
+version: 0.1.0
+# The Educates release this chart is pinned to. Keep in sync with educates.version.
+appVersion: "3.7.2"
+keywords:
+  - educates
+  - workshops
+  - openshift
+  - crc
+home: https://educates.dev
+sources:
+  - https://github.com/educates/educates-training-platform
+maintainers:
+  - name: Platform Enablement

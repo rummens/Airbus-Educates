@@ -1,0 +1,29 @@
+# Installer service account. The Educates installer creates CRDs, cluster
+# packages, operators and SCCs across the cluster, so it requires cluster-admin
+# (this mirrors the upstream educates-installer-app-rbac.yaml exactly).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: educates-installer
+  namespace: {{ .Values.educates.installer.namespace }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: educates-installer
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: educates-installer
+    namespace: {{ .Values.educates.installer.namespace }}

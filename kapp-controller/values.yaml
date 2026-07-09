@@ -1,0 +1,21 @@
+# =============================================================================
+# kapp-controller — values
+# =============================================================================
+# Vendored upstream manifest (v0.60.3). Only the controller image is
+# parameterised, for air-gap. Everything else is upstream verbatim.
+# =============================================================================
+
+global:
+  registry:
+    # Private/mirror registry host. EMPTY = pull from ghcr.io (upstream).
+    # When set, the kapp-controller image rewrites to <host>/carvel-dev/...
+    # Mirror it with:
+    #   imgpkg copy -i ghcr.io/carvel-dev/kapp-controller@sha256:610a...  \
+    #     --to-repo <host>/carvel-dev/kapp-controller
+    host: ""
+
+image:
+  # Digest-pinned upstream controller image. Repo host is swapped when
+  # global.registry.host is set; the digest is preserved.
+  repository: ghcr.io/carvel-dev/kapp-controller
+  digest: "sha256:610a14076cfe8864cd0bd961277b8c239298ab418234a1a8c324f2f5792c9b1d"

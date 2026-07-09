@@ -1,0 +1,30 @@
+# Portal hosting every workshop in the catalog. Served at
+# <portal.name>-ui.<ingressDomain> via the Ingress Educates creates.
+apiVersion: training.educates.dev/v1beta1
+kind: TrainingPortal
+metadata:
+  name: {{ .Values.portal.name }}
+  labels:
+    {{- include "workshops.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  portal:
+    title: {{ .Values.portal.title | quote }}
+    registration:
+      type: {{ if .Values.portal.registration.enabled }}anonymous{{ else }}one-step{{ end }}
+    updates:
+      workshop: true
+    sessions:
+      maximum: {{ .Values.portal.sessions.maximum }}
+    workshop:
+      defaults:
+        reserved: 1
+        initial: 0
+  workshops:
+  {{- range .Values.workshops }}
+    - name: {{ .name }}
+      expires: {{ .portal.expires }}
+      orphaned: {{ .portal.orphaned }}
+  {{- end }}

@@ -1,0 +1,19 @@
+apiVersion: v2
+name: kapp-controller
+description: >-
+  Carvel kapp-controller (vendored upstream release v0.60.3), packaged as a Helm
+  chart so it can be deployed as its own ArgoCD Application and sequenced ahead of
+  the Educates platform via sync waves. kapp-controller reconciles the Educates
+  installer App CR, so it must exist first. Image is registry-overridable for air-gap.
+type: application
+version: 0.1.0
+appVersion: "v0.60.3"
+keywords:
+  - carvel
+  - kapp-controller
+  - prerequisite
+home: https://carvel.dev/kapp-controller/
+sources:
+  - https://github.com/carvel-dev/kapp-controller
+maintainers:
+  - name: Platform Enablement

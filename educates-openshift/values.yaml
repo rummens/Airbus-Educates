@@ -1,0 +1,151 @@
+# =============================================================================
+# educates-openshift — values
+# =============================================================================
+# Every image, domain, and secret is driven from here. Nothing is hardcoded in
+# templates. Defaults run on CRC-with-internet today; going offline requires
+# only setting global.registry.host (plus mirroring images — see README).
+# =============================================================================
+
+global:
+  registry:
+    # Private/mirror registry host. EMPTY = pull from upstream public registries
+    # (ghcr.io/educates, docker.io, ghcr.io/loft-sh) — the online default.
+    # When set (e.g. "registry.apps-crc.testing" or "myregistry.internal:5000"),
+    # ALL image pulls are rewritten to this host:
+    #   - the Educates installer imgpkg bundle (which carries every platform image)
+    #   - Educates' own imageRegistry.host config field
+    #   - workshop content images
+    #   - vcluster images (carried inside the installer bundle)
+    host: ""
+    # Name of an EXISTING pull secret (dockerconfigjson) for the private registry.
+    # Optional. Must exist in the installer namespace (educates.installer.namespace)
+    # so kapp-controller can pull the bundle, and is wired into Educates'
+    # clusterSecrets.pullSecretRefs so workloads pull too. Never put creds here.
+    pullSecret: ""
+
+# -----------------------------------------------------------------------------
+# Educates platform install (phase 1 — always on)
+# -----------------------------------------------------------------------------
+educates:
+  # Pinned Educates release. Drives the installer bundle tag AND the image tags
+  # Educates builds via imageRegistry (config.version). Keep in sync with Chart appVersion.
+  version: "3.7.2"
+
+  # CRC wildcard ingress domain. OpenShift Router serves *.apps-crc.testing.
+  ingressDomain: apps-crc.testing
+
+  # Infrastructure provider profile in the Educates installer. "openshift" forces
+  # SCC-based security and disables contour/cert-manager/external-dns by default.
+  provider: openshift
+
+  security:
+    # MUST be security-context-constraints on OpenShift (the provider forces this
+    # too; set explicitly for clarity).
+    policyEngine: security-context-constraints
+    # Workshop rules engine. kyverno is off on OpenShift, so this MUST be "none".
+    rulesEngine: none
+
+  # Educates' OWN platform image-registry config. Only emitted into the Educates
+  # config when global.registry.host is set (air-gap). namespace is the repo path
+  # segment under the registry where educates-<component>:<version> images live
+  # after mirroring (see README mirroring steps).
+  imageRegistry:
+    namespace: educates
+
+  installer:
+    # Namespace the kapp-controller installer App + RBAC + config secret live in.
+    namespace: educates-installer
+    # Base repo for the installer imgpkg bundle. When global.registry.host is set,
+    # the host is swapped but this path is preserved (mirror to <host>/<this>).
+    bundleRepository: ghcr.io/educates/educates-installer
+
+  # kapp-controller must already be present on the cluster (see README prereqs).
+  # This chart renders the App CR that kapp-controller reconciles.
+
+# -----------------------------------------------------------------------------
+# Training portal + workshops (phase 1)
+# -----------------------------------------------------------------------------
+portal:
+  # Render the TrainingPortal + Workshop CRs from THIS chart (the phase-1 smoke
+  # test). Set false when you deploy workshops with the separate
+  # `educates-workshops` chart instead — keeps this chart platform-only.
+  enabled: true
+  # TrainingPortal name. Portal is served at <name>-ui.<ingressDomain>.
+  name: container-paas
+  title: "Container/PaaS Enablement"
+
+  registration:
+    # true  -> anonymous access (phase 1 smoke test; anyone with the URL enters)
+    # false -> Educates one-step login form (native portal auth)
+    # Phase 2 (auth.enabled) fronts the portal with OpenShift OAuth regardless.
+    enabled: true
+
+  sessions:
+    # Max concurrent sessions across the portal (CRC is single-node; keep small).
+    maximum: 3
+
+  route:
+    # Educates already creates an Ingress that the OpenShift Router serves at
+    # <name>-ui.<ingressDomain> — that IS your route in phase 1. Leave this false
+    # to avoid a duplicate-host conflict. Set true only if you want to manage an
+    # explicit Route (e.g. custom TLS) INSTEAD of the auto Ingress.
+    enabled: false
+    # edge | reencrypt | passthrough
+    tls: edge
+
+# List of workshops to deploy. Each becomes a Workshop CR referenced by the portal.
+workshops:
+  - name: lab-k8s-fundamentals
+    # Workshop content (files) image. EMPTY resolves against global.registry.host:
+    #   host set   -> <host>/educates/lab-k8s-fundamentals-files:<version>
+    #   host empty -> ghcr.io/educates/lab-k8s-fundamentals-files:<version>
+    # Set explicitly to override completely.
+    image: ""
+    version: "8.1"
+    title: "Kubernetes Fundamentals"
+    description: "An interactive workshop on Kubernetes fundamentals."
+    # Session namespace budget: small|medium|large|x-large|custom. medium per spec.
+    budget: medium
+    # Session security policy: restricted|baseline|privileged. restricted per spec.
+    # (Overridden to baseline automatically when vcluster.enabled — see below.)
+    policy: restricted
+    expires: 60m
+    orphaned: 5m
+
+# -----------------------------------------------------------------------------
+# Phase 2 — front the portal with OpenShift's built-in OAuth (values-gated)
+# -----------------------------------------------------------------------------
+auth:
+  enabled: false
+  # Auth uses ServiceAccount-as-OAuthClient (the SA's redirect annotation registers
+  # it with the cluster OAuth server; oauth-proxy uses the SA token as the client
+  # secret). No OAuthClient CR and no client secret to manage — GitOps/ArgoCD safe.
+  #
+  # Name of a PRE-CREATED secret holding key `cookie-secret`. Leave empty for plain
+  # `helm`/`oc` (the chart generates + preserves one via lookup). For ArgoCD set
+  # this — helm template has no cluster access, so a generated cookie would be
+  # regenerated on every sync and log users out. Create once with:
+  #   oc create secret generic educates-oauth-proxy \
+  #     --from-literal=cookie-secret=$(openssl rand -base64 32) -n <release-ns>
+  existingSecret: ""
+  # oauth-proxy image (OpenShift-native). Registry-overridable like everything else:
+  # empty resolves to registry.redhat.io/openshift4/ose-oauth-proxy:<tag> or the
+  # override host. Set explicitly to pin a digest.
+  proxyImage: ""
+  proxyImageRepository: openshift4/ose-oauth-proxy
+  proxyImageRegistry: registry.redhat.io
+  proxyImageTag: "v4.14"
+  # Hostname the authenticated portal is served on. EMPTY -> <portal.name>-secure.<ingressDomain>
+  hostname: ""
+  # Cookie/session secret: generated at install and stored in a Secret (kept across
+  # upgrades via lookup). NEVER placed in values.
+
+# -----------------------------------------------------------------------------
+# Phase 3 — vcluster per session (values-gated)
+# -----------------------------------------------------------------------------
+vcluster:
+  enabled: false
+  # Namespace budget is raised when enabled (vcluster control plane needs room).
+  budget: large
+  # vcluster images (ghcr.io/loft-sh/*) ship inside the installer bundle and are
+  # relocated automatically when global.registry.host is set. No separate ref needed.

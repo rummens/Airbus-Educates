@@ -1,0 +1,100 @@
+# =============================================================================
+# educates-workshops — values
+# =============================================================================
+# Holds the workshop catalog (Workshop CRs) + a TrainingPortal that hosts them.
+# Deploy AFTER the platform (educates-openshift with portal.enabled=false).
+# Add workshops by appending to `workshops:` — the portal hosts every entry.
+# =============================================================================
+
+global:
+  registry:
+    # Private/mirror registry host. EMPTY = pull from upstream. When set, workshop
+    # content IMAGES (source.type=image) rewrite to this host. git/http sources are
+    # URLs and are not rewritten — mirror the git repo / URL for those in air-gap.
+    host: ""
+    pullSecret: ""
+
+# CRC wildcard ingress domain (used for the optional explicit Route host).
+ingressDomain: apps-crc.testing
+
+# -----------------------------------------------------------------------------
+# The portal that hosts the workshops below.
+# -----------------------------------------------------------------------------
+portal:
+  name: container-paas
+  title: "Container/PaaS Enablement"
+  registration:
+    # true -> anonymous; false -> Educates one-step login. If you front the portal
+    # with the educates-openshift auth phase, keep this true.
+    enabled: true
+  sessions:
+    maximum: 3
+  route:
+    # Educates auto-creates an Ingress the OpenShift Router serves at
+    # <name>-ui.<ingressDomain>. Leave false to avoid a duplicate-host Route.
+    enabled: false
+    tls: edge
+
+# -----------------------------------------------------------------------------
+# Phase 3 passthrough — per-session vcluster (requires platform vcluster support).
+# When true, every workshop gets session.applications.vcluster + a larger budget
+# and baseline policy. Toggle per workshop with `<ws>.session.vcluster: true/false`
+# to override this global default.
+# -----------------------------------------------------------------------------
+vcluster:
+  enabled: false
+  budget: large
+
+# -----------------------------------------------------------------------------
+# Workshop catalog. One Workshop CR per entry; all are hosted by the portal.
+# -----------------------------------------------------------------------------
+workshops:
+  # lab-k8s-fundamentals, loaded straight from its GitHub repo (git source).
+  - name: lab-k8s-fundamentals
+    title: "Kubernetes Fundamentals"
+    description: "An interactive workshop on Kubernetes fundamentals."
+    # Content source. type: git | image | githubRelease | http
+    source:
+      type: git
+      git:
+        url: https://github.com/educates/lab-k8s-fundamentals
+        ref: origin/main
+      # For air-gap prefer an image (mirror it; rewrites via global.registry.host):
+      # type: image
+      image:
+        repository: ghcr.io/educates/lab-k8s-fundamentals-files
+        tag: "8.1"
+    # Paths inside the source to serve.
+    includePaths:
+      - /workshop/**
+      - /templates/**
+      - /README.md
+    session:
+      budget: medium        # small|medium|large|x-large|custom
+      policy: restricted    # restricted|baseline|privileged
+      applications:
+        terminal: true
+        console: true
+        editor: true
+        slides: true
+      # Per-workshop vcluster override (omit to follow global vcluster.enabled):
+      # vcluster: true
+    portal:
+      expires: 60m
+      orphaned: 5m
+
+  # --- Add more workshops like this (example, disabled by leaving commented) ---
+  # - name: lab-container-basics
+  #   title: "Container Basics"
+  #   description: "Building and running containers."
+  #   source:
+  #     type: git
+  #     git:
+  #       url: https://github.com/educates/lab-container-basics
+  #       ref: origin/main
+  #   includePaths: [/workshop/**, /README.md]
+  #   session:
+  #     budget: small
+  #     policy: restricted
+  #     applications: { terminal: true, editor: true }
+  #   portal: { expires: 60m, orphaned: 5m }
