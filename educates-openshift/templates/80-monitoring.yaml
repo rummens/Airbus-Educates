@@ -1,0 +1,222 @@
+{{- if .Values.monitoring.enabled }}
+{{- $ns := .Release.Namespace }}
+# =============================================================================
+# Educates metrics — Educates' own operators (session-manager, secrets-manager)
+# are kopf operators that expose NO Prometheus endpoint, so there is nothing to
+# scrape from them directly. Backend *pod/deployment* health already comes from
+# the platform kube-state-metrics + cAdvisor (queryable via Thanos). What is
+# missing is the state of the Educates custom resources — above all how many
+# WorkshopSessions are running, split by workshop type.
+#
+# This deploys a dedicated kube-state-metrics in "custom-resource-state-only"
+# mode that turns the training.educates.dev CRs into metrics, exposes them on a
+# Service, and points a ServiceMonitor at it. OpenShift user-workload monitoring
+# (already enabled on this cluster) auto-discovers the ServiceMonitor and scrapes
+# it, so the series land in Thanos alongside the platform metrics.
+# =============================================================================
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: educates-metrics
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
+---
+# Read-only access to the Educates CRs so kube-state-metrics can list/watch them.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: educates-metrics
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["training.educates.dev"]
+    resources:
+      - workshops
+      - workshopsessions
+      - workshopenvironments
+      - trainingportals
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: educates-metrics
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: educates-metrics
+subjects:
+  - kind: ServiceAccount
+    name: educates-metrics
+    namespace: {{ $ns }}
+---
+# CustomResourceState config: one Info series per CR. Value is always 1; the
+# interesting data is in the labels (workshop type + phase), which the dashboard
+# aggregates. `educates_workshopsession_info{phase="Allocated"}` = a running
+# session; sum by (workshop) splits the count by workshop type.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: educates-metrics-crs
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+data:
+  crs.yaml: |
+    kind: CustomResourceStateMetrics
+    spec:
+      resources:
+        - groupVersionKind:
+            group: training.educates.dev
+            version: v1beta1
+            kind: WorkshopSession
+          metricNamePrefix: educates_workshopsession
+          labelsFromPath:
+            session: [metadata, name]
+            portal: [spec, portal, name]
+            environment: [spec, environment, name]
+            workshop: [spec, workshop, name]
+          metrics:
+            - name: info
+              help: "Educates workshop session, labeled by workshop type and phase."
+              each:
+                type: Info
+                info:
+                  labelsFromPath:
+                    phase: [status, educates, phase]
+        - groupVersionKind:
+            group: training.educates.dev
+            version: v1beta1
+            kind: TrainingPortal
+          metricNamePrefix: educates_trainingportal
+          labelsFromPath:
+            portal: [metadata, name]
+          metrics:
+            - name: info
+              help: "Educates training portal, labeled by phase."
+              each:
+                type: Info
+                info:
+                  labelsFromPath:
+                    phase: [status, educates, phase]
+        - groupVersionKind:
+            group: training.educates.dev
+            version: v1beta1
+            kind: Workshop
+          metricNamePrefix: educates_workshop
+          labelsFromPath:
+            workshop: [metadata, name]
+          metrics:
+            - name: info
+              help: "Educates workshop definition."
+              each:
+                type: Info
+                info: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: educates-metrics
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: metrics
+      app.kubernetes.io/name: educates-openshift
+  template:
+    metadata:
+      labels:
+        {{- include "educates.labels" . | nindent 8 }}
+        app.kubernetes.io/component: metrics
+    spec:
+      serviceAccountName: educates-metrics
+      {{- if .Values.global.registry.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.global.registry.pullSecret }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: kube-state-metrics
+          image: {{ include "educates.ksmImage" . | quote }}
+          args:
+            - --custom-resource-state-only=true
+            - --custom-resource-state-config-file=/config/crs.yaml
+            # No namespace filter: WorkshopSessions are cluster-scoped.
+            - --port=8080
+            - --telemetry-port=8081
+          ports:
+            - name: http-metrics
+              containerPort: 8080
+            - name: telemetry
+              containerPort: 8081
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: telemetry
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: telemetry
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: crs-config
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: crs-config
+          configMap:
+            name: educates-metrics-crs
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: educates-metrics
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
+spec:
+  selector:
+    app.kubernetes.io/component: metrics
+    app.kubernetes.io/name: educates-openshift
+  ports:
+    - name: http-metrics
+      port: 8080
+      targetPort: http-metrics
+---
+# OpenShift user-workload monitoring auto-discovers this ServiceMonitor.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: educates-metrics
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: metrics
+      app.kubernetes.io/name: educates-openshift
+  endpoints:
+    - port: http-metrics
+      interval: 30s
+      scheme: http
+{{- end }}

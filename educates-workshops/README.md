@@ -99,10 +99,17 @@ The portal hosts all listed workshops automatically.
 ## vcluster per session (phase 3)
 
 `--set vcluster.enabled=true` turns on `session.applications.vcluster` for every
-workshop, raises the budget to `large`, and sets policy `baseline`. Override per
-workshop with `session.vcluster: true|false`. Requires the platform to support
-vcluster (installed by educates-openshift). vcluster images ship in the platform
-bundle and are registry-overridable there.
+workshop and raises the budget to `large`. Override per workshop with
+`session.vcluster: true|false`. vcluster images ship in the platform bundle and
+are registry-overridable there.
+
+**OpenShift SCC grant (required).** vcluster syncs a coredns pod (uid + is
+`NET_BIND_SERVICE`) into the host `<session>-vc` namespace, which Educates
+hardcodes to the **baseline** SCC — baseline rejects `NET_BIND_SERVICE`, so
+coredns never starts and the vcluster hangs "not ready". When vcluster is on,
+this chart adds a `session.objects` RoleBinding granting the **educates-privileged**
+SCC to the service accounts in that namespace (`$(vcluster_namespace)`). Without
+it, vcluster does not come up on OpenShift.
 
 ---
 

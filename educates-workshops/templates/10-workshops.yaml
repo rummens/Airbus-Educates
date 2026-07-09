@@ -45,7 +45,28 @@ spec:
     namespaces:
       budget: {{ if $vc }}{{ $ctx.Values.vcluster.budget }}{{ else }}{{ .session.budget }}{{ end }}
       security:
-        policy: {{ if $vc }}baseline{{ else }}{{ .session.policy }}{{ end }}
+        policy: {{ .session.policy }}
+    {{- if $vc }}
+    # vcluster syncs a coredns pod (runAsUser + NET_BIND_SERVICE) into the host
+    # "-vc" namespace, which Educates hardcodes to the baseline SCC — baseline
+    # rejects NET_BIND_SERVICE, so coredns never starts and the vcluster hangs.
+    # Grant the educates-privileged SCC to the service accounts in that namespace
+    # ($(vcluster_namespace) is an Educates session variable). Gated on vcluster.
+    objects:
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        metadata:
+          name: educates-vcluster-scc
+          namespace: $(vcluster_namespace)
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: educates-privileged-scc
+        subjects:
+          - kind: Group
+            apiGroup: rbac.authorization.k8s.io
+            name: system:serviceaccounts:$(vcluster_namespace)
+    {{- end }}
     applications:
       {{- if $app.terminal }}
       terminal:

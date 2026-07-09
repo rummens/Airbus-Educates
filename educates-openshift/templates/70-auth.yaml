@@ -142,6 +142,22 @@ spec:
           ports:
             - name: https
               containerPort: 8443
+          # oauth-proxy serves /oauth/healthz on the TLS port; kubelet skips cert
+          # verification for HTTPS probes so the serving cert host need not match.
+          readinessProbe:
+            httpGet:
+              path: /oauth/healthz
+              port: https
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /oauth/healthz
+              port: https
+              scheme: HTTPS
+            initialDelaySeconds: 15
+            periodSeconds: 20
           volumeMounts:
             - name: proxy-secrets
               mountPath: /etc/proxy/secrets

@@ -73,7 +73,9 @@ Effective session security policy (vcluster needs baseline, not restricted).
 Arg: dict "ctx" $ "ws" <workshop map>
 */}}
 {{- define "educates.sessionPolicy" -}}
-{{- if .ctx.Values.vcluster.enabled -}}baseline{{- else -}}{{ .ws.policy }}{{- end -}}
+{{- /* Main session namespace keeps the workshop's own policy. vcluster's SCC
+       needs are handled in the -vc namespace via session.objects, not here. */ -}}
+{{ .ws.policy }}
 {{- end -}}
 
 {{/*

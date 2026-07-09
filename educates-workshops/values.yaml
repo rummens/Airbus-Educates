@@ -21,8 +21,8 @@ ingressDomain: apps-crc.testing
 # The portal that hosts the workshops below.
 # -----------------------------------------------------------------------------
 portal:
-  name: container-paas
-  title: "Container/PaaS Enablement"
+  name: dcs-training
+  title: "DCS Enablement"
   registration:
     # true -> anonymous; false -> Educates one-step login. If you front the portal
     # with the educates-openshift auth phase, keep this true.
