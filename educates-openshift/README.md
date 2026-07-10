@@ -1,17 +1,25 @@
 # educates-openshift
 
-Helm chart that deploys the [Educates](https://educates.dev) training platform
-onto **OpenShift Local (CRC)**. Runs online today; goes fully air-gapped by
-setting a single value (`global.registry.host`). Ships in three toggled phases —
-phase 1 (bare portal) is on by default; phases 2 and 3 are off.
+Helm chart that installs the [Educates](https://educates.dev) training **platform**
+onto OpenShift (CRC or full clusters). Runs online today; goes fully air-gapped by
+setting a single value (`global.registry.host`).
 
 Pinned to **Educates 3.7.2**.
 
-> **Workshops live in a separate chart.** This chart installs the platform and,
-> by default (`portal.enabled=true`), a built-in smoke-test portal hosting
-> lab-k8s-fundamentals. To manage workshops independently, set
-> `portal.enabled=false` here and use the
-> [`educates-workshops`](../educates-workshops) chart instead.
+> **Platform-only chart.** This installs cluster-essentials + training-platform
+> (via kapp-controller) plus optional metrics/monitoring. The **TrainingPortal,
+> Workshops, and the OpenShift-OAuth proxy live in the separate
+> [`educates-workshops`](../educates-workshops) chart.** Deploy this first, then
+> that.
+>
+> **Namespaces:** static platform namespaces we create are prefixed `dcs-`
+> (e.g. `dcs-educates-installer`); dynamic per-session workshop namespaces are
+> `dcst-*` (from the portal name in the workshops chart). The Educates operator's
+> own `educates` namespace is created by the upstream installer and keeps that name.
+>
+> The phase-1/2/3 sections below describe the original single-chart layout; auth
+> (phase 2) and workshops now live in the workshops chart. Kept for the install +
+> air-gap + security-grant reference.
 
 ---
 
