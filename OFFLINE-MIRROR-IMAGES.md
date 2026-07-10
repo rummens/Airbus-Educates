@@ -95,6 +95,23 @@ redis:8.6.2
 
 ## Harbour Config
 
+
+### 0. GHCR — (educates images)
+
+```text
+educates/{educates-installer,educates-session-manager,educates-training-portal,educates-docker-registry,educates-pause-container,educates-base-environment,educates-jdk8-environment,educates-jdk11-environment,educates-jdk17-environment,educates-jdk21-environment,educates-conda-environment,educates-secrets-manager,educates-tunnel-manager,educates-image-cache,educates-assets-server,educates-lookup-service,educates-node-ca-injector,lab-k8s-fundamentals-files,lab-k8s-fundamentals-frontend}
+
+```
+
+#### 2. Tag Filter
+
+Since this explicit list now includes your workshop content images (`8.1` and `3.0`), update your **Tag** filter field to look for all three target tags, separated by a comma:
+
+```text
+3.7.2, 8.1, 3.0
+
+```
+
 ### 1. GHCR — Loft-sh (vcluster images)
 
 * **Source Registry:** `ghcr-endpoint`
