@@ -92,3 +92,105 @@ redis:8.6.2
 - After mirroring, per-cluster overrides: `global.registry.host` (+ `pullSecret`)
   on the platform and workshops charts; workshop content images rewrite
   automatically, git/http sources do not.
+
+## Harbour Config
+
+### 1. GHCR — Loft-sh (vcluster images)
+
+* **Source Registry:** `ghcr-endpoint`
+* **Name (Repository):**
+```text
+loft-sh/{kubernetes,vcluster-oss}
+
+```
+
+
+* **Tag:**
+```text
+v1.31.1, v1.32.1, v1.33.4, v1.34.0, 0.30.2
+
+```
+
+
+
+### 2. GHCR — Carvel Dev (kapp-controller Prerequisite)
+
+* **Source Registry:** `ghcr-endpoint`
+* **Name (Repository):**
+```text
+carvel-dev/kapp-controller
+
+```
+
+
+* **Tag:** *(Harbor accepts full SHA-256 digests in the Tag filter field)*
+```text
+sha256:610a14076cfe8864cd0bd961277b8c239298ab418234a1a8c324f2f5792c9b1d
+
+```
+
+
+
+### 3. Docker Hub (External Deps & App Images)
+
+> ⚠️ **Important:** Official Docker Hub images do not have an organization prefix in their standard pull strings (e.g., `postgres:17.7`), but their true underlying path in the registry is under the `library/` namespace. You must explicitly include `library/` here.
+
+* **Source Registry:** `dockerhub-endpoint`
+* **Name (Repository):**
+```text
+library/{debian,docker,postgres,redis}
+
+```
+
+
+* **Tag:**
+```text
+sid-20230502-slim, 27.5.1-dind, 17.7, 8.6.2
+
+```
+
+
+
+### 4. Red Hat Registry (Auth Proxy)
+
+* **Source Registry:** `redhat-endpoint`
+* **Name (Repository):**
+```text
+openshift4/ose-oauth-proxy
+
+```
+
+
+* **Tag:**
+```text
+v4.14
+
+```
+
+
+
+### 5. Kubernetes Registry (Monitoring)
+
+* **Source Registry:** `k8s-endpoint`
+* **Name (Repository):**
+```text
+kube-state-metrics/kube-state-metrics
+
+```
+
+
+* **Tag:**
+```text
+v2.14.0
+
+```
+
+
+
+---
+
+### 💡 Pro-Tip for Harbor Replication Logs
+
+When you execute these rules, Harbor will cross-reference every listed tag against every repository in that specific rule.
+
+For example, it will look for the tag `17.7` inside the `library/debian` repository. This will output a harmless `v2/images/tags/list: 404 Not Found` or `Tag not found` warning in your Harbor replication logs for those mismatched combinations. **You can safely ignore these.** The job will still finish with a `Success` status once it successfully matches and pulls the correct tags.
