@@ -27,7 +27,9 @@ Task tracking for the DCS Academy. Priorities: **P1** (blocker), **P2** (importa
 - [~] **P1** Real-OpenShift test on CRC (portal-less, kubectl/httpd variant): Workshop/Env/Session reconcile; session pod + dashboard/editor/console routes up; **httpd deploys under restricted SCC**; A02 examiner tests 8/9 PASS + scale/self-heal (fixed delete cmd)/challenge PASS. The 1 non-pass was the substitute image (`ubi9/httpd-24` returns 403 on `/`, empty docroot) not a workshop bug — real `hello-dcs` returns 200.
   - **Blocker found (content delivery):** the session's `vendir` x509-rejects CRC's registry cert (`image-registry…svc:5000` / route both self-signed) → workshop files don't download, dashboard content empty. Fix options: set Educates `caCertificateRef` to the service-ca/ingress CA (platform override), OR use a git source with trusted TLS, OR the real Harbor with a trusted cert. Ran the flow by `oc cp`-ing manifests+tests into the pod to bypass this.
 - [ ] **P1** Real DCS flow still needs: build **`dcs-workshop-base`/`dcs-tools` with `oc`** (CRC base image has only kubectl) + push to a registry the session trusts; then run A01/A02 unmodified (oc) end-to-end incl. dashboard render.
-- [ ] **P2** Verify dashboard **rendering** (markdown + `{{< param >}}`) once file delivery works — not yet confirmed (blocked by the vendir cert issue).
+- [x] **P1** Content delivery on CRC solved via **git source** (public repo) with the monorepo `newRootPath` + full-path `includePaths` pattern. Confirmed: A02 session pulls all 11 content pages + exercises into the pod. (Image/OCI delivery blocked by CRC self-signed registry cert.)
+- [ ] **P2** Verify dashboard **rendering** (markdown + `{{< param >}}`) in a **browser** — headless curl blocked by the dashboard SPA/auth gateway. Session live at https://lab-a02-kubernetes-essentials-01.apps-crc.testing (basic auth educates/educates).
+- [ ] **P1** Push local commit `105abef` (the `oc delete` fix + vcluster rule) so the git source serves the corrected A02 (currently origin/main has the buggy delete command; render unaffected).
 - [ ] **P2** Implement A03–A06 once A01/A02 pass live.
 
 ## Module B — Developer

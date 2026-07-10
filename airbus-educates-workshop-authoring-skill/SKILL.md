@@ -87,10 +87,15 @@ Always create `workshop/config.yaml` with a `params:` block at creation time. Th
 
 ```yaml
 # workshop/config.yaml
+# `params` is a LIST of {name, value} (Educates schema, ytt-processed) — NOT a map.
+# A map fails the setup step with: ytt Error "string index: got string, want int".
 params:
-  product_name: "Digital Container Service (DCS)"
-  dcs_registry: "harbor.example.dcs/dcs-academy"   # Harbor project for images (placeholder)
-  dcs_docs_base_url: "https://docs.example.dcs"     # DCS docs portal base (placeholder)
+- name: product_name
+  value: "Digital Container Service (DCS)"
+- name: dcs_registry
+  value: "harbor.example.dcs/dcs-academy"   # Harbor project for images (placeholder)
+- name: dcs_docs_base_url
+  value: "https://docs.example.dcs"          # DCS docs portal base (placeholder)
 ```
 
 - `product_name` — product/service the workshop is delivered under

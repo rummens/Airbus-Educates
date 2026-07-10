@@ -26,14 +26,21 @@ For values the **author** controls and wants swappable in one place — the prod
 
 ```yaml
 # workshop/config.yaml
+# `params` is a LIST of {name, value} entries (Educates schema, ytt-processed) —
+# NOT a map. Getting this wrong fails the setup step with a ytt error
+# ("string index: got string, want int").
 params:
-  product_name: "ACME Container Platform"
-  product_short: "ACME"
-  external_registry: "registry.example.com"
-  app_version: "1.4.2"
+- name: product_name
+  value: "ACME Container Platform"
+- name: product_short
+  value: "ACME"
+- name: external_registry
+  value: "registry.example.com"
+- name: app_version
+  value: "1.4.2"
 ```
 
-Read them in instructions with the same `param` shortcode used for platform variables — Hugo falls back to site params when the name is not a built-in data variable:
+Read them in instructions with the `param` shortcode, exactly as for the built-in platform data variables:
 
 ```markdown
 This workshop is delivered as part of **{{< param product_name >}}**.
@@ -50,12 +57,17 @@ Changing a Plane-2 value is a **one-line edit in one file**. It is baked into th
 Every DCS academy workshop declares these three params in `workshop/config.yaml`:
 
 ```yaml
-# workshop/config.yaml
+# workshop/config.yaml — params is a LIST of {name, value}, not a map.
 params:
-  product_name: "Digital Container Service (DCS)"
-  dcs_registry: "harbor.example.dcs/dcs-academy"        # Harbor project for images (placeholder)
-  dcs_docs_base_url: "https://docs.example.dcs"          # DCS docs portal base (placeholder)
+- name: product_name
+  value: "Digital Container Service (DCS)"
+- name: dcs_registry
+  value: "harbor.example.dcs/dcs-academy"        # Harbor project for images (placeholder)
+- name: dcs_docs_base_url
+  value: "https://docs.example.dcs"              # DCS docs portal base (placeholder)
 ```
+
+Each entry may also carry `aliases: [ENV_VAR]` to source its value from a session environment variable instead of a literal.
 
 - `product_name` — the product/service the workshop is delivered under; rendered via `{{< param product_name >}}`.
 - `dcs_registry` — the Harbor location for all author-chosen application/tool images. Every image reference uses `{{< param dcs_registry >}}/...` so the air-gapped registry is declared once. See [air-gapped-images-reference.md](air-gapped-images-reference.md).

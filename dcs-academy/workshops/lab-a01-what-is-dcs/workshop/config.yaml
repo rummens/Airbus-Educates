@@ -1,7 +1,12 @@
-# Hugo config — house params for this workshop.
+# Educates workshop config. `params` is a LIST of {name, value} entries
+# (NOT a Hugo-style map) — each is rendered in content via {{< param name >}}.
 # The param trio is mandatory; values are placeholders, re-pointable without a rebuild.
 params:
-  product_name: "Digital Container Service (DCS)"
-  product_short: "DCS"
-  dcs_registry: "harbor.example.dcs/dcs-academy"
-  dcs_docs_base_url: "https://docs.example.dcs"
+- name: product_name
+  value: "Digital Container Service (DCS)"
+- name: product_short
+  value: "DCS"
+- name: dcs_registry
+  value: "harbor.example.dcs/dcs-academy"
+- name: dcs_docs_base_url
+  value: "https://docs.example.dcs"
