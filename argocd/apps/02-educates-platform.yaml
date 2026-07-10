@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: educates-platform
+  name: dcs-academy-platform
   namespace: openshift-gitops
   annotations:
     # After kapp-controller. On delete, removed before kapp-controller so the
@@ -11,19 +11,13 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  # Multi-source: the chart + a per-cluster values file. Point valueFiles at the
-  # env file for THIS cluster (platform-x86.yaml / platform-crc.yaml). This is the
-  # only place ingressDomain + cert are set — no hardcoding in the chart.
-  sources:
-    - repoURL: https://github.com/rummens/Airbus-Educates
-      targetRevision: main
-      path: educates-openshift
-      helm:
-        valueFiles:
-          - $values/argocd/envs/platform-x86.yaml
-    - repoURL: https://github.com/rummens/Airbus-Educates
-      targetRevision: main
-      ref: values
+  # Per-cluster settings (ingressDomain, router cert) are chart defaults now.
+  # Override per cluster via spec.source.helm.valuesObject if needed.
+  source:
+    repoURL: https://github.com/rummens/Airbus-Educates
+    targetRevision: main
+    path: dcs-academy-platform
+    helm: {}
   destination:
     server: https://kubernetes.default.svc
     # Static platform release namespace (dcs-). Holds the helm release + monitoring

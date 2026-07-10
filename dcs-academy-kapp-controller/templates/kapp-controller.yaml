@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 ---
 apiVersion: v1
 kind: Namespace
@@ -2764,3 +2765,5 @@ subjects:
 - kind: ServiceAccount
   name: kapp-controller-sa
   namespace: kapp-controller
+
+{{- end }}

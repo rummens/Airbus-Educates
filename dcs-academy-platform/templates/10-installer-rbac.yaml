@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 # Installer service account. The Educates installer creates CRDs, cluster
 # packages, operators and SCCs across the cluster, so it requires cluster-admin
 # (this mirrors the upstream educates-installer-app-rbac.yaml exactly).
@@ -27,3 +28,5 @@ subjects:
   - kind: ServiceAccount
     name: educates-installer
     namespace: {{ .Values.educates.installer.namespace }}
+
+{{- end }}

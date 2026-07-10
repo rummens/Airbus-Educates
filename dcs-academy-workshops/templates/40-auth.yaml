@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- if .Values.auth.enabled }}
 {{- $authHost := include "workshops.portalHostname" . }}
 {{- $portalNs := include "workshops.portalNamespace" . }}
@@ -129,6 +130,9 @@ spec:
             - --tls-key=/etc/tls/private/tls.key
             - --email-domain=*
             - --pass-access-token
+            # Auto-redirect unauthenticated users straight to OpenShift OAuth
+            # (like ArgoCD) instead of showing a skippable "Log in" page.
+            - --skip-provider-button=true
           ports:
             - name: https
               containerPort: 8443
@@ -160,4 +164,6 @@ spec:
         - name: proxy-tls
           secret:
             secretName: oauth-proxy-tls
+{{- end }}
+
 {{- end }}

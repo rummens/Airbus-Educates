@@ -6,6 +6,10 @@
 # only setting global.registry.host (plus mirroring images — see README).
 # =============================================================================
 
+# Master switch for this chart. false = render nothing (toggle the whole chart
+# on/off from ArgoCD or helm). Enabled by default.
+enabled: true
+
 global:
   registry:
     # Private/mirror registry host. EMPTY = pull from upstream public registries
@@ -31,20 +35,30 @@ educates:
   # Educates builds via imageRegistry (config.version). Keep in sync with Chart appVersion.
   version: "3.7.2"
 
-  # CRC wildcard ingress domain. OpenShift Router serves *.apps-crc.testing.
-  ingressDomain: apps-crc.testing
+  # Cluster wildcard ingress domain. Default = the x86 test cluster; override per
+  # cluster (CRC uses apps-crc.testing).
+  ingressDomain: apps.test.ocp.globomantics.com
 
   # Ingress protocol + TLS. https makes Educates put TLS on every ingress (portal
   # AND each workshop session) so the OpenShift Router edge-terminates with a real
   # cert. tlsCertificateRef points at a wildcard cert secret; Educates copies it
-  # into each portal/session namespace. Default = the CRC Router's own wildcard
-  # (router-certs-default in openshift-ingress) so https works out of the box on
-  # CRC. Override for other clusters, or set protocol: http to disable TLS.
+  # into each portal/session namespace. Default = the x86 cluster's router cert;
+  # override per cluster (CRC uses router-certs-default). protocol: http disables TLS.
   ingress:
     protocol: https
     tlsCertificateRef:
-      name: router-certs-default
+      name: globomantics-ingress-cert
       namespace: openshift-ingress
+
+  # UI theming stubs. Injected into the Educates platform websiteStyling so the
+  # portal + workshop dashboard pick up brand colors and a logo. Selectors are a
+  # best-effort starting point — tweak the CSS in 25-theming for exact elements.
+  theming:
+    enabled: false
+    primaryColor: "#0a5ed7"
+    secondaryColor: "#6c757d"
+    # Logo shown in the portal/dashboard header. Full URL or a data: URI.
+    logoUrl: ""
 
   # Infrastructure provider profile in the Educates installer. "openshift" forces
   # SCC-based security and disables contour/cert-manager/external-dns by default.

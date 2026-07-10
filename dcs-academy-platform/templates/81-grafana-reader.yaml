@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- if and .Values.monitoring.enabled .Values.monitoring.grafanaReader.enabled }}
 {{- $ns := .Release.Namespace }}
 # =============================================================================
@@ -46,4 +47,6 @@ metadata:
   annotations:
     kubernetes.io/service-account.name: grafana-reader
 type: kubernetes.io/service-account-token
+{{- end }}
+
 {{- end }}

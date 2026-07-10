@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kapp-controller
+name: dcs-academy-kapp-controller
 description: >-
   Carvel kapp-controller (vendored upstream release v0.60.3), packaged as a Helm
   chart so it can be deployed as its own ArgoCD Application and sequenced ahead of

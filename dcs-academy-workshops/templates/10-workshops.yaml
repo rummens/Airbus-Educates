@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 # One Workshop CR per catalog entry. Requires the training.educates.dev CRDs
 # (installed by the educates-openshift platform chart) to already exist.
 {{- $ctx := . -}}
@@ -89,4 +90,6 @@ spec:
       vcluster:
         enabled: true
       {{- end }}
+{{- end }}
+
 {{- end }}

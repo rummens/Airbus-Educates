@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- if .Values.portal.route.enabled }}
 # Optional explicit Route to the portal. OFF by default — Educates already
 # creates an Ingress the OpenShift Router serves at the same host; enabling both
@@ -22,4 +23,6 @@ spec:
   tls:
     termination: {{ .Values.portal.route.tls }}
     insecureEdgeTerminationPolicy: Redirect
+{{- end }}
+
 {{- end }}

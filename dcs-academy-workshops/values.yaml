@@ -6,6 +6,10 @@
 # Add workshops by appending to `workshops:` — the portal hosts every entry.
 # =============================================================================
 
+# Master switch for this chart. false = render nothing (toggle the whole chart
+# on/off from ArgoCD or helm). Enabled by default.
+enabled: true
+
 global:
   registry:
     # Private/mirror registry host. EMPTY = pull from upstream. When set, workshop
@@ -30,8 +34,8 @@ portal:
   name: dcst-dcs
   title: "DCS Enablement"
   ingress:
-    # Public portal hostname, independent of portal.name → training.<domain>.
-    hostname: training
+    # Public portal hostname, independent of portal.name → academy.<domain>.
+    hostname: academy
   registration:
     # anonymous -> no portal signup form. With auth.enabled the OpenShift-OAuth
     # proxy is the sole gate, so only SSO-authenticated users reach the portal.
@@ -55,7 +59,8 @@ portal:
 # Educates portal is an OAuth provider, not a client), so this proxy is the way.
 # -----------------------------------------------------------------------------
 auth:
-  enabled: false
+  # Default ON — SSO gate is the whole point. Disable only for local/no-auth tests.
+  enabled: true
   # PRE-CREATED secret with key cookie-secret (16/24/32 bytes; use
   # `openssl rand -hex 16`). Leave empty for plain helm (generated via lookup).
   # For ArgoCD, set this or use sealedSecret below (helm template has no cluster
@@ -69,11 +74,18 @@ auth:
   proxyImageRegistry: registry.redhat.io
   proxyImageRepository: openshift4/ose-oauth-proxy
   proxyImageTag: "v4.14"
-  # Router wildcard cert for the edge/reencrypt route (per-cluster — set in the
-  # ArgoCD env file).
+  # Router wildcard cert for the reencrypt route. Default = the x86 cluster's
+  # cert; override per cluster (CRC uses router-certs-default).
   tlsCertificateRef:
-    name: router-certs-default
+    name: globomantics-ingress-cert
     namespace: openshift-ingress
+  # NetworkPolicy that restricts the portal pod to the oauth-proxy, blocking the
+  # Educates default portal route (the auth bypass). Default on for the ArgoCD
+  # target cluster. NOTE: ineffective when the ingress router runs on HostNetwork
+  # (traffic comes from the node), and it BLOCKS `helm install` because the portal
+  # namespace doesn't exist yet — set false for plain-helm testing on such clusters.
+  # Under ArgoCD it carries SkipDryRunOnMissingResource + retry, so it applies fine.
+  networkPolicy: true
 
 # -----------------------------------------------------------------------------
 # Phase 3 passthrough — per-session vcluster (requires platform vcluster support).
@@ -82,7 +94,8 @@ auth:
 # to override this global default.
 # -----------------------------------------------------------------------------
 vcluster:
-  enabled: false
+  # Default ON for the x86 cluster; disable for constrained clusters.
+  enabled: true
   budget: large
 
 # -----------------------------------------------------------------------------
@@ -117,22 +130,34 @@ workshops:
         console: true
         editor: true
         slides: true
-      # Per-workshop vcluster override (omit to follow global vcluster.enabled):
+      # Per-workshop vcluster override. Omit to follow global vcluster.enabled.
+      #   vcluster: true   -> force a per-session vcluster
+      #   vcluster: false  -> opt OUT: run in a native, isolated OpenShift session
+      #                       namespace instead (see the lab-openshift-operators
+      #                       example below). Use for OpenShift-specific workshops
+      #                       (operators, SCCs, namespace UID ranges) where a
+      #                       vcluster is overhead. Set policy accordingly
+      #                       (baseline/privileged) since it runs on the real cluster.
       # vcluster: true
     portal:
       expires: 60m
       orphaned: 5m
 
-  # --- Add more workshops like this (example, disabled by leaving commented) ---
-  # - name: lab-container-basics
-  #   title: "Container Basics"
-  #   description: "Building and running containers."
+  # --- Example: a workshop that runs in a NATIVE OpenShift namespace (no vcluster)
+  # even though the global default is vcluster: true. For operator/SCC/UID topics. ---
+  # - name: lab-openshift-operators
+  #   title: "OpenShift Operators & SCCs"
+  #   description: "Native OpenShift namespace — no vcluster."
   #   source:
   #     type: git
-  #     git:
-  #       url: https://github.com/educates/lab-container-basics
-  #       ref: origin/main
+  #     git: { url: https://github.com/educates/lab-container-basics, ref: origin/main }
   #   includePaths: [/workshop/**, /README.md]
+  #   session:
+  #     budget: medium
+  #     policy: baseline          # or privileged, for SCC/UID work on the real cluster
+  #     vcluster: false           # <-- opt out of vcluster
+  #     applications: { terminal: true, console: true, editor: true }
+  #   portal: { expires: 60m, orphaned: 5m }
   #   session:
   #     budget: small
   #     policy: restricted

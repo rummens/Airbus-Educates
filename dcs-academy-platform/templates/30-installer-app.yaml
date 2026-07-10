@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 # kapp-controller App that runs the Educates installer. Mirrors the upstream
 # educates-installer-app.yaml: fetch the imgpkg bundle, template with ytt using
 # our config secret, resolve images with kbld, deploy with kapp. This single App
@@ -64,3 +65,5 @@ spec:
     - kapp:
         rawOptions:
           - --app-changes-max-to-keep=0
+
+{{- end }}

@@ -1,0 +1,40 @@
+{{- if and .Values.enabled .Values.auth.enabled .Values.auth.networkPolicy }}
+# Restrict the portal pod to accept traffic ONLY from the oauth-proxy, blocking
+# the Educates default portal route (<portal.name>-ui.<domain>) — the bypass
+# around OpenShift OAuth.
+#
+# Effective ONLY when the OpenShift ingress router is not on HostNetwork. With a
+# HostNetwork router the router traffic originates from the node, so podSelector
+# rules don't match and this is a no-op — close the bypass at the infra layer
+# then (see README "auth bypass"). Toggle with auth.networkPolicy=false (e.g. for
+# plain-helm testing, where a policy in a not-yet-created namespace also blocks
+# `helm install`). Under ArgoCD the annotations below let it retry until the
+# portal namespace exists.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: educates-portal-oauth-only
+  namespace: {{ include "workshops.portalNamespace" . }}
+  labels:
+    {{- include "workshops.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  podSelector:
+    matchLabels:
+      deployment: training-portal
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Release.Namespace }}
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/component: oauth-proxy
+      ports:
+        - protocol: TCP
+          port: 8080
+{{- end }}

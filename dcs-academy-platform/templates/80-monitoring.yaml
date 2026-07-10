@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 {{- if .Values.monitoring.enabled }}
 {{- $ns := .Release.Namespace }}
 # =============================================================================
@@ -134,7 +135,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/component: metrics
-      app.kubernetes.io/name: educates-openshift
+      app.kubernetes.io/name: dcs-academy-platform
   template:
     metadata:
       labels:
@@ -200,7 +201,7 @@ metadata:
 spec:
   selector:
     app.kubernetes.io/component: metrics
-    app.kubernetes.io/name: educates-openshift
+    app.kubernetes.io/name: dcs-academy-platform
   ports:
     - name: http-metrics
       port: 8080
@@ -219,9 +220,11 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/component: metrics
-      app.kubernetes.io/name: educates-openshift
+      app.kubernetes.io/name: dcs-academy-platform
   endpoints:
     - port: http-metrics
       interval: 30s
       scheme: http
+{{- end }}
+
 {{- end }}

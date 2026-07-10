@@ -5,6 +5,10 @@
 # parameterised, for air-gap. Everything else is upstream verbatim.
 # =============================================================================
 
+# Master switch for this chart. false = render nothing (toggle the whole chart
+# on/off from ArgoCD or helm). Enabled by default.
+enabled: true
+
 global:
   registry:
     # Private/mirror registry host. EMPTY = pull from ghcr.io (upstream).

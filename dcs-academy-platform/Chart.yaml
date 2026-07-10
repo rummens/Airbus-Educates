@@ -1,5 +1,5 @@
 apiVersion: v2
-name: educates-openshift
+name: dcs-academy-platform
 description: >-
   Deploys the Educates training platform onto OpenShift Local (CRC) by wrapping
   the official Educates kapp-controller installer App. Works online today and

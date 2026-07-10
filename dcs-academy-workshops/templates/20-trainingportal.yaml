@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 # Portal hosting every workshop in the catalog. Public UI is served at
 # portal.ingress.hostname.<ingressDomain>; Educates-created namespaces use
 # portal.name (dcst- prefix) so dynamic namespaces stay separate.
@@ -13,12 +14,18 @@ metadata:
 spec:
   portal:
     title: {{ .Values.portal.title | quote }}
-    {{- if and .Values.portal.ingress (not .Values.auth.enabled) }}
-    # Non-auth setups: expose the portal directly at this host. With auth.enabled
-    # the oauth-proxy owns portal.ingress.hostname instead and Educates keeps its
-    # default <name>-ui host (blocked from direct access by the NetworkPolicy).
+    {{- with .Values.portal.ingress }}
     ingress:
-      hostname: {{ .Values.portal.ingress.hostname }}
+      # Portal hostname = the PUBLIC host users reach (academy). Educates uses this
+      # for PORTAL_HOSTNAME → the URLs, session cookies, and CSP frame-ancestors it
+      # generates, so the workshop dashboard's cross-origin iframes work when served
+      # through the oauth-proxy. REQUIRED for the proxy to function.
+      #
+      # With auth.enabled the oauth-proxy also claims this host. The proxy runs at
+      # an earlier sync-wave, so its Route is admitted first and Educates' own
+      # portal Route is rejected (HostAlreadyClaimed) — deterministic under ArgoCD:
+      # the proxy is the only serving route (gated), and there is no bypass route.
+      hostname: {{ .hostname }}
     {{- end }}
     registration:
       type: {{ .Values.portal.registration.type }}
@@ -36,3 +43,5 @@ spec:
       expires: {{ .portal.expires }}
       orphaned: {{ .portal.orphaned }}
   {{- end }}
+
+{{- end }}

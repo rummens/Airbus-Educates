@@ -1,5 +1,5 @@
 apiVersion: v2
-name: educates-workshops
+name: dcs-academy-workshops
 description: >-
   Educates workshop catalog — a TrainingPortal plus one Workshop CR per entry,
   driven entirely from values. Separate from the platform install
