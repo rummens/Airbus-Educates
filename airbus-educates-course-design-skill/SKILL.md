@@ -187,7 +187,7 @@ Create the plan file in `planning/workshop-plans/`, named to match the workshop 
 Each plan follows a standard 8-section structure:
 
 1. **Workshop Metadata** — Name, title, description, duration, difficulty, type, prerequisites, and the `product_name` value (defaults to the course brief's product/service)
-2. **Workshop Configuration** — Session applications needed and any special setup. Note OpenShift specifics (`oc`, Routes vs session proxy, security policy) where relevant — see the authoring skill's OpenShift reference.
+2. **Workshop Configuration** — Session applications needed and any special setup. Note OpenShift specifics (`oc`, Routes vs session proxy, security policy) where relevant. **State where the hands-on work runs — vcluster (default, best isolation) or the OpenShift session namespace (when operator/real-cluster access is needed) — and why.** See the authoring skill's OpenShift reference.
 3. **Learning Objectives** — Aligned with the module file (the source of truth)
 4. **Connection to Previous Workshop** — What the learner already knows and what should NOT be re-taught. Substantive for workshops with a predecessor; omit for standalone or first workshops.
 5. **Exercise Files to Create** — Every file under `exercises/`, with filename, purpose, and initial contents

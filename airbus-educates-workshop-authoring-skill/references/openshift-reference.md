@@ -24,6 +24,25 @@ Inspect the running pods with the [`oc`](https://docs.openshift.com/container-pl
 
 Do **not** mix `kubectl` and `oc` in the same workshop. If a learner already knows `kubectl`, add a single one-line note that `oc` accepts the same subcommands — do not switch back and forth.
 
+## Where the workshop runs: virtual cluster vs OpenShift namespace
+
+Every workshop must make a deliberate decision about **where the learner's hands-on work runs**, and record it in the plan and workshop definition:
+
+- **Virtual cluster (default).** Prefer a per-session **vcluster** (`spec.session.applications.vcluster.enabled: true`). It gives the strongest isolation — the learner gets what looks like their own cluster with cluster-admin inside it, can create namespaces, CRDs, and cluster-scoped resources, and nothing leaks into the shared cluster. Use this unless a specific need rules it out.
+- **OpenShift session namespace (when required).** Run directly in the session's OpenShift namespace when the workshop needs something the vcluster cannot provide — most commonly **operator access** (an Operator installed on the real cluster, its CRDs/CSVs, OperatorHub), real OpenShift-only APIs (Routes, `Project`, SCC behaviour, image streams), the real cluster's ingress/registry, or interaction with cluster-level resources the platform manages.
+
+It is case by case. Decide per workshop based on what the exercises actually touch:
+
+| Need | Choice |
+|---|---|
+| Plain workloads, config, scaling, services, RBAC practice | vcluster (default) |
+| Learner creates namespaces / CRDs / cluster-scoped objects | vcluster (default) |
+| Uses an Operator installed on the real cluster, or OperatorHub | OpenShift namespace |
+| Real OpenShift `Route`, image streams, SCC, `Project` semantics | OpenShift namespace |
+| Interacts with DCS platform-managed cluster resources | OpenShift namespace |
+
+On OpenShift, an enabled vcluster needs `budget: large` and the `educates-privileged-scc` RoleBinding on the `-vc` namespace (otherwise coredns crashloops) — see the CRC testing notes / workshop-yaml reference. State the choice and its reason in the plan's Workshop Configuration section.
+
 ## Projects, not raw namespaces
 
 OpenShift wraps namespaces as **projects**. Each Educates session still maps to one namespace (`session_namespace`), which OpenShift also exposes as a project.

@@ -67,7 +67,7 @@ Now, in the **right** terminal, delete one Pod:
 
 ```terminal:execute-2
 command: |-
-  oc delete pod $(oc get pod -l app=hello-dcs -o name | head -1)
+  oc delete $(oc get pod -l app=hello-dcs -o name | head -1)
 ```
 
 Watch the left terminal: the deleted Pod goes `Terminating`, and almost immediately a

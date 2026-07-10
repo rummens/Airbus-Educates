@@ -12,7 +12,7 @@ This skill provides guidance for creating interactive workshops for the Educates
 
 These standards are mandatory for all workshops produced with this skill. They are woven into the steps below and each has a dedicated reference — apply them throughout, not as an afterthought.
 
-1. **OpenShift target.** Use the `oc` CLI (never `kubectl`), prefer OpenShift `Route` objects over raw `Ingress` where a manual object is needed (the session proxy is still preferred for browser-facing services), and respect Security Context Constraints. See [references/openshift-reference.md](references/openshift-reference.md).
+1. **OpenShift target.** Use the `oc` CLI (never `kubectl`), prefer OpenShift `Route` objects over raw `Ingress` where a manual object is needed (the session proxy is still preferred for browser-facing services), and respect Security Context Constraints. **Decide per workshop where the hands-on work runs — a per-session virtual cluster (default, best isolation) or the OpenShift session namespace (when operator/real-cluster access is needed)** — and record the choice + reason. See [references/openshift-reference.md](references/openshift-reference.md).
 2. **Mandatory introduction page.** Every workshop starts with `workshop/content/00-workshop-overview.md` containing product framing, learning objectives, prerequisites, environment overview, and time/difficulty. See [references/introduction-page-reference.md](references/introduction-page-reference.md).
 3. **Documentation links on every concept.** The first mention of any concept, tool, or resource type links to its official upstream documentation. See [references/documentation-links-reference.md](references/documentation-links-reference.md).
 4. **Variablize everything.** Never hardcode a registry host, domain, route host, namespace, version, or endpoint — use the correct variable plane so the workshop deploys to any cluster/registry without editing content. See [references/workshop-variables-reference.md](references/workshop-variables-reference.md).
@@ -379,6 +379,7 @@ After generating `resources/workshop.yaml`, verify the following critical items:
 - [ ] Workshop image is `dcs-workshop-base` or `dcs-tools`; no external registry referenced anywhere (see [references/air-gapped-images-reference.md](references/air-gapped-images-reference.md))
 - [ ] `spec.session.applications.examiner.enabled: true` (every command is verified — see [references/assessment-reference.md](references/assessment-reference.md))
 - [ ] Security policy left `restricted` unless a stated reason requires `baseline` (see [references/openshift-reference.md](references/openshift-reference.md))
+- [ ] Run location chosen deliberately: vcluster (default) vs OpenShift namespace (operator/real-cluster access), with the reason recorded; if vcluster, `budget: large` + the `educates-privileged-scc` RoleBinding on the `-vc` namespace are present
 
 ### 11. Verify Workshop Instructions
 
