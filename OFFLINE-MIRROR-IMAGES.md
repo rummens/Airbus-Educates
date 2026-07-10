@@ -95,15 +95,6 @@ redis:8.6.2
 
 ## Harbour Config
 
-This is a known limitation when replicating from the GitHub Container Registry (GHCR).
-
-### Why it fails
-
-When you use a wildcard like `educates/*` in a Harbor Pull Replication rule, Harbor is forced to call the upstream registry's standard OCI catalog endpoint (`/v2/_catalog`) to discover what repositories exist under that path.
-
-**GHCR does not support or heavily restricts the `_catalog` endpoint.** Because Harbor cannot list the directories, the replication job immediately fails with a `401 Unauthorized` or `404 Not Found` error.
-
----
 
 ### 0. GHCR — (educates images)
 
