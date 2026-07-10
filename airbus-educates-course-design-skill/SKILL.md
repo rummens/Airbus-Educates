@@ -76,6 +76,7 @@ The instructions file should contain:
   - **Documentation links (hybrid)** — standard constructs → upstream docs; DCS-specific concepts → DCS docs portal via `dcs_docs_base_url` with inline blurb
   - **Air-gapped images** — all images from Harbor; workshops use the shared `dcs-workshop-base` / `dcs-tools` images
   - **Assessment** — an `examiner:execute-test` for **every command** (the tests are an automated verification pipeline) + a knowledge check per workshop
+  - **Conceptual depth** — teach concepts (one per page: what/why/how, expected output, complete coverage), not scripted commands; split long topics rather than thinning
   - **Variablize everything** — no hardcoded registries, domains, routes, or versions
 - **Skill references** — when to invoke each skill:
   - The **airbus-educates-course-design** skill for course planning (topics, workshop breakdowns, per-workshop plans)
@@ -190,7 +191,7 @@ Each plan follows a standard 8-section structure:
 3. **Learning Objectives** — Aligned with the module file (the source of truth)
 4. **Connection to Previous Workshop** — What the learner already knows and what should NOT be re-taught. Substantive for workshops with a predecessor; omit for standalone or first workshops.
 5. **Exercise Files to Create** — Every file under `exercises/`, with filename, purpose, and initial contents
-6. **Workshop Instruction Pages** — Page-by-page breakdown with content outlines and clickable action types. Always includes the mandatory `00-workshop-overview.md` introduction page, and notes which concepts each page must link to official documentation.
+6. **Workshop Instruction Pages** — Page-by-page breakdown with content outlines and clickable action types. **One concept per page** — plan a page for each concept the topic requires (a foundational workshop typically has many), and for each note the *what/why/how* to explain, the expected output to show, and which concepts link to documentation. Always includes the mandatory `00-workshop-overview.md` introduction page. Favour teaching depth over few pages; if complete coverage runs long, split into more workshops rather than thinning explanations. See the authoring skill's content-depth reference.
 7. **Terminal Working Directory Tracking** — Starting directory and any changes through the workshop
 8. **Design Notes** — Design decisions, rationale, and deliberate setups for future workshops. For focused courses, note expansion ideas — what future workshops could build on the patterns established here.
 

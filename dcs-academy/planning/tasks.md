@@ -20,7 +20,11 @@ Task tracking for the DCS Academy. Priorities: **P1** (blocker), **P2** (importa
 - [ ] **P3** Fold newly-surfaced DCS topics into later tracks: costing/recharging + why-OpenShift (Architect D), data classification/RACI/security-exception (Security C), Helm charts (Developer).
 - [ ] **P2** Produce the `hello-dcs` sample image (OpenShift-friendly, non-root) and a Harbor-mirrored base for A04's Containerfile.
 - [ ] **P2** Produce the DCS architecture diagram asset for A01.
-- [ ] **P3** Implement A01 first (with the authoring skill) to prove the format end-to-end, then A02–A06.
+- [x] **P3** Implement A01 and A02 (with the authoring skill) — done, under `workshops/`. Validated (bash + YAML parse). Not yet run on a live cluster.
+- [x] **P2** Rebuild A02 to the new content-depth standard (10 concept pages, one per page, what/why/how + expected output + flags; imperative/declarative, dry-run, ReplicaSet/Pod ownership, labels/selectors, querying, scaling+self-healing, logging, exec, Services/DNS). 9 examiner tests, all referenced.
+- [ ] **P2** Depth pass on A01 (orientation — lighter by design, but review) and apply the content-depth standard when implementing A03–A06.
+- [ ] **P1** Live-test A01 + A02 on a DCS/OpenShift cluster: publish files image, deploy the Workshop, click through, confirm every examiner check passes. Needs the `hello-dcs` sample image + `dcs-workshop-base` in Harbor and the real `dcs_registry`/`DCS_REGISTRY` value.
+- [ ] **P2** Implement A03–A06 once A01/A02 pass live.
 
 ## Module B — Developer
 

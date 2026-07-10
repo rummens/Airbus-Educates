@@ -1,0 +1,41 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-a01-what-is-dcs
+spec:
+  title: What is DCS?
+  description: Get oriented on the Digital Container Service — what it is, how containers and images fit, and how to work in the DCS environment with oc.
+  duration: 20m
+  difficulty: beginner
+  labels:
+    module: "A-Foundations"
+    track: "core"
+  publish:
+    image: "$(image_repository)/lab-a01-what-is-dcs-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "$(image_repository)/dcs-workshop-base:$(workshop_version)"
+    files:
+    - image:
+        url: "$(image_repository)/lab-a01-what-is-dcs-files:$(workshop_version)"
+  session:
+    namespaces:
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      console:
+        enabled: true
+      examiner:
+        enabled: true

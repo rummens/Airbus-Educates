@@ -1,0 +1,7 @@
+# Hugo config — house params for this workshop.
+# The param trio is mandatory; values are placeholders, re-pointable without a rebuild.
+params:
+  product_name: "Digital Container Service (DCS)"
+  product_short: "DCS"
+  dcs_registry: "harbor.example.dcs/dcs-academy"
+  dcs_docs_base_url: "https://docs.example.dcs"

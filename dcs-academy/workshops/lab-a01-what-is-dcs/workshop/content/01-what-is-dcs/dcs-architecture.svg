@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" font-family="sans-serif">
+  <!-- Placeholder architecture diagram for DCS. Replace with the official asset (task in tasks.md). -->
+  <rect x="0" y="0" width="720" height="300" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="360" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#1b2b3a">Digital Container Service (DCS)</text>
+  <text x="360" y="50" text-anchor="middle" font-size="12" fill="#5a6b7b">On-prem · air-gapped · OpenShift · Namespace as a Service</text>
+
+  <rect x="40" y="80" width="300" height="180" rx="6" fill="#ffffff" stroke="#8aa0b4"/>
+  <text x="190" y="104" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b2b3a">Tenant</text>
+  <rect x="60" y="120" width="120" height="60" rx="4" fill="#e8f0f7" stroke="#8aa0b4"/>
+  <text x="120" y="146" text-anchor="middle" font-size="11" fill="#1b2b3a">DEV</text>
+  <text x="120" y="162" text-anchor="middle" font-size="9" fill="#5a6b7b">namespace</text>
+  <rect x="200" y="120" width="120" height="60" rx="4" fill="#e8f0f7" stroke="#8aa0b4"/>
+  <text x="260" y="146" text-anchor="middle" font-size="11" fill="#1b2b3a">PROD</text>
+  <text x="260" y="162" text-anchor="middle" font-size="9" fill="#5a6b7b">namespace</text>
+  <text x="190" y="210" text-anchor="middle" font-size="10" fill="#5a6b7b">promote  DEV → PROD</text>
+
+  <rect x="380" y="80" width="300" height="180" rx="6" fill="#ffffff" stroke="#8aa0b4"/>
+  <text x="530" y="104" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b2b3a">Shared platform services</text>
+  <rect x="400" y="120" width="260" height="34" rx="4" fill="#eef3ee" stroke="#8aa0b4"/>
+  <text x="530" y="142" text-anchor="middle" font-size="11" fill="#1b2b3a">Harbor registry (catalogs, scanning)</text>
+  <rect x="400" y="164" width="260" height="34" rx="4" fill="#eef3ee" stroke="#8aa0b4"/>
+  <text x="530" y="186" text-anchor="middle" font-size="11" fill="#1b2b3a">Networking (Routes, policies)</text>
+  <rect x="400" y="208" width="260" height="34" rx="4" fill="#eef3ee" stroke="#8aa0b4"/>
+  <text x="530" y="230" text-anchor="middle" font-size="11" fill="#1b2b3a">Shared / dedicated OpenShift clusters</text>
+</svg>

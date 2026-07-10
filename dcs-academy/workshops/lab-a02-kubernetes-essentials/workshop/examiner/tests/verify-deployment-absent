@@ -1,0 +1,9 @@
+#!/bin/bash
+# verify-deployment-absent <deployment>
+# Passes when the deployment does NOT exist yet (proves --dry-run created nothing).
+name="${1:?deployment name required}"
+if oc get deployment "$name" >/dev/null 2>&1; then
+  echo "Deployment '$name' already exists — the dry-run should not have created it, and you have not reached the apply step yet." >&2
+  exit 1
+fi
+echo "OK: deployment '$name' does not exist yet (dry-run created nothing)."

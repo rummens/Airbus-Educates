@@ -1,0 +1,10 @@
+#!/bin/bash
+# verify-labels <app-label>
+# Passes when at least one pod carries the app=<label> label.
+app="${1:?app label required}"
+count=$(oc get pods -l "app=$app" -o name 2>/dev/null | wc -l | tr -d ' ')
+if [ "${count:-0}" -lt 1 ]; then
+  echo "No pods found with label app=$app. Labels let a Service (and your queries) find these pods — check the deployment's pod template labels." >&2
+  exit 1
+fi
+echo "OK: $count pod(s) carry the label app=$app."

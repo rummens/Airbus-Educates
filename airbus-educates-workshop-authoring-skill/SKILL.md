@@ -19,6 +19,7 @@ These standards are mandatory for all workshops produced with this skill. They a
 5. **Mandatory product/service name variable.** Every workshop declares the param trio (`product_name`, `dcs_registry`, `dcs_docs_base_url`) in `workshop/config.yaml` and renders `{{< param product_name >}}` (starting on the introduction page). See [references/workshop-variables-reference.md](references/workshop-variables-reference.md).
 6. **Air-gapped images.** DCS is air-gapped — every image comes from Harbor via `$(image_repository)` or `{{< param dcs_registry >}}`; no external registries. Workshops use the `dcs-workshop-base` or `dcs-tools` image. See [references/air-gapped-images-reference.md](references/air-gapped-images-reference.md).
 7. **Assessment / automated-test coverage.** **Every command** is paired with an `examiner:execute-test` asserting its outcome (no exceptions — the examiner tests are the automated test pipeline that verifies workshops end-to-end), and every workshop ends with a knowledge check. See [references/assessment-reference.md](references/assessment-reference.md).
+8. **Teach concepts, don't script commands.** One concept per page; explain what/why/how and trade-offs, show and explain expected output, explain non-obvious flags, and cover the topic completely. Depth beats brevity — split long topics into more workshops rather than thinning explanations. See [references/content-depth-reference.md](references/content-depth-reference.md).
 
 ## Initial Workshop Creation
 
@@ -146,7 +147,7 @@ spec:
 
 - Set `metadata.name` to the workshop name
 - Set `spec.title` and `spec.description` from gathered details
-- Set `spec.duration` to estimated completion time (e.g., `15m`, `30m`, `1h`). **Target 20–60 minutes per workshop** — the sweet spot peer platforms (Red Hat, Killercoda) use for discrete, focused labs. If a workshop is trending past ~60 minutes or covers more than one clear outcome, split it into two rather than shipping one long lab.
+- Set `spec.duration` to estimated completion time (e.g., `15m`, `30m`, `1h`). **Prefer 30–60 minutes per workshop.** But depth wins: never thin explanations to hit a time box. If full, well-explained coverage runs long, **split into more sequential workshops** (each still deep) rather than compressing out the *why* — a dense foundational topic may legitimately run 60–90 minutes. See [references/content-depth-reference.md](references/content-depth-reference.md).
 - Set `spec.difficulty` to one of: `beginner`, `intermediate`, `advanced`, `extreme`
 - Always include terminal with `enabled: true` and `layout: split`
 - Enable only the additional session applications the workshop requires
@@ -319,6 +320,7 @@ Content for the second section...
 - **Link every concept to its docs (house standard).** The first mention of any concept, tool, or resource type on a page must be a Markdown link to official upstream documentation. Do not re-link on repeat mentions. See [references/documentation-links-reference.md](references/documentation-links-reference.md).
 - **Use `oc`, not `kubectl` (house standard).** All commands target OpenShift via `oc`. See [references/openshift-reference.md](references/openshift-reference.md).
 - **Never hardcode infrastructure or product values (house standard).** Registry hosts, domains, route hosts, namespaces, versions, and the product name come from variables — `{{< param ... >}}` for content. See [references/workshop-variables-reference.md](references/workshop-variables-reference.md).
+- **Teach the concept, don't just script the command (house standard).** Lead each concept with explanation — what it is, why it exists (the problem it solves), how it relates to other concepts, and any trade-off or production nuance. Show and explain the expected output after commands, and explain non-obvious flags. One concept per page. Cover the topic completely — don't skip foundational concepts. See [references/content-depth-reference.md](references/content-depth-reference.md).
 - **Focus on the workshop topic, not the platform.** Workshop instructions should teach the subject matter, not how Educates works. When the workshop requires platform-specific configuration (e.g., setting up a session proxy for accessing a deployed service, configuring ingresses, or using data variables), present these as natural steps of the exercise without drawing attention to Educates internals. Do not say things like "we will learn how Educates is configured" or "this is how Educates handles ingress" — unless the workshop is specifically about using the Educates platform itself. The overview, summary, and learning objectives should describe what users will learn about the topic, not about the workshop infrastructure supporting it.
 
 #### File Naming Convention
@@ -421,7 +423,8 @@ After generating workshop instruction pages, verify the following:
 - [ ] Every image reference uses `{{< param dcs_registry >}}` or `$(image_repository)` — no external registries (see [references/air-gapped-images-reference.md](references/air-gapped-images-reference.md))
 - [ ] **Every command** has a paired `examiner:execute-test` (automated-pipeline coverage — no unverified commands); checks emit diagnostic failure messages; workshop ends with a Check Your Understanding section (see [references/assessment-reference.md](references/assessment-reference.md))
 - [ ] Long-running steps are preceded by an experience note and paired with a polling check
-- [ ] Workshop duration is ~20–60 min; longer/multi-outcome workshops are split
+- [ ] **Concepts are taught, not just scripted** — each page covers one concept and explains what/why/how; expected output is shown and explained; flags are explained; no foundational concept is skipped (see [references/content-depth-reference.md](references/content-depth-reference.md))
+- [ ] Depth was not thinned to hit a time box — long topics were split into more workshops instead
 - [ ] No hardcoded registry hosts, domains, route hosts, namespaces, or versions in content — variables are used throughout
 
 ### 12. Update Planning Documents (Course Workshops Only)
@@ -444,6 +447,7 @@ For detailed guidance on specific topics, see:
 **House standards (this fork):**
 
 - [OpenShift Reference](references/openshift-reference.md) - Using `oc`, projects, Routes vs Ingress and the session proxy, and Security Context Constraints on OpenShift
+- [Content Depth Reference](references/content-depth-reference.md) - The standard that workshops teach concepts (one per page: what/why/how, expected output, flags, complete coverage) rather than scripting commands
 - [Introduction Page Reference](references/introduction-page-reference.md) - The mandatory `00-workshop-overview.md` overview page: required content, rules, and template
 - [Documentation Links Reference](references/documentation-links-reference.md) - The rule that every concept links to docs on first mention; the hybrid upstream-vs-DCS model; canonical documentation bases
 - [Workshop Variables Reference](references/workshop-variables-reference.md) - The three variable planes, the mandatory param trio (`product_name`, `dcs_registry`, `dcs_docs_base_url`), and how to variablize every infrastructure value so workshops need no rebuild to redeploy

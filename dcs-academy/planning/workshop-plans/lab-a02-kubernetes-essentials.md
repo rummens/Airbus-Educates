@@ -5,8 +5,8 @@
 - **Name:** `lab-a02-kubernetes-essentials`
 - **Title:** Kubernetes Essentials on DCS
 - **Description:** Deploy your first workload on DCS with `oc` — Pods, Deployments, and Services — and learn to inspect and scale it.
-- **Duration:** 45m
-- **Difficulty:** beginner
+- **Duration:** 75m (depth over brevity — one concept per page; see content-depth reference)
+- **Difficulty:** beginner → intermediate
 - **Type:** Core (Module A — Foundations)
 - **Prerequisites:** A01 (What is DCS?)
 - **product_name:** Digital Container Service (DCS)
@@ -45,22 +45,19 @@ A01 covered orientation and first `oc` commands. Learner knows how to find their
 
 ## 6. Workshop Instruction Pages
 
-- **`00-workshop-overview.md`** — intro page (objectives, prerequisite A01, environment, 45m/beginner). Align framing with the DCS docs' "Kubernetes Fundamentals" 4-layer model (Infrastructure → Workloads → Networking → Config & Storage) so learners map this workshop onto the portal's mental model.
-- **`01-pods-and-deployments.md`**
-  - `editor:open-file` deployment.yaml; explain [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) and [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) (upstream links).
-  - `terminal:execute` `oc apply -f deployment.yaml` → **experience note** (rollout takes a moment) + polling examiner check `readyReplicas >= 1`.
-  - `oc get pods` → check: a `hello-dcs-*` pod is Running.
-  - `oc describe deployment/hello-dcs` → check: deployment exists (assert selector/replicas).
-- **`02-services.md`**
-  - `editor:open-file` service.yaml; explain [Service](https://kubernetes.io/docs/concepts/services-networking/service/).
-  - `oc apply -f service.yaml` → check: service `hello-dcs` exists with an endpoint.
-  - `oc rollout status` / curl in-cluster: `curl http://hello-dcs.$SESSION_NAMESPACE.svc:8080` → check: HTTP 200 / expected body.
-- **`03-scaling-and-inspection.md`**
-  - `oc scale deployment/hello-dcs --replicas=3` → polling check: 3 ready replicas within budget.
-  - `oc get pods` → check: 3 running pods.
-  - `oc logs deployment/hello-dcs` → check: log output present.
-  - `oc get events` → observational; check asserts no crash-loop events for the app.
-- **`99-workshop-summary.md`** — recap Pod/Deployment/Service. **Challenge** (unguided): scale to 2 replicas and confirm within quota (examiner-validated) + hint + reveal-solution. **Check Your Understanding** (3 Q): what a Deployment manages; how to reach a Service in-cluster; what `oc scale` changes.
+**One concept per page** (content-depth standard). Each page leads with what/why/how, shows expected output, explains flags, and has ≥1 examiner check.
+
+- **`00-workshop-overview.md`** — intro page (objectives, prerequisite A01, environment). Frame with the DCS "Kubernetes Fundamentals" 4-layer model (Infrastructure → Workloads → Networking → Config & Storage).
+- **`01-creating-resources.md`** — *how you create resources.* Imperative vs declarative; `oc create deployment --dry-run=client -o yaml`; `--help`/`oc explain`; why production keeps manifests in git. Check: deployment still **absent** after dry-run (proves dry-run creates nothing).
+- **`02-the-deployment-resource.md`** — what a Deployment is/why; `editor:open-file` deployment.yaml; `oc apply`; `oc rollout status`; expected output. Experience note + polling check (1 ready replica).
+- **`03-deployments-replicasets-pods.md`** — the ownership hierarchy Deployment→ReplicaSet→Pod; `oc get all -l app=hello-dcs`; why you don't edit ReplicaSet/Pod directly; cascade delete. Checks: pods running; deployment exists.
+- **`04-labels-and-selectors.md`** — what/why labels; how Deployment & Service select Pods; querying by label. Check: pods carry `app=hello-dcs`.
+- **`05-querying-resources.md`** — inspecting: `oc get -o wide/-o yaml/-o name`, `oc describe`, `oc explain`. Check: deployment exists (shared across the observational commands).
+- **`06-scaling-and-self-healing.md`** — `oc scale` to 3; **split-terminal** `watch` + delete a pod → auto-recreated; config drift and `oc apply` reset. Checks: 3 replicas; pods running.
+- **`07-application-logging.md`** — why logs; `oc logs deployment/…`, `--tail`, `-f`; deployment vs pod logs. Check: logs present.
+- **`08-accessing-containers.md`** — `oc exec` / `oc rsh` for debugging; ephemerality (don't fix things live). Check: exec works.
+- **`09-services-and-networking.md`** — Pods ephemeral, IPs change → Service; ClusterIP, endpoints, in-cluster DNS FQDN; `oc apply` service; `oc get endpoints`; `curl`. (External exposure stays in A06.) Checks: service has endpoints; responds 200.
+- **`99-workshop-summary.md`** — recap. **Challenge** (unguided): scale to 2, confirm within quota (examiner-validated) + hint + reveal. **Check Your Understanding** (4–5 Q across the concepts).
 
 ## 7. Terminal Working Directory Tracking
 
