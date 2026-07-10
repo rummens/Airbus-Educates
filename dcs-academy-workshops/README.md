@@ -102,29 +102,36 @@ users to OpenShift OAuth** (`--skip-provider-button`, like ArgoCD). Portal
 gate. Verified: `GET https://academy.<domain>/` → `302` to
 `oauth-openshift.<domain>/oauth/authorize`.
 
-**Bypass — read this.** Educates always publishes its *own* portal route at
-`<portal.name>-ui.<domain>` (e.g. `dcst-dcs-ui.<domain>`), which reaches the
-portal directly, around the proxy. On this platform it can NOT be closed from the
-chart:
+**Bypass — read this.** Educates always publishes its *own* portal route
+(no disable flag), which would reach the portal directly, around the proxy.
+How the chart closes it:
 
-- **NetworkPolicy** — ineffective when the OpenShift ingress router runs on
-  `HostNetwork` (default on some clusters): router traffic comes from the node, so
-  podSelector rules don't match it.
-- **Route-hostname conflict** (proxy + Educates claim the same host) — races on
-  route admission and can fail *open*. Not used.
+1. **Host claim.** The portal's `ingress.hostname` is set to the proxy host
+   (`academy`), so `PORTAL_HOSTNAME` matches the public host (required anyway —
+   otherwise session cookies/CSP are generated for the wrong host and the
+   workshop iframe is browser-blocked). The oauth-proxy Route runs at an earlier
+   ArgoCD sync-wave, wins the `academy` host, and Educates' route is rejected
+   (`HostAlreadyClaimed`). Deterministic under ArgoCD only — plain helm has no
+   wave ordering (dev-only).
+2. **VAP backstop (fail-closed).** `templates/42-auth-route-vap.yaml` ships a
+   `ValidatingAdmissionPolicy` (`reserve-academy-host`, OCP 4.16+/K8s 1.30+)
+   denying any Route CREATE/UPDATE with `spec.host = academy.<domain>` outside
+   the release namespace. This kills the residual fail-open: without it, if the
+   proxy Route is ever recreated *after* Educates' route exists, Educates wins
+   the host (router admission is oldest-claim-wins) and the portal serves
+   unauthenticated. With it, Educates' route can never exist on that host — the
+   ingress-to-route controller's creation attempts are denied (warning events in
+   `<portal>-ui`, harmless; portal unaffected). Verified: deleting the proxy
+   Route → `academy` serves **503** until ArgoCD selfHeal recreates it.
+3. **NetworkPolicy** (`auth.networkPolicy`, default on) — defense in depth for
+   clusters whose router is NOT HostNetwork. On HostNetwork routers (this test
+   cluster) router traffic comes from the node and podSelector rules don't match,
+   so the netpol is ineffective there — the VAP is the enforcement that holds.
 
-Close the bypass at the **infra layer** (deployment choice):
-
-1. **Switch the router off HostNetwork** — set the IngressController
-   `endpointPublishingStrategy` to `LoadBalancer`/`NodePortService`. Then a
-   NetworkPolicy restricting the portal pod to the oauth-proxy works; re-add one
-   if desired.
-2. **External gateway** — put a reverse proxy / API gateway doing OpenShift OAuth
-   in front of the apps domain, or restrict `*-ui.<domain>` at the edge.
-
-The chart intentionally does not ship a NetworkPolicy, since it silently fails on
-HostNetwork routers and blocks `helm install` (the portal namespace doesn't exist
-yet). Enforcement is an infra decision.
+Session hosts (`<portal>-w##-<id>.<domain>` + console/editor subdomains) are not
+behind the proxy but are gated by Educates' own portal-issued session tokens:
+an unauthenticated browser is bounced `oauth_handshake` → portal (behind the
+proxy) → OpenShift OAuth. Verified end-to-end with curl.
 
 ## vcluster per session (phase 3)
 

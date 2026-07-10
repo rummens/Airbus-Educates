@@ -3,13 +3,14 @@
 # the Educates default portal route (<portal.name>-ui.<domain>) — the bypass
 # around OpenShift OAuth.
 #
-# Effective ONLY when the OpenShift ingress router is not on HostNetwork. With a
-# HostNetwork router the router traffic originates from the node, so podSelector
-# rules don't match and this is a no-op — close the bypass at the infra layer
-# then (see README "auth bypass"). Toggle with auth.networkPolicy=false (e.g. for
-# plain-helm testing, where a policy in a not-yet-created namespace also blocks
-# `helm install`). Under ArgoCD the annotations below let it retry until the
-# portal namespace exists.
+# Blocks the ROUTER only when the OpenShift ingress router is not on
+# HostNetwork (HostNetwork router traffic originates from the node, so
+# podSelector rules don't match it) — there the VAP (42-auth-route-vap.yaml) is
+# the enforcement. Pod-to-pod traffic IS enforced regardless, which is why the
+# session-namespace rule below is required. Toggle with
+# auth.networkPolicy=false (e.g. for plain-helm testing, where a policy in a
+# not-yet-created namespace also blocks `helm install`). Under ArgoCD the
+# annotations below let it retry until the portal namespace exists.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -34,6 +35,13 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/component: oauth-proxy
+        # Workshop session gateways exchange their OAuth code server-to-server
+        # at the portal's in-cluster service (PORTAL_API_URL). Blocking this
+        # hangs /oauth_callback on the session host → browser timeout. The
+        # token endpoint is self-protecting (client id+secret per session).
+        - namespaceSelector:
+            matchLabels:
+              training.educates.dev/portal.name: {{ .Values.portal.name }}
       ports:
         - protocol: TCP
           port: 8080
