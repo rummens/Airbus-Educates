@@ -1,6 +1,7 @@
 # Per-cluster values for the educates-openshift (platform) chart.
 # Referenced by the educates-platform ArgoCD Application (multi-source valueFiles).
 # Copy this per cluster; only ingressDomain + tlsCertificateRef differ.
+# Platform is install-only now (portal/workshops/auth live in educates-workshops).
 educates:
   # x86 test cluster wildcard domain.
   ingressDomain: apps.test.ocp.globomantics.com
@@ -10,11 +11,3 @@ educates:
     tlsCertificateRef:
       name: globomantics-ingress-cert
       namespace: openshift-ingress
-# Platform only — workshops come from the educates-workshops app.
-portal:
-  enabled: false
-# Phase 2: OpenShift OAuth. Cookie secret supplied out-of-band (SealedSecret or
-# a pre-created secret named below); never in git as plaintext.
-auth:
-  enabled: true
-  existingSecret: educates-oauth-proxy

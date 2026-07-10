@@ -1,5 +1,6 @@
-# Portal hosting every workshop in the catalog. Served at
-# <portal.name>-ui.<ingressDomain> via the Ingress Educates creates.
+# Portal hosting every workshop in the catalog. Public UI is served at
+# portal.ingress.hostname.<ingressDomain>; Educates-created namespaces use
+# portal.name (dcst- prefix) so dynamic namespaces stay separate.
 apiVersion: training.educates.dev/v1beta1
 kind: TrainingPortal
 metadata:
@@ -12,8 +13,15 @@ metadata:
 spec:
   portal:
     title: {{ .Values.portal.title | quote }}
+    {{- if and .Values.portal.ingress (not .Values.auth.enabled) }}
+    # Non-auth setups: expose the portal directly at this host. With auth.enabled
+    # the oauth-proxy owns portal.ingress.hostname instead and Educates keeps its
+    # default <name>-ui host (blocked from direct access by the NetworkPolicy).
+    ingress:
+      hostname: {{ .Values.portal.ingress.hostname }}
+    {{- end }}
     registration:
-      type: {{ if .Values.portal.registration.enabled }}anonymous{{ else }}one-step{{ end }}
+      type: {{ .Values.portal.registration.type }}
     updates:
       workshop: true
     sessions:

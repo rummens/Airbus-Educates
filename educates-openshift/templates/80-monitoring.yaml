@@ -38,6 +38,10 @@ rules:
       - workshopenvironments
       - trainingportals
     verbs: ["get", "list", "watch"]
+  # CRS mode resolves the CR GVKs against the CRD list at startup.
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -158,16 +162,17 @@ spec:
               containerPort: 8080
             - name: telemetry
               containerPort: 8081
+          # KSM serves /healthz + /livez on the main metrics port (8080).
           readinessProbe:
             httpGet:
               path: /healthz
-              port: telemetry
+              port: http-metrics
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /healthz
-              port: telemetry
+              path: /livez
+              port: http-metrics
             initialDelaySeconds: 10
             periodSeconds: 20
           securityContext:

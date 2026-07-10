@@ -14,26 +14,66 @@ global:
     host: ""
     pullSecret: ""
 
-# CRC wildcard ingress domain (used for the optional explicit Route host).
-ingressDomain: apps-crc.testing
+# Cluster wildcard ingress domain. Per-cluster — override via the ArgoCD env file
+# (argocd/envs/workshops-<cluster>.yaml). Used for the portal UI host, the auth
+# proxy host, and the optional explicit Route.
+ingressDomain: apps.test.ocp.globomantics.com
 
 # -----------------------------------------------------------------------------
 # The portal that hosts the workshops below.
 # -----------------------------------------------------------------------------
 portal:
-  name: dcs-training
+  # Portal name drives the DYNAMIC namespaces Educates creates per session
+  # (<name>-w0N, <name>-w0N-xxxx, ...-vc). Keep the dcst- prefix so every
+  # user-started (dynamic) namespace sorts under dcst-*. The public URL is set
+  # separately by ingress.hostname, so the prefix here does not affect the DNS.
+  name: dcst-dcs
   title: "DCS Enablement"
+  ingress:
+    # Public portal hostname, independent of portal.name → training.<domain>.
+    hostname: training
   registration:
-    # true -> anonymous; false -> Educates one-step login. If you front the portal
-    # with the educates-openshift auth phase, keep this true.
-    enabled: true
+    # anonymous -> no portal signup form. With auth.enabled the OpenShift-OAuth
+    # proxy is the sole gate, so only SSO-authenticated users reach the portal.
+    # (one-step would add an Educates local-account form — not wanted.)
+    type: anonymous
   sessions:
     maximum: 3
   route:
-    # Educates auto-creates an Ingress the OpenShift Router serves at
-    # <name>-ui.<ingressDomain>. Leave false to avoid a duplicate-host Route.
+    # The portal is fronted by the oauth-proxy (auth below). Educates still makes
+    # its own portal Ingress; when auth.enabled a NetworkPolicy blocks direct
+    # access so the proxy is the only way in. This explicit Route is for
+    # non-auth setups only.
     enabled: false
     tls: edge
+
+# -----------------------------------------------------------------------------
+# OpenShift OAuth gate (oauth-proxy + ServiceAccount-as-OAuthClient). Fronts the
+# portal so only cluster-authenticated (SSO) users can reach it and start a
+# workshop. Served at portal.ingress.hostname (training.<domain>); a NetworkPolicy
+# blocks the Educates portal route bypass. Native OIDC is NOT possible (the
+# Educates portal is an OAuth provider, not a client), so this proxy is the way.
+# -----------------------------------------------------------------------------
+auth:
+  enabled: false
+  # PRE-CREATED secret with key cookie-secret (16/24/32 bytes; use
+  # `openssl rand -hex 16`). Leave empty for plain helm (generated via lookup).
+  # For ArgoCD, set this or use sealedSecret below (helm template has no cluster
+  # access, so a generated cookie churns every sync).
+  existingSecret: ""
+  sealedSecret:
+    enabled: false
+    encryptedCookieSecret: ""
+  # oauth-proxy image (registry-overridable via global.registry.host).
+  proxyImage: ""
+  proxyImageRegistry: registry.redhat.io
+  proxyImageRepository: openshift4/ose-oauth-proxy
+  proxyImageTag: "v4.14"
+  # Router wildcard cert for the edge/reencrypt route (per-cluster — set in the
+  # ArgoCD env file).
+  tlsCertificateRef:
+    name: router-certs-default
+    namespace: openshift-ingress
 
 # -----------------------------------------------------------------------------
 # Phase 3 passthrough — per-session vcluster (requires platform vcluster support).

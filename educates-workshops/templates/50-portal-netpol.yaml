@@ -1,0 +1,39 @@
+{{- if .Values.auth.enabled }}
+# Close the auth bypass. Educates always creates a public Ingress/Route for the
+# portal at <portal.name>-ui.<domain>, which would let users reach the portal
+# without going through the oauth-proxy. This NetworkPolicy restricts ingress to
+# the portal pod to ONLY the oauth-proxy pod, so the direct route no longer works
+# and the proxy (OpenShift OAuth) becomes the sole entrypoint.
+#
+# ponytail: allows only the oauth-proxy namespace/pod. If a future Educates
+# feature needs pod-to-pod access to the portal (it currently doesn't — the
+# session dashboard talks to the portal via the browser/proxy), add its source
+# here. kubelet health probes come from the node and are not affected.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: educates-portal-oauth-only
+  namespace: {{ include "workshops.portalNamespace" . }}
+  labels:
+    {{- include "workshops.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  podSelector:
+    matchLabels:
+      deployment: training-portal
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Release.Namespace }}
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/component: oauth-proxy
+      ports:
+        - protocol: TCP
+          port: 8080
+{{- end }}

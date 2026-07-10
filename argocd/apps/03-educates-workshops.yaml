@@ -12,18 +12,23 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
-  source:
-    repoURL: https://github.com/rummens/Airbus-Educates
-    targetRevision: main
-    path: educates-workshops
-    helm:
-      valuesObject:
-        # Phase 3: per-session vcluster on every workshop.
-        vcluster:
-          enabled: true
+  # Multi-source: chart + per-cluster values (domain, auth cert, vcluster).
+  # Point valueFiles at the env file for THIS cluster.
+  sources:
+    - repoURL: https://github.com/rummens/Airbus-Educates
+      targetRevision: main
+      path: educates-workshops
+      helm:
+        valueFiles:
+          - $values/argocd/envs/workshops-x86.yaml
+    - repoURL: https://github.com/rummens/Airbus-Educates
+      targetRevision: main
+      ref: values
   destination:
     server: https://kubernetes.default.svc
-    namespace: educates
+    # Static release ns for the portal/workshop CRs + oauth-proxy (dcs- = platform).
+    # Dynamic per-session namespaces are dcst-* (from the portal name).
+    namespace: dcs-educates-workshops
   syncPolicy:
     automated:
       prune: true

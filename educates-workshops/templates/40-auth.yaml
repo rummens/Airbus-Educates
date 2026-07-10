@@ -1,18 +1,13 @@
 {{- if .Values.auth.enabled }}
-{{- $authHost := include "educates.authHostname" . }}
+{{- $authHost := include "workshops.portalHostname" . }}
+{{- $portalNs := include "workshops.portalNamespace" . }}
 {{- $secName := .Values.auth.existingSecret | default "educates-oauth-proxy" }}
-# Front the portal with OpenShift's built-in OAuth via oauth-proxy.
-# Auth model: ServiceAccount-as-OAuthClient (the OpenShift oauth-proxy pattern).
-# The ServiceAccount's redirect annotation registers it as an OAuth client with
-# the cluster OAuth server; oauth-proxy uses the SA's own token as the client
-# secret (--openshift-service-account). This means there is NO client secret to
-# template, store in git, or keep in sync with an OAuthClient CR — which is what
-# makes phase 2 safe under ArgoCD (helm template runs with no cluster access).
+# OpenShift OAuth gate for the portal. oauth-proxy (ServiceAccount-as-OAuthClient)
+# serves the public portal host (training.<domain>) and proxies to the Educates
+# portal Service; only cluster-authenticated (SSO) users get through. The portal
+# trusts X-Forwarded-Host so its self-URLs use the proxy host. Educates' own
+# portal route is blocked by the NetworkPolicy (50-portal-netpol.yaml).
 {{- if and (not .Values.auth.existingSecret) (not .Values.auth.sealedSecret.enabled) }}
-{{- /* Only a COOKIE secret is needed. Generate once; reuse via lookup for plain
-       helm. Under ArgoCD, lookup returns nil each render, regenerating the cookie
-       and logging users out on every sync — set auth.existingSecret to a
-       pre-created secret to avoid that (see README). */ -}}
 {{- $existing := lookup "v1" "Secret" .Release.Namespace $secName }}
 {{- $cookie := "" }}
 {{- if $existing }}
@@ -26,31 +21,29 @@ metadata:
   name: {{ $secName }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "educates.labels" . | nindent 4 }}
+    {{- include "workshops.labels" . | nindent 4 }}
   annotations:
     helm.sh/resource-policy: keep
 stringData:
   cookie-secret: {{ $cookie | quote }}
 ---
 {{- end }}
-# --- ServiceAccount (acts as the OAuth client via the redirect annotation) -----
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: educates-oauth-proxy
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "educates.labels" . | nindent 4 }}
+    {{- include "workshops.labels" . | nindent 4 }}
   annotations:
     serviceaccounts.openshift.io/oauth-redirecturi.primary: {{ printf "https://%s/oauth/callback" $authHost | quote }}
 ---
-# --- RBAC: proxy validates tokens via TokenReview/SubjectAccessReview ----------
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: educates-oauth-proxy-auth-delegator
   labels:
-    {{- include "educates.labels" . | nindent 4 }}
+    {{- include "workshops.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -60,14 +53,13 @@ subjects:
     name: educates-oauth-proxy
     namespace: {{ .Release.Namespace }}
 ---
-# --- Service (OpenShift issues the serving cert into oauth-proxy-tls) ----------
 apiVersion: v1
 kind: Service
 metadata:
   name: educates-oauth-proxy
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "educates.labels" . | nindent 4 }}
+    {{- include "workshops.labels" . | nindent 4 }}
   annotations:
     service.beta.openshift.io/serving-cert-secret-name: oauth-proxy-tls
 spec:
@@ -78,14 +70,13 @@ spec:
       port: 8443
       targetPort: 8443
 ---
-# --- Route (reencrypt: Router TLS -> proxy TLS) -------------------------------
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: educates-portal-secure
+  name: educates-portal-oauth
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "educates.labels" . | nindent 4 }}
+    {{- include "workshops.labels" . | nindent 4 }}
 spec:
   host: {{ $authHost }}
   to:
@@ -97,14 +88,13 @@ spec:
     termination: reencrypt
     insecureEdgeTerminationPolicy: Redirect
 ---
-# --- oauth-proxy Deployment: fronts the portal Service ------------------------
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: educates-oauth-proxy
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "educates.labels" . | nindent 4 }}
+    {{- include "workshops.labels" . | nindent 4 }}
     app.kubernetes.io/component: oauth-proxy
 spec:
   replicas: 1
@@ -114,7 +104,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "educates.labels" . | nindent 8 }}
+        {{- include "workshops.labels" . | nindent 8 }}
         app.kubernetes.io/component: oauth-proxy
     spec:
       serviceAccountName: educates-oauth-proxy
@@ -126,12 +116,12 @@ spec:
         runAsNonRoot: true
       containers:
         - name: oauth-proxy
-          image: {{ include "educates.oauthProxyImage" . | quote }}
+          image: {{ include "workshops.oauthProxyImage" . | quote }}
           args:
             - --provider=openshift
             - --https-address=:8443
             - --http-address=
-            - --upstream=http://training-portal.{{ .Values.portal.name }}-ui.svc:80
+            - --upstream=http://training-portal.{{ $portalNs }}.svc:80
             - --openshift-service-account=educates-oauth-proxy
             - --cookie-secret-file=/etc/proxy/secrets/cookie-secret
             - --redirect-url=https://{{ $authHost }}/oauth/callback
@@ -142,8 +132,6 @@ spec:
           ports:
             - name: https
               containerPort: 8443
-          # oauth-proxy serves /oauth/healthz on the TLS port; kubelet skips cert
-          # verification for HTTPS probes so the serving cert host need not match.
           readinessProbe:
             httpGet:
               path: /oauth/healthz

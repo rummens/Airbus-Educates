@@ -1,0 +1,49 @@
+{{- if and .Values.monitoring.enabled .Values.monitoring.grafanaReader.enabled }}
+{{- $ns := .Release.Namespace }}
+# =============================================================================
+# Read-only bridge for an EXTERNAL Grafana to query this cluster's metrics.
+# Grafana points a Prometheus datasource at the Thanos Querier route and
+# authenticates with this ServiceAccount's token. cluster-monitoring-view grants
+# read access to both platform and user-workload metrics through Thanos.
+#
+# The token is a long-lived ServiceAccount token Secret (does not expire like a
+# TokenRequest token would) so the datasource keeps working across restarts.
+# Read it with:
+#   oc -n {{ $ns }} get secret grafana-reader-token -o jsonpath='{.data.token}' | base64 -d
+# =============================================================================
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: grafana-reader
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: educates-grafana-reader
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-monitoring-view
+subjects:
+  - kind: ServiceAccount
+    name: grafana-reader
+    namespace: {{ $ns }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: grafana-reader-token
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+    app.kubernetes.io/component: metrics
+  annotations:
+    kubernetes.io/service-account.name: grafana-reader
+type: kubernetes.io/service-account-token
+{{- end }}

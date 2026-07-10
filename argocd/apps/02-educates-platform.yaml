@@ -26,9 +26,9 @@ spec:
       ref: values
   destination:
     server: https://kubernetes.default.svc
-    # Release namespace — oauth-proxy (phase 2) lands here. Installer creates its
-    # own educates-installer / educates namespaces regardless.
-    namespace: educates
+    # Static platform release namespace (dcs-). Holds the helm release + monitoring
+    # resources. The installer creates its own dcs-educates-installer namespace.
+    namespace: dcs-educates
   # kapp-controller co-owns fields on the installer App + its tracking ConfigMap.
   # Ignore those managers so ArgoCD does not fight kapp-controller (no SSA churn).
   ignoreDifferences:
@@ -39,7 +39,7 @@ spec:
     - group: ""
       kind: ConfigMap
       name: installer.educates.dev.app
-      namespace: educates-installer
+      namespace: dcs-educates-installer
       managedFieldsManagers:
         - kapp
         - kapp-controller
