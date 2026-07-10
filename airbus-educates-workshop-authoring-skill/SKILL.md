@@ -1,0 +1,478 @@
+---
+name: airbus-educates-workshop-authoring
+description: >
+  Comprehensive guide for creating and configuring workshops for the Educates interactive training platform, customized to target OpenShift. Includes steps for creating workshops from scratch, configuring workshop definitions and content and writing workshop instructions. Enforces house standards: OpenShift/`oc`, a mandatory introduction page, official documentation links on every concept, full variablization of infrastructure values, and a mandatory product/service name variable. Use this skill when creating Educates workshops, configuring workshop settings or writing workshop content and instructions.
+---
+
+# Educates Workshop Authoring Skill (OpenShift, house standards)
+
+This skill provides guidance for creating interactive workshops for the Educates training platform. It is a customized fork targeting **OpenShift** and enforcing a set of house standards on every workshop.
+
+## House Standards (apply to every workshop)
+
+These standards are mandatory for all workshops produced with this skill. They are woven into the steps below and each has a dedicated reference — apply them throughout, not as an afterthought.
+
+1. **OpenShift target.** Use the `oc` CLI (never `kubectl`), prefer OpenShift `Route` objects over raw `Ingress` where a manual object is needed (the session proxy is still preferred for browser-facing services), and respect Security Context Constraints. See [references/openshift-reference.md](references/openshift-reference.md).
+2. **Mandatory introduction page.** Every workshop starts with `workshop/content/00-workshop-overview.md` containing product framing, learning objectives, prerequisites, environment overview, and time/difficulty. See [references/introduction-page-reference.md](references/introduction-page-reference.md).
+3. **Documentation links on every concept.** The first mention of any concept, tool, or resource type links to its official upstream documentation. See [references/documentation-links-reference.md](references/documentation-links-reference.md).
+4. **Variablize everything.** Never hardcode a registry host, domain, route host, namespace, version, or endpoint — use the correct variable plane so the workshop deploys to any cluster/registry without editing content. See [references/workshop-variables-reference.md](references/workshop-variables-reference.md).
+5. **Mandatory product/service name variable.** Every workshop declares the param trio (`product_name`, `dcs_registry`, `dcs_docs_base_url`) in `workshop/config.yaml` and renders `{{< param product_name >}}` (starting on the introduction page). See [references/workshop-variables-reference.md](references/workshop-variables-reference.md).
+6. **Air-gapped images.** DCS is air-gapped — every image comes from Harbor via `$(image_repository)` or `{{< param dcs_registry >}}`; no external registries. Workshops use the `dcs-workshop-base` or `dcs-tools` image. See [references/air-gapped-images-reference.md](references/air-gapped-images-reference.md).
+7. **Assessment / automated-test coverage.** **Every command** is paired with an `examiner:execute-test` asserting its outcome (no exceptions — the examiner tests are the automated test pipeline that verifies workshops end-to-end), and every workshop ends with a knowledge check. See [references/assessment-reference.md](references/assessment-reference.md).
+
+## Initial Workshop Creation
+
+When the user asks to create a workshop, follow these steps:
+
+### 1. Gather Workshop Details
+
+Collect the following information from the user or infer from context:
+
+- **Title**: A short, human-readable title for the workshop
+- **Description**: A one to two sentence description of what the workshop covers
+- **Name**: A machine-readable identifier (lowercase, dashes allowed, max 25 characters, recommended `lab-` prefix)
+
+If the user provides a topic but not explicit values, propose reasonable defaults and confirm before proceeding.
+
+### 2. Determine Workshop Location
+
+Ask the user to choose one of:
+- Use the current directory as the workshop root
+- Create a new subdirectory using the workshop name
+
+**Deriving the workshop name from the directory:**
+
+If the user chooses to use the current working directory:
+1. Check if the directory name satisfies the naming convention (lowercase, dashes allowed, max 25 characters). Note: the `lab-` prefix is recommended but not required when using the directory name.
+2. If it does, use the directory name as the workshop name
+3. If it does not satisfy the requirements, infer an appropriate name from the workshop topic or title, but confirm with the user before proceeding (unless they already explicitly provided a name)
+
+### 3. Determine Workshop Requirements
+
+The terminal application is always enabled by default. Always include it explicitly with `enabled: true` and `layout: split` for clarity.
+
+Ask the user about additional session applications based on the workshop's technical requirements:
+
+- **Editor**: Will users need to edit or view files in the browser?
+- **OpenShift/Kubernetes access**: Will users run `oc` commands or interact with the cluster API? (Use `oc`, not `kubectl` — see [references/openshift-reference.md](references/openshift-reference.md).)
+- **Web console**: Would a visual cluster view help users?
+- **Docker**: Will users build or run containers?
+- **Image registry**: Will users push container images?
+- **Virtual cluster**: Does the workshop need cluster-admin operations?
+- **Git server**: Will users need a local Git repository (e.g., for CI/CD pipelines)?
+- **Slides**: Does the workshop include a presentation alongside the instructions?
+
+Infer sensible defaults from the workshop topic. For example, a Kubernetes workshop likely needs editor, Kubernetes access, and console enabled.
+
+### 4. Create Workshop Structure
+
+Create the following directory structure in the chosen location:
+
+```
+<workshop-root>/
+├── README.md                    # Workshop title and description
+├── exercises/
+│   └── README.md                # Placeholder to ensure directory is preserved
+├── resources/
+│   └── workshop.yaml            # Educates Workshop definition
+└── workshop/
+    ├── config.yaml              # Hugo config — declares house params (product_name, etc.)
+    └── content/                 # Workshop instruction pages (Markdown)
+```
+
+#### The workshop/config.yaml File
+
+Always create `workshop/config.yaml` with a `params:` block at creation time. This is where house variables are declared once and rendered in content via `{{< param name >}}`. Seed it with the mandatory param trio:
+
+```yaml
+# workshop/config.yaml
+params:
+  product_name: "Digital Container Service (DCS)"
+  dcs_registry: "harbor.example.dcs/dcs-academy"   # Harbor project for images (placeholder)
+  dcs_docs_base_url: "https://docs.example.dcs"     # DCS docs portal base (placeholder)
+```
+
+- `product_name` — product/service the workshop is delivered under
+- `dcs_registry` — Harbor location for all author-chosen images (air-gapped; no external registries)
+- `dcs_docs_base_url` — base URL for DCS-specific concept links
+
+If the workshop is part of a course, the course brief provides these defaults. See [references/workshop-variables-reference.md](references/workshop-variables-reference.md).
+
+#### The exercises Directory
+
+Always create an `exercises/` directory as part of the initial workshop structure. This directory serves as the working area for the workshop user — place any files they will need during the workshop here, such as source code, configuration files, sample data, YAML manifests, templates, or starter projects. By keeping all user-facing files under `exercises/`, the workshop environment stays organized and free of clutter from the home directory.
+
+When this directory exists in the workshop files imported into the workshop session container, Educates treats it specially:
+
+- **Terminal working directory**: Embedded terminals in the workshop dashboard start with `~/exercises` as their current working directory instead of the home directory.
+- **Editor root directory**: The VS Code editor opens on `~/exercises` rather than the home directory, so users only see workshop-relevant files and are not distracted by hidden dot files or other home directory contents.
+
+This special behavior is only triggered if the `exercises/` directory already exists when the workshop session starts. It cannot be created later by workshop instructions — the directory must be part of the published workshop files.
+
+**Important: the directory must contain at least one file.** Empty directories are not preserved when publishing workshop files to a Git repository or OCI image artefact. To ensure the directory is included, add a `README.md` with a brief note such as "Exercise files for this workshop" or a similar placeholder. Avoid using a `.gitkeep` file unless the workshop source is managed in a Git repository where that convention makes sense.
+
+Because the `exercises/` directory is always recommended, workshop instructions should never need to create it. File paths used in clickable actions for files under this directory must use the `~/exercises` prefix (e.g., `~/exercises/deployment.yaml`). The examples in the clickable actions reference files already follow this convention.
+
+### 5. Generate workshop.yaml
+
+Refer to [references/workshop-yaml-reference.md](references/workshop-yaml-reference.md) for the complete workshop.yaml structure and options.
+
+Generate the `resources/workshop.yaml` file based on the gathered details.
+
+**CRITICAL: Use the correct publish and workshop.files format.**
+
+The workshop.yaml MUST include these sections with this exact structure (substituting the actual workshop name):
+
+```yaml
+spec:
+  publish:
+    image: "$(image_repository)/{workshop-name}-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    files:
+    - image:
+        url: "$(image_repository)/{workshop-name}-files:$(workshop_version)"
+```
+
+**IMPORTANT:** Do NOT use `spec.content.files` — this is a deprecated format. Always use `spec.publish` and `spec.workshop.files` as shown above. The `$(image_repository)` and `$(workshop_version)` variables must be used exactly as shown to support local workshop publishing and deployment workflows. The `spec.publish.files` section controls which files are packaged into the published OCI image — only the listed paths are included, keeping the image small. The `spec.workshop.files` section specifies where to pull the files from at runtime; since the published image is already filtered, no `includePaths` is needed there. The `spec.workshop.files` array also supports Git and HTTP sources and can contain multiple entries overlaid in order — see the "Alternative File Sources" section in the workshop YAML reference for details.
+
+**Additional configuration:**
+
+- Set `metadata.name` to the workshop name
+- Set `spec.title` and `spec.description` from gathered details
+- Set `spec.duration` to estimated completion time (e.g., `15m`, `30m`, `1h`)
+- Set `spec.difficulty` to one of: `beginner`, `intermediate`, `advanced`, `extreme`
+- Always include terminal with `enabled: true` and `layout: split`
+- Enable only the additional session applications the workshop requires
+- Set `spec.session.namespaces.security.token.enabled` to `false` by default (it is enabled by default for historical reasons)
+- Only set `spec.session.namespaces.security.token.enabled` to `true` if the workshop needs kubectl or uses the Kubernetes console
+- Omit any applications that are not needed (do not include with `enabled: false`)
+
+**Variablization (house standard).** Do not hardcode infrastructure values in `workshop.yaml`. Registry hosts, domains, route/ingress hosts, and namespaces must use data variables (`$(image_repository)`, `$(ingress_domain)`, `$(session_namespace)`, `$(session_hostname)`, etc.). Author-controlled values that must also reach the terminal or definition go in `spec.session.env`. See [references/workshop-variables-reference.md](references/workshop-variables-reference.md) for the three variable planes and how to keep a single source of truth.
+
+### 6. Add GitHub Actions Workflow for Publishing (Only When Requested)
+
+**Skip this step during initial workshop creation unless the user explicitly asks to set up publishing of the workshop to GitHub container registry using a GitHub action.** This step also applies when a user returns to an existing workshop and asks to add publishing support after the workshop has already been created.
+
+This step applies only to standalone workshops that live in their own Git repository. If the workshop is part of a course containing multiple workshops, do not use this GitHub action — publishing for courses is handled differently.
+
+When requested, create a `.github/workflows/publish-workshop.yaml` file in the workshop repository. Refer to [references/workshop-publishing-reference.md](references/workshop-publishing-reference.md) for the complete workflow configuration, action parameters, and how publishing relates to the `spec.publish` section in workshop.yaml.
+
+### 7. Add Local Docker Compatibility (Only When Requested)
+
+**Skip this step unless the user explicitly asks for the workshop to work on local Docker as well as in Kubernetes.** This step also applies when a user returns to an existing workshop and asks to add local Docker support retrospectively.
+
+Not all workshops are compatible with local Docker deployment. Workshops that require Kubernetes access, a virtual cluster, a session image registry, or that use `environment.objects`, `session.objects`, or `request.objects` in the workshop definition cannot run on local Docker.
+
+When local Docker support is requested for a compatible workshop, the main change is appending the `ingress_port_suffix` data variable to all session proxy URLs — in both the workshop definition and workshop instructions. This variable is an empty string when on standard ports (Kubernetes) and includes the port number when on a non-standard port (local Docker), so adding it has no effect on Kubernetes deployment.
+
+Refer to [references/local-docker-deployment-reference.md](references/local-docker-deployment-reference.md) for the full list of restrictions, where to apply the port suffix, and how to retrofit local Docker support onto an existing workshop.
+
+### 8. Create the AI Assistant Instructions File
+
+**Skip this step if any of the following are true:**
+- An AI assistant instructions file (e.g., `CLAUDE.md`, `AGENTS.md`) already exists in the workshop root directory
+- An AI assistant instructions file already exists in a parent directory (indicating the workshop is part of a larger project, such as a course created with the airbus-educates-course-design skill)
+
+Create an AI assistant instructions file in the project root so that future AI interactions automatically know the project context and which skills to use. For Claude Code, this file is `CLAUDE.md`; other AI coding agents use different conventions (e.g., `AGENTS.md`).
+
+The instructions file should contain:
+
+- A pointer to `README.md` for the project overview and description
+- **Skill references** — when to invoke each skill:
+  - The **airbus-educates-workshop-authoring** skill for creating or modifying the workshop definition, instruction pages, and exercise files
+  - The **airbus-educates-course-design** skill for course planning, if this workshop is later incorporated into a multi-workshop course
+
+Keep this file focused on AI-specific instructions and project-specific overrides. Do not duplicate content that already exists in `README.md` — reference it instead.
+
+### 9. Create Workshop Instructions
+
+Workshop instructions are placed in the `workshop/content/` directory as Markdown files rendered by Hugo.
+
+#### Guided Instruction Through Clickable Actions
+
+By default, workshop instructions should provide a guided experience where all code interaction — viewing, running, and modifying — is driven through clickable actions. Learners should not be asked to type commands into the terminal or write code into the editor by hand. Instead, every interaction should use the appropriate clickable action (`terminal:execute`, `editor:open-file`, `editor:replace-matching-text`, etc.). This keeps learners focused on the concepts rather than on mechanics. If the person requesting the workshop explicitly asks for a different experience, adjust accordingly.
+
+Refer to [references/workshop-design-principles.md](references/workshop-design-principles.md) for the complete design philosophy, including guidance on how learners should view, run, and modify code, and how to structure the `exercises/` directory as a pre-populated workspace.
+
+#### Clickable Actions in Instructions
+
+Workshop instructions use clickable actions — special fenced code blocks that let users execute commands, edit files, and interact with the workshop environment by clicking. Refer to [references/clickable-actions-reference.md](references/clickable-actions-reference.md) for the complete list of action types and detailed syntax.
+
+**Critical YAML safety rule for terminal commands:** When generating `terminal:execute` clickable actions, always use YAML block scalar syntax (`command: |-`) if the command contains any characters that are special in YAML (colon, hash, curly braces, square brackets, etc.) or if the command spans multiple lines. This prevents the YAML parser from misinterpreting the command. For example:
+
+````markdown
+```terminal:execute
+command: |-
+  docker run --rm -p 8080:80 nginx:latest
+```
+````
+
+Also ensure that shell commands use correct quoting — variable expansions containing paths with spaces should be double-quoted, strings with special characters should be properly escaped, etc. See the "YAML Syntax Safety" section in the clickable actions reference for detailed guidance and examples.
+
+**Critical YAML safety rule for editor actions with indented text:** When generating editor clickable actions (`editor:select-matching-text`, `editor:replace-matching-text`, etc.) where the `match`, `replacement`, or `text` content starts with leading spaces — i.e., every line is indented — you **must** use a YAML block scalar **indent indicator** (e.g., `|2`, `|4`) to preserve the whitespace. Without it, the YAML parser strips the leading spaces, causing matches to fail or replacements to be inserted with incorrect indentation. For example:
+
+````markdown
+```editor:replace-matching-text
+file: ~/exercises/deployment.yaml
+match: |2
+      containers:
+      - name: app
+        image: myapp:v1
+replacement: |2
+      containers:
+      - name: app
+        image: myapp:v2
+```
+````
+
+An alternative that avoids needing an indent indicator: expand the match to include enclosing context that starts at column 1. For example, instead of matching only an indented function body, include the function definition line (e.g., `def my_function():`) so the first line of the block scalar has no leading spaces and a plain `|` suffices. This works well for top-level functions but may not help for class methods or other constructs that are themselves indented. See the editor file actions reference for full details on indent indicators.
+
+**Critical YAML safety rule for trailing blank lines in text properties:** When an editor clickable action's `text` or `replacement` property ends with one or more blank lines, those blank lines can be lost at two stages: YAML's default "clip" chomping strips trailing newlines from block scalar values, and Hugo's Markdown processor strips trailing blank lines from code fences. To preserve trailing blank lines, you must do both of the following: use the `+` keep chomping indicator on the block scalar (`|+` instead of `|`), and add `eot: true` as the final property in the YAML. For example:
+
+````markdown
+```editor:insert-lines-before-selection
+file: ~/exercises/app.py
+text: |+
+  # --- Section boundary ---
+
+eot: true
+```
+````
+
+The `|+` tells YAML to keep trailing newlines, and the `eot: true` property (which has no meaning to the clickable action) ensures the blank lines are not trailing content in the code fence where Hugo would strip them. See the "Trailing blank lines in text properties" section in the clickable actions reference for detailed guidance.
+
+#### Tracking Terminal Working Directory
+
+When the `exercises/` directory exists, each terminal session starts with `~/exercises` as its current working directory — not the home directory. As you write workshop instructions, you **must track the current working directory of each terminal at every point** in the instructions. Any `cd` command in a `terminal:execute` action changes the working directory for all subsequent commands in that terminal.
+
+Getting this wrong leads to commands that reference incorrect file paths. Either:
+
+- **Track the working directory and use correct relative paths.** For example, if the terminal is in `~/exercises` and you need to access `~/exercises/deployment.yaml`, use `deployment.yaml`. If a previous step ran `cd ~/exercises/myapp`, then `deployment.yaml` would need to be `../deployment.yaml` or you must use the full path.
+- **Use absolute paths to avoid ambiguity.** For example, always use `~/exercises/deployment.yaml` regardless of the current directory.
+
+When the workshop uses the split terminal layout (two terminals), track the working directory of each terminal independently — a `cd` in one terminal does not affect the other.
+
+#### Dashboard Tab Visibility
+
+The workshop dashboard shows only one tab at a time on the right-hand side of the screen (the left side displays the workshop instructions). The Terminal tab is visible by default when a session starts. Users switch between tabs by clicking on tab headers or through `dashboard:open-dashboard` clickable actions.
+
+This matters when writing instructions because certain actions implicitly change which tab is visible. A `terminal:execute` action switches to the Terminal tab, hiding any other tab (such as a web application dashboard) the user was viewing. If the workshop uses a custom dashboard tab (e.g., for a web app accessed via the session proxy), you must explicitly guide the user back to that tab after running terminal commands so they can see the result.
+
+Dashboard tabs are iframes with no URL bar — users cannot see or change the URL the tab is pointing at. Because the content is embedded in an iframe, the page title of the embedded web application is also not visible anywhere in the browser — the browser tab/window title is dictated by the topmost parent page, not the iframe content. To change what a dashboard tab displays, use `dashboard:reload-dashboard` with a new `url`. Use `dashboard:open-dashboard` (not `dashboard:reload-dashboard` without a URL) when you only need to make a tab visible without reloading its content. When a workshop will change a tab's URL during the instructions, prefer creating the tab dynamically with `dashboard:create-dashboard` rather than pre-defining it in `spec.session.dashboards`, so the initial URL is visible in context.
+
+Refer to [references/workshop-dashboard-reference.md](references/workshop-dashboard-reference.md) for detailed patterns and examples for handling tab switching in workshop instructions.
+
+#### Data Variables in Instructions
+
+Workshop instructions should be parameterized using data variables rather than hardcoding session-specific values. Educates provides data variables for the session namespace, ingress domain, session hostname, and many other context-specific values. Use the Hugo `param` shortcode to insert them:
+
+```markdown
+Deploy the application to the `{{< param session_namespace >}}` namespace.
+```
+
+Data variables also work inside clickable actions:
+
+````markdown
+```terminal:execute
+command: kubectl get pods -n {{< param session_namespace >}}
+```
+````
+
+In terminal commands within clickable actions, you can alternatively use the equivalent uppercase environment variable (e.g., `$SESSION_NAMESPACE`) since the terminal shell has these set automatically. Refer to [references/data-variables-reference.md](references/data-variables-reference.md) for the complete list of available data variables and which contexts they can be used in.
+
+#### Page Structure
+
+Each page requires YAML frontmatter with at least a `title` property:
+
+```markdown
+---
+title: Page Title
+---
+
+This is the introductory paragraph for the page. It appears immediately
+after the frontmatter with no heading.
+
+## First Section
+
+Content for the first section...
+
+## Second Section
+
+Content for the second section...
+```
+
+**Content guidelines:**
+
+- Use standard Markdown for page content
+- Do NOT use a level 1 heading (`#`) — the `title` in frontmatter automatically generates the page header
+- Begin immediately with an introductory paragraph after the frontmatter
+- Use level 2 headings (`##`) and below for any additional sections
+- **Use admonition shortcodes** to highlight important information: `{{< note >}}` for tips, `{{< warning >}}` for cautions, and `{{< danger >}}` for critical warnings. See [references/hugo-shortcodes-reference.md](references/hugo-shortcodes-reference.md) for syntax and usage guidance.
+- **Link every concept to its docs (house standard).** The first mention of any concept, tool, or resource type on a page must be a Markdown link to official upstream documentation. Do not re-link on repeat mentions. See [references/documentation-links-reference.md](references/documentation-links-reference.md).
+- **Use `oc`, not `kubectl` (house standard).** All commands target OpenShift via `oc`. See [references/openshift-reference.md](references/openshift-reference.md).
+- **Never hardcode infrastructure or product values (house standard).** Registry hosts, domains, route hosts, namespaces, versions, and the product name come from variables — `{{< param ... >}}` for content. See [references/workshop-variables-reference.md](references/workshop-variables-reference.md).
+- **Focus on the workshop topic, not the platform.** Workshop instructions should teach the subject matter, not how Educates works. When the workshop requires platform-specific configuration (e.g., setting up a session proxy for accessing a deployed service, configuring ingresses, or using data variables), present these as natural steps of the exercise without drawing attention to Educates internals. Do not say things like "we will learn how Educates is configured" or "this is how Educates handles ingress" — unless the workshop is specifically about using the Educates platform itself. The overview, summary, and learning objectives should describe what users will learn about the topic, not about the workshop infrastructure supporting it.
+
+#### File Naming Convention
+
+Use a numeric prefix for ordering pages: `nn-page-name.md`
+
+Recommended structure:
+- `00-workshop-overview.md` - **Mandatory introduction page** (see below)
+- `01-first-topic.md` - First instructional page
+- `02-second-topic.md` - Continue incrementing for core content
+- `99-workshop-summary.md` - Wrap-up and next steps
+
+Reserve `00-` for the overview and `99-` for the summary. Core instructional pages start at `01-` and increment.
+
+#### Mandatory Introduction Page (house standard)
+
+Every workshop must include `workshop/content/00-workshop-overview.md`. It is read-only orientation (no clickable actions) and must contain, in order: product framing using `{{< param product_name >}}`, **What You'll Learn**, **Prerequisites** (with docs links for named concepts), **Your Environment**, and **Time and Difficulty** (matching `workshop.yaml`). See [references/introduction-page-reference.md](references/introduction-page-reference.md) for the required content, rules, and a copy-paste template.
+
+#### Page Bundles
+
+For simple pages, use a single `.md` file. For pages with embedded images local to that page, use a page bundle instead:
+
+```
+workshop/content/
+├── 00-workshop-overview.md
+├── 01-first-topic/
+│   ├── index.md
+│   └── diagram.png
+├── 02-second-topic.md
+└── 99-workshop-summary.md
+```
+
+A page bundle is a directory containing `index.md` plus any associated assets (images, etc.). For detailed guidance on including images in workshop pages, see [references/images-in-workshop-pages.md](references/images-in-workshop-pages.md).
+
+### 10. Verify Workshop Definition
+
+After generating `resources/workshop.yaml`, verify the following critical items:
+
+**Required sections exist:**
+- [ ] `spec.publish` section exists with `image` and `files` fields
+- [ ] `spec.publish.files` uses `includePaths` to select only `/workshop/**`, `/exercises/**`, and `/README.md`
+- [ ] `spec.workshop` section exists with `files` array
+- [ ] Both `spec.publish.image` and `spec.workshop.files` use `$(image_repository)` and `$(workshop_version)` variables
+
+**Deprecated formats NOT used:**
+- [ ] `spec.content.files` is NOT present (use `spec.workshop.files` instead)
+
+**Application settings:**
+- [ ] Terminal includes `enabled: true` and `layout: split`
+- [ ] Only required applications are included (omit disabled ones entirely)
+- [ ] `spec.session.namespaces.security.token.enabled` is explicitly set to `false` unless Kubernetes/OpenShift access is needed
+
+**House standards (definition):**
+- [ ] `workshop/config.yaml` declares the param trio (`product_name`, `dcs_registry`, `dcs_docs_base_url`)
+- [ ] No hardcoded registry host, domain, route/ingress host, or namespace in `workshop.yaml` — data variables are used (see [references/workshop-variables-reference.md](references/workshop-variables-reference.md))
+- [ ] Workshop image is `dcs-workshop-base` or `dcs-tools`; no external registry referenced anywhere (see [references/air-gapped-images-reference.md](references/air-gapped-images-reference.md))
+- [ ] `spec.session.applications.examiner.enabled: true` (every command is verified — see [references/assessment-reference.md](references/assessment-reference.md))
+- [ ] Security policy left `restricted` unless a stated reason requires `baseline` (see [references/openshift-reference.md](references/openshift-reference.md))
+
+### 11. Verify Workshop Instructions
+
+After generating workshop instruction pages, verify the following:
+
+**Terminal working directory correctness:**
+- [ ] The initial working directory for each terminal is known (it is `~/exercises` when the exercises directory exists, otherwise `~`)
+- [ ] Every `cd` command in `terminal:execute` actions is tracked — the working directory after each step is accounted for
+- [ ] All relative file paths in terminal commands are correct for the working directory at that point in the instructions
+- [ ] When using split terminals, the working directory of each terminal is tracked independently
+
+**File path consistency:**
+- [ ] File paths in `editor` clickable actions use the `~/exercises` prefix where appropriate
+- [ ] File paths referenced in prose match the paths used in clickable actions
+
+**Dashboard tab visibility:**
+- [ ] After any `terminal:execute` action that follows a step where the user was viewing a non-terminal dashboard tab (e.g., a web application), the instructions guide the user back to the correct tab using `dashboard:open-dashboard` (when no content refresh is needed) or `dashboard:reload-dashboard` (when the content needs reloading or the URL needs to change)
+- [ ] The visible dashboard tab is tracked throughout the instructions, just as the terminal working directory is tracked
+- [ ] `dashboard:reload-dashboard` without a `url` is not used solely to make a tab visible — `dashboard:open-dashboard` is used for that purpose instead
+- [ ] When `dashboard:reload-dashboard` is used to change a dashboard tab's URL during the workshop, the initial dashboard is created with `dashboard:create-dashboard` in the instructions (not pre-defined in `spec.session.dashboards`) so the initial URL is visible to the reader
+
+**YAML syntax in editor actions:**
+- [ ] Every `editor:select-matching-text`, `editor:replace-matching-text`, or similar action where `match`, `replacement`, or `text` content starts with leading spaces uses a YAML block scalar indent indicator (`|2`, `|4`, etc.) — or the match has been expanded to include enclosing context that starts at column 1 so a plain `|` suffices
+- [ ] Every editor clickable action where the `text` or `replacement` property ends with trailing blank lines uses the `|+` keep chomping indicator and includes `eot: true` as the final YAML property to prevent YAML and Hugo from stripping those blank lines
+
+**Guided instruction:**
+- [ ] All code viewing uses editor clickable actions (`editor:open-file`, `editor:select-matching-text`) — not plain code blocks or terminal commands like `cat`
+- [ ] All command execution uses `terminal:execute` clickable actions — learners are never asked to type commands manually
+- [ ] All code modifications use editor clickable actions (`editor:replace-matching-text`, `editor:append-lines-after-match`, `editor:insert-lines-before-match`, etc.) — learners are never asked to edit files by hand
+- [ ] `workshop:copy` or `workshop:copy-and-edit` are only used where content must be customized per-learner and cannot be handled by data variables
+
+**Content focus:**
+- [ ] Workshop overview and summary describe the subject matter, not the Educates platform
+- [ ] Learning objectives focus on what the user will learn about the topic
+- [ ] Platform-specific steps (proxies, ingresses, data variables) are presented as natural parts of the exercise without calling attention to Educates internals
+
+**House standards (content):**
+- [ ] `00-workshop-overview.md` exists and follows [references/introduction-page-reference.md](references/introduction-page-reference.md) — product framing, learning objectives, prerequisites, environment, time/difficulty; no clickable actions
+- [ ] Product name is rendered via `{{< param product_name >}}` — never hardcoded
+- [ ] Every concept links on first mention: standard constructs → upstream docs, DCS-specific concepts → `{{< param dcs_docs_base_url >}}` with an inline blurb (see [references/documentation-links-reference.md](references/documentation-links-reference.md), [references/dcs-concepts-reference.md](references/dcs-concepts-reference.md))
+- [ ] All commands use `oc`, never `kubectl`; manual Routes use `app-{{< param session_hostname >}}` (see [references/openshift-reference.md](references/openshift-reference.md))
+- [ ] Every image reference uses `{{< param dcs_registry >}}` or `$(image_repository)` — no external registries (see [references/air-gapped-images-reference.md](references/air-gapped-images-reference.md))
+- [ ] **Every command** has a paired `examiner:execute-test` (automated-pipeline coverage — no unverified commands); workshop ends with a Check Your Understanding section (see [references/assessment-reference.md](references/assessment-reference.md))
+- [ ] No hardcoded registry hosts, domains, route hosts, namespaces, or versions in content — variables are used throughout
+
+### 12. Update Planning Documents (Course Workshops Only)
+
+When the workshop is part of a course that has planning documents (i.e., a `planning/` directory exists containing workshop plans), check whether any significant changes made during implementation need to be reflected back in the planning documents. The goal is to keep the workshop plan accurate so that planning for subsequent workshops starts from correct information.
+
+**What to update:**
+
+- **Page changes**: If you changed a page's topic or title, rename the page file to match the new content and update the workshop plan's page listing accordingly.
+- **Approach changes**: If you changed the overall approach — switched technique, simplified or restructured exercises, chose a different library or tool — update the workshop plan to describe what was actually built rather than what was originally planned.
+- **Renamed files**: If you renamed a page file, check that no other workshop pages or planning documents still reference the old filename.
+- **Sequential workshop impact**: For sequential workshops, check whether the next workshop's plan or implementation references anything that changed — its "Connection to Previous Workshop" section, exercises, or narrative hooks may assume the original approach.
+
+Use the `airbus-educates-course-design` skill to make these updates — it owns the planning document format and ensures changes follow the correct structure. The important thing is that the workshop plan ends up reflecting the as-built design rather than the original draft.
+
+## Reference Guides
+
+For detailed guidance on specific topics, see:
+
+**House standards (this fork):**
+
+- [OpenShift Reference](references/openshift-reference.md) - Using `oc`, projects, Routes vs Ingress and the session proxy, and Security Context Constraints on OpenShift
+- [Introduction Page Reference](references/introduction-page-reference.md) - The mandatory `00-workshop-overview.md` overview page: required content, rules, and template
+- [Documentation Links Reference](references/documentation-links-reference.md) - The rule that every concept links to docs on first mention; the hybrid upstream-vs-DCS model; canonical documentation bases
+- [Workshop Variables Reference](references/workshop-variables-reference.md) - The three variable planes, the mandatory param trio (`product_name`, `dcs_registry`, `dcs_docs_base_url`), and how to variablize every infrastructure value so workshops need no rebuild to redeploy
+- [Air-Gapped Images Reference](references/air-gapped-images-reference.md) - Every image from Harbor, the two DCS base images, and no external registries
+- [DCS Concepts Reference](references/dcs-concepts-reference.md) - Shared source of truth for DCS-specific concepts (namespace types, Harbor, tenancy, networking): blurbs, doc paths, and where each is taught
+- [Assessment Reference](references/assessment-reference.md) - Examiner step checks throughout and a knowledge check per workshop
+- [Image Manifest Reference](references/image-manifest-reference.md) - Emitting the deduplicated image list across the academy for Harbor mirroring
+
+**Core references:**
+
+- [Workshop Design Principles](references/workshop-design-principles.md) - Guided experience philosophy, the no-manual-typing rule, and guidance on how learners should view, run, and modify code
+- [Workshop YAML Reference](references/workshop-yaml-reference.md) - Complete workshop.yaml structure and options
+- [Images in Workshop Pages](references/images-in-workshop-pages.md) - How to include images using page bundles and static assets
+- [Clickable Actions Reference](references/clickable-actions-reference.md) - Index of all clickable action types, YAML syntax safety guidance, and links to category-specific references in [references/clickable-actions/](references/clickable-actions/)
+- [Workshop Tools Reference](references/workshop-tools-reference.md) - Command-line tools available in the workshop environment, including utilities for JSON/YAML processing, Kubernetes management, container handling, and load testing
+- [Kubernetes Access Reference](references/kubernetes-access-reference.md) - Namespace isolation, session namespace references, and pod security policies for workshops with Kubernetes access
+- [Data Variables Reference](references/data-variables-reference.md) - Complete list of data variables for parameterizing workshop instructions, terminal commands, and workshop definitions
+- [Workshop Dashboard Reference](references/workshop-dashboard-reference.md) - Dashboard layout, single-tab visibility behavior, and patterns for guiding users between tabs in workshop instructions
+- [Workshop Image Reference](references/workshop-image-reference.md) - Container image selection for workshops, including pre-built JDK and Conda images
+- [Java Language Reference](references/java-language-reference.md) - JDK image selection, Maven/Gradle build commands, project layout, and Spring Boot patterns for Java workshops
+- [Python Language Reference](references/python-language-reference.md) - Python version management, uv/pip package installation, project layout, and web framework patterns for Python workshops
+- [Workshop Setup Reference](references/workshop-setup-reference.md) - Setup scripts, environment variables, background services, and terminal customization for the workshop container
+- [Hugo Shortcodes Reference](references/hugo-shortcodes-reference.md) - Admonition callouts (note, warning, danger), pathway conditional rendering, and custom shortcodes for workshop instructions
+- [Session Objects Reference](references/session-objects-reference.md) - Pre-creating Kubernetes resources per session, shared environment objects, request objects, and workshop container resource configuration
+- [Workshop Publishing Reference](references/workshop-publishing-reference.md) - How to add a GitHub Actions workflow for publishing a standalone workshop to GitHub container registry using the Educates publish-workshop GitHub Action. Consult this when a user asks to set up publishing for a workshop, whether during initial creation or when adding it to an existing workshop later.
+- [Local Docker Deployment Reference](references/local-docker-deployment-reference.md) - Restrictions and required changes for workshops that need to run on local Docker as well as in Kubernetes. Consult this when a user asks for local Docker compatibility, whether during initial creation or when retrofitting it onto an existing workshop.
+- [Local Cluster Deployment Reference](references/local-cluster-deployment-reference.md) - How to publish, deploy, update, and delete workshops on a local Educates cluster created with `educates create-cluster`. Consult this when a user asks to publish or deploy a workshop to a local cluster. Do not run these commands automatically — only when the user explicitly asks to manage a workshop in the local cluster.
+
+## Skill Version
+
+When asked about the skill version, read the `VERSION.txt` file and report its contents to the user.
+
+## Getting Help
+
+For more information, visit the Educates documentation: https://docs.educates.dev/
