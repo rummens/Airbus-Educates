@@ -4,12 +4,12 @@ Topic inventory for the DCS Academy, organised by module. Topics are an inventor
 
 ## Module A — Foundations
 
-1. **Containers & images** — what a container is, images, the OCI model (upstream).
-2. **Kubernetes essentials** — Pods, Deployments, Services, config/secrets (upstream).
-3. **DCS namespace types** — prod vs dev, differences, promotion (DCS-specific).
-4. **DCS registry (Harbor)** — pull/push, projects, robot accounts, scan gates (DCS-specific).
-5. **Tenancy & access** — onboarding, SSO/OAuth login, RBAC, quotas, self-service (DCS-specific).
-6. **Networking on DCS** — Routes, DNS naming, egress restrictions (DCS-specific).
+1. **Containers & images** — what a container is, images, the OCI model (upstream). DCS framing: containers vs VMs, the Airbus OpenShift journey.
+2. **Kubernetes essentials** — Pods, Deployments, Services, config/secrets (upstream). Aligns to the DCS "Kubernetes Fundamentals" 4-layer model.
+3. **NaaS & namespace lifecycle** — Namespace as a Service; DEV vs PROD lifecycle, differences, promotion; shared vs dedicated clusters (DCS-specific).
+4. **DCS registry (Harbor)** — catalogs (DCS / Allowed External / Proxy-Cached), robot accounts, GitOps-managed repos, Helm charts, mirroring via ITSM, scan gates (DCS-specific).
+5. **Tenancy & access** — Namespace→Project→Tenant model, onboarding, SSO login, RBAC, Network Policy isolation, quotas (Basic/Customized) + ITSM increase, egress IPs (DCS-specific).
+6. **Networking on DCS** — Service→Route→External Load Balancer, DNS naming, Network Policies, egress restrictions (DCS-specific).
 
 ## Module B — Developer
 
@@ -21,23 +21,24 @@ Topic inventory for the DCS Academy, organised by module. Topics are an inventor
 
 ## Module C — Security & Compliance
 
-12. **Image scanning & Harbor gates** — vulnerability scanning, gate policies.
+12. **Image scanning & Harbor gates** — vulnerability vs compliance scanning, per-image/project/global scans, gate policies, reading reports, remediation.
 13. **Pod security / SCC** — restricted policy, arbitrary UID, when baseline is needed.
 14. **Secrets management** — good practice, avoiding secrets in images/logs.
-15. **Supply chain & provenance** — signing, trusted sources, air-gapped supply.
-16. **EU data-residency & compliance** — data locality, compliance workflows on DCS.
+15. **Supply chain & provenance** — catalogs, allowed external registries, mirroring via ITSM, trusted sources, air-gapped supply.
+16. **Governance, data classification & residency** — Data Classification Matrix (multi-national, e.g. DE/ES), Responsibility Matrix (RACI), Security Exception Process, Terms & Conditions (image/registry policies), compliance workflows on DCS.
 
 ## Module D — Architect / Onboarding
 
-17. **DCS service catalog** — what DCS offers and when to use each capability.
-18. **Tenancy / landing-zone design** — structuring projects, quotas, environments.
-19. **Reference architectures / golden paths** — recommended patterns for tenant apps.
+17. **DCS service catalog & capabilities** — the DCS Services Overview (mission, service catalog, core capabilities, deployment locations); why Red Hat OpenShift (strategic rationale).
+18. **Tenancy / landing-zone design** — structuring tenants/projects/namespaces, shared vs dedicated clusters, quotas, DEV/PROD environments.
+19. **Costing & recharging** — resource tiers, shared vs dedicated cost model, capacity planning, the cost calculator.
+20. **Reference architectures / golden paths** — recommended patterns for tenant apps.
 
 ## Module E — Observability
 
-20. **Metrics & dashboards** — Prometheus/Thanos, Grafana for tenant apps.
-21. **Logs** — accessing and querying application logs.
-22. **Alerts** — defining and routing alerts for tenant apps.
+21. **Metrics & dashboards** — Prometheus/Thanos, Grafana for tenant apps.
+22. **Logs** — accessing and querying application logs.
+23. **Alerts** — defining and routing alerts for tenant apps.
 
 ## Notes on Topic Selection
 

@@ -9,7 +9,7 @@ Observability for tenant applications on DCS. Cross-track: relevant to both Deve
 ### Workshop E01: Metrics & Dashboards
 
 **Directory name:** `lab-e01-metrics-dashboards`
-**Covers ideas:** 20
+**Covers ideas:** 21
 **Type:** Elective (cross-track)
 **Prerequisites:** Module A + a deployed app (B01 or equivalent)
 **Learning objectives:** Find application metrics; read a Grafana dashboard; understand the Prometheus/Thanos path.
@@ -20,7 +20,7 @@ Observability for tenant applications on DCS. Cross-track: relevant to both Deve
 ### Workshop E02: Logs
 
 **Directory name:** `lab-e02-logs`
-**Covers ideas:** 21
+**Covers ideas:** 22
 **Type:** Elective (cross-track)
 **Prerequisites:** E01 (or Module A + deployed app)
 **Learning objectives:** Access and query application logs on DCS.
@@ -30,7 +30,7 @@ Observability for tenant applications on DCS. Cross-track: relevant to both Deve
 ### Workshop E03: Alerts
 
 **Directory name:** `lab-e03-alerts`
-**Covers ideas:** 22
+**Covers ideas:** 23
 **Type:** Elective (cross-track)
 **Prerequisites:** E01
 **Learning objectives:** Understand how alerts are defined and routed for tenant apps.

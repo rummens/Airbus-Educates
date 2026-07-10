@@ -26,6 +26,8 @@ Foundations assumes no prior container knowledge and brings everyone to a shared
 - **Docs portal** (`dcs_docs_base_url`): placeholder `https://docs.example.dcs` until confirmed
 - **Base images:** `dcs-workshop-base`, `dcs-tools`
 
+**Platform vocabulary** (from customer docs — use consistently): Namespace as a Service (NaaS); DEV/PROD namespace lifecycle; Namespace→Project→Tenant; shared vs dedicated managed clusters; Harbor catalogs (DCS / Allowed External / Proxy-Cached); robot accounts; image mirroring and quota increases via ITSM requests; Network Policies for isolation. Detailed definitions live in the authoring skill's DCS concepts reference.
+
 ## Delivery Platform
 
 Delivered on the Educates training platform, targeting **OpenShift**. Each workshop is a self-contained, interactive, browser-based environment with an embedded terminal, VS Code editor, and step-by-step instructions. Commands target OpenShift via `oc`. The platform is **fully air-gapped** — all images come from Harbor and external sites are unreachable from within a session.

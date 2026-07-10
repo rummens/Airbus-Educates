@@ -146,7 +146,7 @@ spec:
 
 - Set `metadata.name` to the workshop name
 - Set `spec.title` and `spec.description` from gathered details
-- Set `spec.duration` to estimated completion time (e.g., `15m`, `30m`, `1h`)
+- Set `spec.duration` to estimated completion time (e.g., `15m`, `30m`, `1h`). **Target 20–60 minutes per workshop** — the sweet spot peer platforms (Red Hat, Killercoda) use for discrete, focused labs. If a workshop is trending past ~60 minutes or covers more than one clear outcome, split it into two rather than shipping one long lab.
 - Set `spec.difficulty` to one of: `beginner`, `intermediate`, `advanced`, `extreme`
 - Always include terminal with `enabled: true` and `layout: split`
 - Enable only the additional session applications the workshop requires
@@ -315,6 +315,7 @@ Content for the second section...
 - Begin immediately with an introductory paragraph after the frontmatter
 - Use level 2 headings (`##`) and below for any additional sections
 - **Use admonition shortcodes** to highlight important information: `{{< note >}}` for tips, `{{< warning >}}` for cautions, and `{{< danger >}}` for critical warnings. See [references/hugo-shortcodes-reference.md](references/hugo-shortcodes-reference.md) for syntax and usage guidance.
+- **Add an experience note before any long-running step.** When a step takes noticeable time (a deployment rolling out, an image pull, a build), precede it with a `{{< note >}}` telling the learner it may take a moment and what "done" looks like — otherwise they think the workshop hung. Pair such steps with a polling examiner check (`retries: .INF`).
 - **Link every concept to its docs (house standard).** The first mention of any concept, tool, or resource type on a page must be a Markdown link to official upstream documentation. Do not re-link on repeat mentions. See [references/documentation-links-reference.md](references/documentation-links-reference.md).
 - **Use `oc`, not `kubectl` (house standard).** All commands target OpenShift via `oc`. See [references/openshift-reference.md](references/openshift-reference.md).
 - **Never hardcode infrastructure or product values (house standard).** Registry hosts, domains, route hosts, namespaces, versions, and the product name come from variables — `{{< param ... >}}` for content. See [references/workshop-variables-reference.md](references/workshop-variables-reference.md).
@@ -418,7 +419,9 @@ After generating workshop instruction pages, verify the following:
 - [ ] Every concept links on first mention: standard constructs → upstream docs, DCS-specific concepts → `{{< param dcs_docs_base_url >}}` with an inline blurb (see [references/documentation-links-reference.md](references/documentation-links-reference.md), [references/dcs-concepts-reference.md](references/dcs-concepts-reference.md))
 - [ ] All commands use `oc`, never `kubectl`; manual Routes use `app-{{< param session_hostname >}}` (see [references/openshift-reference.md](references/openshift-reference.md))
 - [ ] Every image reference uses `{{< param dcs_registry >}}` or `$(image_repository)` — no external registries (see [references/air-gapped-images-reference.md](references/air-gapped-images-reference.md))
-- [ ] **Every command** has a paired `examiner:execute-test` (automated-pipeline coverage — no unverified commands); workshop ends with a Check Your Understanding section (see [references/assessment-reference.md](references/assessment-reference.md))
+- [ ] **Every command** has a paired `examiner:execute-test` (automated-pipeline coverage — no unverified commands); checks emit diagnostic failure messages; workshop ends with a Check Your Understanding section (see [references/assessment-reference.md](references/assessment-reference.md))
+- [ ] Long-running steps are preceded by an experience note and paired with a polling check
+- [ ] Workshop duration is ~20–60 min; longer/multi-outcome workshops are split
 - [ ] No hardcoded registry hosts, domains, route hosts, namespaces, or versions in content — variables are used throughout
 
 ### 12. Update Planning Documents (Course Workshops Only)

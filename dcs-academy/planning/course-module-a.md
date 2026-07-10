@@ -11,6 +11,7 @@ Each entry lists: **Covers ideas** (topic numbers from `course-topics.md`), **Ty
 ### Workshop A01: What is DCS?
 
 **Directory name:** `lab-a01-what-is-dcs`
+**Detailed plan:** [workshop-plans/lab-a01-what-is-dcs.md](workshop-plans/lab-a01-what-is-dcs.md)
 **Covers ideas:** 1
 **Type:** Core
 **Prerequisites:** None
@@ -22,6 +23,7 @@ Each entry lists: **Covers ideas** (topic numbers from `course-topics.md`), **Ty
 ### Workshop A02: Kubernetes Essentials on DCS
 
 **Directory name:** `lab-a02-kubernetes-essentials`
+**Detailed plan:** [workshop-plans/lab-a02-kubernetes-essentials.md](workshop-plans/lab-a02-kubernetes-essentials.md)
 **Covers ideas:** 2
 **Type:** Core
 **Prerequisites:** A01
@@ -33,6 +35,7 @@ Each entry lists: **Covers ideas** (topic numbers from `course-topics.md`), **Ty
 ### Workshop A03: Namespaces & the Prod/Dev Model
 
 **Directory name:** `lab-a03-namespace-model`
+**Detailed plan:** [workshop-plans/lab-a03-namespace-model.md](workshop-plans/lab-a03-namespace-model.md)
 **Covers ideas:** 3
 **Type:** Core
 **Prerequisites:** A02
@@ -45,6 +48,7 @@ Each entry lists: **Covers ideas** (topic numbers from `course-topics.md`), **Ty
 ### Workshop A04: Working with Harbor
 
 **Directory name:** `lab-a04-harbor-registry`
+**Detailed plan:** [workshop-plans/lab-a04-harbor-registry.md](workshop-plans/lab-a04-harbor-registry.md)
 **Covers ideas:** 4
 **Type:** Core
 **Prerequisites:** A02
@@ -57,6 +61,7 @@ Each entry lists: **Covers ideas** (topic numbers from `course-topics.md`), **Ty
 ### Workshop A05: Access & Tenancy
 
 **Directory name:** `lab-a05-access-tenancy`
+**Detailed plan:** [workshop-plans/lab-a05-access-tenancy.md](workshop-plans/lab-a05-access-tenancy.md)
 **Covers ideas:** 5
 **Type:** Core
 **Prerequisites:** A01
@@ -68,6 +73,7 @@ Each entry lists: **Covers ideas** (topic numbers from `course-topics.md`), **Ty
 ### Workshop A06: Networking & Exposing Apps
 
 **Directory name:** `lab-a06-networking`
+**Detailed plan:** [workshop-plans/lab-a06-networking.md](workshop-plans/lab-a06-networking.md)
 **Covers ideas:** 6
 **Type:** Core
 **Prerequisites:** A02

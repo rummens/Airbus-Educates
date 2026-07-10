@@ -17,6 +17,18 @@ This applies to **all** image references: the workshop container image, sample a
 
 Never write a bare image like `nginx:latest` or `python:3.12` in any manifest or command — resolve it to its Harbor-mirrored path via `{{< param dcs_registry >}}`.
 
+## The DCS registry model (catalogs & mirroring)
+
+Images do not arrive in Harbor by magic — DCS has a defined model, and workshops should reflect it (see [dcs-concepts-reference.md](dcs-concepts-reference.md)):
+
+- **DCS Catalogs** — curated image sets provided by the platform.
+- **Allowed External Registries** — a permitted set of upstreams.
+- **Proxy-Cached Catalog** — a caching proxy for permitted upstream images. **Not usable from PROD namespaces** — a workshop that pulls via the proxy cache must do so from a DEV-type namespace, or note the restriction.
+- **Image mirroring** — bringing an external image into DCS Harbor (External→DCS Harbor) or copying between DCS Harbor projects (DCS Harbor→DCS Harbor) is requested via an **ITSM ticket**, not done ad hoc. When a workshop conceptually needs a new upstream image, the real-world step is "request a mirror"; in the workshop, the image is already mirrored — point at the ITSM process via docs rather than having the learner mirror live.
+- **Robot accounts** — pushes/pulls for automation use a Harbor **robot account**, not a personal login. Workshops that push (e.g. Foundations A04) use robot-account credentials.
+- **Helm charts** — Harbor also stores Helm charts; the same catalog/registry rules apply.
+- **GitOps** — repo creation and permission management are done "the GitOps way"; a workshop that needs a repo models the request/activation rather than clicking in a UI.
+
 ## Workshop container base images
 
 DCS academy workshops use one of **two** base images, both mirrored in Harbor and both extending a common base:

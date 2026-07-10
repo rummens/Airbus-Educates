@@ -32,6 +32,19 @@ Curated external documentation for the DCS Academy subject matter. Consult this 
 
 The blurbs and teaching notes for these live in the authoring skill's `dcs-concepts-reference`.
 
+## Training curriculum references (design inspiration)
+
+Used to shape the Foundations sequence. Proven ordering: intro/console → CLI & API health → run/troubleshoot pods → deploy managed & networked apps → config & storage → reliability → updates.
+
+| Source | URL |
+|---|---|
+| Red Hat DO180 (OpenShift Administration I) outline | https://www.redhat.com/en/services/training/red-hat-openshift-administration-i-operating-a-production-cluster |
+| Coursera — Fundamentals of Containers, Kubernetes & OpenShift (developers) | https://www.coursera.org/learn/fundamentals-of-red-hat-openshift-for-developers |
+| Red Hat learn.openshift.com — Foundations of OpenShift | https://learn.openshift.com/introduction/deploying-images/ |
+| Red Hat interactive labs | https://www.redhat.com/en/interactive-labs/openshift |
+| Instruqt lab structure & tasks (authoring patterns) | https://docs.labs.instruqt.com/configuration/lab-structure/ |
+| Skillable — building successful hands-on labs | https://docs.skillable.com/docs/building-successful-hand-on-labs |
+
 ## Curation Notes
 
 - Registry, docs portal URL, and Harbor project are **placeholders** — replace with confirmed values when available. No workshop rebuild is needed to re-point them (they are params).

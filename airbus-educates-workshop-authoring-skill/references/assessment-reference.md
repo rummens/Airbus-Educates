@@ -44,8 +44,62 @@ delay: 1
 **Guidance:**
 - Write checks against DCS/OpenShift reality using `oc` inside the test script.
 - Keep tests idempotent and re-runnable — a learner may click a check multiple times, and examiner checks must stay reliable across session resets (see reset/idempotency guidance in your workshop plan).
-- Do not gate trivial or purely observational steps; reserve checks for outcomes that matter.
+- Every command is verified (see the every-command rule above). For a purely observational command, assert the observable state it was meant to reveal exists — do not skip it.
 - A test script counts as a runtime image dependency only if it pulls one — keep tests to shell + `oc`.
+
+**Emit a diagnostic message on failure.** A check that just exits `1` is useless to a stuck learner and to the CI pipeline reading logs. On failure, print *what* was expected and *what* was found, then exit non-zero:
+
+```bash
+#!/bin/bash
+# workshop/examiner/tests/verify-app-running
+name="${1:-sample-app}"
+if ! oc get deployment "$name" >/dev/null 2>&1; then
+  echo "Deployment '$name' not found in $(oc project -q). Did the apply step run?" >&2
+  exit 1
+fi
+ready=$(oc get deployment "$name" -o jsonpath='{.status.readyReplicas}')
+if [ "${ready:-0}" -lt 1 ]; then
+  echo "Deployment '$name' exists but has 0 ready replicas — check pod events with 'oc get events'." >&2
+  exit 1
+fi
+echo "OK: deployment '$name' is ready."
+
+## Hints and revealing solutions (optional)
+
+Guided workshops rarely leave a learner stuck, but for steps that ask the learner to *figure something out* (a diagnose-and-fix step, an end-of-workshop challenge), offer graduated help — the pattern peer platforms (Instruqt `solve.sh`) use:
+
+- **Hint** — a collapsible nudge that points at the approach without giving the answer:
+
+  ```markdown
+  {{< note >}}
+  **Hint:** the pod is crash-looping. Check its recent events and logs before changing anything.
+  {{< /note >}}
+  ```
+
+- **Reveal solution** — for a stuck learner, a clickable action that applies the correct state so they can continue rather than abandon the workshop. Put it after the hint, clearly labelled as the answer:
+
+  ````markdown
+  If you are stuck, apply the fix directly:
+
+  ```terminal:execute
+  command: oc set resources deployment/sample-app --limits=memory=128Mi
+  ```
+  ````
+
+Use sparingly and only where the learner is expected to problem-solve — for ordinary guided steps the clickable action already *is* the solution.
+
+## End-of-workshop challenge (optional, recommended)
+
+Beyond click-through steps, a workshop can end with **one unguided challenge** — a task stated as an outcome with no step-by-step instructions, validated by the examiner. This tests whether the learner can apply what they practised, not just follow along, and it gives the automated pipeline a higher-order assertion.
+
+```markdown
+## Challenge
+
+Without step-by-step guidance: scale the sample app to 3 replicas, and make sure it
+stays within the namespace quota. Then run the check below.
+```
+
+Pair it with an `examiner:execute-test` that validates the outcome, and offer a hint + reveal-solution (above) for learners who need them. Keep it short — one challenge, tied to the workshop's main objective.
 
 ## Knowledge check per workshop
 
@@ -73,6 +127,8 @@ Keep questions tied to the stated learning objectives — one question per major
 - [ ] **Every command has an `examiner:execute-test`** asserting its outcome — no command is unverified (automated-pipeline requirement)
 - [ ] Atomic command sequences share one test; distinct observable effects each get their own
 - [ ] Examiner tests use `oc`, are idempotent, headless-runnable, and poll for async outcomes
+- [ ] Every check emits a diagnostic message on failure (expected vs found), not a bare exit 1
 - [ ] Test names/order let a CI pipeline run the whole workshop end-to-end
-- [ ] Workshop ends with a **Check Your Understanding** section, one question per major learning objective
+- [ ] Diagnose/challenge steps offer a hint and a reveal-solution; ordinary guided steps need neither
+- [ ] Workshop ends with a **Check Your Understanding** section, one question per major learning objective (optionally an unguided challenge tied to the main objective)
 - [ ] Conceptual answers link DCS concepts to `dcs_docs_base_url` and standard constructs to upstream docs
