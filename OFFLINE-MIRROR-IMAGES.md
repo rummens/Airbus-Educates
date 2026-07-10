@@ -95,6 +95,32 @@ redis:8.6.2
 
 ## Harbour Config
 
+This is a known limitation when replicating from the GitHub Container Registry (GHCR).
+
+### Why it fails
+
+When you use a wildcard like `educates/*` in a Harbor Pull Replication rule, Harbor is forced to call the upstream registry's standard OCI catalog endpoint (`/v2/_catalog`) to discover what repositories exist under that path.
+
+**GHCR does not support or heavily restricts the `_catalog` endpoint.** Because Harbor cannot list the directories, the replication job immediately fails with a `401 Unauthorized` or `404 Not Found` error.
+
+---
+
+### 0. GHCR — (educates images)
+
+```text
+educates/{educates-installer,educates-session-manager,educates-training-portal,educates-docker-registry,educates-pause-container,educates-base-environment,educates-jdk8-environment,educates-jdk11-environment,educates-jdk17-environment,educates-jdk21-environment,educates-conda-environment,educates-secrets-manager,educates-tunnel-manager,educates-image-cache,educates-assets-server,educates-lookup-service,educates-node-ca-injector,lab-k8s-fundamentals-files,lab-k8s-fundamentals-frontend}
+
+```
+
+#### 2. Tag Filter
+
+Since this explicit list now includes your workshop content images (`8.1` and `3.0`), update your **Tag** filter field to look for all three target tags, separated by a comma:
+
+```text
+3.7.2, 8.1, 3.0
+
+```
+
 ### 1. GHCR — Loft-sh (vcluster images)
 
 * **Source Registry:** `ghcr-endpoint`
