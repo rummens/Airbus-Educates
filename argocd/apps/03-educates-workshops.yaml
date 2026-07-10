@@ -24,6 +24,13 @@ spec:
     # Static release ns for the portal/workshop CRs + oauth-proxy (dcs-).
     # Dynamic per-session namespaces are dcst-* (from the portal name).
     namespace: dcs-educates-workshops
+  # Educates' Workshop CRD defaults spec.workshop.files[].path to "." on the
+  # stored object; git doesn't set it, so ArgoCD reports OutOfSync. Ignore it.
+  ignoreDifferences:
+    - group: training.educates.dev
+      kind: Workshop
+      jqPathExpressions:
+        - '.spec.workshop.files[].path'
   syncPolicy:
     automated:
       prune: true

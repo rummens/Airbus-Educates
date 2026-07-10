@@ -79,6 +79,9 @@ auth:
   tlsCertificateRef:
     name: globomantics-ingress-cert
     namespace: openshift-ingress
+  # OpenShift router timeout for the academy route. Session start (with vcluster)
+  # can exceed the 30s default → 504. Raise it.
+  routeTimeout: "120s"
   # NetworkPolicy that restricts the portal pod to the oauth-proxy, blocking the
   # Educates default portal route (the auth bypass). Default on for the ArgoCD
   # target cluster. NOTE: ineffective when the ingress router runs on HostNetwork

@@ -78,6 +78,11 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "workshops.labels" . | nindent 4 }}
+  annotations:
+    # Portal session-start (esp. with vcluster) can take longer than the router's
+    # 30s default; raise the timeout so opening a still-provisioning workshop shows
+    # progress instead of a 504.
+    haproxy.router.openshift.io/timeout: {{ .Values.auth.routeTimeout | quote }}
 spec:
   host: {{ $authHost }}
   to:
