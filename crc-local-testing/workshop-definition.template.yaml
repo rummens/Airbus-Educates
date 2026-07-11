@@ -1,0 +1,62 @@
+# Standalone Workshop CR template — apply this to define a NEW workshop directly
+# on the cluster (fastest for local CRC testing; no portal, no chart edit).
+# Replace my-workshop / title / content source, then:
+#   oc --context crc-admin apply -f workshop-definition.yaml
+#
+# Content source: pick ONE of `git` or `image` under workshop.files[0]
+# (see the two variants below; delete the one you don't use).
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: my-workshop
+spec:
+  title: "My Workshop"
+  description: "One-line summary shown in the catalog."
+  workshop:
+    files:
+      # --- variant A: content from a git repo ---
+      - git:
+          url: https://github.com/ORG/my-workshop
+          ref: origin/main
+        includePaths: ["/workshop/**", "/templates/**", "/README.md"]
+        path: .
+      # --- variant B: content baked into an OCI image (source.type=image) ---
+      # - image:
+      #     url: ghcr.io/ORG/my-workshop-files:1.0
+      #   includePaths: ["/workshop/**"]
+      #   path: .
+  session:
+    namespaces:
+      budget: large            # small|medium|large — vcluster needs large
+      security:
+        policy: restricted     # restricted|baseline|privileged
+    applications:
+      terminal:  { enabled: true, layout: split }
+      editor:    { enabled: true }
+      console:   { enabled: true }   # embedded OpenShift/k8s console tab
+      slides:    { enabled: true }
+      vcluster:  { enabled: true }   # per-session isolated cluster (loft-sh)
+    # vcluster on OpenShift needs the -vc namespace granted the privileged SCC
+    # (Educates hardcodes it to baseline; coredns needs NET_BIND_SERVICE).
+    # Keep this block whenever vcluster.enabled is true:
+    objects:
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: RoleBinding
+        metadata:
+          name: educates-vcluster-scc
+          namespace: $(vcluster_namespace)
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: educates-privileged-scc
+        subjects:
+          - apiGroup: rbac.authorization.k8s.io
+            kind: Group
+            name: system:serviceaccounts:$(vcluster_namespace)
+    # --- EXPOSE extra web apps at their own hostname (optional) ---
+    # Each entry auto-creates an edge route <session>-<name>.<ingressDomain>
+    # and a dashboard tab. Host MUST embed the session name (kyverno enforces it).
+    # ingresses:
+    #   - name: app
+    #     port: 8080
+    #     # protocol: http   # backend protocol; route is still edge-TLS

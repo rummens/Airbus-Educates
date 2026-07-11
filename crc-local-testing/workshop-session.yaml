@@ -1,0 +1,14 @@
+# Portal-less WorkshopSession. Access URL = https://<env>-<id>.<ingressDomain>
+# Basic-auth creds = spec.session.username / spec.session.password below.
+# For more sessions: copy this file, bump metadata.name AND session.id.
+apiVersion: training.educates.dev/v1beta1
+kind: WorkshopSession
+metadata:
+  name: lab-k8s-fundamentals-w01
+spec:
+  environment:
+    name: lab-k8s-fundamentals   # matches the WorkshopEnvironment
+  session:
+    id: "01"                     # URL becomes <env>-<id>.<domain>
+    username: educates
+    password: educates

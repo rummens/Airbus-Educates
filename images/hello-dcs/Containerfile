@@ -11,5 +11,6 @@ LABEL org.opencontainers.image.source="https://github.com/rummens/Airbus-Educate
 # The UBI9 nginx image serves /opt/app-root/src on port 8080 by default.
 COPY index.html /opt/app-root/src/index.html
 
-# Default CMD from the base image starts nginx serving the doc root on 8080.
-CMD ["nginx", "-g", "daemon off;"]
+# Emit startup output to stdout so `oc logs` shows the app starting (the base
+# nginx image is otherwise silent on stdout — needed for the logging exercise).
+CMD ["sh", "-c", "echo \"[hello-dcs] starting; serving Hello DCS on :8080\"; exec nginx -g \"daemon off;\""]

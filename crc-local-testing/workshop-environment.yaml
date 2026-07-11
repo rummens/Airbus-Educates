@@ -1,0 +1,10 @@
+# Portal-less WorkshopEnvironment for local CRC testing.
+# session-manager reconciles this directly — no TrainingPortal needed
+# (the portal image SIGILLs on CRC Apple-Silicon; the session pods do not).
+apiVersion: training.educates.dev/v1beta1
+kind: WorkshopEnvironment
+metadata:
+  name: lab-k8s-fundamentals
+spec:
+  workshop:
+    name: lab-k8s-fundamentals   # must match an existing Workshop CR
