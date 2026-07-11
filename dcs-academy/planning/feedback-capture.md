@@ -4,7 +4,8 @@
 
 ## As built (2026-07)
 
-- **Collector service** `feedback-collector` (`images/feedback-collector/`): stdlib-only Python + **SQLite on a PVC**. Endpoints: `/form` (HTML form), `POST /feedback`, `POST /analytics` (Educates webhook sink), `/admin` (token-gated report: per-course + aggregate + comments), `/metrics` (Prometheus), `/healthz`. CNPG swap seam via `DATABASE_URL` (SQLite is v1).
+- **Collector service** `feedback-collector` (`images/feedback-collector/`): stdlib-only Python + **SQLite on a PVC**. Endpoints: `/form` (HTML form), `POST /feedback`, `POST /analytics` (Educates webhook sink), `/admin` (token-gated report: per-course + aggregate + comments; German date-time, long comments truncated with click-to-expand), `/metrics` (Prometheus), `/healthz`. CNPG swap seam via `DATABASE_URL` (SQLite is v1).
+- **Backup (CSV/Excel) — UI + API**, all token-gated: `GET /export.csv` (Excel-compatible), `GET /export.json`, `POST /import` (raw CSV body for automation, or the admin file-upload form; `?replace=true` to wipe-and-restore). Automated backup example: `curl -H "Authorization: Bearer $TOKEN" https://feedback.<domain>/export.csv > backup.csv`.
 - **Both Likert + comments stored**: the form captures a 1–5 rating, a 1–5 clarity score, and a comment — all in one table. One-click ratings (analytics events) are also stored.
 - **Chart**: `dcs-academy-workshops/templates/60-feedback-collector.yaml` (PVC, Deployment `Recreate`+RWO, Service, edge Route `feedback.<ingressDomain>`, admin-token Secret) + `61-feedback-monitoring.yaml` (ServiceMonitor). Toggle/config under `values.feedback`. TrainingPortal `spec.analytics.webhook.url` wired to the collector.
 - **Reporting**: `/admin` HTML view **and** a Grafana dashboard (`dcs-academy-platform/dashboards/feedback.json`) — avg rating/clarity by course, response/comment counts, aggregate, responses-over-time — via the existing Thanos datasource.

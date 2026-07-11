@@ -9,7 +9,9 @@ COPY app.py /opt/app/app.py
 # Data dir for the SQLite file (mounted PV in-cluster). Group-writable so an
 # arbitrary UID in group 0 can write when no fsGroup is applied.
 USER 0
-RUN mkdir -p /data && chgrp -R 0 /data && chmod -R g=u /data /opt/app
+# tzdata so zoneinfo can render Europe/Berlin timestamps in the admin view.
+RUN pip install --no-cache-dir tzdata \
+ && mkdir -p /data && chgrp -R 0 /data && chmod -R g=u /data /opt/app
 USER 1001
 
 ENV FEEDBACK_DB=/data/feedback.db \

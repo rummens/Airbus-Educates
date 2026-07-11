@@ -23,7 +23,9 @@ stubbed in `_pg` (requires psycopg in the image; not bundled in v1).
 # ponytail: SQLite + stdlib http.server is enough for one small form; swap to
 # CNPG only if concurrency/HA actually demands it (DATABASE_URL is the seam).
 """
+import csv
 import html
+import io
 import json
 import os
 import re
@@ -32,6 +34,14 @@ import sys
 import urllib.parse
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+try:
+    from zoneinfo import ZoneInfo
+    BERLIN = ZoneInfo("Europe/Berlin")          # needs tzdata (in the image)
+except Exception:                                # pragma: no cover - fallback if tz db missing
+    BERLIN = timezone.utc
+
+EXPORT_COLS = ["id", "ts", "workshop", "session", "source", "rating", "clarity", "comment"]
 
 DB_PATH = os.environ.get("FEEDBACK_DB", "/data/feedback.db")
 DATABASE_URL = os.environ.get("DATABASE_URL", "")          # set to postgres://... to swap backends
@@ -123,10 +133,65 @@ def comments(limit=200):
         ).fetchall()
 
 
+# --- export / import (backup) ------------------------------------------------
+
+def export_rows():
+    with _db() as c:
+        return [dict(r) for r in c.execute(
+            "SELECT id,ts,workshop,session,source,rating,clarity,comment "
+            "FROM feedback ORDER BY id").fetchall()]
+
+
+def export_csv():
+    buf = io.StringIO()
+    w = csv.DictWriter(buf, fieldnames=EXPORT_COLS)
+    w.writeheader()
+    for row in export_rows():
+        w.writerow(row)
+    return buf.getvalue()
+
+
+def import_csv(text, replace=False):
+    """Restore rows from a CSV produced by export_csv (Excel-compatible).
+    Preserves original ts/source; `id` is ignored (auto-assigned). Returns count."""
+    rows = list(csv.DictReader(io.StringIO(text)))
+    with _db() as c:
+        if replace:
+            c.execute("DELETE FROM feedback")
+        n = 0
+        for r in rows:
+            ts = (r.get("ts") or datetime.now(timezone.utc).isoformat(timespec="seconds")).strip()
+            workshop = (r.get("workshop") or "unknown").strip()[:200]
+            session = ((r.get("session") or "").strip() or None)
+            source = (r.get("source") or "import").strip()[:20]
+            comment = ((r.get("comment") or "").strip() or None)
+            rating = _clamp_score(r.get("rating"))
+            clarity = _clamp_score(r.get("clarity"))
+            c.execute(
+                "INSERT INTO feedback(ts,workshop,session,source,rating,clarity,comment) "
+                "VALUES(?,?,?,?,?,?,?)",
+                (ts, workshop, session, source, rating, clarity, comment))
+            n += 1
+    return n
+
+
 # --- rendering ---------------------------------------------------------------
 
 def _esc(s):
     return html.escape(str(s if s is not None else ""))
+
+
+def fmt_de(ts):
+    """UTC ISO timestamp -> German date-time (TT.MM.JJJJ HH:MM, Europe/Berlin)."""
+    if not ts:
+        return ""
+    try:
+        dt = datetime.fromisoformat(ts)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(BERLIN).strftime("%d.%m.%Y %H:%M")
+    except (ValueError, TypeError):
+        return _esc(ts)
 
 
 def form_page(workshop, session):
@@ -167,11 +232,20 @@ def thanks_page():
             "<h1>Thank you!</h1><p>Your feedback was recorded.</p></body>")
 
 
-def admin_page():
+def admin_page(token=""):
     rows, overall = aggregates()
+    tq = urllib.parse.quote(token)
 
     def fmt(v):
         return f"{v:.2f}" if v is not None else "—"
+
+    def cell_comment(text):
+        full = text or ""
+        short = full if len(full) <= 80 else full[:80].rstrip() + "…"
+        # full text lives in data-full; JS opens a modal on click.
+        return (f'<td class="cmt" data-full="{_esc(full)}" onclick="showComment(this)" '
+                f'title="Click to show full comment">{_esc(short)}</td>')
+
     trs = "".join(
         f"<tr><td>{_esc(r['workshop'])}</td><td>{r['n']}</td>"
         f"<td>{fmt(r['avg_rating'])} ({r['n_rating']})</td>"
@@ -180,8 +254,8 @@ def admin_page():
         for r in rows
     ) or "<tr><td colspan=5 class=muted>No feedback yet.</td></tr>"
     crows = "".join(
-        f"<tr><td>{_esc(c['ts'])}</td><td>{_esc(c['workshop'])}</td>"
-        f"<td>{_esc(c['rating'])}</td><td>{_esc(c['comment'])}</td></tr>"
+        f"<tr><td>{fmt_de(c['ts'])}</td><td>{_esc(c['workshop'])}</td>"
+        f"<td>{_esc(c['rating'])}</td>{cell_comment(c['comment'])}</tr>"
         for c in comments()
     ) or "<tr><td colspan=4 class=muted>No comments yet.</td></tr>"
     return f"""<!doctype html><html><head><meta charset="utf-8">
@@ -190,19 +264,44 @@ def admin_page():
 <style>
  body{{font-family:system-ui,sans-serif;max-width:960px;margin:2rem auto;padding:0 1rem;color:#1a2b45}}
  table{{border-collapse:collapse;width:100%;margin:1rem 0}} th,td{{border:1px solid #cbd5e0;padding:.4rem .6rem;text-align:left;vertical-align:top}}
- th{{background:#f0f4fa}} .muted{{color:#5a6b85}} h1{{font-size:1.4rem}}
- @media (prefers-color-scheme:dark){{body{{color:#e8eef7;background:#0f1729}}th,td{{border-color:#33445c}}th{{background:#18233a}}}}
+ th{{background:#f0f4fa}} .muted{{color:#5a6b85}} h1{{font-size:1.4rem}} h2{{font-size:1.1rem;margin-top:1.6rem}}
+ td.cmt{{cursor:pointer;max-width:32rem}} td.cmt:hover{{background:#eef4ff}}
+ .tools{{margin:1rem 0;padding:.8rem 1rem;border:1px solid #cbd5e0;border-radius:8px;background:#f7fafd}}
+ .tools a,.tools button{{margin-right:1rem}}
+ button{{background:#2b6cb0;color:#fff;border:0;border-radius:6px;padding:.4rem .9rem;cursor:pointer}}
+ #modal{{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center}}
+ #modal.open{{display:flex}} #modalbox{{background:#fff;color:#1a2b45;max-width:640px;max-height:80vh;overflow:auto;padding:1.5rem;border-radius:10px;white-space:pre-wrap}}
+ @media (prefers-color-scheme:dark){{body{{color:#e8eef7;background:#0f1729}}th,td{{border-color:#33445c}}th{{background:#18233a}}
+  td.cmt:hover{{background:#18233a}}.tools{{background:#14203a;border-color:#33445c}}#modalbox{{background:#18233a;color:#e8eef7}}}}
 </style></head><body>
 <h1>{_esc(PRODUCT)} — feedback</h1>
 <p><strong>Overall:</strong> {overall['n']} responses ·
  avg rating {fmt(overall['avg_rating'])} · avg clarity {fmt(overall['avg_clarity'])} ·
  {overall['n_comment']} comments</p>
+
+<div class="tools">
+ <strong>Backup:</strong>
+ <a href="/export.csv?token={tq}">Download CSV</a>
+ <a href="/export.json?token={tq}">Download JSON</a>
+ <form action="/import?token={tq}" method="POST" enctype="multipart/form-data" style="display:inline">
+   <input type="file" name="file" accept=".csv,text/csv" required>
+   <label><input type="checkbox" name="replace" value="true"> replace all</label>
+   <button type="submit">Import CSV</button>
+ </form>
+</div>
+
 <h2>By course</h2>
 <table><tr><th>Workshop</th><th>Responses</th><th>Avg rating (n)</th><th>Avg clarity (n)</th><th>Comments</th></tr>
 {trs}</table>
 <h2>Comments</h2>
-<table><tr><th>When (UTC)</th><th>Workshop</th><th>Rating</th><th>Comment</th></tr>
+<table><tr><th>When (Europe/Berlin)</th><th>Workshop</th><th>Rating</th><th>Comment</th></tr>
 {crows}</table>
+
+<div id="modal" onclick="this.classList.remove('open')"><div id="modalbox"></div></div>
+<script>
+ function showComment(td){{document.getElementById('modalbox').textContent=td.getAttribute('data-full');
+   document.getElementById('modal').classList.add('open');}}
+</script>
 </body></html>"""
 
 
@@ -255,6 +354,28 @@ def parse_analytics(payload):
 
 # --- HTTP --------------------------------------------------------------------
 
+def _multipart_file(raw, ctype):
+    """Minimal multipart/form-data parser: return (file_text, replace_bool).
+    Enough for one file field ('file') + an optional 'replace' checkbox — avoids
+    the stdlib `cgi` module (removed in Python 3.13)."""
+    m = re.search(r'boundary=(?:"([^"]+)"|([^;]+))', ctype)
+    if not m:
+        return "", False
+    boundary = ("--" + (m.group(1) or m.group(2)).strip()).encode()
+    text, replace = "", False
+    for part in raw.split(boundary):
+        if b"\r\n\r\n" not in part:
+            continue
+        head, _, body = part.partition(b"\r\n\r\n")
+        body = body.rstrip(b"\r\n")
+        disp = head.decode("utf-8", "replace")
+        if 'name="file"' in disp:
+            text = body.decode("utf-8", "replace")
+        elif 'name="replace"' in disp:
+            replace = body.decode().strip().lower() in ("true", "on", "1")
+    return text, replace
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "feedback-collector/1"
 
@@ -282,14 +403,25 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, metrics_text(), "text/plain; version=0.0.4")
         if u.path in ("/form", "/feedback"):
             return self._send(200, form_page(q.get("workshop", [""])[0], q.get("session", [""])[0]))
-        if u.path == "/admin":
+        if u.path in ("/admin", "/export.csv", "/export.json"):
             if not ADMIN_TOKEN:
-                return self._send(503, "admin view disabled: ADMIN_TOKEN is not configured on "
+                return self._send(503, "admin/backup disabled: ADMIN_TOKEN is not configured on "
                                   "the collector (set feedback.adminToken or feedback.existingSecret)",
                                   "text/plain")
             if not self._authed(q):
                 return self._send(401, "unauthorized — append ?token=<ADMIN_TOKEN>", "text/plain")
-            return self._send(200, admin_page())
+            if u.path == "/export.csv":
+                self.send_response(200)
+                self.send_header("Content-Type", "text/csv; charset=utf-8")
+                self.send_header("Content-Disposition", "attachment; filename=feedback-backup.csv")
+                body = export_csv().encode()
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                return self.wfile.write(body)
+            if u.path == "/export.json":
+                return self._send(200, json.dumps(export_rows(), ensure_ascii=False, indent=2),
+                                  "application/json; charset=utf-8")
+            return self._send(200, admin_page(q.get("token", [""])[0]))
         if u.path == "/":
             return self._send(200, f"{PRODUCT} feedback collector. POST /feedback or /analytics.",
                               "text/plain")
@@ -314,6 +446,33 @@ class Handler(BaseHTTPRequestHandler):
             if parsed:
                 insert(*(list(parsed[:2]) + ["analytics"] + list(parsed[2:])))
             return self._send(204, b"")                     # ack every event; store only ratings
+        if u.path == "/import":
+            if not ADMIN_TOKEN:
+                return self._send(503, "import disabled: ADMIN_TOKEN not configured", "text/plain")
+            q = urllib.parse.parse_qs(u.query)
+            if not self._authed(q):
+                return self._send(401, "unauthorized", "text/plain")
+            ctype = self.headers.get("Content-Type", "")
+            replace = q.get("replace", ["false"])[0].lower() == "true"
+            if ctype.startswith("multipart/form-data"):     # admin UI upload
+                text, form_replace = _multipart_file(raw, ctype)
+                replace = replace or form_replace
+            else:                                            # API: raw CSV body
+                text = raw.decode("utf-8", "replace")
+            if not text:
+                return self._send(400, "no CSV data", "text/plain")
+            try:
+                n = import_csv(text, replace=replace)
+            except (csv.Error, ValueError) as e:
+                return self._send(400, f"import failed: {e}", "text/plain")
+            msg = f"imported {n} rows{' (replaced all)' if replace else ''}"
+            # browser form -> redirect back to admin; API -> plain text
+            if ctype.startswith("multipart/form-data"):
+                self.send_response(303)
+                self.send_header("Location", "/admin?token=" + urllib.parse.quote(q.get("token", [""])[0]))
+                self.end_headers()
+                return
+            return self._send(200, msg + "\n", "text/plain")
         return self._send(404, "not found", "text/plain")
 
     def log_message(self, fmt, *args):                      # concise stdout logging
@@ -342,6 +501,21 @@ def selftest():
     assert parse_analytics({"event": {"name": "workshop.rating", "data": {"score": 5}},
                             "workshop": {"name": "lab-a03"}})[0] == "lab-a03"
     assert parse_analytics({"event": {"name": "session.started"}}) is None
+    # german date format
+    assert fmt_de("2026-01-15T09:30:00+00:00") == "15.01.2026 10:30", fmt_de("2026-01-15T09:30:00+00:00")
+    # export -> import round-trip (replace) preserves rows + timestamps
+    csv_text = export_csv()
+    assert "workshop" in csv_text.splitlines()[0]
+    n = import_csv(csv_text, replace=True)
+    assert n == 2, n
+    _, overall2 = aggregates()
+    assert overall2["n"] == 2, overall2["n"]
+    # multipart extraction
+    body = (b"--B\r\nContent-Disposition: form-data; name=\"file\"; filename=\"x.csv\"\r\n\r\n"
+            b"id,ts,workshop,session,source,rating,clarity,comment\r\n--B\r\n"
+            b"Content-Disposition: form-data; name=\"replace\"\r\n\r\ntrue\r\n--B--\r\n")
+    text, rep = _multipart_file(body, "multipart/form-data; boundary=B")
+    assert rep is True and text.startswith("id,ts,workshop"), (rep, text[:20])
     print("selftest OK")
 
 
