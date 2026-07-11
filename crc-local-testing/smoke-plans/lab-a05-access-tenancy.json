@@ -1,0 +1,17 @@
+{
+  "workshop": "lab-a05-access-tenancy",
+  "_note": "Read-mostly RBAC/quota lab. Runs in the session namespace. Educates budget=medium provisions a ResourceQuota + LimitRange, so verify-quota/limitrange pass. Needs the real dcs-workshop-base image (oc whoami / oc project are oc-only; the kubectl shim can't cover them).",
+  "steps": [
+    {"check": "verify-whoami"},
+    {"check": "verify-project"},
+    {"check": "verify-can-i-list"},
+    {"check": "verify-self-can-i", "args": ["create", "deployments", "yes"]},
+    {"check": "verify-isolation", "args": ["get", "pods", "kube-system"]},
+    {"run": "oc apply -f sample-role.yaml"},
+    {"check": "verify-role", "args": ["pod-reader"]},
+    {"check": "verify-rolebinding", "args": ["pod-reader-binding"]},
+    {"check": "verify-quota"},
+    {"check": "verify-limitrange"},
+    {"check": "verify-isolation", "args": ["create", "deployments", "kube-system"]}
+  ]
+}

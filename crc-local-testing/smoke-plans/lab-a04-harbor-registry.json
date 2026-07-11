@@ -1,0 +1,11 @@
+{
+  "workshop": "lab-a04-harbor-registry",
+  "_note": "Pull-only Harbor lab. The catalog-pull step (pod-from-catalog) is testable if the samples/hello-dcs image is in the deploy registry. All skopeo checks REQUIRE skopeo in dcs-workshop-base (not added yet — separate base-image task) AND a real Harbor with a robot account; they are EXPECTED TO FAIL here.",
+  "steps": [
+    {"check": "verify-skopeo"},
+    {"run": "envsubst < pod-from-catalog.yaml | oc apply -f -"},
+    {"check": "verify-pod-running", "args": ["hello-catalog"]},
+    {"check": "verify-image-inspectable", "args": ["$DCS_REGISTRY/samples/hello-dcs:1.0"]},
+    {"check": "verify-tags", "args": ["$DCS_REGISTRY/samples/hello-dcs"]}
+  ]
+}

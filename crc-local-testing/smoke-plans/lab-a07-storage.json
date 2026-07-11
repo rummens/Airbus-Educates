@@ -1,0 +1,12 @@
+{
+  "workshop": "lab-a07-storage",
+  "_note": "Storage lab. CRC has ONLY a default hostpath StorageClass (RWO, WaitForFirstConsumer) and NO dcs-file/dcs-block classes. The workshop's File PVC is ReadWriteMany, which hostpath cannot provision — so the File flow is EXPECTED TO FAIL on CRC. run-steps set DCS_SC_FILE to the CRC default so envsubst produces a valid (if RWO-only) class name; verify-storageclass then passes, but pvc-bound for the RWX claim will not. Full green needs the real DCS storage classes.",
+  "steps": [
+    {"check": "verify-storageclass", "args": ["crc-csi-hostpath-provisioner"]},
+    {"run": "DCS_SC_FILE=crc-csi-hostpath-provisioner envsubst < pvc-file.yaml | oc apply -f - && envsubst < hello-dcs-with-volume.yaml | oc apply -f - && oc rollout status deployment/hello-dcs --timeout=120s || true"},
+    {"check": "verify-pvc-bound", "args": ["hello-dcs-data"]},
+    {"check": "verify-pods-running", "args": ["hello-dcs", "1"]},
+    {"run": "oc exec deployment/hello-dcs -- sh -c 'echo persisted-by-dcs > /data/marker' || true"},
+    {"check": "verify-marker", "args": ["hello-dcs", "/data/marker", "persisted-by-dcs"]}
+  ]
+}
