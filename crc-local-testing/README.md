@@ -237,6 +237,32 @@ oc --context crc-admin delete workshopsession $WS-w$ID
 oc --context crc-admin delete workshopenvironment $WS   # removes all its sessions
 ```
 
+## Routes show "Application is not available" (pods stuck Init:0/1)
+
+If freshly deployed sessions never come up and their dashboard/editor Routes show
+the OpenShift **"Application is not available"** page, check the session pod:
+
+```bash
+oc --context crc-admin -n <workshop> get pods         # stuck at 0/1 Init:0/1 ?
+oc --context crc-admin -n <workshop> get events | grep FailedCreatePodSandBox
+```
+
+If events show `Multus ... error waiting for pod: Unauthorized`, it's **not** the
+workshop — CRC's Multus CNI auth token has gone stale (typically after long
+cluster uptime). Existing pods keep running; only *new* pods fail to get a network
+sandbox, so their Route has no backend. Quick in-cluster fix:
+
+```bash
+oc --context crc-admin -n openshift-multus rollout restart daemonset/multus \
+  deployment/multus-admission-controller
+oc --context crc-admin -n openshift-multus rollout status daemonset/multus
+# then recreate the stuck session pods so they get networking:
+oc --context crc-admin -n <workshop> delete pod --all
+```
+
+Durable fix (regenerates certs + restarts the network stack): `crc stop && crc start`
+(host command — run it yourself).
+
 ## Gotchas
 
 - **Only the portal is broken on CRC arm64** (SIGILL). Everything a session needs
