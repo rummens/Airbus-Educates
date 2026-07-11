@@ -102,6 +102,47 @@ vcluster:
   budget: large
 
 # -----------------------------------------------------------------------------
+# End-of-workshop feedback collector (see dcs-academy/planning/feedback-capture.md).
+# A tiny in-cluster service storing Likert ratings + comments in SQLite on a PV.
+# Sessions reach its form via a public Route (a "Feedback" dashboard tab); the
+# TrainingPortal also POSTs analytics events (one-click ratings) to it. Metrics
+# are scraped by user-workload monitoring for the Grafana feedback dashboard.
+# -----------------------------------------------------------------------------
+feedback:
+  # Master switch. When on: PVC + Deployment + Service + Route + ServiceMonitor,
+  # and the TrainingPortal's analytics webhook is wired to it.
+  enabled: true
+  image:
+    # Registry-overridable via global.registry.host (air-gap mirror).
+    repository: ghcr.io/rummens/feedback-collector
+    tag: dev
+  # Public host for the in-session feedback form → feedback.<ingressDomain>.
+  hostname: feedback
+  route:
+    tls: edge
+  storage:
+    size: 1Gi
+    # Empty = cluster default StorageClass. Set to a DCS File/Block class in prod.
+    className: ""
+  # /admin gate. Provide adminToken (chart makes a Secret) OR existingSecret with
+  # key `admin-token`. Empty = /admin stays locked (401) until one is set.
+  adminToken: ""
+  existingSecret: ""
+  # Future CNPG swap seam: set to postgres://... (needs a psycopg-enabled image).
+  # Empty = SQLite on the PV (v1).
+  databaseUrl: ""
+  serviceMonitor:
+    # Expose /metrics to user-workload monitoring (Thanos → Grafana).
+    enabled: true
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+# -----------------------------------------------------------------------------
 # Workshop catalog. One Workshop CR per entry; all are hosted by the portal.
 # -----------------------------------------------------------------------------
 workshops:

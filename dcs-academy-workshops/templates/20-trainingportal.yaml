@@ -37,6 +37,14 @@ spec:
       defaults:
         reserved: 1
         initial: 0
+  {{- if .Values.feedback.enabled }}
+  # One-click Likert ratings on the feedback page fire report-analytics-event;
+  # Educates POSTs every analytics event to this webhook. The collector stores
+  # rating events and ignores the rest. In-cluster Service DNS (release ns).
+  analytics:
+    webhook:
+      url: "http://feedback-collector.{{ .Release.Namespace }}.svc:8080/analytics"
+  {{- end }}
   workshops:
   {{- range .Values.workshops }}
     - name: {{ .name }}

@@ -95,6 +95,9 @@ the usual remedy. References point at the authoritative source.
 ### F. Introduction page & first-time note
 - **Rule:** `00-workshop-overview.md` exists with product framing via `{{< param product_name >}}`, the **first-time note** linking the environment guide via `{{< param dcs_docs_base_url >}}`, What You'll Learn, Prerequisites, Your Environment, Time & Difficulty; no clickable actions. **Check:** read page 00. **Fix:** add the missing elements. *(introduction-page-reference.)*
 
+### F2. Feedback page
+- **Rule:** a `98-your-feedback.md` page exists and opens the feedback form (a `dashboard:create-dashboard` **Feedback** tab pointing at `feedback.{{< param ingress_domain >}}/form?workshop=<name>&session=...`). **Check:** the page exists; the `workshop=` param matches the workshop `metadata.name`. **Fix:** add the page from the template. *(feedback-page-reference — Minor if missing.)*
+
 ### G. Documentation links (hybrid)
 - **Rule:** first mention of each concept links its docs — standard constructs → upstream; DCS-specific concepts → `{{< param dcs_docs_base_url >}}` with an inline blurb; internal procedures → DCS docs. No standard construct mislinked to the DCS portal, or vice versa. **Check:** scan each page's first mentions. **Fix:** add/repoint links. *(documentation-links-reference, dcs-concepts-reference.)*
 
