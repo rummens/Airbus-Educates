@@ -1,0 +1,9 @@
+#!/bin/bash
+# verify-storageclass <storageclass-name>
+# Passes when the named DCS StorageClass exists in the cluster.
+sc="${1:?storageclass name required}"
+if ! oc get storageclass "$sc" >/dev/null 2>&1; then
+  echo "StorageClass '$sc' not found. List what is available with 'oc get storageclass'. On DCS the File and Block classes are provisioned for you; if this is a bare cluster the placeholder names will not exist." >&2
+  exit 1
+fi
+echo "OK: StorageClass '$sc' exists."

@@ -1,0 +1,12 @@
+#!/bin/bash
+# verify-isolation <verb> <resource> <namespace> — you must NOT be allowed the action in
+# another tenant's/namespace (proves access stops at your boundary).
+verb="${1:?verb required}"
+res="${2:?resource required}"
+ns="${3:?namespace required}"
+got=$(oc auth can-i "$verb" "$res" -n "$ns" 2>/dev/null)
+if [ "$got" != "no" ]; then
+  echo "can-i $verb $res -n $ns returned '${got:-<empty>}', expected 'no' (you should not have access outside your namespaces)." >&2
+  exit 1
+fi
+echo "OK: can-i $verb $res -n $ns = 'no' — isolation holds."

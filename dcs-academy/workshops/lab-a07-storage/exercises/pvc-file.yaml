@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hello-dcs-data
+  labels:
+    app: hello-dcs
+spec:
+  # File storage supports ReadWriteMany — many pods on many nodes can mount it at once.
+  accessModes:
+  - ReadWriteMany
+  # Storage-class name comes from the DCS_SC_FILE env var — never hardcode it.
+  storageClassName: ${DCS_SC_FILE}
+  resources:
+    requests:
+      storage: 1Gi

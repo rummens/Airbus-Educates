@@ -1,0 +1,8 @@
+#!/bin/bash
+# verify-project — a current namespace/project is set.
+ns=$(oc project -q 2>/dev/null)
+if [ -z "$ns" ]; then
+  echo "No current project/namespace is set (oc project -q returned nothing)." >&2
+  exit 1
+fi
+echo "OK: current namespace is '$ns'."

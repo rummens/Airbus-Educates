@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-catalog
+  labels:
+    app: hello-catalog
+spec:
+  containers:
+  - name: hello-catalog
+    # Image pulled from a DCS Harbor catalog via the DCS_REGISTRY env var.
+    image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+    ports:
+    - containerPort: 8080
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi

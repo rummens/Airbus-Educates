@@ -1,0 +1,8 @@
+#!/bin/bash
+# verify-api-resource <grep-pattern> — the CR kind is a known API resource.
+pat="${1:?grep pattern required}"
+if ! oc api-resources 2>/dev/null | grep -q "$pat"; then
+  echo "No API resource matching '$pat'. Is the operator (and its CRDs) installed?" >&2
+  exit 1
+fi
+echo "OK: API resource matching '$pat' is available."

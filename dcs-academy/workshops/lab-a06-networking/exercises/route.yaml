@@ -1,0 +1,15 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  # No explicit host: OpenShift auto-assigns one that includes this namespace, e.g.
+  # hello-dcs-<namespace>.<apps-domain>. On DCS the host must include the session
+  # hostname (Kyverno enforces this) and DCS-managed DNS resolves it — see page 03.
+  to:
+    kind: Service
+    name: hello-dcs
+  port:
+    targetPort: 8080

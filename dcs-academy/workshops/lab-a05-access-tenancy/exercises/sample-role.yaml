@@ -1,0 +1,27 @@
+# A minimal Role + RoleBinding to see RBAC in action within your own namespace.
+#
+# The Role defines *what* may be done (read Pods); the RoleBinding grants that Role to a
+# *subject*. Here the subject is the built-in group system:authenticated, so this file needs
+# no per-learner username and applies cleanly in any namespace. Both objects are namespaced —
+# with no `namespace:` field they land in your current project when you `oc apply` them.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+rules:
+- apiGroups: [""]          # "" is the core API group, where Pods live
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-reader-binding
+subjects:
+- kind: Group
+  name: system:authenticated   # every authenticated user in this namespace
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io

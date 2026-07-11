@@ -1,0 +1,14 @@
+#!/bin/bash
+# verify-route-admitted <route> — the Route exists and has been admitted with a host.
+name="${1:?route name required}"
+host=$(oc get route "$name" -o jsonpath='{.spec.host}' 2>/dev/null)
+if [ -z "$host" ]; then
+  echo "Route '$name' not found or has no host yet. Apply route.yaml." >&2
+  exit 1
+fi
+admitted=$(oc get route "$name" -o jsonpath='{.status.ingress[0].conditions[?(@.type=="Admitted")].status}' 2>/dev/null)
+if [ "$admitted" != "True" ]; then
+  echo "Route '$name' (host '$host') is not Admitted (status '${admitted:-unknown}'). Check 'oc describe route $name'." >&2
+  exit 1
+fi
+echo "OK: route '$name' admitted with host '$host'."

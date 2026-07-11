@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 250" role="img" aria-label="Storage model: a PVC requests storage, a StorageClass provisions a PV dynamically, the pod mounts it.">
+  <style>
+    .box { fill: #e8eef7; stroke: #2b6cb0; stroke-width: 2; }
+    .sc  { fill: #eaf5ec; stroke: #2f855a; stroke-width: 2; }
+    .lbl { fill: #1a2b45; font: 600 15px sans-serif; }
+    .sub { fill: #33445c; font: 12px sans-serif; }
+    .arrow { stroke: #2b6cb0; stroke-width: 2; fill: none; marker-end: url(#a); }
+    .cap { fill: #33445c; font: italic 12px sans-serif; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#2b6cb0"/>
+    </marker>
+  </defs>
+
+  <rect class="box" x="20" y="95" width="150" height="70" rx="8"/>
+  <text class="lbl" x="95" y="122" text-anchor="middle">Pod</text>
+  <text class="sub" x="95" y="144" text-anchor="middle">mounts a volume</text>
+
+  <rect class="box" x="210" y="95" width="150" height="70" rx="8"/>
+  <text class="lbl" x="285" y="122" text-anchor="middle">PVC</text>
+  <text class="sub" x="285" y="144" text-anchor="middle">"I want 1Gi, File"</text>
+
+  <rect class="sc" x="400" y="95" width="150" height="70" rx="8"/>
+  <text class="lbl" x="475" y="122" text-anchor="middle">StorageClass</text>
+  <text class="sub" x="475" y="144" text-anchor="middle">provisioner</text>
+
+  <rect class="box" x="590" y="95" width="110" height="70" rx="8"/>
+  <text class="lbl" x="645" y="122" text-anchor="middle">PV</text>
+  <text class="sub" x="645" y="144" text-anchor="middle">real disk</text>
+
+  <path class="arrow" d="M170 130 L208 130"/>
+  <path class="arrow" d="M360 130 L398 130"/>
+  <path class="arrow" d="M550 130 L588 130"/>
+
+  <text class="cap" x="189" y="120" text-anchor="middle">claims</text>
+  <text class="cap" x="379" y="120" text-anchor="middle">names</text>
+  <text class="cap" x="569" y="120" text-anchor="middle">creates</text>
+  <text class="cap" x="360" y="205" text-anchor="middle">Dynamic provisioning: the StorageClass creates a PV to satisfy the PVC — you never pre-create disks.</text>
+</svg>

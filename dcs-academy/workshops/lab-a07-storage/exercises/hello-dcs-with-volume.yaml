@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-dcs
+  template:
+    metadata:
+      labels:
+        app: hello-dcs
+    spec:
+      volumes:
+      # Back this volume with the PVC created from pvc-file.yaml.
+      - name: data
+        persistentVolumeClaim:
+          claimName: hello-dcs-data
+      containers:
+      - name: hello-dcs
+        # Image pulled from the DCS Harbor registry via the DCS_REGISTRY env var.
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        # Mount the persistent volume at /data inside the container.
+        - name: data
+          mountPath: /data
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi

@@ -1,0 +1,12 @@
+#!/bin/bash
+# verify-prod-blocked <deployment> <prod-namespace>
+# The Kyverno policy should have rejected the non-compliant deploy into PROD, so the
+# deployment must NOT exist there. (In DEV the same deploy succeeds — that contrast is
+# the learning point.)
+name="${1:?deployment required}"
+ns="${2:?namespace required}"
+if oc get deployment "$name" -n "$ns" >/dev/null 2>&1; then
+  echo "Deployment '$name' unexpectedly exists in PROD namespace '$ns'. The Kyverno policy should have blocked it — is the policy applied and is Kyverno enforcing?" >&2
+  exit 1
+fi
+echo "OK: deployment '$name' was blocked from PROD namespace '$ns' (as expected)."

@@ -1,0 +1,9 @@
+#!/bin/bash
+# verify-tags <repo-ref-without-transport-or-tag> — skopeo can list tags for the repo.
+repo="${1:?repo reference required (e.g. \$DCS_REGISTRY/samples/hello-dcs)}"
+tags=$(skopeo list-tags "docker://${repo}" 2>/dev/null)
+if [ -z "$tags" ]; then
+  echo "Could not list tags for 'docker://${repo}'. Is the repository in Harbor and the robot account configured? (Needs a real Harbor.)" >&2
+  exit 1
+fi
+echo "OK: listed tags for ${repo}."

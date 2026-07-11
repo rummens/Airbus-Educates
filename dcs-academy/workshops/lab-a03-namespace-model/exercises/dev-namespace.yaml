@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: team-dev
+  labels:
+    # The DCS namespace-type label — DEV favours fast iteration, no Kyverno gate.
+    dcs.airbus/namespace-type: dev

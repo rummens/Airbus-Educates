@@ -1,0 +1,9 @@
+#!/bin/bash
+# verify-crds <grep-pattern> — at least one installed CRD matches the pattern
+# (proves the operator's types are installed cluster-wide).
+pat="${1:?grep pattern required}"
+if ! oc get crds 2>/dev/null | grep -q "$pat"; then
+  echo "No CRD matching '$pat' found. The operator does not appear to be installed in this cluster (needs the CloudNativePG operator pre-installed by the platform)." >&2
+  exit 1
+fi
+echo "OK: found CRD(s) matching '$pat'."

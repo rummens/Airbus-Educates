@@ -1,0 +1,8 @@
+#!/bin/bash
+# verify-netpol-present <name> — the pre-provisioned NetworkPolicy exists (observe-only step).
+name="${1:?networkpolicy name required}"
+if ! oc get networkpolicy "$name" >/dev/null 2>&1; then
+  echo "NetworkPolicy '$name' not found in the session namespace. It should be pre-provisioned for you to inspect." >&2
+  exit 1
+fi
+echo "OK: NetworkPolicy '$name' is present."

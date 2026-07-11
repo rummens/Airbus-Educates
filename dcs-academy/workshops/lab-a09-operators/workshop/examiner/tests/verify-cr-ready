@@ -1,0 +1,10 @@
+#!/bin/bash
+# verify-cr-ready <cluster-name> — the CloudNativePG Cluster has >=1 ready instance,
+# i.e. the operator has reconciled the CR into running PostgreSQL.
+name="${1:?cluster name required}"
+ready=$(oc get cluster.postgresql.cnpg.io "$name" -o jsonpath='{.status.readyInstances}' 2>/dev/null)
+if [ -z "$ready" ] || [ "$ready" -lt 1 ] 2>/dev/null; then
+  echo "Cluster '$name' has no ready instances yet (got '${ready:-none}'). The operator may still be reconciling — check 'oc describe cluster.postgresql.cnpg.io $name'." >&2
+  exit 1
+fi
+echo "OK: Cluster '$name' has $ready ready instance(s) — the operator reconciled it."

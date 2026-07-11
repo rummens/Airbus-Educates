@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 220" role="img" aria-label="RBAC chain: a subject is granted a role via a binding; the role holds rules.">
+  <style>
+    .box { fill: #e8eef7; stroke: #2b6cb0; stroke-width: 2; rx: 8; }
+    .lbl { fill: #1a2b45; font: 600 15px sans-serif; }
+    .sub { fill: #33445c; font: 12px sans-serif; }
+    .arrow { stroke: #2b6cb0; stroke-width: 2; fill: none; marker-end: url(#a); }
+    .cap { fill: #33445c; font: italic 12px sans-serif; }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#2b6cb0"/>
+    </marker>
+  </defs>
+
+  <rect class="box" x="20" y="70" width="150" height="70" rx="8"/>
+  <text class="lbl" x="95" y="100" text-anchor="middle">Subject</text>
+  <text class="sub" x="95" y="122" text-anchor="middle">user / group / SA</text>
+
+  <rect class="box" x="230" y="70" width="150" height="70" rx="8"/>
+  <text class="lbl" x="305" y="100" text-anchor="middle">RoleBinding</text>
+  <text class="sub" x="305" y="122" text-anchor="middle">grants role to subject</text>
+
+  <rect class="box" x="440" y="70" width="150" height="70" rx="8"/>
+  <text class="lbl" x="515" y="100" text-anchor="middle">Role</text>
+  <text class="sub" x="515" y="122" text-anchor="middle">(or ClusterRole)</text>
+
+  <rect class="box" x="620" y="70" width="120" height="70" rx="8"/>
+  <text class="lbl" x="680" y="96" text-anchor="middle">Rules</text>
+  <text class="sub" x="680" y="116" text-anchor="middle">apiGroups ×</text>
+  <text class="sub" x="680" y="132" text-anchor="middle">resources × verbs</text>
+
+  <path class="arrow" d="M170 105 L228 105"/>
+  <path class="arrow" d="M380 105 L438 105"/>
+  <path class="arrow" d="M590 105 L618 105"/>
+
+  <text class="cap" x="200" y="60" text-anchor="middle">bound by</text>
+  <text class="cap" x="410" y="60" text-anchor="middle">refers to</text>
+  <text class="cap" x="605" y="60" text-anchor="middle">holds</text>
+</svg>

@@ -1,0 +1,11 @@
+#!/bin/bash
+# verify-svc-reachable <service> <port> — Service answers over HTTP in-cluster.
+name="${1:?service name required}"
+port="${2:-8080}"
+url="http://${name}.${SESSION_NAMESPACE}.svc:${port}"
+code=$(curl -s -o /dev/null -m 5 -w '%{http_code}' "$url" 2>/dev/null)
+if [ "$code" != "200" ]; then
+  echo "GET $url returned '${code:-no response}', expected 200. Is the Service backed by a running pod on port $port?" >&2
+  exit 1
+fi
+echo "OK: $url returned 200."

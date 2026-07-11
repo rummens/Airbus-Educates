@@ -1,0 +1,8 @@
+#!/bin/bash
+# verify-policy-present <clusterpolicy-name> — the Kyverno ClusterPolicy exists.
+name="${1:?policy name required}"
+if ! oc get clusterpolicy "$name" >/dev/null 2>&1; then
+  echo "Kyverno ClusterPolicy '$name' not found. Apply kyverno-policy.yaml. (This requires Kyverno to be installed in the cluster.)" >&2
+  exit 1
+fi
+echo "OK: Kyverno ClusterPolicy '$name' is present."
