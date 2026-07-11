@@ -166,6 +166,10 @@ def main():
         print(f"editor:    {editor}")
     if "console" in apps:
         print(f"console:   {console}")
+    if "editor" in apps or "console" in apps:
+        print("note: editor/console are separate hosts with the CRC self-signed cert. If their\n"
+              "      dashboard tab shows 'temporarily down', open the URL above once and accept\n"
+              "      the cert (or trust the CRC ingress CA once — see crc-local-testing/README).")
 
 
 if __name__ == "__main__":

@@ -55,6 +55,8 @@ Prefer a coherent, realistic sample application carried across the workshop over
 
 For behaviour that unfolds over time (self-healing, rollout, scaling), use the split terminal: `watch` the resource in one terminal, cause the change in the other, and narrate what the learner sees. Static output alone does not convey that Kubernetes *reacts*.
 
+The split terminal stacks **vertically** — `terminal:execute-1` / `terminal:interrupt-1` target the **upper** terminal and `terminal:execute-2` the **lower** one. Refer to them as "upper" and "lower" in prose, never "left"/"right".
+
 ### 7. Cover the concept completely — don't skip the foundational ones
 
 A fundamentals workshop that omits labels/selectors, resource querying, ownership relationships, logs, or exec is incomplete, however tidy. When scoping, list the concepts a competent user of the topic needs and make sure each is taught. It is better to split into more workshops than to drop concepts.

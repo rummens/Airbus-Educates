@@ -56,26 +56,26 @@ The ReplicaSet doesn't just create Pods once — it *continuously* keeps the cou
 desired number. If a Pod dies, it's replaced. Let's watch that happen live using the
 split terminal.
 
-In the **left** terminal, watch the Pods continuously:
+In the **upper** terminal, watch the Pods continuously:
 
 ```terminal:execute-1
 command: |-
   watch oc get pods -l app=hello-dcs
 ```
 
-Now, in the **right** terminal, delete one Pod:
+Now, in the **lower** terminal, delete one Pod:
 
 ```terminal:execute-2
 command: |-
   oc delete $(oc get pod -l app=hello-dcs -o name | head -1)
 ```
 
-Watch the left terminal: the deleted Pod goes `Terminating`, and almost immediately a
+Watch the upper terminal: the deleted Pod goes `Terminating`, and almost immediately a
 brand-new Pod appears to take its place — the ReplicaSet noticed the count dropped below 3
 and fixed it. You never asked it to; that's the control loop working. This is why
 Kubernetes is *resilient*: crashed instances are replaced automatically.
 
-Stop the watch in the left terminal:
+Stop the watch in the upper terminal:
 
 ```terminal:interrupt-1
 ```

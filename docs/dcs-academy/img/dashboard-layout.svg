@@ -25,12 +25,12 @@
   <text x="530" y="64" text-anchor="middle" font-size="11" fill="#cdd7e0">Console</text>
   <rect x="570" y="46" width="70" height="26" fill="#3a4a5a"/>
   <text x="605" y="64" text-anchor="middle" font-size="11" fill="#cdd7e0">Slides</text>
-  <!-- split terminal -->
-  <rect x="352" y="84" width="180" height="264" rx="4" fill="#0f1720"/>
+  <!-- split terminal: stacked upper / lower -->
+  <rect x="352" y="84" width="376" height="126" rx="4" fill="#0f1720"/>
   <text x="362" y="104" font-size="10" fill="#7fd88f" font-family="monospace">~/exercises $ _</text>
-  <text x="362" y="120" font-size="9" fill="#5a6b7b" font-family="monospace">(left terminal)</text>
-  <rect x="548" y="84" width="180" height="264" rx="4" fill="#0f1720"/>
-  <text x="558" y="104" font-size="10" fill="#7fd88f" font-family="monospace">~/exercises $ _</text>
-  <text x="558" y="120" font-size="9" fill="#5a6b7b" font-family="monospace">(right terminal)</text>
-  <text x="540" y="360" text-anchor="middle" font-size="10" fill="#5a6b7b">Terminal shown split; Editor / Console / Slides open in this same area via their tabs.</text>
+  <text x="362" y="122" font-size="9" fill="#5a6b7b" font-family="monospace">(upper terminal — execute-1)</text>
+  <rect x="352" y="216" width="376" height="126" rx="4" fill="#0f1720"/>
+  <text x="362" y="236" font-size="10" fill="#7fd88f" font-family="monospace">~/exercises $ _</text>
+  <text x="362" y="254" font-size="9" fill="#5a6b7b" font-family="monospace">(lower terminal — execute-2)</text>
+  <text x="540" y="356" text-anchor="middle" font-size="10" fill="#5a6b7b">Split terminal stacks upper/lower; Editor / Console / Slides open in this same area via their tabs.</text>
 </svg>

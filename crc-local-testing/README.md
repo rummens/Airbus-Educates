@@ -23,6 +23,36 @@ Smoke plans live in `smoke-plans/<workshop>.json` (ordered `run` setup steps +
 (`dcs-workshop-base`, `hello-dcs`) in a reachable registry — until then,
 checks that need a running app pod fail as expected.
 
+## TLS: editor/console tab shows "temporarily down"
+
+The dashboard, editor and console are each on a **separate hostname**
+(`<session>`, `editor-<session>`, `console-<session>`), all served with CRC's
+**self-signed** wildcard cert (`*.apps-crc.testing`, issued by the cluster's
+`ingress-operator` CA). Accepting the cert for the dashboard host does **not**
+cover the editor/console hosts, and an iframe (the editor/console tabs) can't
+prompt for a cert exception — so those tabs fail with "temporarily down" even
+though the backends are healthy (`curl -k` returns 200/302).
+
+Two fixes:
+
+- **Quick (per host):** open the editor and console URLs (printed by
+  `deploy_workshop.py`) directly in a browser tab, click through the warning
+  (Advanced → proceed), then reload the dashboard — the tabs now load.
+- **One-time (best):** trust the CRC ingress CA so every `*.apps-crc.testing`
+  host is accepted with no prompts:
+
+  ```bash
+  # export the router CA and add it to the login keychain as trusted
+  oc --context crc-admin -n openshift-ingress-operator get secret router-ca \
+    -o jsonpath='{.data.tls\.crt}' | base64 -d > /tmp/crc-router-ca.crt
+  # (macOS) trust it — you will be prompted for your password:
+  sudo security add-trusted-cert -d -r trustRoot \
+    -k /Library/Keychains/System.keychain /tmp/crc-router-ca.crt
+  ```
+
+  Restart the browser afterwards. (Modifying the system trust store is your
+  call — run it yourself; the deploy script never touches it.)
+
 ## Why portal-less
 
 The `educates-training-portal` image SIGILLs (`Illegal instruction`, exit 132)

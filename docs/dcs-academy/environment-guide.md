@@ -41,9 +41,10 @@ visible, and click again.
 ### Terminal
 
 A shell connected to your DCS session. It starts in the `~/exercises` directory where the
-lab's files live. Many labs use a **split terminal** (two side-by-side) — for example one
-to `watch` something while the other makes a change. Commands are run with the OpenShift
-CLI, `oc`. You can type here too, but the guided actions do the typing for you.
+lab's files live. Many labs use a **split terminal** — two stacked one above the other,
+an **upper** and a **lower** — for example one to `watch` something while the other makes
+a change. Commands are run with the OpenShift CLI, `oc`. You can type here too, but the
+guided actions do the typing for you.
 _(screenshot: split terminal)_
 
 ### Editor
