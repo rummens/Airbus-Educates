@@ -11,6 +11,11 @@ Task tracking for the DCS Academy. Priorities: **P1** (blocker), **P2** (importa
 - [ ] **P2** Validate vcluster is available/sized on DCS for the sessions that need the prod/dev model (A03).
 - [ ] **P3** Run `scripts/collect-images.sh` once the first workshops exist and hand the manifest to the Harbor mirroring workflow.
 
+## Tooling
+
+- [x] **P2** `crc-local-testing/deploy_workshop.py` — deploy any workshop to CRC from git (portal-less). Verified green (A02 session Running).
+- [x] **P2** `crc-local-testing/smoke_test.py` + `smoke-plans/*.json` — run setup + all examiner checks in the live session pod, with `--oc-shim`. Verified running; A02 = 6 pass / 9 fail (the 9 need the `hello-dcs` app image — unblocks with the image step).
+
 ## Module A — Foundations
 
 - [x] **P1** Write per-workshop plans (Step 4) for A01–A06 in `workshop-plans/`. *(Done — 6 plans linked from course-module-a.md.)*

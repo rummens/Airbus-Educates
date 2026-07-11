@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+"""Deploy a DCS workshop to the local CRC cluster, portal-less, from git.
+
+Creates the three CRs (Workshop + WorkshopEnvironment + WorkshopSession) that
+session-manager reconciles directly (the portal SIGILLs on CRC arm64 — see
+README.md). Files are pulled from the repo's git remote using the monorepo
+`newRootPath` pattern, so no image publish is needed.
+
+By default the workshop container image override is DROPPED (uses the default
+base-environment, which has kubectl) so it starts on CRC without the custom
+dcs-workshop-base image. Pass --keep-image once that image exists.
+
+Examples:
+  ./deploy_workshop.py lab-a02-kubernetes-essentials
+  ./deploy_workshop.py lab-a03-namespace-model --vcluster
+  ./deploy_workshop.py lab-a02-kubernetes-essentials --delete
+"""
+import argparse, json, subprocess, sys, time, pathlib
+
+REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+DEFAULT_BASE = "dcs-academy/workshops"
+
+
+def sh(args, **kw):
+    return subprocess.run(args, capture_output=True, text=True, **kw)
+
+
+def git_remote_url():
+    r = sh(["git", "-C", str(REPO_ROOT), "config", "--get", "remote.origin.url"])
+    url = r.stdout.strip()
+    if url.startswith("git@github.com:"):          # normalise ssh -> https
+        url = "https://github.com/" + url[len("git@github.com:"):]
+    return url.removesuffix(".git")
+
+
+def oc_apply(ctx, obj):
+    r = sh(["oc", "--context", ctx, "apply", "-f", "-"], input=json.dumps(obj))
+    sys.stdout.write(r.stdout)
+    if r.returncode:
+        sys.stderr.write(r.stderr)
+        sys.exit(f"apply failed for {obj['kind']}/{obj['metadata']['name']}")
+
+
+def oc_delete(ctx, kind, name):
+    sh(["oc", "--context", ctx, "delete", kind, name, "--ignore-not-found", "--wait=false"])
+
+
+def build_workshop(name, url, ref, subpath, budget, apps, vcluster, keep_image, title, desc):
+    inc = [f"/{subpath}/workshop/**", f"/{subpath}/exercises/**", f"/{subpath}/README.md"]
+    application = {a: {"enabled": True} for a in apps}
+    if "terminal" in application:
+        application["terminal"]["layout"] = "split"
+    session = {
+        "namespaces": {"budget": budget, "security": {"token": {"enabled": True}}},
+        "applications": application,
+    }
+    if vcluster:
+        application["vcluster"] = {"enabled": True}
+        session["namespaces"]["budget"] = "large"      # vcluster needs large
+        session["objects"] = [{                          # privileged SCC for the -vc ns
+            "apiVersion": "rbac.authorization.k8s.io/v1", "kind": "RoleBinding",
+            "metadata": {"name": "educates-vcluster-scc", "namespace": "$(vcluster_namespace)"},
+            "roleRef": {"apiGroup": "rbac.authorization.k8s.io", "kind": "ClusterRole",
+                        "name": "educates-privileged-scc"},
+            "subjects": [{"apiGroup": "rbac.authorization.k8s.io", "kind": "Group",
+                          "name": "system:serviceaccounts:$(vcluster_namespace)"}],
+        }]
+    workshop = {"files": [{"git": {"url": url, "ref": ref},
+                           "includePaths": inc, "newRootPath": subpath}]}
+    if keep_image:
+        workshop["image"] = "$(image_repository)/dcs-workshop-base:$(workshop_version)"
+    return {
+        "apiVersion": "training.educates.dev/v1beta1", "kind": "Workshop",
+        "metadata": {"name": name},
+        "spec": {"title": title, "description": desc, "workshop": workshop, "session": session},
+    }
+
+
+def main():
+    p = argparse.ArgumentParser(description="Deploy a DCS workshop to CRC (portal-less, git source).")
+    p.add_argument("name", help="workshop dir name, e.g. lab-a02-kubernetes-essentials")
+    p.add_argument("--id", default="01")
+    p.add_argument("--context", default="crc-admin")
+    p.add_argument("--git-url", default=None, help="default: repo origin remote")
+    p.add_argument("--ref", default="origin/main")
+    p.add_argument("--base", default=DEFAULT_BASE, help="path prefix of workshops in the repo")
+    p.add_argument("--budget", default="medium")
+    p.add_argument("--apps", default="terminal,editor,console,examiner",
+                   help="comma list of session applications")
+    p.add_argument("--vcluster", action="store_true", help="run in a per-session vcluster")
+    p.add_argument("--keep-image", action="store_true",
+                   help="keep the dcs-workshop-base image (default: use base-environment)")
+    p.add_argument("--wait", type=int, default=300, help="seconds to wait for Running (0=don't)")
+    p.add_argument("--delete", action="store_true", help="tear down instead of deploy")
+    args = p.parse_args()
+
+    ctx, name, sid = args.context, args.name, args.id
+    session_name = f"{name}-w{sid}"
+
+    if args.delete:
+        oc_delete(ctx, "workshopsession", session_name)
+        oc_delete(ctx, "workshopenvironment", name)
+        oc_delete(ctx, "workshop", name)
+        print(f"deleted {name} (workshop, env, session)")
+        return
+
+    url = args.git_url or git_remote_url()
+    subpath = f"{args.base}/{name}"
+    apps = [a.strip() for a in args.apps.split(",") if a.strip()]
+    ws = build_workshop(name, url, args.ref, subpath, args.budget, apps, args.vcluster,
+                        args.keep_image, title=name, desc=f"{name} (CRC test, git source)")
+
+    # idempotent: drop any prior env/session so content re-pulls fresh
+    oc_delete(ctx, "workshopsession", session_name)
+    oc_delete(ctx, "workshopenvironment", name)
+    time.sleep(2)
+
+    oc_apply(ctx, ws)
+    oc_apply(ctx, {"apiVersion": "training.educates.dev/v1beta1", "kind": "WorkshopEnvironment",
+                   "metadata": {"name": name}, "spec": {"workshop": {"name": name}}})
+    oc_apply(ctx, {"apiVersion": "training.educates.dev/v1beta1", "kind": "WorkshopSession",
+                   "metadata": {"name": session_name},
+                   "spec": {"environment": {"name": name},
+                            "session": {"id": sid, "username": "educates", "password": "educates"}}})
+
+    print(f"git: {url}  ref: {args.ref}  path: {subpath}")
+    if not args.wait:
+        return
+    deadline = time.time() + args.wait
+    phase = url_ = ""
+    while time.time() < deadline:
+        print(f"Still deploying {session_name} (phase: {phase or '(unknown)'})")
+        r = sh(["oc", "--context", ctx, "get", "workshopsession", session_name,
+                "-o", "jsonpath={.status.educates.phase} {.status.educates.url}"])
+        phase, _, url_ = r.stdout.strip().partition(" ")
+        if phase == "Running":
+            break
+        time.sleep(5)
+    print(f"phase: {phase or '(unknown)'}")
+    if phase == "Running":
+        print(f"URL:   {url_}")
+        print("login: educates / educates  (accept the self-signed cert)")
+    else:
+        sys.exit("session did not reach Running in time; check "
+                 f"'oc --context {ctx} get workshopsession {session_name} -o yaml'")
+
+
+if __name__ == "__main__":
+    main()
