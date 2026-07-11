@@ -1,12 +1,14 @@
 {
   "workshop": "lab-a07-storage",
-  "_note": "Storage lab. CRC has ONLY a default hostpath StorageClass (RWO, WaitForFirstConsumer) and NO dcs-file/dcs-block classes. The workshop's File PVC is ReadWriteMany, which hostpath cannot provision — so the File flow is EXPECTED TO FAIL on CRC. run-steps set DCS_SC_FILE to the CRC default so envsubst produces a valid (if RWO-only) class name; verify-storageclass then passes, but pvc-bound for the RWX claim will not. Full green needs the real DCS storage classes.",
+  "_note": "CRC has ONLY a default hostpath StorageClass; DCS_SC_FILE is set to it so envsubst yields a valid class. Two CRC-specific notes: (1) the RWX File PVC binds because hostpath allows it here; (2) CRC's portless-test session SCC is RunAsAny, so it does NOT auto-assign an fsGroup — the mounted volume stays root-owned and the non-root container can't write. Standard OpenShift restricted-v2 (as on real DCS) auto-assigns an in-range fsGroup and the volume is group-writable with no manifest change. To reproduce that here, the apply step patches fsGroup explicitly. The workshop manifest is intentionally left portable (no hardcoded fsGroup).",
   "steps": [
     {"check": "verify-storageclass", "args": ["crc-csi-hostpath-provisioner"]},
-    {"run": "DCS_SC_FILE=crc-csi-hostpath-provisioner envsubst < pvc-file.yaml | oc apply -f - && envsubst < hello-dcs-with-volume.yaml | oc apply -f - && oc rollout status deployment/hello-dcs --timeout=120s || true"},
+    {"run": "DCS_SC_FILE=crc-csi-hostpath-provisioner envsubst < pvc-file.yaml | oc apply -f - && envsubst < hello-dcs-with-volume.yaml | oc apply -f - && oc patch deployment/hello-dcs --type=merge -p '{\"spec\":{\"template\":{\"spec\":{\"securityContext\":{\"fsGroup\":1000700000}}}}}' && oc rollout status deployment/hello-dcs --timeout=150s"},
     {"check": "verify-pvc-bound", "args": ["hello-dcs-data"]},
     {"check": "verify-pods-running", "args": ["hello-dcs", "1"]},
-    {"run": "oc exec deployment/hello-dcs -- sh -c 'echo persisted-by-dcs > /data/marker' || true"},
+    {"run": "oc exec deployment/hello-dcs -- sh -c 'echo persisted-by-dcs > /data/marker'"},
+    {"check": "verify-marker", "args": ["hello-dcs", "/data/marker", "persisted-by-dcs"]},
+    {"run": "oc delete pod -l app=hello-dcs && oc rollout status deployment/hello-dcs --timeout=150s"},
     {"check": "verify-marker", "args": ["hello-dcs", "/data/marker", "persisted-by-dcs"]}
   ]
 }

@@ -1,11 +1,11 @@
 {
   "workshop": "lab-a04-harbor-registry",
-  "_note": "Pull-only Harbor lab. The catalog-pull step (pod-from-catalog) is testable if the samples/hello-dcs image is in the deploy registry. All skopeo checks REQUIRE skopeo in dcs-workshop-base (not added yet — separate base-image task) AND a real Harbor with a robot account; they are EXPECTED TO FAIL here.",
+  "_note": "Pull-only Harbor lab. skopeo ships in dcs-workshop-base. Check args use the concrete CRC test registry (ghcr.io/rummens) because smoke_test single-quotes args, so $DCS_REGISTRY would not expand — the workshop content itself uses {{< param dcs_registry >}}/$DCS_REGISTRY correctly. On real DCS these hit Harbor with a read-only robot account instead.",
   "steps": [
     {"check": "verify-skopeo"},
-    {"run": "envsubst < pod-from-catalog.yaml | oc apply -f -"},
+    {"run": "envsubst < pod-from-catalog.yaml | oc apply -f - && oc wait --for=condition=Ready pod/hello-catalog --timeout=120s"},
     {"check": "verify-pod-running", "args": ["hello-catalog"]},
-    {"check": "verify-image-inspectable", "args": ["$DCS_REGISTRY/samples/hello-dcs:1.0"]},
-    {"check": "verify-tags", "args": ["$DCS_REGISTRY/samples/hello-dcs"]}
+    {"check": "verify-image-inspectable", "args": ["ghcr.io/rummens/samples/hello-dcs:1.0"]},
+    {"check": "verify-tags", "args": ["ghcr.io/rummens/samples/hello-dcs"]}
   ]
 }

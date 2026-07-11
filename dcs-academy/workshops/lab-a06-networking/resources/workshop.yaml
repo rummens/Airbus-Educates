@@ -40,11 +40,46 @@ spec:
     ingresses:
     - name: app
       port: 8080
+    # Educates' default session role (educates-admin-session-role) grants most
+    # namespace verbs but NOT routes — so grant the session service account the
+    # ability to manage Routes, which this workshop's core exercise needs. (On DCS a
+    # tenant creates Routes in a PROD-type namespace; this mirrors that access.)
+    objects:
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: session-route-manager
+        namespace: $(session_namespace)
+      rules:
+      - apiGroups: ["route.openshift.io"]
+        resources: ["routes"]
+        verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+      - apiGroups: ["route.openshift.io"]
+        resources: ["routes/custom-host"]
+        verbs: ["create"]
+      # Read-only on Network Policies so the learner can INSPECT the pre-provisioned
+      # one (tenants can't create them yet — observe-only). Educates' default session
+      # role excludes networkpolicies entirely, so grant read here.
+      - apiGroups: ["networking.k8s.io"]
+        resources: ["networkpolicies"]
+        verbs: ["get", "list", "watch"]
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: session-route-manager
+        namespace: $(session_namespace)
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: session-route-manager
+      subjects:
+      - kind: ServiceAccount
+        name: $(service_account)
+        namespace: $(workshop_namespace)
     # A representative Network Policy is pre-provisioned for the learner to INSPECT.
     # Tenants cannot self-create Network Policies on DCS yet (roadmap), so this lab
     # teaches NetworkPolicy as observe/concept. This one is a targeted ALLOW (ingress
     # to hello-dcs on 8080) so it does not break the session proxy or examiner checks.
-    objects:
     - apiVersion: networking.k8s.io/v1
       kind: NetworkPolicy
       metadata:

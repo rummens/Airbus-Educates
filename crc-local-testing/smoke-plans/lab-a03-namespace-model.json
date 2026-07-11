@@ -5,7 +5,7 @@
     {"check": "verify-oc-namespaces"},
     {"run": "oc apply -f dev-namespace.yaml"},
     {"check": "verify-ns-type", "args": ["team-dev", "dev"]},
-    {"run": "envsubst < hello-dcs.yaml | oc apply -n team-dev -f - && oc rollout status deployment/hello-dcs -n team-dev --timeout=150s"},
+    {"run": "envsubst < hello-dcs.yaml | oc apply -n team-dev -f - && oc wait --for=condition=available deployment/hello-dcs -n team-dev --timeout=180s"},
     {"check": "verify-workload-ready", "args": ["hello-dcs", "team-dev"]},
     {"run": "oc apply -f prod-namespace.yaml"},
     {"check": "verify-ns-type", "args": ["team-prod", "prod"]},
