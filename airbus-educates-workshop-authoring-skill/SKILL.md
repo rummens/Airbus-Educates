@@ -433,7 +433,30 @@ After generating workshop instruction pages, verify the following:
 - [ ] Depth was not thinned to hit a time box — long topics were split into more workshops instead
 - [ ] No hardcoded registry hosts, domains, route hosts, namespaces, or versions in content — variables are used throughout
 
-### 12. Update Planning Documents (Course Workshops Only)
+### 12. Smoke-Test in a Live Session (do this early)
+
+**Static checks are not enough — deploy the workshop to a live session and open it.** A whole class of errors surfaces *only* when a session actually starts and renders, and they pass every YAML lint and file-structure check:
+
+- **`workshop/config.yaml` / ytt errors** — e.g. `params` written as a map instead of a list of `{name, value}` fails the session **setup** step with `ytt: Error: string index: got string, want int`, and the dashboard shows "the execution of the workshop setup scripts failed". Nothing catches this until a session runs.
+- **Content rendering** — Hugo/shortcode errors, and whether `{{< param … >}}` values actually substitute (check the product name resolves, not the raw shortcode).
+- **File delivery** — the files source (OCI image or git) must actually download in-session; a wrong `newRootPath`/`includePaths` yields empty content ("Cannot GET /workshop/content/").
+- **Clickable actions and examiner tests** — that they run against the real cluster.
+
+Do this **as soon as the workshop is minimally complete**, not at the very end — the earlier a config/render error is found, the cheaper it is. Deploy to a local cluster (see [references/local-cluster-deployment-reference.md](references/local-cluster-deployment-reference.md)) or the target OpenShift, start a session, and:
+
+1. Confirm the session reaches **Running** with **no setup-error banner**.
+2. Open the dashboard and confirm pages **render** and `{{< param … >}}` values are substituted (not shown as raw shortcodes).
+3. Walk the clickable actions and confirm each **examiner check passes**.
+
+If a session cannot be started in the current environment, say so explicitly rather than reporting the workshop as verified — static validation alone is not verification.
+
+**Verification checklist (live session):**
+- [ ] Session reaches `Running`; no "setup scripts failed" banner (config.yaml/ytt is valid)
+- [ ] Pages render; `{{< param … >}}` values are substituted, no raw shortcodes leak
+- [ ] Files delivered (content + exercises present); no "Cannot GET /workshop/content/"
+- [ ] Clickable actions run and every examiner test passes against the cluster
+
+### 13. Update Planning Documents (Course Workshops Only)
 
 When the workshop is part of a course that has planning documents (i.e., a `planning/` directory exists containing workshop plans), check whether any significant changes made during implementation need to be reflected back in the planning documents. The goal is to keep the workshop plan accurate so that planning for subsequent workshops starts from correct information.
 

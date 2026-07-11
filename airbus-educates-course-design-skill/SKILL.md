@@ -227,6 +227,8 @@ For each workshop to be implemented:
 
 The workshop files are created in the `workshops/` directory, separate from the `planning/` directory.
 
+**Smoke-test each workshop in a live session early** — deploy it and open a session as soon as it is minimally complete (authoring skill, "Smoke-Test in a Live Session"). Setup/ytt/config.yaml, rendering, param substitution, and file-delivery errors surface *only* when a session runs, not in static checks; catching them early is far cheaper than after several workshops are built.
+
 ### Update Task Tracking
 
 After implementing a workshop, review the result against the plan and update `planning/tasks.md`:
