@@ -283,6 +283,10 @@ class Handler(BaseHTTPRequestHandler):
         if u.path in ("/form", "/feedback"):
             return self._send(200, form_page(q.get("workshop", [""])[0], q.get("session", [""])[0]))
         if u.path == "/admin":
+            if not ADMIN_TOKEN:
+                return self._send(503, "admin view disabled: ADMIN_TOKEN is not configured on "
+                                  "the collector (set feedback.adminToken or feedback.existingSecret)",
+                                  "text/plain")
             if not self._authed(q):
                 return self._send(401, "unauthorized — append ?token=<ADMIN_TOKEN>", "text/plain")
             return self._send(200, admin_page())

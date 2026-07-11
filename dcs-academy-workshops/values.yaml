@@ -125,7 +125,12 @@ feedback:
     # Empty = cluster default StorageClass. Set to a DCS File/Block class in prod.
     className: ""
   # /admin gate. Provide adminToken (chart makes a Secret) OR existingSecret with
-  # key `admin-token`. Empty = /admin stays locked (401) until one is set.
+  # key `admin-token`. Empty (default) = /admin is DISABLED and returns 503
+  # ("ADMIN_TOKEN not configured") — set one to enable the report.
+  # Under GitOps do NOT commit a real token here (plaintext in git). Set it per
+  # cluster via the ArgoCD Application spec.source.helm.valuesObject.feedback.adminToken,
+  # or pre-create a Secret and reference it with existingSecret. selfHeal keeps it;
+  # a manual `oc set env`/patch will be reverted.
   adminToken: ""
   existingSecret: ""
   # Future CNPG swap seam: set to postgres://... (needs a psycopg-enabled image).
