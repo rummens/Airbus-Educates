@@ -1,0 +1,35 @@
+# DCS Academy workshop base image for the basic courses.
+#
+# IMPORTANT: a workshop *session* image MUST extend educates-base-environment —
+# the dashboard, terminal, editor, content renderer and supervisor all live in
+# that image. A from-scratch Red Hat image cannot serve as a workshop image, so
+# the Red Hat hardened base is used for the *application* image (hello-dcs),
+# not here. This base is Fedora-based and already ships jq, yq, curl, git,
+# envsubst and kubectl; the only tool the basic courses need that it lacks is
+# the OpenShift CLI `oc`, which we add.
+#
+# Pin to the digest the running platform uses so the dashboard protocol matches.
+ARG BASE=ghcr.io/educates/educates-base-environment@sha256:b7e55570e5b6a98251cc010e96b1615173c788d50f4833f0b9d3e821bb5fcd5a
+FROM ${BASE}
+
+ARG TARGETARCH=arm64
+ARG OC_CHANNEL=stable
+
+LABEL org.opencontainers.image.source="https://github.com/rummens/Airbus-Educates" \
+      org.opencontainers.image.description="DCS Academy workshop base (educates-base-environment + oc)"
+
+USER root
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+      arm64) OCARCH=arm64 ;; \
+      amd64) OCARCH=amd64 ;; \
+      *) echo "unsupported arch: ${TARGETARCH}" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSL "https://mirror.openshift.com/pub/openshift-v4/${OCARCH}/clients/ocp/${OC_CHANNEL}/openshift-client-linux.tar.gz" \
+      -o /tmp/oc.tgz; \
+    tar -xzf /tmp/oc.tgz -C /usr/local/bin oc; \
+    rm -f /tmp/oc.tgz; \
+    chmod +x /usr/local/bin/oc; \
+    /usr/local/bin/oc version --client=true
+# Educates base runs as uid 1001; restore it.
+USER 1001

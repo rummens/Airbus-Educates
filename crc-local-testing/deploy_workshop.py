@@ -45,7 +45,7 @@ def oc_delete(ctx, kind, name):
     sh(["oc", "--context", ctx, "delete", kind, name, "--ignore-not-found", "--wait=false"])
 
 
-def build_workshop(name, url, ref, subpath, budget, apps, vcluster, keep_image, title, desc):
+def build_workshop(name, url, ref, subpath, budget, apps, vcluster, image, registry, title, desc):
     inc = [f"/{subpath}/workshop/**", f"/{subpath}/exercises/**", f"/{subpath}/README.md"]
     application = {a: {"enabled": True} for a in apps}
     if "terminal" in application:
@@ -54,6 +54,8 @@ def build_workshop(name, url, ref, subpath, budget, apps, vcluster, keep_image, 
         "namespaces": {"budget": budget, "security": {"token": {"enabled": True}}},
         "applications": application,
     }
+    if registry:                                     # DCS_REGISTRY for exercise manifests
+        session["env"] = [{"name": "DCS_REGISTRY", "value": registry}]
     if vcluster:
         application["vcluster"] = {"enabled": True}
         session["namespaces"]["budget"] = "large"      # vcluster needs large
@@ -67,8 +69,8 @@ def build_workshop(name, url, ref, subpath, budget, apps, vcluster, keep_image, 
         }]
     workshop = {"files": [{"git": {"url": url, "ref": ref},
                            "includePaths": inc, "newRootPath": subpath}]}
-    if keep_image:
-        workshop["image"] = "$(image_repository)/dcs-workshop-base:$(workshop_version)"
+    if image:
+        workshop["image"] = image
     return {
         "apiVersion": "training.educates.dev/v1beta1", "kind": "Workshop",
         "metadata": {"name": name},
@@ -88,8 +90,10 @@ def main():
     p.add_argument("--apps", default="terminal,editor,console,examiner",
                    help="comma list of session applications")
     p.add_argument("--vcluster", action="store_true", help="run in a per-session vcluster")
-    p.add_argument("--keep-image", action="store_true",
-                   help="keep the dcs-workshop-base image (default: use base-environment)")
+    p.add_argument("--image", default="ghcr.io/rummens/dcs-workshop-base:dev",
+                   help="workshop container image; pass '' to use the default base-environment")
+    p.add_argument("--registry", default="ghcr.io/rummens",
+                   help="DCS_REGISTRY value for exercise image refs; pass '' to omit")
     p.add_argument("--wait", type=int, default=300, help="seconds to wait for Running (0=don't)")
     p.add_argument("--delete", action="store_true", help="tear down instead of deploy")
     args = p.parse_args()
@@ -108,7 +112,7 @@ def main():
     subpath = f"{args.base}/{name}"
     apps = [a.strip() for a in args.apps.split(",") if a.strip()]
     ws = build_workshop(name, url, args.ref, subpath, args.budget, apps, args.vcluster,
-                        args.keep_image, title=name, desc=f"{name} (CRC test, git source)")
+                        args.image, args.registry, title=name, desc=f"{name} (CRC test, git source)")
 
     # idempotent: drop any prior env/session so content re-pulls fresh
     oc_delete(ctx, "workshopsession", session_name)

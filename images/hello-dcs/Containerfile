@@ -1,0 +1,15 @@
+# DCS Academy sample application: a tiny "Hello DCS" HTTP server on :8080.
+#
+# Built on Red Hat UBI9 nginx — a hardened, Red Hat-supported base that runs
+# non-root and tolerates OpenShift's arbitrary assigned UID out of the box,
+# so it deploys cleanly under the restricted security policy.
+FROM registry.access.redhat.com/ubi9/nginx-124:latest
+
+LABEL org.opencontainers.image.source="https://github.com/rummens/Airbus-Educates" \
+      org.opencontainers.image.description="DCS Academy sample app (hello-dcs)"
+
+# The UBI9 nginx image serves /opt/app-root/src on port 8080 by default.
+COPY index.html /opt/app-root/src/index.html
+
+# Default CMD from the base image starts nginx serving the doc root on 8080.
+CMD ["nginx", "-g", "daemon off;"]
