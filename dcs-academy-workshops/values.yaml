@@ -21,7 +21,7 @@ global:
 # Cluster wildcard ingress domain. Per-cluster — override via the ArgoCD env file
 # (argocd/envs/workshops-<cluster>.yaml). Used for the portal UI host, the auth
 # proxy host, and the optional explicit Route.
-ingressDomain: apps.test.ocp.globomantics.com
+ingressDomain: apps-crc.testing
 
 # -----------------------------------------------------------------------------
 # The portal that hosts the workshops below.

@@ -14,7 +14,6 @@ spec:
     repoURL: https://github.com/rummens/Airbus-Educates
     targetRevision: main
     path: dcs-academy-kapp-controller
-    helm: {}
   destination:
     server: https://kubernetes.default.svc
     namespace: kapp-controller

@@ -37,7 +37,7 @@ educates:
 
   # Cluster wildcard ingress domain. Default = the x86 test cluster; override per
   # cluster (CRC uses apps-crc.testing).
-  ingressDomain: apps.test.ocp.globomantics.com
+  ingressDomain: apps-crc.testing
 
   # Ingress protocol + TLS. https makes Educates put TLS on every ingress (portal
   # AND each workshop session) so the OpenShift Router edge-terminates with a real
@@ -47,7 +47,7 @@ educates:
   ingress:
     protocol: https
     tlsCertificateRef:
-      name: globomantics-ingress-cert
+      name: router-certs-default
       namespace: openshift-ingress
 
   # UI theming stubs. Injected into the Educates platform websiteStyling so the

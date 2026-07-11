@@ -17,7 +17,6 @@ spec:
     repoURL: https://github.com/rummens/Airbus-Educates
     targetRevision: main
     path: dcs-academy-platform
-    helm: {}
   destination:
     server: https://kubernetes.default.svc
     # Static platform release namespace (dcs-). Holds the helm release + monitoring

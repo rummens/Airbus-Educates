@@ -18,7 +18,6 @@ spec:
     repoURL: https://github.com/rummens/Airbus-Educates
     targetRevision: main
     path: dcs-academy-workshops
-    helm: {}
   destination:
     server: https://kubernetes.default.svc
     # Static release ns for the portal/workshop CRs + oauth-proxy (dcs-).
