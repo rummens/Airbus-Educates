@@ -78,38 +78,73 @@ def build_workshop(name, url, ref, subpath, budget, apps, vcluster, image, regis
     }
 
 
-def main():
-    p = argparse.ArgumentParser(description="Deploy a DCS workshop to CRC (portal-less, git source).")
-    p.add_argument("name", help="workshop dir name, e.g. lab-a02-kubernetes-essentials")
-    p.add_argument("--id", default="01")
-    p.add_argument("--context", default="crc-admin")
-    p.add_argument("--git-url", default=None, help="default: repo origin remote")
-    p.add_argument("--ref", default="origin/main")
-    p.add_argument("--base", default=DEFAULT_BASE, help="path prefix of workshops in the repo")
-    p.add_argument("--budget", default="medium")
-    p.add_argument("--apps", default="terminal,editor,console,examiner",
-                   help="comma list of session applications")
-    p.add_argument("--vcluster", action="store_true", help="run in a per-session vcluster")
-    p.add_argument("--image", default="ghcr.io/rummens/dcs-workshop-base:dev",
-                   help="workshop container image; pass '' to use the default base-environment")
-    p.add_argument("--registry", default="ghcr.io/rummens",
-                   help="DCS_REGISTRY value for exercise image refs; pass '' to omit")
-    p.add_argument("--wait", type=int, default=300, help="seconds to wait for Running (0=don't)")
-    p.add_argument("--delete", action="store_true", help="tear down instead of deploy")
-    args = p.parse_args()
+def is_workshop_dir(d):
+    return (d / "resources" / "workshop.yaml").exists()
 
-    ctx, name, sid = args.context, args.name, args.id
-    session_name = f"{name}-w{sid}"
 
-    if args.delete:
-        oc_delete(ctx, "workshopsession", session_name)
-        oc_delete(ctx, "workshopenvironment", name)
-        oc_delete(ctx, "workshop", name)
-        print(f"deleted {name} (workshop, env, session)")
+def resolve_targets(name, base):
+    """Map the positional into a list of (workshop_name, repo_relative_subpath).
+
+    Accepts a single workshop dir name (under --base), OR a path to a parent
+    folder holding several workshop dirs (deploy them all). The subpath must be
+    inside the repo — the git file source pulls from there.
+    """
+    by_base = REPO_ROOT / base / name
+    if is_workshop_dir(by_base):                       # single workshop under --base
+        return [(name, f"{base}/{name}")]
+
+    given = pathlib.Path(name)
+    given = given if given.is_absolute() else (REPO_ROOT / given)
+
+    for cand in (by_base, given):                      # parent folder → all child workshops
+        if cand.is_dir():
+            try:
+                rel_parent = cand.resolve().relative_to(REPO_ROOT)
+            except ValueError:
+                sys.exit(f"{cand} is outside the repo ({REPO_ROOT}); the git source can only pull in-repo paths.")
+            kids = sorted(d for d in cand.iterdir() if d.is_dir() and is_workshop_dir(d))
+            if kids:
+                return [(d.name, f"{rel_parent}/{d.name}") for d in kids]
+
+    if is_workshop_dir(given):                          # a path straight to one workshop
+        return [(given.name, str(given.resolve().relative_to(REPO_ROOT)))]
+
+    return [(name, f"{base}/{name}")]                   # fall back to single name (may be built elsewhere)
+
+
+def list_labs(ctx):
+    """Print all deployed workshop sessions with their phase and URL."""
+    r = sh(["oc", "--context", ctx, "get", "workshopsession",
+            "-o", "custom-columns=SESSION:.metadata.name,ENVIRONMENT:.spec.environment.name,"
+            "PHASE:.status.educates.phase,URL:.status.educates.url", "--no-headers"])
+    if r.returncode:
+        sys.stderr.write(r.stderr)
+        sys.exit("could not list workshop sessions")
+    rows = [ln for ln in r.stdout.splitlines() if ln.strip()]
+    if not rows:
+        print("no workshop sessions deployed.")
         return
+    print(f"{'SESSION':<40} {'PHASE':<12} URL")
+    for ln in rows:
+        parts = ln.split()
+        sess = parts[0] if parts else "?"
+        phase = parts[2] if len(parts) > 2 else "-"
+        url = parts[3] if len(parts) > 3 and parts[3] != "<none>" else ""
+        print(f"{sess:<40} {phase:<12} {url}")
+    print(f"\n{len(rows)} session(s).")
 
+
+def delete_one(ctx, name, sid):
+    oc_delete(ctx, "workshopsession", f"{name}-w{sid}")
+    oc_delete(ctx, "workshopenvironment", name)
+    oc_delete(ctx, "workshop", name)
+    print(f"deleted {name} (workshop, env, session)")
+
+
+def deploy_one(args, name, subpath):
+    ctx, sid = args.context, args.id
+    session_name = f"{name}-w{sid}"
     url = args.git_url or git_remote_url()
-    subpath = f"{args.base}/{name}"
     apps = [a.strip() for a in args.apps.split(",") if a.strip()]
     ws = build_workshop(name, url, args.ref, subpath, args.budget, apps, args.vcluster,
                         args.image, args.registry, title=name, desc=f"{name} (CRC test, git source)")
@@ -170,6 +205,52 @@ def main():
         print("note: editor/console are separate hosts with the CRC self-signed cert. If their\n"
               "      dashboard tab shows 'temporarily down', open the URL above once and accept\n"
               "      the cert (or trust the CRC ingress CA once — see crc-local-testing/README).")
+
+
+def main():
+    p = argparse.ArgumentParser(description="Deploy a DCS workshop to CRC (portal-less, git source).")
+    p.add_argument("name", nargs="?",
+                   help="workshop dir name (e.g. lab-a02-kubernetes-essentials) OR a parent "
+                        "folder holding several workshop dirs (deploys all of them). Omit with --list.")
+    p.add_argument("--id", default="01")
+    p.add_argument("--context", default="crc-admin")
+    p.add_argument("--git-url", default=None, help="default: repo origin remote")
+    p.add_argument("--ref", default="origin/main")
+    p.add_argument("--base", default=DEFAULT_BASE, help="path prefix of workshops in the repo")
+    p.add_argument("--budget", default="medium")
+    p.add_argument("--apps", default="terminal,editor,console,examiner",
+                   help="comma list of session applications")
+    p.add_argument("--vcluster", action="store_true", help="run in a per-session vcluster")
+    p.add_argument("--image", default="ghcr.io/rummens/dcs-workshop-base:dev",
+                   help="workshop container image; pass '' to use the default base-environment")
+    p.add_argument("--registry", default="ghcr.io/rummens",
+                   help="DCS_REGISTRY value for exercise image refs; pass '' to omit")
+    p.add_argument("--wait", type=int, default=300, help="seconds to wait for Running (0=don't)")
+    p.add_argument("--delete", action="store_true", help="tear down instead of deploy")
+    p.add_argument("--list", action="store_true", help="list all deployed workshop sessions and exit")
+    args = p.parse_args()
+
+    if args.list:
+        list_labs(args.context)
+        return
+
+    if not args.name:
+        p.error("a workshop name or parent folder is required (or use --list)")
+
+    targets = resolve_targets(args.name, args.base)
+    if len(targets) > 1:
+        print(f"{'deleting' if args.delete else 'deploying'} {len(targets)} workshops: "
+              f"{', '.join(n for n, _ in targets)}\n")
+
+    for i, (name, subpath) in enumerate(targets, 1):
+        if len(targets) > 1:
+            print(f"===== [{i}/{len(targets)}] {name} =====")
+        if args.delete:
+            delete_one(args.context, name, args.id)
+        else:
+            deploy_one(args, name, subpath)
+        if len(targets) > 1:
+            print()
 
 
 if __name__ == "__main__":

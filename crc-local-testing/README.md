@@ -12,6 +12,13 @@ Two helpers automate the flow below (stdlib Python only; default `--context crc-
 # runs on the stock base-environment). --vcluster / --delete / --keep-image.
 ./deploy_workshop.py lab-a02-kubernetes-essentials
 
+# list every deployed session (name, phase, URL):
+./deploy_workshop.py --list
+
+# deploy ALL workshops under a parent folder at once (also works with --delete):
+./deploy_workshop.py dcs-academy/workshops
+./deploy_workshop.py dcs-academy/workshops --delete
+
 # run the workshop's smoke test (setup steps + every examiner check) in the
 # live session pod. --oc-shim aliases oc->kubectl so oc-based workshops run on
 # the stock base image before dcs-workshop-base (with real oc) exists.
