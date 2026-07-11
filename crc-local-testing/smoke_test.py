@@ -26,14 +26,50 @@ Examples:
   ./smoke_test.py lab-a02-kubernetes-essentials --oc-shim
   ./smoke_test.py lab-a01-what-is-dcs
 """
-import argparse, json, subprocess, sys, pathlib
+import argparse, json, re, subprocess, sys, pathlib
 
 HERE = pathlib.Path(__file__).resolve().parent
 GREEN, RED, DIM, RST = "\033[32m", "\033[31m", "\033[2m", "\033[0m"
+# hosts to skip in link checking: placeholders, in-cluster/demo hosts, session routes
+LINK_SKIP = ("example.dcs", "example.com", "localhost", ".svc", "apps-crc.testing")
 
 
 def sh(args, **kw):
     return subprocess.run(args, capture_output=True, text=True, **kw)
+
+
+def check_links(content_dir):
+    """Extract external http(s) links from workshop markdown and verify each is reachable."""
+    urls = set()
+    for f in content_dir.rglob("*.md"):
+        for m in re.findall(r'https?://[^\s)>\]"\'`]+', f.read_text()):
+            u = m.rstrip('.,;:')
+            if "{{<" in u or "$" in u:                 # unrendered param / shell var
+                continue
+            if any(s in u for s in LINK_SKIP):          # placeholder / non-public
+                continue
+            urls.add(u)
+    print(f"\nlink check ({len(urls)} external links):")
+    bad = 0
+    for u in sorted(urls):
+        code = sh(["curl", "-sSL", "-m", "20", "-A", "Mozilla/5.0",
+                   "-o", "/dev/null", "-w", "%{http_code}", u]).stdout.strip()
+        ok = bool(code) and code[0] in "23"             # 2xx/3xx = reachable
+        bad += 0 if ok else 1
+        tag = f"{GREEN}{code or 'ERR'}{RST}" if ok else f"{RED}{code or 'ERR'}{RST}"
+        print(f"  {tag}  {u}")
+    return bad
+
+
+def restart_session(ctx, name, sid):
+    """Delete + recreate the WorkshopSession so the next user starts clean."""
+    sn = f"{name}-w{sid}"
+    sh(["oc", "--context", ctx, "delete", "workshopsession", sn, "--ignore-not-found", "--wait=true"])
+    sh(["oc", "--context", ctx, "apply", "-f", "-"], input=json.dumps({
+        "apiVersion": "training.educates.dev/v1beta1", "kind": "WorkshopSession",
+        "metadata": {"name": sn},
+        "spec": {"environment": {"name": name},
+                 "session": {"id": sid, "username": "educates", "password": "educates"}}}))
 
 
 def find_pod(ctx, ns, prefix):
@@ -61,6 +97,10 @@ def main():
     p.add_argument("--workdir", default="/home/eduk8s/exercises")
     p.add_argument("--oc-shim", action="store_true", help="alias oc->kubectl on PATH in the pod")
     p.add_argument("--timeout", type=int, default=180, help="per-step timeout (s)")
+    p.add_argument("--content-base", default=str(HERE.parent / "dcs-academy" / "workshops"),
+                   help="repo path holding <workshop>/workshop/content for link checking")
+    p.add_argument("--no-links", action="store_true", help="skip external link checking")
+    p.add_argument("--no-restart", action="store_true", help="don't restart the session at the end")
     args = p.parse_args()
 
     plan_path = pathlib.Path(args.plan) if args.plan else HERE / "smoke-plans" / f"{args.name}.json"
@@ -104,8 +144,25 @@ def main():
             if diag:
                 print(f"        {DIM}{diag[-1]}{RST}")
 
-    print(f"\n{passed} passed, {failed} failed of {passed + failed}")
-    sys.exit(1 if failed else 0)
+    link_bad = 0
+    if not args.no_links:
+        cdir = pathlib.Path(args.content_base) / args.name / "workshop" / "content"
+        if cdir.exists():
+            link_bad = check_links(cdir)
+        else:
+            print(f"\n(no content dir {cdir}; skipping link check)")
+
+    summary = f"\n{passed} passed, {failed} failed of {passed + failed}"
+    if not args.no_links:
+        summary += f"; links: {link_bad} unreachable"
+    print(summary)
+
+    if not args.no_restart:
+        print("\nrestarting session for a clean start...")
+        restart_session(args.context, args.name, args.id)
+        print(f"session {args.name}-w{args.id} recreated (fresh).")
+
+    sys.exit(1 if (failed or link_bad) else 0)
 
 
 if __name__ == "__main__":

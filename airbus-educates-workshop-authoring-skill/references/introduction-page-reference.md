@@ -16,6 +16,16 @@ The page must contain the following, in this order. Use `##` headings (never `#`
 
    Follow with one or two sentences describing what the workshop covers (the subject, not the Educates platform).
 
+1a. **First-time note (mandatory).** Immediately after the framing, add a short note for first-time learners pointing to the environment guide, so newcomers learn the terminal/editor/console/actions before diving in. Link the internal guide via the `dcs_docs_base_url` param:
+
+   ```markdown
+   {{< note >}}
+   **First time in one of these labs?** Take two minutes to read the
+   [DCS Academy environment guide]({{< param dcs_docs_base_url >}}/academy/environment-guide) —
+   it explains the terminal, editor, console, slides and the clickable actions you'll use here.
+   {{< /note >}}
+   ```
+
 2. **What you'll learn.** A short bulleted list of concrete learning objectives — what the learner will be able to *do* afterwards. Align these with the workshop plan's learning objectives if one exists.
 
 3. **Prerequisites.** What prior knowledge is assumed, and any concepts the learner should already understand. Link the docs for each named prerequisite concept (see [documentation-links-reference.md](documentation-links-reference.md)) so a learner who is missing background can catch up. Example:
@@ -48,6 +58,12 @@ title: Workshop Overview
 
 Welcome to this workshop, part of **{{< param product_name >}}**. In it you will
 <one-sentence description of the subject and the goal>.
+
+{{< note >}}
+**First time in one of these labs?** Take two minutes to read the
+[DCS Academy environment guide]({{< param dcs_docs_base_url >}}/academy/environment-guide) —
+it explains the terminal, editor, console, slides and the clickable actions you'll use here.
+{{< /note >}}
 
 ## What You'll Learn
 
@@ -88,6 +104,7 @@ Commands are run with `oc` in the terminal.
 
 - [ ] `workshop/content/00-workshop-overview.md` exists
 - [ ] Opens with `{{< param product_name >}}` framing — no hardcoded product name
+- [ ] Has the first-time note linking the environment guide via `{{< param dcs_docs_base_url >}}`
 - [ ] Contains: What You'll Learn, Prerequisites, Your Environment, Time and Difficulty
 - [ ] Every named concept in Prerequisites/Further Reading links to official docs
 - [ ] Duration and difficulty match `workshop.yaml`

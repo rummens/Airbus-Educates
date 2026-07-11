@@ -5,7 +5,7 @@ metadata:
 spec:
   title: Kubernetes Essentials on DCS
   description: Deploy your first workload on DCS with oc — Pods, Deployments, and Services — and learn to inspect and scale it.
-  duration: 45m
+  duration: 40m
   difficulty: beginner
   labels:
     module: "A-Foundations"

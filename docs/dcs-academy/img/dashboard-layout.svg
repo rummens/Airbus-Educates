@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 380" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="380" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="26" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">DCS Academy workshop dashboard</text>
+
+  <!-- left: instructions -->
+  <rect x="20" y="46" width="300" height="314" rx="6" fill="#ffffff" stroke="#8aa0b4"/>
+  <rect x="20" y="46" width="300" height="26" rx="6" fill="#1b2b3a"/>
+  <text x="170" y="64" text-anchor="middle" font-size="12" fill="#ffffff">Instructions (this text)</text>
+  <text x="34" y="96" font-size="11" fill="#1b2b3a">Step-by-step content.</text>
+  <text x="34" y="116" font-size="11" fill="#5a6b7b">Blue boxes are clickable</text>
+  <text x="34" y="132" font-size="11" fill="#5a6b7b">actions — click to run.</text>
+  <rect x="34" y="146" width="272" height="30" rx="4" fill="#e8f0f7" stroke="#3b7dd8"/>
+  <text x="44" y="165" font-size="10" fill="#1b4a86" font-family="monospace">$ oc get pods   ▶ click to run</text>
+  <rect x="34" y="184" width="272" height="30" rx="4" fill="#eef3ee" stroke="#4a9a5a"/>
+  <text x="44" y="203" font-size="10" fill="#2c6a3a">✓ Verify deployment ready (examiner)</text>
+
+  <!-- right: tabbed work area -->
+  <rect x="340" y="46" width="400" height="314" rx="6" fill="#ffffff" stroke="#8aa0b4"/>
+  <!-- tabs -->
+  <rect x="340" y="46" width="80" height="26" fill="#1b2b3a"/>
+  <text x="380" y="64" text-anchor="middle" font-size="11" fill="#ffffff">Terminal</text>
+  <rect x="420" y="46" width="70" height="26" fill="#3a4a5a"/>
+  <text x="455" y="64" text-anchor="middle" font-size="11" fill="#cdd7e0">Editor</text>
+  <rect x="490" y="46" width="80" height="26" fill="#3a4a5a"/>
+  <text x="530" y="64" text-anchor="middle" font-size="11" fill="#cdd7e0">Console</text>
+  <rect x="570" y="46" width="70" height="26" fill="#3a4a5a"/>
+  <text x="605" y="64" text-anchor="middle" font-size="11" fill="#cdd7e0">Slides</text>
+  <!-- split terminal -->
+  <rect x="352" y="84" width="180" height="264" rx="4" fill="#0f1720"/>
+  <text x="362" y="104" font-size="10" fill="#7fd88f" font-family="monospace">~/exercises $ _</text>
+  <text x="362" y="120" font-size="9" fill="#5a6b7b" font-family="monospace">(left terminal)</text>
+  <rect x="548" y="84" width="180" height="264" rx="4" fill="#0f1720"/>
+  <text x="558" y="104" font-size="10" fill="#7fd88f" font-family="monospace">~/exercises $ _</text>
+  <text x="558" y="120" font-size="9" fill="#5a6b7b" font-family="monospace">(right terminal)</text>
+  <text x="540" y="360" text-anchor="middle" font-size="10" fill="#5a6b7b">Terminal shown split; Editor / Console / Slides open in this same area via their tabs.</text>
+</svg>

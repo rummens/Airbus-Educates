@@ -30,6 +30,12 @@ Each layer owns the one below. When you change the image or replica count on the
 Deployment, it creates a new ReplicaSet or adjusts the existing one, which in turn
 creates or removes Pods.
 
+![Deployment owns ReplicaSet owns Pods](ownership-chain.svg)
+
+If you've worked with VMs, it's like a **scale-set**: you manage the group definition,
+and the platform creates and maintains the individual instances for you — you don't
+hand-place each one.
+
 Confirm the Pod is running:
 
 ```terminal:execute

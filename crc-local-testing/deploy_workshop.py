@@ -141,12 +141,31 @@ def main():
             break
         time.sleep(5)
     print(f"phase: {phase or '(unknown)'}")
-    if phase == "Running":
-        print(f"URL:   {url_}")
-        print("login: educates / educates  (accept the self-signed cert)")
-    else:
+    if phase != "Running":
         sys.exit("session did not reach Running in time; check "
                  f"'oc --context {ctx} get workshopsession {session_name} -o yaml'")
+
+    # App routes are created per enabled application (editor-/console-<session>).
+    # phase=Running can precede the app backends being ready, so wait for the
+    # editor to actually answer before declaring done — that's the "editor page
+    # temporarily down" the user hit when opening it too early.
+    editor = url_.replace("https://", "https://editor-", 1)
+    console = url_.replace("https://", "https://console-", 1)
+    if url_:
+        end = time.time() + 90
+        while time.time() < end:
+            code = sh(["curl", "-sk", "-m", "5", "-o", "/dev/null", "-w", "%{http_code}",
+                       "-u", "educates:educates", editor]).stdout.strip()
+            if code == "200":
+                break
+            print(f"waiting for editor to be ready (http {code or '...'})")
+            time.sleep(5)
+    print("login: educates / educates  (accept the self-signed cert)")
+    print(f"dashboard: {url_}")
+    if "editor" in apps:
+        print(f"editor:    {editor}")
+    if "console" in apps:
+        print(f"console:   {console}")
 
 
 if __name__ == "__main__":

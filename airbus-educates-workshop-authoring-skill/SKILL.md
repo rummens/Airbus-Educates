@@ -152,7 +152,7 @@ spec:
 
 - Set `metadata.name` to the workshop name
 - Set `spec.title` and `spec.description` from gathered details
-- Set `spec.duration` to estimated completion time (e.g., `15m`, `30m`, `1h`). **Prefer 30–60 minutes per workshop.** But depth wins: never thin explanations to hit a time box. If full, well-explained coverage runs long, **split into more sequential workshops** (each still deep) rather than compressing out the *why* — a dense foundational topic may legitimately run 60–90 minutes. See [references/content-depth-reference.md](references/content-depth-reference.md).
+- Set `spec.duration` to estimated completion time (e.g., `15m`, `30m`, `1h`). **Estimate realistically and err low** — guided clickable content goes fast (~3 min/page + real waits), so a ~10-page Foundations workshop is typically 30–40 minutes, not 60+. An inflated estimate deters learners. Depth still wins on *content*: if full coverage is genuinely large, **split into more workshops** rather than thinning — but that lengthens the course, not each lab. See [references/content-depth-reference.md](references/content-depth-reference.md).
 - Set `spec.difficulty` to one of: `beginner`, `intermediate`, `advanced`, `extreme`
 - Always include terminal with `enabled: true` and `layout: split`
 - Enable only the additional session applications the workshop requires

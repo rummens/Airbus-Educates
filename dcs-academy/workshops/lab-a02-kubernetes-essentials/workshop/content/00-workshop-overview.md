@@ -6,6 +6,12 @@ Welcome back. In this workshop, part of **{{< param product_name >}}**, you'll l
 core Kubernetes building blocks you use in every {{< param product_short >}} project —
 by deploying a real application and taking it apart to see how it works.
 
+{{< note >}}
+**First time in one of these labs?** Take two minutes to read the
+[DCS Academy environment guide]({{< param dcs_docs_base_url >}}/academy/environment-guide) —
+it explains the terminal, editor, console, slides and the clickable actions you'll use here.
+{{< /note >}}
+
 It helps to picture Kubernetes in four layers:
 
 - **Infrastructure** — the cluster and its nodes (managed for you on {{< param product_short >}}).
@@ -41,5 +47,5 @@ A **split terminal**, an editor, and the web console, connected to your own
 
 ## Time and Difficulty
 
-- **Estimated time:** 75 minutes
+- **Estimated time:** 40 minutes
 - **Difficulty:** Beginner → Intermediate

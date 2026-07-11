@@ -30,6 +30,17 @@ Here `Deployment` → upstream (standard construct); `dev namespace` → DCS por
 
 `dcs_docs_base_url` is one of the mandatory param trio (`product_name`, `dcs_registry`, `dcs_docs_base_url`) — see [workshop-variables-reference.md](workshop-variables-reference.md). It defaults to a placeholder and is re-pointable without a rebuild.
 
+## Reference internal documentation for depth and procedures
+
+Beyond linking a concept's docs, actively point learners at **internal DCS documentation** where it adds value — procedures the workshop only summarises (requesting a quota increase, image mirroring, onboarding a tenant — all ITSM flows), and deeper reading on DCS-specific concepts. Link via the `dcs_docs_base_url` param so it re-points without a rebuild:
+
+```markdown
+On DCS, a quota increase is requested through an ITSM ticket — see
+[Requesting a quota increase]({{< param dcs_docs_base_url >}}/quotas/increase).
+```
+
+Prefer internal docs for anything DCS-operational (the workshop teaches the concept; the internal doc is the source of truth for the real-world procedure). Like analogies, this can taper as courses advance — early workshops hand-hold with links to onboarding/how-to pages; advanced ones assume the learner knows where the portal is.
+
 ## Canonical documentation bases
 
 Use these roots to construct links. Confirm the exact deep path when in doubt; these are the stable entry points.

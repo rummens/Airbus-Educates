@@ -5,7 +5,7 @@
 - **Name:** `lab-a02-kubernetes-essentials`
 - **Title:** Kubernetes Essentials on DCS
 - **Description:** Deploy your first workload on DCS with `oc` — Pods, Deployments, and Services — and learn to inspect and scale it.
-- **Duration:** 75m (depth over brevity — one concept per page; see content-depth reference)
+- **Duration:** 40m (guided, clickable — most finish faster than the page count suggests)
 - **Difficulty:** beginner → intermediate
 - **Type:** Core (Module A — Foundations)
 - **Prerequisites:** A01 (What is DCS?)

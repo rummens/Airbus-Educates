@@ -9,6 +9,12 @@ images fit, and how to work in your environment using the `oc` command line.
 This is the first workshop in the Foundations track. It assumes **no prior container
 or Kubernetes knowledge**.
 
+{{< note >}}
+**First time in one of these labs?** Take two minutes to read the
+[DCS Academy environment guide]({{< param dcs_docs_base_url >}}/academy/environment-guide) —
+it explains the terminal, editor, console, slides and the clickable actions you'll use here.
+{{< /note >}}
+
 ## What You'll Learn
 
 By the end of this workshop you will be able to:
