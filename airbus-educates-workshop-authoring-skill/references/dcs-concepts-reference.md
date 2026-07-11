@@ -12,28 +12,30 @@ Standard constructs mentioned alongside these (Deployment, Secret, ServiceAccoun
 ## DCS terminology (use these exact terms)
 
 - **Namespace as a Service (NaaS)** — DCS's core offering; a namespace is the unit teams consume.
-- **Tenant** — a team/organisation; owns one or more Projects/Namespaces.
-- **DEV namespace** / **PROD namespace** — the two namespace lifecycle types, with different controls.
+- **Tenant** — a team/organisation (org level, used for recharging & accountability); owns one or more **Namespaces**. There is **no separate "project" layer** — "project" is just OpenShift's word for a namespace.
+- **DEV namespace** / **PROD namespace** — the two namespace lifecycle types, with different controls. The concrete difference: **PROD enforces Kyverno admission policies; DEV does not.**
 - **Shared cluster** (default, recommended) vs **Dedicated Managed cluster**.
 - **Catalog** — how images are made available: DCS Catalogs, Allowed External Registries, and the Proxy-Cached Catalog.
-- **Robot account** — non-human credential for pushing/pulling to Harbor.
-- **ITSM request / incident** — the self-service ticket workflow for quota increases, image mirroring, repo requests, and security exceptions.
+- **Robot account** — non-human credential for pulling from (and, with a dedicated project, pushing to) Harbor. Foundations uses read-only pull.
+- **ITSM request / incident** — the self-service ticket workflow for quota increases, image mirroring, repo requests, security exceptions, and S3 storage provisioning.
 
 ## Core DCS concepts
 
-### Tenancy: Namespace, Project, Tenant
+### Tenancy: Tenant → Namespaces
 
-**Blurb:** DCS uses a three-level model. A **Kubernetes Namespace** is the low-level isolation boundary; an **OpenShift Project** wraps a namespace with additional access controls; a **Tenant** is the team/organisation that owns one or more projects. Isolation between tenants on a shared cluster is enforced with RBAC and Network Policies. Access is via SSO; a tenant only ever sees its own projects.
+**Blurb:** DCS uses a **two-level** model. A **Tenant** is the team/organisation — the org-level unit used for recharging and accountability — and it owns one or more **Namespaces** (DEV/PROD types). There is **no separate "project" layer**: on OpenShift, "project" is simply another word for a namespace, not a distinct level. Isolation between tenants on a shared cluster is enforced with RBAC and Network Policies. Access is via SSO; a tenant only ever sees its own namespaces.
 
-- Path (placeholder): `/tenancy/namespaces-projects-tenants`
-- Taught in: Foundations A05. Underpins every track.
+- Path (placeholder): `/tenancy/tenants-and-namespaces`
+- Taught in: Foundations A05 (basics) and A08 (RBAC depth). Underpins every track.
+- **Do not** teach a Namespace→Project→Tenant three-level model (an earlier draft did — it is wrong).
 
 ### Namespace as a Service (NaaS) — DEV vs PROD lifecycle
 
-**Blurb:** DCS delivers namespaces as a service. Each namespace is a **DEV** or **PROD** type with a distinct lifecycle. DEV favours fast iteration and looser controls; PROD enforces stricter policy and change control. Work is **promoted** from DEV to PROD rather than edited in place. (Notably, PROD namespaces cannot pull from the Proxy-Cached Catalog — see Registry.)
+**Blurb:** DCS delivers namespaces as a service. Each namespace is a **DEV** or **PROD** type with a distinct lifecycle. DEV favours fast iteration and looser controls; **PROD enforces Kyverno admission policies** (the concrete DEV-vs-PROD difference) plus stricter change control. Work is **promoted** from DEV to PROD rather than edited in place. (Notably, PROD namespaces cannot pull from the Proxy-Cached Catalog — see Registry — and an OpenShift Route requires a PROD-type namespace — see Networking.)
 
 - Path (placeholder): `/naas/dev-prod-lifecycle`
 - Taught in: Foundations A03. Represented in-session via a virtual cluster so both types are visible.
+- **Kyverno** is a standard construct → link [kyverno.io](https://kyverno.io/docs/) upstream; the DCS *policy set* is DCS-specific.
 
 ### Cluster types (shared vs dedicated)
 
@@ -48,14 +50,16 @@ Standard constructs mentioned alongside these (Deployment, Secret, ServiceAccoun
 
 - Path (placeholder): `/registry/overview`
 - Taught in: Foundations A04; deepened in Security C01 (scan gates) and C04 (supply chain / mirroring).
+- **Foundations A04 is pull-only** and uses **`skopeo`** (daemonless — no `docker`/`podman` inside a workshop container, to avoid double-virtualization). **Pushing** needs a dedicated Harbor project + push-capable robot account and is taught as a concept only. The read-only robot account is provided to the session.
 - All image references in workshops resolve to Harbor — see [air-gapped-images-reference.md](air-gapped-images-reference.md).
 
 ### Networking — Service, Route, Load Balancer, Network Policies
 
-**Blurb:** An app is reached in-cluster via a **Service**, exposed externally via an OpenShift **Route**, which is fronted by an **External Load Balancer** at the cluster edge, using DCS-managed DNS. On the shared cluster, **Network Policies** (matching on labels) control which workloads may talk to each other — the default posture is restrictive, and egress is limited (air-gapped).
+**Blurb:** An app is reached in-cluster via a **Service**, exposed externally via an OpenShift **Route**, which is fronted by an **External Load Balancer** at the cluster edge, using DCS-managed DNS. **A Route requires a PROD-type namespace** on DCS (Kyverno enforces this). On the shared cluster, **Network Policies** (matching on labels) control which workloads may talk to each other — the default posture is restrictive, and egress is limited (air-gapped).
 
 - Path (placeholder): `/networking/overview`
 - Taught in: Foundations A06. Network Policies revisited in Security track.
+- **Tenants cannot self-create Network Policies yet** (on the DCS roadmap) — teach NetworkPolicy as observe/concept (inspect a pre-provisioned one), not a hands-on create.
 - Follow the Route/session-proxy guidance in [openshift-reference.md](openshift-reference.md).
 
 ### Resource quotas & requests
@@ -78,6 +82,29 @@ Standard constructs mentioned alongside these (Deployment, Secret, ServiceAccoun
 
 - Path (placeholder): `/governance/overview`
 - Taught in: Security & Compliance track (C02, C05). Architect track references the responsibility split.
+
+### Storage — PVCs, storage classes, S3
+
+**Blurb:** DCS offers persistent storage through standard Kubernetes **PersistentVolumeClaims (PVCs)** backed by DCS **StorageClasses**. Two access types are available via PVC: **File** storage (shareable, RWX-capable) and **Block** storage (single-writer, RWO). The right storage class depends on **data and security classification** (multi-national residency) — different classifications may require different classes. **Object (S3) storage** is provisioned separately, **via an ITSM ticket to the storage team**, not through a PVC.
+
+- Path (placeholder): `/storage/overview`
+- Taught in: Foundations A07 (concept + persistence); Developer B05 (stateful deep dive).
+- Storage-class **names are variabilised** (`dcs_sc_file`, `dcs_sc_block`) — never hardcode them. `PersistentVolume`/`StorageClass`/`PersistentVolumeClaim` constructs → upstream.
+
+### RBAC on DCS
+
+**Blurb:** Access on DCS is scoped with Kubernetes **RBAC**: **Roles**/**ClusterRoles** define permissions (rules over apiGroups × resources × verbs), and **RoleBindings**/**ClusterRoleBindings** grant them to subjects (users, groups, ServiceAccounts). A tenant's access is confined to its own namespaces. Tenants may manage Roles/RoleBindings **within their own namespaces**; cluster-scoped RBAC is platform-managed (read-only to tenants).
+
+- Path (placeholder): `/concepts/rbac`
+- Taught in: Foundations A05 (basics — `oc auth can-i`, isolation) and A08 (depth — the objects). RBAC construct → upstream.
+
+### Operators & the DCS ownership model
+
+**Blurb:** DCS offers several platform services as **OpenShift Operators**, not as managed/aaS. An **Operator** is a controller that watches a **Custom Resource (CR)** — an instance of a type defined by a **CRD** — and continuously reconciles the managed application toward the desired state. Operators are installed cluster-wide by the platform via **OLM** (Operator Lifecycle Manager), surfaced through **OperatorHub**. The key DCS distinction: **the platform owns the operator (install, upgrades, CRD versions); the tenant owns the application instance** the operator manages — its sizing, config, data, backups, CR upgrades, and day-2 operations. This is *not* a managed DBaaS/SaaS where the provider owns day-2.
+
+- Path (placeholder): `/concepts/operators`
+- Taught in: Foundations A09 (concept + one CR). Applied per service in the Operators track (Module F: GitLab, Argo CD, CloudNativePG).
+- Operator pattern / CRD / CR / OLM / OperatorHub are standard constructs → link upstream (kubernetes.io Operator pattern, OpenShift Operators docs). The **ownership split** is the DCS-specific point → DCS docs + the Responsibility Matrix (see Governance).
 
 ## Adding a new DCS concept
 

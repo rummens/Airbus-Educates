@@ -28,7 +28,7 @@
 - Explain **Namespace as a Service (NaaS)** — namespaces as the DCS consumption unit.
 - Distinguish the **DEV** and **PROD** namespace lifecycle types and their differing controls.
 - Deploy a workload into a DEV namespace.
-- Inspect the constraints that differ in a PROD namespace (incl. that PROD cannot use the Proxy-Cached Catalog).
+- Inspect the constraints that differ in a PROD namespace: **PROD enforces Kyverno policies, DEV does not** (the concrete difference), and PROD cannot use the Proxy-Cached Catalog.
 - Explain promotion (DEV → PROD) at a conceptual level.
 
 ## 4. Connection to Previous Workshop
@@ -38,7 +38,8 @@ A02 taught Deployments/Services and `oc` inspection. Learner can deploy a worklo
 ## 5. Exercise Files to Create
 
 - `exercises/dev-namespace.yaml` — a Namespace (or DCS namespace request object) labelled as dev type.
-- `exercises/prod-namespace.yaml` — a Namespace labelled as prod type (stricter).
+- `exercises/prod-namespace.yaml` — a Namespace labelled as prod type (stricter — Kyverno policies enforced).
+- `exercises/kyverno-policy.yaml` — a representative Kyverno policy (or ClusterPolicy) that applies to PROD-type namespaces only, so the DEV-vs-PROD enforcement difference is demonstrable in the vcluster.
 - `exercises/hello-dcs.yaml` — combined Deployment+Service (from A02) to deploy into each.
 - `exercises/README.md` — placeholder.
 
@@ -47,14 +48,15 @@ A02 taught Deployments/Services and `oc` inspection. Learner can deploy a worklo
 ## 6. Workshop Instruction Pages
 
 - **`00-workshop-overview.md`** — intro page. DCS-specific framing: **NaaS / DEV-PROD lifecycle** blurb + link `{{< param dcs_docs_base_url >}}/naas/dev-prod-lifecycle` (placeholder path).
-- **`01-naas-and-namespace-types.md`** — concept. NaaS (namespaces as the unit); DEV vs PROD lifecycle: what differs (policy, change control, quotas, catalog access, promotion). Include a **quick-comparison DEV vs PROD** table (mirrors the customer docs). Inline blurb + DCS docs link. `Namespace` construct → [upstream](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/); OpenShift [Project](https://docs.openshift.com/container-platform/latest/rest_api/project_apis/project-project-openshift-io-v1.html) upstream.
+- **`01-naas-and-namespace-types.md`** — concept. NaaS (namespaces as the unit); DEV vs PROD lifecycle: what differs — the headline being **PROD enforces Kyverno admission policies, DEV does not** — plus change control, quotas, catalog access, promotion. Include a **quick-comparison DEV vs PROD** table (mirrors the customer docs) with the Kyverno-enforcement row called out. Introduce Kyverno briefly (policy-as-admission-control) + link [Kyverno](https://kyverno.io/docs/) upstream. Inline blurb + DCS docs link. `Namespace` construct → [upstream](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/); OpenShift [Project](https://docs.openshift.com/container-platform/latest/rest_api/project_apis/project-project-openshift-io-v1.html) upstream.
   - `oc get namespaces` (in vcluster) → check: command succeeds.
 - **`02-deploy-to-dev.md`**
   - `oc apply -f dev-namespace.yaml` → check: dev namespace exists with the dev-type label.
   - `oc apply -n <dev-ns> -f hello-dcs.yaml` → polling check: workload ready in dev namespace.
 - **`03-prod-differences.md`**
   - `oc apply -f prod-namespace.yaml` → check: prod namespace exists with prod-type label.
-  - Attempt the same deploy into prod / inspect stricter controls → check asserts the expected prod constraint (e.g. a policy that blocks or requires more). Diagnose-style; include hint.
+  - `oc apply -f kyverno-policy.yaml` (applies to PROD-type only) → check: policy present.
+  - Attempt the same deploy into prod → the **Kyverno policy blocks or mutates it** where the DEV deploy succeeded unchanged. Check asserts the Kyverno rejection/enforcement (diagnose-style; hint explains PROD is guarded by admission policy, DEV is not).
   - Concept: promotion dev → prod (no live promotion tooling in Foundations; conceptual + docs link).
 - **`99-workshop-summary.md`** — recap. **Check Your Understanding** (3 Q): which type enforces change control; why two types exist; how work moves dev→prod. Answers link DCS docs.
 
@@ -65,6 +67,6 @@ A02 taught Deployments/Services and `oc` inspection. Learner can deploy a worklo
 ## 8. Design Notes
 
 - **Only Foundations workshop needing vcluster** — it is the cheapest way to give a learner two real namespaces with differing policy. Confirm vcluster sizing/availability on DCS (task in tasks.md).
-- The prod-constraint demonstration depends on how DCS actually differentiates prod namespaces — flagged P1. Until confirmed, model it with a representative policy so the learning point (prod is stricter, promote don't edit) lands.
+- The concrete prod-constraint is **Kyverno policy enforcement** (confirmed): PROD-type namespaces enforce Kyverno admission policies, DEV do not. Model it in the vcluster with a representative Kyverno policy so the learning point (prod is stricter, promote don't edit) lands. Exact production policy set is a P2 to confirm — the *mechanism* (Kyverno) is settled.
 - Reuses the A02 sample app to avoid new images.
 - Anchors the DCS mental model that A05 (tenancy) and the Developer track build on.

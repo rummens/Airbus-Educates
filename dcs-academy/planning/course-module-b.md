@@ -65,7 +65,24 @@ Same conventions as [course-module-a.md](course-module-a.md). Names: `lab-b0N-na
 **Code exercises:** Create PVC, mount it, write data, restart, confirm data survives.
 **Key code examples:** PVC + volume mount using a DCS storage class. Constructs → upstream.
 
+### Workshop B06: Cloud Development with OpenShift Dev Spaces
+
+**Directory name:** `lab-b06-dev-spaces`
+**Covers ideas:** 11b (see course-topics.md)
+**Type:** Elective (Developer)
+**Prerequisites:** B01
+**Learning objectives:** Explain what **OpenShift Dev Spaces** is (in-cluster, browser-based dev environments — upstream Eclipse Che) and why it fits an **air-gapped** platform; launch a workspace from a devfile against the sample app repo; make a code change and run it **inside the cluster**; understand how Dev Spaces relates to the Educates editor and to normal `oc` deploys.
+**Narrative arc:** "How do I develop *on* DCS, not just deploy to it?" → Dev Spaces gives every developer a consistent, policy-compliant, air-gapped IDE in the cluster → open a workspace from the sample app's **devfile** → edit + run the app in the workspace → push/deploy with the skills from B01.
+**Code exercises:** Open (or inspect) a Dev Spaces workspace from a `devfile.yaml`; run the app in the workspace terminal; make a small change and see it live; compare with the plain `oc apply` flow from B01.
+**Key code examples:** A `devfile.yaml` for the sample app referencing a **Harbor-mirrored** dev/UDI image via `{{< param dcs_registry >}}`; the Dev Spaces dashboard URL surfaced as a session dashboard tab.
+**Design notes:**
+- Dev Spaces is an OpenShift operator-provided service — it must be **installed by the platform team** (ties to A09 operators / Module F). This workshop **uses** it, it does not install it. If a Dev Spaces instance isn't available in the test cluster, deliver the workspace/devfile walkthrough as an annotated, screenshot-driven concept lab (guided tour) rather than live.
+- All workspace images come from **Harbor** (air-gapped): mirror the Universal Developer Image (UDI) / chosen stack. No external devfile registries — point `che`/devfile at the mirrored registry.
+- Clarify the boundary vs the built-in Educates VS Code editor: the Educates editor is for the *workshop*; **Dev Spaces is the real on-platform dev environment** a tenant would use day to day.
+- DCS-specific concept → `{{< param dcs_docs_base_url >}}/services/dev-spaces`; [OpenShift Dev Spaces](https://docs.openshift.com/dev-spaces/latest/) upstream; [devfile](https://devfile.io/) upstream.
+
 ## Future Expansion Ideas
 
 - Blue/green or canary rollout workshop (once CI/CD module exists).
 - Multi-service app (front + back + db) tying B02/B03/B05 together.
+- Dev Spaces + GitLab (Module F) integration: clone from the tenant's GitLab straight into a workspace.

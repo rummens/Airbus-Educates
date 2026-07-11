@@ -41,13 +41,14 @@ Delivered on the Educates training platform, targeting **OpenShift**. Each works
 | **C — Security & Compliance** | Scanning, pod security, secrets, supply chain, data-residency | Elective track |
 | **D — Architect / Onboarding** | Service catalog, tenancy design, reference architectures | Elective track |
 | **E — Observability** | Metrics, logs, alerts for tenant apps | Elective (cross-track) |
+| **F — Operators / Platform Services** | Consume DCS operators (GitLab, Argo CD, CloudNativePG) — platform owns the operator, tenant owns the instance | Elective track |
 
 ## Navigation Model
 
 Core/elective:
 
 - **Core** = Module A (Foundations). Sequential; every learner completes it first. It establishes the shared baseline and the DCS-specific concepts all tracks rely on.
-- **Electives** = Modules B, C, D, E. Each branches off Foundations. Within a track, workshops are sequential (they share a per-track sample app). Across tracks they are independent — a learner can take Developer without Security. Observability (E) has an additional prerequisite: a deployed application (from Developer B01, or equivalent).
+- **Electives** = Modules B, C, D, E, F. Each branches off Foundations. Within a track, workshops are sequential (they share a per-track sample app). Across tracks they are independent — a learner can take Developer without Security. Observability (E) has an additional prerequisite: a deployed application (from Developer B01, or equivalent). Operators (F) has an additional prerequisite: A09 (the operator concept); its workshops are independent per service.
 - Every workshop states its prerequisites explicitly.
 
 ## Design Principles

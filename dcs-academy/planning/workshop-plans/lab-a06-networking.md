@@ -20,6 +20,7 @@
 - Web console: enabled
 - Examiner: `enabled: true`
 - Session ingress + dashboard: define a session ingress for the sample app and an "App" dashboard tab (browser access via session proxy)
+- **PROD-type namespace:** a **Route requires a PROD-type namespace**, so provision a PROD-type namespace for the Route exercise (the session's default namespace is not enough). Do this via the session setup / a provisioned namespace object. (Reuses the PROD/Kyverno concept from A03.)
 - Workshop image: `dcs-workshop-base`
 - Sample image: reuse `{{< param dcs_registry >}}/samples/hello-dcs:1.0`
 
@@ -28,8 +29,8 @@
 - Reach a Service in-cluster by DNS.
 - Explain the DCS traffic chain: **Service → Route → External Load Balancer** with DCS-managed DNS.
 - Expose an app to the browser via the session proxy, and create an OpenShift Route.
-- Construct a Route host from the session hostname (policy-compliant).
-- Explain how **Network Policies** (label-based) isolate workloads on the shared cluster, and egress restrictions on the air-gapped platform.
+- Construct a Route host from the session hostname (policy-compliant), and understand that **a Route requires a PROD-type namespace**.
+- Explain how **Network Policies** (label-based) isolate workloads on the shared cluster, and egress restrictions on the air-gapped platform. (NetworkPolicy is **observe/concept only** — tenants cannot self-create them yet; see below.)
 
 Mapped to DO180 module 4 (expose apps inside and outside the cluster) + DCS networking (docs: Services/Routes/Ingress, External Load Balancer, Network Policies).
 
@@ -54,13 +55,14 @@ A02 deployed `hello-dcs` and reached it in-cluster via `curl`. This workshop tak
   - Explain why the session proxy is preferred (HTTPS, no mixed content, auth-gated) — see openshift-reference. Guide learner back to terminal afterward.
 - **`03-routes-and-dns.md`**
   - Explain the chain **Service → Route → External Load Balancer** (DCS-managed DNS) — inline blurb + DCS networking docs.
+  - **Call out that a Route requires a PROD-type namespace** (Kyverno enforces this on DCS) — the exercise uses the provisioned PROD-type namespace for that reason. Tie back to A03's PROD/DEV distinction.
   - `editor:open-file` route.yaml; explain [Route](https://docs.openshift.com/container-platform/latest/networking/routes/route-configuration.html) upstream + DCS DNS naming (DCS docs).
-  - `oc apply -f route.yaml` → check: Route admitted, host = `hello-dcs-<session_hostname>`.
+  - `oc apply -f route.yaml` **into the PROD-type namespace** → check: Route admitted, host = `hello-dcs-<session_hostname>`.
   - `curl` the Route host → check: reachable.
   - **Note on hostname policy:** host must include `session_hostname` or Kyverno rejects it — call out the requirement.
 - **`04-network-policies-and-egress.md`**
   - Concept: **Network Policies** isolate workloads on the shared cluster by matching **labels**; default posture is restrictive. Inline blurb + DCS docs; [NetworkPolicy](https://kubernetes.io/docs/concepts/services-networking/network-policies/) upstream.
-  - Apply/inspect a NetworkPolicy scoping access to the app → check: policy present; a disallowed pod-to-pod call is blocked (diagnose-style + hint).
+  - **Observe only** — tenants **cannot create Network Policies themselves yet** (on the DCS roadmap). So **inspect a pre-provisioned NetworkPolicy** scoping access to the app (`oc get/describe networkpolicy`) → check: policy present; optionally show a disallowed pod-to-pod call being blocked (diagnose-style + hint). Do **not** have the learner author/apply one. Note the roadmap item for self-service.
   - Egress: `oc exec ... -- curl -m 5 https://example.com` → check asserts it **fails/times out** (air-gapped egress). Hint explains egress restriction + egress-IP concept. DCS networking docs link.
 - **`99-workshop-summary.md`** — recap in-cluster vs external, session proxy vs Route, egress. **Challenge**: expose a second port/path or create a Route for a given service (examiner-validated) + hint + reveal. **Check Your Understanding** (3 Q): how to reach a Service in-cluster; why Route host must include the session hostname; why external calls fail.
 
@@ -75,3 +77,5 @@ A02 deployed `hello-dcs` and reached it in-cluster via `curl`. This workshop tak
 - Session proxy vs Route: teach both but be explicit that the session proxy is the DCS-preferred path for browser access; the Route exercise exists to teach the object and the hostname policy.
 - The egress-fails demonstration makes "air-gapped" concrete and memorable.
 - After Foundations, learner is ready for any track. Developer B01 assumes A02+A06 (deploy + expose).
+- **Route needs a PROD-type namespace (confirmed):** provision one for this lab. Ties the exposure exercise back to the A03 PROD/Kyverno model — reinforce, don't re-teach.
+- **NetworkPolicy is observe-only (confirmed):** tenants can't self-create them yet (roadmap). Teach it as concept + inspect a pre-provisioned policy; revisit as a hands-on step once self-service lands.

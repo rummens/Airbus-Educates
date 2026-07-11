@@ -6,7 +6,8 @@ Task tracking for the DCS Academy. Priorities: **P1** (blocker), **P2** (importa
 
 - [ ] **P1** Confirm real values for the param trio: `dcs_registry` (Harbor project), `dcs_docs_base_url` (docs portal), and confirm `product_name`. Currently placeholders in `course-brief.md` / `resources.md`.
 - [ ] **P1** Confirm the two base images (`dcs-workshop-base`, `dcs-tools`) exist / are built and mirrored in Harbor, with `oc` and required tooling.
-- [ ] **P2** Confirm the DCS docs portal has (or will have) pages for the four DCS concepts (`namespace-types`, `registry`, `tenancy-and-access`, `networking`).
+- [ ] **P2** Confirm the DCS docs portal has (or will have) pages for the DCS concepts (`namespace-types`, `registry`, `tenancy-and-access`, `networking`, `storage`, `rbac`, `operators`).
+- [ ] **P2** Feedback capture (see `planning/feedback-capture.md`): decide v1 scope (ratings-only vs ratings+comments); confirm the Educates analytics webhook is enabled on the DCS portal; build the in-cluster feedback-collector + Grafana dashboard; add the mandatory `98-your-feedback.md` page template to the authoring skill.
 - [ ] **P2** Choose the per-track sample applications (Developer, Security, Architect) — all images Harbor-mirrored.
 - [ ] **P2** Validate vcluster is available/sized on DCS for the sessions that need the prod/dev model (A03).
 - [ ] **P3** Run `scripts/collect-images.sh` once the first workshops exist and hand the manifest to the Harbor mirroring workflow.
@@ -22,6 +23,16 @@ Task tracking for the DCS Academy. Priorities: **P1** (blocker), **P2** (importa
 - [x] **P1** A04 auth resolved from customer docs: Harbor **robot accounts**. *(Remaining P2: per-session robot provisioning + target project.)*
 - [ ] **P2** A03: confirm the technical mechanism DCS uses to mark DEV vs PROD namespaces (labels / CRD / request objects). Lifecycle + quick-comparison confirmed from customer docs; mechanism not in shared docs.
 - [ ] **P2** Consider a dedicated **Network Policies** workshop if A06 runs past 60m (network policies added from customer docs).
+- [ ] **P2** A04: add **`skopeo`** to `dcs-workshop-base` (no docker/podman in-container); **spike** whether the Harbor UI can be embedded as a session dashboard tab (auth/reverse-proxy) — fallback is `skopeo`/API output + screenshots.
+- [ ] **P2** A06: provision a **PROD-type namespace** for the Route exercise; source a **pre-provisioned NetworkPolicy** to inspect (tenant self-create not yet available).
+- [ ] **P2** A07: confirm real **storage-class names** for File + Block with the storage team (set `dcs_sc_file`/`dcs_sc_block`); confirm the S3-via-ITSM flow.
+- [ ] **P1** Write per-workshop plans done for A07/A08/A09 (this session). Implement A07–A09 after A03–A06.
+- [ ] **P2** A09/Module F: confirm a lightweight operator (CloudNativePG) can be pre-installed + operand images Harbor-mirrored for the hands-on CR.
+
+## Module F — Operators / Platform Services
+
+- [x] **P2** Module planned (`course-module-f.md`): F01 GitLab, F02 Argo CD, F03 CloudNativePG — operator model (platform owns operator, tenant owns instance). Prereq A09.
+- [ ] **P2** Write per-workshop plans for F01–F03 after A09 is built; confirm each operator + operand images are mirrored and pre-installable.
 - [ ] **P3** Fold newly-surfaced DCS topics into later tracks: costing/recharging + why-OpenShift (Architect D), data classification/RACI/security-exception (Security C), Helm charts (Developer).
 - [ ] **P2** Produce the `hello-dcs` sample image (OpenShift-friendly, non-root) and a Harbor-mirrored base for A04's Containerfile.
 - [ ] **P2** Produce the DCS architecture diagram asset for A01.
@@ -35,11 +46,11 @@ Task tracking for the DCS Academy. Priorities: **P1** (blocker), **P2** (importa
 - [x] **P1** Content delivery on CRC solved via **git source** (public repo) with the monorepo `newRootPath` + full-path `includePaths` pattern. Confirmed: A02 session pulls all 11 content pages + exercises into the pod. (Image/OCI delivery blocked by CRC self-signed registry cert.)
 - [x] **P2** Rendering **CONFIRMED** on CRC (fresh pod after the config.yaml fix): `/workshop/content/*` pages return 200, `{{< param product_name >}}` → "Digital Container Service (DCS)", `product_short` DCS resolves, no leaked shortcodes, depth page 01-creating-resources renders. (The "Cannot GET /workshop/content/" was the stale live-patched pod; deleting it and re-pulling fixed config from git resolved it.)
 - [ ] **P1** Push local commit `105abef` (the `oc delete` fix + vcluster rule) so the git source serves the corrected A02 (currently origin/main has the buggy delete command; render unaffected).
-- [ ] **P2** Implement A03–A06 once A01/A02 pass live.
+- [x] **P2** Implement A03–A09 (built under `workshops/`; static-validated: YAML parses, examiner test scripts `bash -n` clean + name cross-ref, 120/120 clickable-action blocks parse, all house-standard rubric dims pass). **Not yet run live** (no cluster; several checks are env-dependent — Kyverno for A03, real Harbor for A04, DCS storage classes for A07, CNPG operator for A09, air-gapped egress for A06). Live smoke test on OpenShift/DCS still needed.
 
 ## Module B — Developer
 
-- [ ] **P2** Write per-workshop plans for B01–B05 after Foundations plans are done (read A0x plans first for continuity).
+- [ ] **P2** Write per-workshop plans for B01–B06 after Foundations plans are done (read A0x plans first for continuity). **B06 Dev Spaces** added — confirm a Dev Spaces instance can be pre-installed and the UDI/dev images Harbor-mirrored, else deliver B06 as a screenshot-driven concept lab.
 
 ## Modules C / D / E
 
