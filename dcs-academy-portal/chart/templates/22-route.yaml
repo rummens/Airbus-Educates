@@ -1,0 +1,26 @@
+{{- if .Values.enabled }}
+# The portal's public Route on the academy host (edge TLS). The portal serves the
+# landing UI AND reverse-proxies the Educates session paths; login (OpenShift
+# OAuth) runs inside the app, so there is no oauth-proxy in front. The VAP (62)
+# reserves this host for this namespace so Educates' own portal Route can't win it.
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+  annotations:
+    # Session start (esp. with vcluster) can exceed the router's 30s default → 504.
+    haproxy.router.openshift.io/timeout: {{ .Values.auth.routeTimeout | quote }}
+spec:
+  host: {{ include "portal.authHostname" . }}
+  to:
+    kind: Service
+    name: {{ .Chart.Name }}
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+{{- end }}

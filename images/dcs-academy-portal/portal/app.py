@@ -5,26 +5,53 @@ runtime paths. Order matters: custom routes are registered first, the proxy
 blueprint last (it only claims allowlisted prefixes, else 404).
 """
 import logging
+import os
 import re
 import time
 
+import markdown as md
 from flask import (Flask, render_template, request, redirect, abort, jsonify,
                    Response, url_for)
+from markupsafe import Markup
 
 from . import config as cfg
-from . import k8sclient, educates, feedback, metrics, proxy
+from . import k8sclient, educates, feedback, metrics, proxy, auth
 from .icons import ICONS, DIFFICULTY_ICON, resolve_icon
 
 STEPS = ["Reserving session", "Starting virtual cluster", "Starting workshop pod",
          "Loading content", "Ready"]
 
 
+def _steps_for(vcluster):
+    """Loading steps for a launch. Non-vcluster labs run in a plain namespace, so
+    the second step must say 'namespace', not 'virtual cluster' (task: stay true)."""
+    s = list(STEPS)
+    s[1] = "Starting virtual cluster" if vcluster else "Setting up namespace"
+    return s
+
+
+def _render_md(text):
+    """Render trusted README markdown → safe HTML for the course view. Source is
+    our own repo (git), rendered server-side; tables/fenced code enabled."""
+    if not text:
+        return ""
+    return Markup(md.markdown(text, extensions=["fenced_code", "tables", "toc", "sane_lists"]))
+
+# Endpoints reachable WITHOUT a login session. auth.* drive the login; health
+# probes are kubelet; /analytics is the Educates webhook (server-to-server, no
+# cookie); static assets must load on the login page itself.
+_PUBLIC_ENDPOINTS = {"auth.login", "auth.callback", "auth.logout",
+                     "healthz", "readyz", "analytics", "static"}
+
+
 def _user():
-    return request.headers.get(cfg.USER_HEADER, "").strip()
+    # OAuth identity in prod; a fixed dev identity locally (OAuth off) so per-user
+    # progress/trophies bind to someone and persist across sessions.
+    return auth.current_user() or cfg.DEV_USER
 
 
 def _token():
-    return request.headers.get(cfg.TOKEN_HEADER, "").strip()
+    return auth.current_token()
 
 
 def create_app():
@@ -34,6 +61,22 @@ def create_app():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
     logging.getLogger().setLevel(logging.INFO)
     log = logging.getLogger("portal")
+
+    # Signed session cookie (login identity + token). A stable secret from a Secret
+    # keeps sessions valid across restarts/replicas; fall back to ephemeral for dev.
+    app.secret_key = cfg.SESSION_SECRET or os.urandom(32)
+    app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax",
+                      SESSION_COOKIE_SECURE=True)
+    app.register_blueprint(auth.bp)
+
+    @app.before_request
+    def _require_login():
+        if not cfg.OAUTH_ENABLED or auth.current_user():
+            return None
+        if request.endpoint in _PUBLIC_ENDPOINTS:
+            return None
+        # No session yet → start the OpenShift OAuth dance, returning here after.
+        return redirect(url_for("auth.login", next=request.full_path.rstrip("?")))
 
     @app.before_request
     def _log_req():
@@ -52,6 +95,17 @@ def create_app():
         feedback.init_db()
     except Exception as e:            # noqa: BLE001 — DB may be absent in pure-UI local dev
         app.logger.warning("feedback DB init failed (continuing): %s", e)
+
+    # Boot diagnostics: where we will talk to the Educates training-portal REST API.
+    # Logs the configured override + the resolved in-cluster Service base (best-effort;
+    # the resolve reads TrainingPortal.status, which may not exist yet at boot).
+    if not cfg.DEMO:
+        log.info("BOOT educates portal=%s cr-namespace=%s service-url=%r",
+                 cfg.PORTAL_NAME, cfg.PORTAL_CR_NAMESPACE, cfg.PORTAL_SERVICE_URL or "(derive)")
+        try:
+            log.info("BOOT educates REST base resolved to %s", k8sclient.portal_service_base())
+        except Exception as e:        # noqa: BLE001
+            log.info("BOOT educates REST base not resolvable yet: %s", e)
 
     @app.context_processor
     def _inject():
@@ -100,7 +154,8 @@ def create_app():
                                min_reviews=cfg.FEEDBACK_MIN_REVIEWS, is_admin=_is_admin(),
                                difficulty_icon=DIFFICULTY_ICON, progress=progress,
                                stats=_catalog_stats(courses, tracks), hidden=hidden,
-                               cont=cont_course)
+                               cont=cont_course, banner=_banner(),
+                               trophies=_trophies(_user(), courses))
 
     @app.route("/course/<name>")
     def course(name):
@@ -108,9 +163,12 @@ def create_app():
         if not c:
             abort(404)
         ratings = _ratings_safe()
+        # Rich description = the lab's README.md (markdown), fetched from its git
+        # source; falls back to the CR description if unavailable.
+        readme = _safe(lambda: educates.fetch_readme(c.get("readme_url", ""))) or ""
         return render_template("course.html", c=c, ratings=ratings,
                                min_reviews=cfg.FEEDBACK_MIN_REVIEWS, is_admin=_is_admin(),
-                               difficulty_icon=DIFFICULTY_ICON,
+                               difficulty_icon=DIFFICULTY_ICON, readme_html=_render_md(readme),
                                status=_progress_safe(_user()).get(name, ""))
 
     # --- launch / provisioning ---------------------------------------------
@@ -119,19 +177,34 @@ def create_app():
         c = next((x for x in k8sclient.list_courses() if x["name"] == name), None)
         if not c:
             abort(404)
+        steps = _steps_for(c.get("vcluster"))
         try:
             sess = educates.request_session(name, _user())
             metrics.REQUESTS.labels(name, "ok").inc()
             _safe(lambda: feedback.mark_progress(_user(), name, "started"))
+        except educates.CapacityError:
+            # Portal is at its session limit → don't dump a raw 503. Show the running
+            # sessions and let the user free one (task: clear error + self-service).
+            metrics.REQUESTS.labels(name, "error").inc()
+            running = _safe(lambda: k8sclient.sessions_for_workshop(name)) or []
+            return render_template("over_limit.html", course=c, sessions=running,
+                                   is_admin=_is_admin()), 503
         except Exception as e:        # noqa: BLE001
             metrics.REQUESTS.labels(name, "error").inc()
             metrics.ERRORS.labels("session_request").inc()
             return render_template("launch.html", course=c, error=str(e),
-                                   session_name="", target="", steps=STEPS, t0=0), 502
+                                   session_name="", target="", steps=steps, t0=0), 502
         target = _abs_session_url(sess.get("url", ""))
         return render_template("launch.html", course=c, error="",
                                session_name=sess.get("name", ""), target=target,
-                               steps=STEPS, t0=int(time.time()))
+                               steps=steps, t0=int(time.time()))
+
+    @app.route("/session/<name>/delete", methods=["POST"])
+    def session_delete(name):
+        """Free a running session (from the over-capacity page), then retry launch."""
+        _safe(lambda: educates.delete_session(name))
+        nxt = request.form.get("next", "")
+        return redirect(nxt if nxt.startswith("/") else url_for("index"))
 
     @app.route("/api/session/<name>/status")
     def session_status(name):
@@ -169,7 +242,15 @@ def create_app():
         rows, overall = feedback.aggregates()
         return render_template("admin.html", rows=rows, overall=overall,
                                comments=feedback.comments(), sessions=_usage(),
-                               is_admin=True)
+                               banner=_banner(), is_admin=True)
+
+    @app.route("/admin/banner", methods=["POST"])
+    def admin_banner():
+        """Set/clear the site-wide banner (maintenance / announcement)."""
+        if not _is_admin():
+            abort(403)
+        _safe(lambda: feedback.set_setting("banner", request.form.get("banner", "").strip()[:500]))
+        return redirect(url_for("admin"))
 
     @app.route("/help")
     def help_page():
@@ -208,6 +289,40 @@ def _safe(fn):
         return None
 
 
+def _banner():
+    """Admin-set site banner text ('' = none). Best-effort."""
+    return _safe(lambda: feedback.get_setting("banner", "")) or ""
+
+
+def _trophies(user, courses):
+    """Trophies from completed-lab progress: first lab, each module, each track,
+    and all-complete. Returns earned + locked (so the UI shows goals) + a count."""
+    done = {w for w, s in _progress_safe(user).items() if s == "completed"}
+    total = len(courses)
+
+    def group(key):
+        g = {}
+        for c in courses:
+            g.setdefault(c.get(key) or "", []).append(c["name"])
+        return {k: v for k, v in g.items() if k}
+
+    trophies = [{"key": "first", "title": "First Lab", "icon": "trophy",
+                 "earned": len(done) >= 1, "detail": "Complete your first lab"}]
+    for mod, labs in sorted(group("module").items()):
+        trophies.append({"key": f"module:{mod}", "title": f"{mod} Module", "icon": "medal",
+                         "earned": bool(labs) and all(l in done for l in labs),
+                         "detail": f"Complete every lab in {mod}"})
+    for tr, labs in sorted(group("track").items()):
+        trophies.append({"key": f"track:{tr}", "title": f"{tr} Track", "icon": "award",
+                         "earned": bool(labs) and all(l in done for l in labs),
+                         "detail": f"Complete every lab in the {tr} track"})
+    if total:
+        trophies.append({"key": "all", "title": "Academy Master", "icon": "star",
+                         "earned": len(done) >= total, "detail": "Complete every lab"})
+    return {"items": trophies, "earned": sum(t["earned"] for t in trophies),
+            "done": len(done), "total": total}
+
+
 def _ratings_safe():
     try:
         return feedback.ratings_by_workshop()
@@ -216,7 +331,10 @@ def _ratings_safe():
 
 
 def _progress_safe(user):
-    if cfg.DEMO or not user:
+    # Progress/trophies bind to a user identity, not to cluster mode: with no user
+    # there's nothing to read; with one (real OAuth user, or DEV_USER locally) return
+    # their persisted progress even in DEMO so trophies work when iterating locally.
+    if not user:
         return {}
     return _safe(lambda: feedback.user_progress(user)) or {}
 

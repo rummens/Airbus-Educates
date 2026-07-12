@@ -37,13 +37,3 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- printf "%s.%s" .Values.auth.hostname .Values.educates.ingressDomain -}}
 {{- end -}}
 
-{{/* oauth-proxy image, registry-overridable (air-gap → Harbor). */}}
-{{- define "portal.oauthProxyImage" -}}
-{{- if .Values.auth.proxyImage -}}
-{{- .Values.auth.proxyImage -}}
-{{- else -}}
-{{- $host := .Values.global.registry.host -}}
-{{- $reg := ternary $host .Values.auth.proxyImageRegistry (ne $host "") -}}
-{{- printf "%s/%s:%s" $reg .Values.auth.proxyImageRepository .Values.auth.proxyImageTag -}}
-{{- end -}}
-{{- end -}}

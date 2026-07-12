@@ -1,0 +1,11 @@
+#!/bin/bash
+# verify-replicas <deployment> <n> — deployment has exactly <n> READY replicas.
+name="${1:?deployment name required}"
+want="${2:?desired replica count required}"
+have=$(oc get deployment "$name" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+have="${have:-0}"
+if [ "$have" != "$want" ]; then
+  echo "Deployment '$name' has $have ready replica(s), expected $want. Give the rollout a moment ('oc rollout status deploy/$name') and re-check." >&2
+  exit 1
+fi
+echo "OK: deployment '$name' has $want ready replica(s)."

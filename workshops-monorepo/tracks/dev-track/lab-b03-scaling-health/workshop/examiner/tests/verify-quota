@@ -1,0 +1,7 @@
+#!/bin/bash
+# verify-quota — a ResourceQuota exists in the session namespace (the budget is real).
+if ! oc get resourcequota -o name 2>/dev/null | grep -q .; then
+  echo "No ResourceQuota found in this namespace. The namespace budget defines your quota — run 'oc get resourcequota'." >&2
+  exit 1
+fi
+echo "OK: a ResourceQuota is present — your namespace has a budget."

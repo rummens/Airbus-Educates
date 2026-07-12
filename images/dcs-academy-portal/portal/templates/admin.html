@@ -8,6 +8,14 @@
   <p class="muted"><strong>{{ overall.n }}</strong> responses · avg rating {{ avg(overall.avg_rating) }}
      · avg clarity {{ avg(overall.avg_clarity) }} · {{ overall.n_comment }} comments</p>
 
+  <h2>Site banner</h2>
+  <p class="muted">Shown to everyone on the landing page (maintenance notices, announcements). Empty = hidden.</p>
+  <form method="post" action="{{ url_for('admin_banner') }}" class="banner-form">
+    <input type="text" name="banner" maxlength="500" value="{{ banner }}"
+           placeholder="e.g. Maintenance window Sat 20:00–22:00 CET — sessions may restart">
+    <button class="btn btn-primary" type="submit">Save</button>
+  </form>
+
   <h2>Running sessions</h2>
   <table class="tbl">
     <tr><th>Session</th><th>Workshop</th><th>User</th><th>Phase</th></tr>

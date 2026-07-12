@@ -1,0 +1,7 @@
+# Track metadata → one Track CR. `id` is EXPLICIT (not the folder name). A workshop
+# joins this track with label academy.dcs/track: <id>. Only `id` + `title` required.
+id: dev              # track id — must equal the workshops' academy.dcs/track label
+title: "Developer — Build on DCS"
+description: "Deploy, configure, scale, debug, persist and develop your apps on DCS."
+order: 20            # after the core foundations track
+icon: rocket         # FA-style icon name the portal vendors

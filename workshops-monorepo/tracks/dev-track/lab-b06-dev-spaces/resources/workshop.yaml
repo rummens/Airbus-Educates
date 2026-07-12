@@ -1,0 +1,80 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b06-dev-spaces
+  labels:
+    academy.dcs/track: dev
+    academy.dcs/order: "60"
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Cloud Development with OpenShift Dev Spaces
+  description: Develop on DCS, not just deploy to it — launch a browser-based, in-cluster dev environment from a devfile, change the sample app and run it inside the cluster, all from Harbor-mirrored images.
+  duration: 45m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Developer"
+  publish:
+    image: "$(image_repository)/lab-b06-dev-spaces-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - /workshops-monorepo/tracks/dev-track/lab-b06-dev-spaces/workshop/**
+      - /workshops-monorepo/tracks/dev-track/lab-b06-dev-spaces/exercises/**
+      - /workshops-monorepo/tracks/dev-track/lab-b06-dev-spaces/README.md
+      newRootPath: workshops-monorepo/tracks/dev-track/lab-b06-dev-spaces
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b06-dev-spaces-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY is the single terminal/manifest/devfile source for the sample-image
+    # registry. Keep it in sync with dcs_registry in workshop/config.yaml, which is the
+    # content-rendering copy. Placeholder value — re-pointable per deploy.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    # Extra dashboard tab for the live Dev Spaces instance. Gated on the Helm value
+    # devSpacesUrl: set it to a Harbor-backed Dev Spaces dashboard URL and the "Dev Spaces"
+    # tab appears; leave it unset and no tab is created — the workshop degrades cleanly to
+    # the annotated, screenshot-driven concept walkthrough. (Content refers to the tab by
+    # name, so nothing breaks when it is absent.)
+    {{- if .Values.devSpacesUrl }}
+    dashboards:
+    - name: Dev Spaces
+      url: "{{ .Values.devSpacesUrl }}"
+    {{- end }}
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # Native OpenShift session namespace — Dev Spaces is a platform service the
+      # session CONSUMES (operator-installed cluster-wide), not something it installs,
+      # so no per-session vcluster is needed.
+      vcluster:
+        enabled: false

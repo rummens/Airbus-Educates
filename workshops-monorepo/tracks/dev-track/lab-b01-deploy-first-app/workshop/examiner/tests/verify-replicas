@@ -1,0 +1,20 @@
+#!/bin/bash
+# verify-replicas <deployment> <count>
+# Passes when the deployment has <count> desired AND <count> ready replicas.
+name="${1:?deployment name required}"
+want="${2:?replica count required}"
+if ! oc get deployment "$name" >/dev/null 2>&1; then
+  echo "Deployment '$name' not found in $(oc project -q 2>/dev/null). Did the apply step run?" >&2
+  exit 1
+fi
+desired=$(oc get deployment "$name" -o jsonpath='{.spec.replicas}' 2>/dev/null)
+ready=$(oc get deployment "$name" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+if [ "${desired:-0}" != "$want" ]; then
+  echo "Deployment '$name' is set to ${desired:-0} replicas, expected $want. Re-run the scale/apply step." >&2
+  exit 1
+fi
+if [ "${ready:-0}" != "$want" ]; then
+  echo "Deployment '$name' has ${ready:-0}/$want replicas ready — still rolling out or a pod is failing. Check 'oc get pods' and 'oc get events'." >&2
+  exit 1
+fi
+echo "OK: deployment '$name' has $want/$want replicas ready."

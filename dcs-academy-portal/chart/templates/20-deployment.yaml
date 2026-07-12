@@ -40,8 +40,25 @@ spec:
             # --- behaviour ---
             - { name: PORTAL_SESSION_TLS_VERIFY,     value: {{ .Values.sessionTlsVerify | quote }} }
             - { name: FEEDBACK_MIN_REVIEWS,          value: {{ .Values.feedback.minReviews | quote }} }
-            - { name: PORTAL_USER_HEADER,            value: {{ .Values.userHeader | quote }} }
-            - { name: PORTAL_TOKEN_HEADER,           value: {{ .Values.tokenHeader | quote }} }
+            # --- login: portal IS the OpenShift OAuth client (no oauth-proxy) ---
+            - { name: PORTAL_OAUTH_ENABLED,          value: {{ .Values.auth.enabled | quote }} }
+            {{- if .Values.auth.enabled }}
+            # SA-as-OAuthClient: client_id = system:serviceaccount:<ns>:<sa>; the
+            # client_secret is the pod's projected SA token (read in-app at runtime).
+            - { name: PORTAL_OAUTH_CLIENT_ID,        value: "system:serviceaccount:{{ .Release.Namespace }}:{{ .Chart.Name }}" }
+            - { name: PORTAL_OAUTH_REDIRECT_URL,     value: "https://{{ include "portal.authHostname" . }}/oauth/callback" }
+            - { name: PORTAL_OAUTH_SCOPE,            value: {{ .Values.auth.scope | quote }} }
+            - { name: PORTAL_OAUTH_TLS_VERIFY,       value: {{ .Values.auth.oauthTlsVerify | quote }} }
+            # Optional explicit endpoints (empty = discover from the in-cluster API).
+            - { name: PORTAL_OAUTH_AUTHORIZE_URL,    value: {{ .Values.auth.authorizeUrl | quote }} }
+            - { name: PORTAL_OAUTH_TOKEN_URL,        value: {{ .Values.auth.tokenUrl | quote }} }
+            # Signed-session key (identity + token cookie). Keep stable across restarts.
+            - name: PORTAL_SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.existingSecret | default (printf "%s-session" .Chart.Name) }}
+                  key: session-secret
+            {{- end }}
             - { name: ADMIN_SSAR_GROUP,              value: {{ .Values.admin.ssarGroup | quote }} }
             - { name: ADMIN_SSAR_RESOURCE,           value: {{ .Values.admin.ssarResource | quote }} }
             - { name: ADMIN_SSAR_VERB,               value: {{ .Values.admin.ssarVerb | quote }} }

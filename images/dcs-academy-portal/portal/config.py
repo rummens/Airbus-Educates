@@ -46,9 +46,42 @@ ADMIN_SSAR_RESOURCE = os.environ.get("ADMIN_SSAR_RESOURCE", "trainingportals")
 ADMIN_SSAR_VERB = os.environ.get("ADMIN_SSAR_VERB", "delete")
 ADMIN_SSAR_NAMESPACE = os.environ.get("ADMIN_SSAR_NAMESPACE", PORTAL_CR_NAMESPACE)
 
-# Header the oauth-proxy passes through with the SSO identity / token.
-USER_HEADER = os.environ.get("PORTAL_USER_HEADER", "X-Forwarded-User")
-TOKEN_HEADER = os.environ.get("PORTAL_TOKEN_HEADER", "X-Forwarded-Access-Token")
+# --- login (portal is the OpenShift OAuth client; no oauth-proxy) -----------
+# The portal runs the OAuth2 authorization-code flow itself against the cluster's
+# OpenShift OAuth server (ServiceAccount-as-OAuthClient), so it learns the real
+# user identity + token and sets its own session cookie. When disabled the portal
+# is open (local/dev) and _user() is empty.
+OAUTH_ENABLED = _b("PORTAL_OAUTH_ENABLED", True)
+# client_id = system:serviceaccount:<ns>:<sa>; client_secret = a token for that SA
+# (the projected SA token, used only for the server-side code exchange).
+OAUTH_CLIENT_ID = os.environ.get("PORTAL_OAUTH_CLIENT_ID", "")
+OAUTH_CLIENT_SECRET_FILE = os.environ.get(
+    "PORTAL_OAUTH_CLIENT_SECRET_FILE", "/var/run/secrets/kubernetes.io/serviceaccount/token")
+# Public callback URL the OAuth server redirects the browser back to. Must match
+# the SA's serviceaccounts.openshift.io/oauth-redirecturi annotation.
+OAUTH_REDIRECT_URL = os.environ.get("PORTAL_OAUTH_REDIRECT_URL", "")
+# SA-as-OAuthClient only permits user:info (enough to read the username).
+OAUTH_SCOPE = os.environ.get("PORTAL_OAUTH_SCOPE", "user:info")
+# Where to discover the OAuth authorize/token endpoints, and where to read the
+# user identity (users/~). Default = in-cluster API (reliable pod-side DNS + CA).
+OAUTH_ISSUER_URL = os.environ.get("PORTAL_OAUTH_ISSUER_URL", "https://kubernetes.default.svc").rstrip("/")
+OAUTH_API_URL = os.environ.get("PORTAL_OAUTH_API_URL", "https://kubernetes.default.svc").rstrip("/")
+# Optional explicit overrides if discovery/DNS is awkward (e.g. CRC). Empty =
+# use discovery from OAUTH_ISSUER_URL.
+OAUTH_AUTHORIZE_URL = os.environ.get("PORTAL_OAUTH_AUTHORIZE_URL", "").rstrip("/")
+OAUTH_TOKEN_URL = os.environ.get("PORTAL_OAUTH_TOKEN_URL", "").rstrip("/")
+# CA bundle for the server-side calls (discovery + token + users/~). Default = SA
+# CA. The external oauth route cert may differ → set OAUTH_TLS_VERIFY=false on
+# self-signed dev clusters (CRC).
+OAUTH_CA_FILE = os.environ.get("PORTAL_OAUTH_CA_FILE", "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
+OAUTH_TLS_VERIFY = _b("PORTAL_OAUTH_TLS_VERIFY", True)
+# Flask session cookie signing key. Set from a Secret so sessions survive restarts
+# and pod replicas agree; empty = ephemeral random (dev only).
+SESSION_SECRET = os.environ.get("PORTAL_SESSION_SECRET", "")
+# Local/dev identity fallback: when OAuth is off there is no logged-in user, so
+# progress/trophies have no one to bind to. Set PORTAL_DEV_USER to a fixed name
+# to exercise per-user features locally. Unset in prod (OAuth provides identity).
+DEV_USER = os.environ.get("PORTAL_DEV_USER", "")
 
 # --- theme (→ CSS variables) ------------------------------------------------
 # Only primary/secondary/logo are "required" per the plan; all have on-brand

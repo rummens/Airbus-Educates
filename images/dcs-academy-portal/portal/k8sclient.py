@@ -93,6 +93,42 @@ def _source_url(spec):
     return ""
 
 
+def _readme_raw_url(spec):
+    """Raw URL of the lab's README.md from its git file source (for the course
+    view's rich description). GitHub → raw.githubusercontent.com/<repo>/<ref>/
+    <newRootPath>/README.md. Empty if the source isn't a github git source."""
+    files = (spec.get("workshop", {}) or {}).get("files", []) or []
+    for f in files:
+        git = f.get("git") or {}
+        url = (git.get("url") or "").rstrip("/")
+        if not url or "github.com" not in url:
+            continue
+        if url.endswith(".git"):
+            url = url[:-4]
+        repo = url.split("github.com/", 1)[-1]                 # owner/repo
+        ref = (git.get("ref") or "main").split("/")[-1] or "main"
+        root = (f.get("newRootPath") or "").strip("/")
+        path = f"{root}/README.md" if root else "README.md"
+        return f"https://raw.githubusercontent.com/{repo}/{ref}/{path}"
+    return ""
+
+
+def _uses_vcluster(spec):
+    """True if the workshop runs a per-session vcluster (session.applications.
+    vcluster.enabled). Drives the 'virtual cluster' vs 'namespace' loading copy."""
+    apps = ((spec.get("session", {}) or {}).get("applications", {}) or {})
+    return bool((apps.get("vcluster", {}) or {}).get("enabled"))
+
+
+def _module(spec):
+    """The lab's module, from the Educates spec.labels list [{name,value}] entry
+    name=module (used to group trophies). Empty if unset."""
+    for lbl in (spec.get("labels", []) or []):
+        if isinstance(lbl, dict) and lbl.get("name") == "module":
+            return lbl.get("value", "") or ""
+    return ""
+
+
 def _prettify(name):
     """Fallback display name from a workshop CR name.
     'lab-a02-kubernetes-essentials' → 'Kubernetes Essentials'."""
@@ -166,8 +202,11 @@ def list_courses():
             "duration": _ann(meta, "duration") or spec.get("duration", ""),
             "author": _ann(meta, "author") or spec.get("vendor", ""),
             "track": _lbl(meta, "track"),
+            "module": _module(spec),
             "order": int(_lbl(meta, "order", "100") or "100"),
             "source_url": _source_url(spec),
+            "readme_url": _readme_raw_url(spec),
+            "vcluster": _uses_vcluster(spec),
             # academy.dcs/icon (FA-style name) → vendored icon; "" → tile falls
             # back to the track's section icon.
             "icon": resolve_icon(_ann(meta, "icon"), default="") if _ann(meta, "icon") else "",
@@ -203,6 +242,24 @@ def list_sessions():
             "training.educates.dev", "v1beta1", "workshopsessions").get("items", [])
     except ApiException:
         return []
+
+
+def sessions_for_workshop(workshop_name):
+    """Running sessions of one workshop → [{name, url, status}]. Powers the
+    over-capacity page where the user frees a session to launch another."""
+    out = []
+    for s in list_sessions():
+        lbls = s.get("metadata", {}).get("labels", {}) or {}
+        if lbls.get("training.educates.dev/workshop.name") != workshop_name:
+            continue
+        st = (s.get("status", {}) or {}).get("educates", {}) or {}
+        out.append({
+            "name": s["metadata"]["name"],
+            "url": st.get("url", ""),
+            "status": st.get("phase", "") or "",
+        })
+    out.sort(key=lambda x: x["name"])
+    return out
 
 
 def session_status(name):

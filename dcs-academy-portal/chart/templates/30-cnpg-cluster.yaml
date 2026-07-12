@@ -16,6 +16,13 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   instances: {{ $c.instances }}
+  {{- if .Values.backup.enabled }}
+  # Propagate the Kanister blueprint binding to the CNPG StatefulSet/pods so K10
+  # runs the pre-snapshot CHECKPOINT hook against the DB (see 70-k10-backup.yaml).
+  inheritedMetadata:
+    annotations:
+      kanister.kasten.io/blueprint: {{ .Chart.Name }}-cnpg-blueprint
+  {{- end }}
   {{- with $c.imageName }}
   imageName: {{ . }}
   {{- end }}

@@ -28,6 +28,7 @@ SCHEMA_SQLITE = [
     """CREATE TABLE IF NOT EXISTS progress (
       username TEXT NOT NULL, workshop TEXT NOT NULL, status TEXT NOT NULL,
       ts TEXT NOT NULL, UNIQUE(username, workshop))""",
+    "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)",
 ]
 SCHEMA_PG = [
     """CREATE TABLE IF NOT EXISTS feedback (
@@ -38,6 +39,7 @@ SCHEMA_PG = [
     """CREATE TABLE IF NOT EXISTS progress (
       username TEXT NOT NULL, workshop TEXT NOT NULL, status TEXT NOT NULL,
       ts TIMESTAMPTZ NOT NULL, UNIQUE(username, workshop))""",
+    "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)",
 ]
 
 
@@ -188,6 +190,25 @@ def last_in_progress(username):
                 f"ORDER BY ts DESC LIMIT 1", (username,))
     rows = _rows(cur)
     return rows[0]["workshop"] if rows else None
+
+
+# --- settings (admin-set banner, etc.) --------------------------------------
+
+def get_setting(key, default=""):
+    """Single settings value, or default. Best-effort (never raises)."""
+    try:
+        cur = _exec(f"SELECT value FROM settings WHERE key={_PH}", (key,))
+        rows = _rows(cur)
+        return rows[0]["value"] if rows and rows[0]["value"] is not None else default
+    except Exception:                 # noqa: BLE001
+        return default
+
+
+def set_setting(key, value):
+    """Upsert a settings value ('' clears it)."""
+    sql = (f"INSERT INTO settings(key,value) VALUES({_PH},{_PH}) "
+           f"ON CONFLICT(key) DO UPDATE SET value=excluded.value")
+    _exec(sql, (key, value or ""))
 
 
 # --- analytics webhook parsing (verbatim from feedback-collector) -----------

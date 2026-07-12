@@ -27,6 +27,17 @@ log = logging.getLogger("portal.educates")
 _tok_lock = threading.Lock()
 _tok = {"value": "", "exp": 0.0}
 
+_readme_lock = threading.Lock()
+_readme_cache = {}                    # url -> (text, exp)
+
+
+class CapacityError(Exception):
+    """Raised when the training portal has no capacity for a new session (HTTP
+    503 from /request/). Carries the workshop so the UI can offer to free one."""
+    def __init__(self, workshop):
+        super().__init__(f"no session capacity for {workshop}")
+        self.workshop = workshop
+
 
 def _verify():
     return cfg.SESSION_TLS_VERIFY
@@ -98,11 +109,45 @@ def request_session(workshop_name, user):
     if user:
         params["user"] = user
     r = s.get(f"{base}/workshops/environment/{env}/request/", params=params, timeout=30)
+    if r.status_code == 503:
+        log.info("REQUEST-SESSION workshop=%s env=%s -> 503 (no capacity)", workshop_name, env)
+        raise CapacityError(workshop_name)
     r.raise_for_status()
     data = r.json()
     log.info("REQUEST-SESSION workshop=%s env=%s user=%r -> name=%s url=%r",
              workshop_name, env, user, data.get("name"), data.get("url"))
     return data
+
+
+def delete_session(name):
+    """Ask the training portal (robot-authed) to delete a session, freeing capacity."""
+    base, s = _session()
+    r = s.post(f"{base}/workshops/session/{name}/delete/", timeout=15)
+    log.info("DELETE-SESSION %s -> %s", name, r.status_code)
+    r.raise_for_status()
+    return True
+
+
+def fetch_readme(url, ttl=300):
+    """Fetch a lab's README markdown (raw git URL), cached. '' on any failure so
+    the course view degrades to the CR description."""
+    if not url:
+        return ""
+    now = time.time()
+    with _readme_lock:
+        hit = _readme_cache.get(url)
+        if hit and now < hit[1]:
+            return hit[0]
+    try:
+        r = requests.get(url, timeout=10)
+        r.raise_for_status()
+        text = r.text
+    except requests.RequestException as e:
+        log.info("README fetch failed %s: %s", url, e)
+        text = ""
+    with _readme_lock:
+        _readme_cache[url] = (text, now + ttl)
+    return text
 
 
 def _public_host():

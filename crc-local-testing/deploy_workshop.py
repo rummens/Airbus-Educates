@@ -18,7 +18,7 @@ Examples:
 import argparse, json, subprocess, sys, time, pathlib
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
-DEFAULT_BASE = "dcs-academy/workshops"
+DEFAULT_BASE = "workshops-monorepo/tracks/core-track"
 
 
 def sh(args, **kw):

@@ -1,0 +1,11 @@
+#!/bin/bash
+# verify-pods-running <app-label> <min-count>
+# Passes when at least <min-count> pods with app=<label> are Running.
+app="${1:?app label required}"
+min="${2:-1}"
+running=$(oc get pods -l "app=$app" --field-selector=status.phase=Running -o name 2>/dev/null | wc -l | tr -d ' ')
+if [ "${running:-0}" -lt "$min" ]; then
+  echo "Found ${running:-0} Running pod(s) with app=$app, expected at least $min. Check 'oc get pods' — a pod may be pending or crashing." >&2
+  exit 1
+fi
+echo "OK: $running pod(s) with app=$app are Running."

@@ -1,0 +1,8 @@
+#!/bin/bash
+# verify-configmap <name> — the ConfigMap exists.
+name="${1:-hello-dcs-config}"
+if ! oc get configmap "$name" >/dev/null 2>&1; then
+  echo "ConfigMap '$name' not found. Apply configmap.yaml first ('oc apply -f configmap.yaml')." >&2
+  exit 1
+fi
+echo "OK: ConfigMap '$name' exists."

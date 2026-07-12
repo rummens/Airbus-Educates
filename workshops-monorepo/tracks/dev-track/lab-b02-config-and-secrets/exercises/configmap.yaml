@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-dcs-config
+  labels:
+    app: hello-dcs
+data:
+  # Simple key/value settings, delivered to the container as environment variables.
+  GREETING: "Hello from DCS"
+  FEATURE_FLAG: "beta"
+  # A whole config file, delivered by mounting this key as a file in the container.
+  app.conf: |
+    greeting=Hello from DCS
+    feature_flag=beta

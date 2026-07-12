@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hello-dcs-data
+  labels:
+    app: hello-dcs
+spec:
+  # ReadWriteOnce — a single node mounts this volume read-write at a time
+  # (single-writer). Fine for one app pod; see the summary for the replicas caveat.
+  accessModes:
+  - ReadWriteOnce
+  # Storage-class name comes from the DCS_STORAGE_CLASS env var — never hardcode it.
+  storageClassName: ${DCS_STORAGE_CLASS}
+  resources:
+    requests:
+      storage: 1Gi

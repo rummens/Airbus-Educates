@@ -1,0 +1,13 @@
+#!/bin/bash
+# verify-not-ready <app-label>
+# Passes when NO pod with app=<label> is Ready — i.e. the seeded fault is still
+# present. Used on the "what is broken" page to confirm the starting state.
+app="${1:?app label required}"
+ready=$(oc get pods -l "app=$app" \
+  -o jsonpath='{range .items[*]}{.status.conditions[?(@.type=="Ready")].status}{"\n"}{end}' \
+  2>/dev/null | grep -c '^True')
+if [ "${ready:-0}" -ge 1 ]; then
+  echo "A pod with app=$app is already Ready — this page expects the seeded fault to still be present. Have you already fixed it? If so, move on." >&2
+  exit 1
+fi
+echo "OK: no Ready pod with app=$app — the seeded fault is present, as expected."

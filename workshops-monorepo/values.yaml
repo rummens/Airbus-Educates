@@ -24,6 +24,17 @@ workshopImages:
   base: ghcr.io/rummens/dcs-workshop-base:dev
   # tools: ghcr.io/rummens/dcs-workshop-tools:dev
 
+# Where each lab's CONTENT (workshop/, exercises/, README.md) is fetched from.
+#   useGit=false (default, prod): the published $(image_repository)/<lab>-files
+#     image (needs `educates publish` → Harbor/registry).
+#   useGit=true (CRC/dev): pull straight from this git repo — no publish step,
+#     works when the -files content images aren't built. Air-gapped prod can't
+#     reach GitHub, so keep this false there and mirror content to the registry.
+workshopContent:
+  useGit: false
+  gitUrl: https://github.com/rummens/Airbus-Educates
+  gitRef: origin/main
+
 # Extra labels merged onto the Track CRs + TrainingPortal this chart emits.
 # (Workshop CRs are NOT verbatim — rendered through `tpl`, so .Values work there.)
 labels: {}

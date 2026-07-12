@@ -2,6 +2,8 @@
 {% import "_macros.html" as m with context %}
 {% block content %}
 
+{% if banner %}<div class="banner" role="status">{{ icon('info')|safe }} <span>{{ banner }}</span></div>{% endif %}
+
 <section class="hero">
   <span class="eyebrow">Interactive training platform</span>
   <h1>DCS <span class="accent">Academy.</span></h1>
@@ -21,6 +23,23 @@
     <span class="continue-title">{{ cont.title }}</span></span>
   <span class="continue-go">{{ icon('arrow-right')|safe }}</span>
 </a>
+{% endif %}
+
+{% if trophies and trophies.total %}
+<section class="trophies">
+  <div class="trophies-head">
+    <span class="eyebrow">Your trophies</span>
+    <span class="muted">{{ trophies.done }}/{{ trophies.total }} labs done · {{ trophies.earned }} earned</span>
+  </div>
+  <div class="trophy-row">
+    {% for t in trophies['items'] %}
+    <div class="trophy {{ 'earned' if t.earned else 'locked' }}" title="{{ t.detail }}">
+      <span class="trophy-ic">{{ icon(t.icon)|safe }}</span>
+      <span class="trophy-t">{{ t.title }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
 {% endif %}
 
 <div class="toolbar">

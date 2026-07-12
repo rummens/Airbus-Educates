@@ -58,7 +58,11 @@ Task tracking for the DCS Academy. Priorities: **P1** (blocker), **P2** (importa
 
 ## Module B — Developer
 
-- [ ] **P2** Write per-workshop plans for B01–B06 after Foundations plans are done (read A0x plans first for continuity). **B06 Dev Spaces** added — confirm a Dev Spaces instance can be pre-installed and the UDI/dev images Harbor-mirrored, else deliver B06 as a screenshot-driven concept lab.
+- [x] **P2** Write per-workshop plans for B01–B06 — done (`workshop-plans/lab-b0*.md`), continuity with A0x checked.
+- [x] **P2** Sample app decided: **hello-dcs** (`{{< param dcs_registry >}}/samples/hello-dcs:1.0`), carried across B01–B05.
+- [ ] **P2** Confirm a **Dev Spaces** instance can be pre-installed on DCS + the **UDI/dev images Harbor-mirrored** for B06; else deliver B06 as a screenshot-driven concept lab (plan supports both).
+- [ ] **P2** Add a **`dcs_storage_class`** param placeholder (used by B05 `pvc.yaml`) to the workshop `config.yaml` param set when authoring.
+- [ ] **P3** Author B01–B06 workshops from these plans (workshop-authoring skill), reusing the hello-dcs manifests progressively (config → probes → fault → PVC).
 
 ## Modules C / D / E
 

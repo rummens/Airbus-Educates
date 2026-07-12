@@ -1,0 +1,10 @@
+#!/bin/bash
+# verify-pvc-bound <pvc-name>
+# Passes when the PersistentVolumeClaim has reached phase Bound.
+pvc="${1:?pvc name required}"
+phase=$(oc get pvc "$pvc" -o jsonpath='{.status.phase}' 2>/dev/null)
+if [ "$phase" != "Bound" ]; then
+  echo "PVC '$pvc' is in phase '${phase:-not found}', expected 'Bound'. Check 'oc get pvc $pvc' and 'oc describe pvc $pvc' — a Pending PVC usually means the storage class is missing or has no provisioner." >&2
+  exit 1
+fi
+echo "OK: PVC '$pvc' is Bound."

@@ -1,0 +1,77 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b01-deploy-first-app
+  labels:
+    academy.dcs/track: dev
+    academy.dcs/order: "10"
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Deploy Your First App on DCS
+  description: Take the sample app from a Harbor image to a running, reachable workload in your DEV namespace on DCS — deploy it, expose it, and confirm it responds.
+  duration: 40m
+  difficulty: beginner
+  labels:
+    - name: module
+      value: "B-Developer"
+  publish:
+    image: "$(image_repository)/lab-b01-deploy-first-app-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - /workshops-monorepo/tracks/dev-track/lab-b01-deploy-first-app/workshop/**
+      - /workshops-monorepo/tracks/dev-track/lab-b01-deploy-first-app/exercises/**
+      - /workshops-monorepo/tracks/dev-track/lab-b01-deploy-first-app/README.md
+      newRootPath: workshops-monorepo/tracks/dev-track/lab-b01-deploy-first-app
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b01-deploy-first-app-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY is the single terminal/manifest source for the sample-image
+    # registry (Plane 3). Keep it in sync with dcs_registry in workshop/config.yaml,
+    # which is the content-rendering copy. Placeholder value — re-pointable per deploy.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    # Expose the learner's own Service through the session proxy so the app can be
+    # reached in a dashboard tab. The Service (hello-dcs) is created by the learner
+    # during the workshop; the proxy resolves the backing host at request time.
+    ingresses:
+    - name: hello-dcs
+      protocol: http
+      host: hello-dcs.$(session_namespace).svc
+      port: 8080
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # Native OpenShift session namespace — this IS the learner's DEV namespace
+      # (self-service, no Kyverno). No per-session vcluster needed.
+      vcluster:
+        enabled: false

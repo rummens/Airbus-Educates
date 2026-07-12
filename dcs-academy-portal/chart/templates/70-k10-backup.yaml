@@ -1,0 +1,72 @@
+{{- if and .Values.enabled .Values.backup.enabled }}
+{{- $b := .Values.backup }}
+# Kasten K10 backup of the whole portal namespace, including the CNPG feedback DB.
+# GATED OFF by default (backup.enabled=false) and UNTESTED on the dev cluster —
+# requires K10 + Kanister CRDs installed. K10 Policy/Blueprint objects live in the
+# K10 namespace (default kasten-io), so they're rendered there, not in the release ns.
+#
+# DB consistency: K10 snapshots the PVC, but a live Postgres volume isn't crash-
+# consistent on its own. The Kanister Blueprint below runs a pre-snapshot
+# `CHECKPOINT` (and a logical `pg_dumpall` as a captured artifact) against the CNPG
+# primary; the CNPG Cluster is annotated to bind it (see 30-cnpg-cluster.yaml).
+---
+apiVersion: cr.kanister.io/v1alpha1
+kind: Blueprint
+metadata:
+  name: {{ .Chart.Name }}-cnpg-blueprint
+  namespace: {{ $b.k10Namespace }}
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+actions:
+  backupPrehook:
+    # Quiesce: force a checkpoint so the on-disk state is as consistent as possible
+    # before K10 snapshots the PVC. Runs in the CNPG primary pod.
+    phases:
+      - func: KubeExec
+        name: checkpoint
+        args:
+          namespace: "{{`{{ .StatefulSet.Namespace }}`}}"
+          pod: "{{`{{ index .StatefulSet.Pods 0 }}`}}"
+          container: postgres
+          command:
+            - bash
+            - -o
+            - errexit
+            - -c
+            - psql -U postgres -c 'CHECKPOINT;'
+  backupPosthook:
+    phases: []
+  restore:
+    phases: []
+---
+apiVersion: config.kio.kasten.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ .Chart.Name }}-backup
+  namespace: {{ $b.k10Namespace }}
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+spec:
+  comment: "DCS Academy portal namespace backup (incl. CNPG feedback DB)"
+  frequency: {{ $b.frequency | quote }}
+  retention:
+    {{- toYaml $b.retention | nindent 4 }}
+  actions:
+    - action: backup
+    {{- if $b.exportProfile }}
+    - action: export
+      exportParameters:
+        frequency: {{ $b.frequency | quote }}
+        profile:
+          name: {{ $b.exportProfile }}
+          namespace: {{ $b.k10Namespace }}
+        exportData:
+          enabled: true
+    {{- end }}
+  selector:
+    matchExpressions:
+      - key: k10.kasten.io/appNamespace
+        operator: In
+        values:
+          - {{ .Release.Namespace }}
+{{- end }}

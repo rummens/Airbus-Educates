@@ -45,36 +45,38 @@ educates:
 # component; the Flask app + the Educates backend stay in-cluster only.
 # -----------------------------------------------------------------------------
 auth:
-  # Default ON — SSO gate is the whole point. Disable only for local/no-auth tests.
-  # TEMPORARILY OFF: isolates the custom-portal auth bridge. With this off, oauth-proxy
-  # + VAP are gone, academy is freed, and Educates' NATIVE TrainingPortal Route serves
-  # academy directly → native (anonymous) portal handles session oauth correctly. Proves
-  # the platform. Re-enable (true) once the custom-portal login bridge is fixed.
-  enabled: false
-  # Public host the proxy serves → <hostname>.<ingressDomain>. MUST equal the
+  # Portal-owned OpenShift OAuth login (the app IS the OAuth client, SA-as-
+  # OAuthClient — no oauth-proxy sidecar). true = enforce login, register the SA
+  # as an OAuthClient, mount a session secret. false = open portal (local/dev),
+  # _user() empty. This also gives the browser a real portal session cookie, which
+  # authenticates the Educates session-host oauth_handshake the app reverse-proxies.
+  enabled: true
+  # Public host the portal serves → <hostname>.<ingressDomain>. MUST equal the
   # workshops chart's portal.ingress.hostname (Educates PORTAL_HOSTNAME): the
   # session gateway's browser-side oauth_handshake + CSP frame-ancestors are built
-  # for this host, so it must keep serving the Educates session paths (via this
-  # app's reverse proxy).
+  # for this host, so the app must keep serving the Educates session paths (proxy).
   hostname: academy
-  # PRE-CREATED secret with key cookie-secret (16/24/32 bytes; `openssl rand -hex
-  # 16`). Empty for plain helm (generated via lookup). For ArgoCD set this or use
-  # sealedSecret (helm template has no cluster access, so a generated cookie churns).
+  # OAuth scope. SA-as-OAuthClient permits only user:info (enough for the username).
+  scope: user:info
+  # Server-side calls (discovery + token exchange + users/~). The OAuth route cert
+  # is the cluster ingress cert (self-signed on CRC) → false there; true on real
+  # clusters where the ingress cert is trusted / the SA CA covers it.
+  oauthTlsVerify: false
+  # Explicit OAuth endpoints; empty = discover from the in-cluster API
+  # (https://kubernetes.default.svc/.well-known/oauth-authorization-server).
+  authorizeUrl: ""
+  tokenUrl: ""
+  # Flask session signing key (identity + token cookie). PRE-CREATED secret with
+  # key session-secret; empty + no sealedSecret = auto-generated + kept (helm
+  # install/dev). For ArgoCD set existingSecret or sealedSecret (helm template has
+  # no cluster access, so a generated key churns and logs everyone out on sync).
   existingSecret: ""
   sealedSecret:
     enabled: false
-    encryptedCookieSecret: ""
-  # oauth-proxy image (registry-overridable via global.registry.host).
-  proxyImage: ""
-  proxyImageRegistry: registry.redhat.io
-  proxyImageRepository: openshift4/ose-oauth-proxy
-  proxyImageTag: "v4.14"
+    encryptedSessionSecret: ""
   # Router timeout for the academy route. Session start (with vcluster) can exceed
   # the 30s default → 504. Raise it.
   routeTimeout: "120s"
-  # Proxy upstream. Empty = this chart's portal Service (the landing UI). Override
-  # only to hand the landing experience to something else.
-  upstream: ""
 
 # NOTE: the TrainingPortal + Workshop + Track CRs moved to the dcs-academy-workshops
 # chart (the workshops monorepo owns the catalog + session engine). This chart keeps
@@ -134,10 +136,6 @@ admin:
   ssarVerb: delete
   ssarNamespace: ""             # empty → educates.portalCrNamespace
 
-# oauth-proxy passthrough headers (set by the existing proxy).
-userHeader: X-Forwarded-User
-tokenHeader: X-Forwarded-Access-Token
-
 # NetworkPolicy locking the Educates training-portal Service (in the portal-UI
 # namespace) to this app + session namespaces. Same HostNetwork caveat as the
 # workshops chart's netpol; the VAP is the router-level enforcement.
@@ -146,6 +144,21 @@ networkPolicy:
 
 serviceMonitor:
   enabled: true
+
+# Kasten K10 backup of this namespace (incl. the CNPG feedback DB). OFF by default
+# and UNTESTED on dev — needs K10 + Kanister CRDs. Policy/Blueprint render into the
+# K10 namespace; a CHECKPOINT hook quiesces the DB before the snapshot. See
+# templates/70-k10-backup.yaml.
+backup:
+  enabled: false
+  k10Namespace: kasten-io          # where K10 Policy/Blueprint objects live
+  frequency: "@daily"
+  retention:
+    daily: 7
+    weekly: 4
+    monthly: 3
+  # K10 Location Profile to export snapshots offsite; "" = local snapshots only.
+  exportProfile: ""
 
 resources:
   requests:

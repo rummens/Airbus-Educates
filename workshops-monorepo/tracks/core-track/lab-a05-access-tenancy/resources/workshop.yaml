@@ -28,8 +28,19 @@ spec:
   workshop:
     image: "{{ .Values.workshopImages.base }}"
     files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - /workshops-monorepo/tracks/core-track/lab-a05-access-tenancy/workshop/**
+      - /workshops-monorepo/tracks/core-track/lab-a05-access-tenancy/exercises/**
+      - /workshops-monorepo/tracks/core-track/lab-a05-access-tenancy/README.md
+      newRootPath: workshops-monorepo/tracks/core-track/lab-a05-access-tenancy
+    {{- else }}
     - image:
         url: "$(image_repository)/lab-a05-access-tenancy-files:$(workshop_version)"
+    {{- end }}
   session:
     # DCS_REGISTRY is the single terminal/manifest source for the sample-image
     # registry (Plane 3). Keep it in sync with dcs_registry in workshop/config.yaml,

@@ -1,0 +1,14 @@
+#!/bin/bash
+# verify-pods-running — all hello-dcs Pods are Running (none Pending/failed): the app
+# fits within the namespace budget after right-sizing.
+phases=$(oc get pods -l app=hello-dcs \
+  -o jsonpath='{range .items[*]}{.status.phase}{"\n"}{end}' 2>/dev/null)
+if [ -z "$phases" ]; then
+  echo "No hello-dcs Pods found. Apply your right-sized Deployment first." >&2
+  exit 1
+fi
+if echo "$phases" | grep -qv '^Running$'; then
+  echo "Not all hello-dcs Pods are Running (found: $(echo "$phases" | tr '\n' ' ')). Right-size requests to fit the budget and re-check." >&2
+  exit 1
+fi
+echo "OK: all hello-dcs Pods are Running within the namespace budget."

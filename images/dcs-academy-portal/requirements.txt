@@ -5,4 +5,5 @@ kubernetes==31.0.0
 prometheus_client==0.21.1
 psycopg[binary]==3.2.13
 tzdata==2024.2
+Markdown==3.7
 pytest

@@ -1,0 +1,21 @@
+# Educates workshop config. `params` is a LIST of {name, value} entries
+# (NOT a Hugo-style map) — each is rendered in content via {{< param name >}}.
+# The param trio is mandatory; values are placeholders, re-pointable without a rebuild.
+# NOTE: dcs_registry here (content rendering) must match DCS_REGISTRY in
+# resources/workshop.yaml (terminal/manifest/devfile use).
+params:
+- name: product_name
+  value: "Digital Container Service (DCS)"
+- name: product_short
+  value: "DCS"
+- name: dcs_registry
+  value: "harbor.example.dcs/dcs-academy"
+- name: dcs_docs_base_url
+  value: "https://docs.example.dcs"
+# Optional: address of the live Dev Spaces dashboard. The actual tab is provisioned
+# in resources/workshop.yaml from the Helm value `devSpacesUrl` (gated — no value,
+# no tab, and the lab runs as the annotated concept walkthrough). Declared here so the
+# content plane has a single documented reference point; content refers to the tab by
+# name ("Dev Spaces"), so an empty value is harmless.
+- name: dev_spaces_url
+  value: ""

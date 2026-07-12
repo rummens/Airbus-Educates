@@ -13,8 +13,12 @@
     <div class="detail-rating">{{ m.stars(r.avg) }}<span class="rating-n">{{ '%.1f'|format(r.avg) }} · {{ r.n }} reviews</span></div>
   {% endif %}
 
+  {% if readme_html %}
+  <div class="detail-readme markdown">{{ readme_html }}</div>
+  {% else %}
   <p class="detail-desc">{{ c.description }}</p>
   {% if c.details_md %}<div class="detail-more">{{ c.details_md }}</div>{% endif %}
+  {% endif %}
   {% if c.author %}<p class="detail-author">{{ icon('user')|safe }} {{ c.author }}</p>{% endif %}
 
   <div class="detail-actions">

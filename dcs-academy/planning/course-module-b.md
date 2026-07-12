@@ -6,7 +6,7 @@ For app developers deploying and running their applications on DCS. Sequential w
 
 Same conventions as [course-module-a.md](course-module-a.md). Names: `lab-b0N-name`. All follow the house standards.
 
-**Sample app:** one web app (TBD — see `tasks.md`), reused across B01–B05. Its image lives in Harbor via `{{< param dcs_registry >}}`.
+**Sample app:** **`hello-dcs`** — the repo's small non-root web app (port 8080), reused across B01–B05. Its image lives in Harbor via `{{< param dcs_registry >}}/samples/hello-dcs:1.0` (already Harbor-mirrorable; also used in A02/A03/A06). B06 uses a Harbor-mirrored UDI referenced from a devfile.
 
 ---
 

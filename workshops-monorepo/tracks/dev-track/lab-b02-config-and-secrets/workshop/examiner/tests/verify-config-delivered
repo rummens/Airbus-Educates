@@ -1,0 +1,16 @@
+#!/bin/bash
+# verify-config-delivered [expected] — the ConfigMap value reached the container. Reads the
+# GREETING env var inside a running hello-dcs Pod (proves delivery at the container boundary;
+# hello-dcs is a static server and does not itself render config). If [expected] is given, the
+# value must match it (used after a config change).
+want="${1:-}"
+got=$(oc exec deployment/hello-dcs -- printenv GREETING 2>/dev/null | tr -d '\r')
+if [ -z "$got" ]; then
+  echo "GREETING is not set in the container. Wire the ConfigMap (envFrom) into the Deployment and re-roll ('oc rollout status deploy/hello-dcs')." >&2
+  exit 1
+fi
+if [ -n "$want" ] && [ "$got" != "$want" ]; then
+  echo "GREETING is '$got', expected '$want'. Did you edit the ConfigMap and trigger a rollout ('oc rollout restart deploy/hello-dcs')?" >&2
+  exit 1
+fi
+echo "OK: the container sees GREETING='$got' from the ConfigMap."
