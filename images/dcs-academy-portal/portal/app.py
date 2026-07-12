@@ -264,8 +264,13 @@ def _status_feed(name, t0):
     vc_ready = bool(vc) and all(p["ready"] == p["total"] and p["total"] for p in vc)
     ws_ready = bool(ws) and all(p["ready"] == p["total"] and p["total"] for p in ws)
 
+    # WorkshopSession.status.educates.phase for a live session is "Allocated"
+    # (assigned) — "Running" is never reported here, so we key readiness off the
+    # workshop pod being Ready + a session URL, gated to allocated/running phases.
+    READY_PHASES = ("Running", "Allocated", "Available")
+    url = st.get("url", "")
     step = "Reserving session"
-    if phase == "Running" and (ws_ready or not ws):
+    if phase in READY_PHASES and ws_ready and (vc_ready or not vc) and url:
         step = "Ready"
     elif ws_ready:
         step = "Loading content"
