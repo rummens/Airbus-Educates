@@ -6,3 +6,8 @@ app.kubernetes.io/part-of: dcs-academy
 {{ toYaml . }}
 {{- end }}
 {{- end -}}
+
+{{/* The Educates portal-UI namespace (<portalName>-ui). */}}
+{{- define "portal.uiNamespace" -}}
+{{- printf "%s-ui" .Values.educates.portalName -}}
+{{- end -}}
