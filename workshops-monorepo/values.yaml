@@ -15,15 +15,24 @@ global:
     host: ""
     pullSecret: ""
 
+# Session container images labs run in. `base` is the default; add named
+# variants for labs that need something else (e.g. extra tooling). A lab's
+# authored workshop.yaml picks one via {{ .Values.workshopImages.<name> }} —
+# templates/workshops.yaml renders those files through `tpl`. Air-gap: repoint
+# at Harbor. Edit here, not per-lab.
+workshopImages:
+  base: ghcr.io/rummens/dcs-workshop-base:dev
+  # tools: ghcr.io/rummens/dcs-workshop-tools:dev
+
 # Extra labels merged onto the Track CRs + TrainingPortal this chart emits.
-# (Workshop CRs are emitted verbatim from each lab's file, so label those there.)
+# (Workshop CRs are NOT verbatim — rendered through `tpl`, so .Values work there.)
 labels: {}
 
 # The one Educates TrainingPortal that hosts the whole catalog. Its name +
 # hostname MUST match the portal chart (educates.portalName / auth.hostname):
 # the portal app reads this CR's status for the robot REST creds + backend ns.
 educates:
-  portalName: dcst-dcs-backend
+  portalName: dcst
 
 portal:
   title: "DCS Enablement"

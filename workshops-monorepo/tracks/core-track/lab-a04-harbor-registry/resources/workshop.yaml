@@ -31,7 +31,7 @@ spec:
     # dcs-workshop-base, NOT dcs-tools.
     # NOTE: skopeo must be present in dcs-workshop-base. Adding it is a separate
     # base-image rebuild task (see air-gapped-images-reference / image-manifest).
-    image: "$(image_repository)/dcs-workshop-base:$(workshop_version)"
+    image: "{{ .Values.workshopImages.base }}"
     files:
     - image:
         url: "$(image_repository)/lab-a04-harbor-registry-files:$(workshop_version)"

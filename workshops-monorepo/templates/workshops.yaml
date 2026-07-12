@@ -10,6 +10,6 @@
 {{- range $path, $_ := .Files.Glob "tracks/*/*/resources/workshop.yaml" }}
 ---
 # from: {{ $path }}
-{{ $.Files.Get $path }}
+{{ tpl ($.Files.Get $path) $ }}
 {{- end }}
 {{- end }}

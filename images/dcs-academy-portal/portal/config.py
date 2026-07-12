@@ -15,7 +15,7 @@ def _b(name, default):
 # --- who we talk to ---------------------------------------------------------
 # The (cluster-scoped) TrainingPortal CR whose .status carries the Educates REST
 # robot credentials and the portal-UI namespace.
-PORTAL_NAME = os.environ.get("EDUCATES_PORTAL_NAME", "dcst-dcs-backend")
+PORTAL_NAME = os.environ.get("EDUCATES_PORTAL_NAME", "dcst")
 # Only used as the default namespace for the admin SSAR (trainingportals is
 # cluster-scoped, so the SSAR namespace is effectively ignored).
 PORTAL_CR_NAMESPACE = os.environ.get("EDUCATES_PORTAL_CR_NAMESPACE", "dcs-academy-portal")

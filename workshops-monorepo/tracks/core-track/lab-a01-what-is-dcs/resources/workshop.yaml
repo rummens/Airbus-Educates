@@ -40,7 +40,7 @@ spec:
       - /exercises/**
       - /README.md
   workshop:
-    image: "$(image_repository)/dcs-workshop-base:$(workshop_version)"
+    image: "{{ .Values.workshopImages.base }}"
     files:
     - image:
         url: "$(image_repository)/lab-a01-what-is-dcs-files:$(workshop_version)"

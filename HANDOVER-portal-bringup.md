@@ -11,7 +11,7 @@ specific and does **not** apply there. Read alongside auto-memory
 
 One chart — `dcs-academy-portal/chart` — owns the whole academy:
 - Workshop CRs (`70-workshops.yaml`) + TrainingPortal (`71-trainingportal.yaml`,
-  name **`dcst-dcs-backend`**) — both cluster-scoped.
+  name **`dcst`**) — both cluster-scoped.
 - oauth gate: `60-oauth-proxy.yaml`, `61-oauth-sealed-secret.yaml`,
   `62-oauth-route-vap.yaml` (host-reservation VAP).
 - Custom Flask UI (`20-deployment.yaml`/`21-service.yaml`), CNPG feedback
@@ -26,7 +26,7 @@ come from `argocd/envs/platform-crc.yaml` via `$values`.
 
 Request flow: browser → Route `oauth-proxy` (reencrypt, academy host) → oauth-proxy
 (SSO gate) → **upstream = the Flask app** → app reverse-proxies Educates session
-paths to the backend `training-portal` REST in `dcst-dcs-backend-ui`.
+paths to the backend `training-portal` REST in `dcst-ui`.
 
 ## Deploy status (2026-07-12)
 
@@ -54,9 +54,9 @@ Two pods need it:
 1. **Custom portal pod** — declarative: `values.openssl.armcap` (empty default),
    rendered as an env in `20-deployment.yaml`. Set to `"0"` in `platform-crc.yaml`.
 2. **Educates backend `training-portal` pod** — operator-owned Deployment in
-   `dcst-dcs-backend-ui`, NOT in our chart. Handled by `values.crcWorkaround.enabled`
+   `dcst-ui`, NOT in our chart. Handled by `values.crcWorkaround.enabled`
    → PostSync hook Job `63-crc-armcap-job.yaml` that runs
-   `oc set env deployment/training-portal -n dcst-dcs-backend-ui OPENSSL_armcap=0`
+   `oc set env deployment/training-portal -n dcst-ui OPENSSL_armcap=0`
    after each sync. Enabled in `platform-crc.yaml`. Idempotent; re-applies if the
    TrainingPortal recreates the backend. **x86: leave both OFF.**
 
@@ -98,11 +98,11 @@ Two pods need it:
   (session hosts `<lab>-<id>.apps-crc.testing` + `console-`/`editor-` variants too).
 - Workshop + TrainingPortal CRDs are **Cluster-scoped** — namespace is irrelevant to
   them; read cluster-scoped.
-- The `-ui` namespace (`dcst-dcs-backend-ui`) is **Educates-owned** — never create it
+- The `-ui` namespace (`dcst-ui`) is **Educates-owned** — never create it
   (chart or `oc`); Educates fails if it pre-exists.
 - Backend pod crash check:
-  `oc get pod -n dcst-dcs-backend-ui -l deployment=training-portal`
-  `oc logs <pod> -n dcst-dcs-backend-ui --previous | tail` (look for "Illegal instruction").
+  `oc get pod -n dcst-ui -l deployment=training-portal`
+  `oc logs <pod> -n dcst-ui --previous | tail` (look for "Illegal instruction").
 - TrainingPortal health:
-  `oc get trainingportal dcst-dcs-backend -o jsonpath='{.status.educates}'`
+  `oc get trainingportal dcst -o jsonpath='{.status.educates}'`
 - Portal image is `:dev` (pullPolicy Always) — `oc rollout restart` re-pulls.

@@ -27,6 +27,15 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: dcs-academy-tracks-and-workshops
+  # The Workshop CRD defaults files[].path to "." server-side (it's the subpath
+  # INSIDE the fetched source, not a repo path — "." = content root, correct).
+  # ServerSideApply then reports perpetual drift on the injected default. Ignore.
+  ignoreDifferences:
+    - group: training.educates.dev
+      kind: Workshop
+      jqPathExpressions:
+        - '.spec.publish.files[].path'
+        - '.spec.workshop.files[].path'
   syncPolicy:
     automated:
       prune: true

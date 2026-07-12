@@ -25,10 +25,10 @@ replicas: 1            # stateless (state in CNPG) → safe to raise for HA
 
 # The Educates TrainingPortal this chart ships (71-trainingportal.yaml). Its
 # .status carries the robot REST creds + the backend namespace. Cluster-scoped;
-# Educates derives the backend namespace as <portalName>-ui (dcst-dcs-backend-ui)
+# Educates derives the backend namespace as <portalName>-ui (dcst-ui)
 # — that pod serves the REST API/session runtime; the landing UI is this app.
 educates:
-  portalName: dcst-dcs-backend
+  portalName: dcst
   # Default namespace for the admin SSAR only (trainingportals is cluster-scoped,
   # so this is effectively ignored). The CR itself is read cluster-scoped.
   portalCrNamespace: dcs-academy-portal
