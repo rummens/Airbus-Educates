@@ -5,8 +5,9 @@ title: Overview
 Welcome to **Configuration & Secrets** on **{{< param product_name >}}**.
 
 {{< note >}}
-**First time in a workshop?** Instructions are on the left; your live environment (terminal,
-editor, web console) is on the right. Clickable blocks run commands or open files for you.
+**First time in one of these labs?** Take two minutes to read the
+[DCS Academy environment guide]({{< param dcs_docs_base_url >}}/academy/environment-guide) —
+it explains the terminal, editor, console, slides and the clickable actions you'll use here.
 {{< /note >}}
 
 In B01 you deployed `hello-dcs` — but its settings were baked into the image and manifest. To

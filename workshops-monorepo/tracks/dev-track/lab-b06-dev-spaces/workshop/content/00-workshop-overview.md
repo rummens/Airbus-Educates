@@ -5,8 +5,9 @@ title: Overview
 Welcome to **Cloud Development with OpenShift Dev Spaces** on **{{< param product_name >}}**.
 
 {{< note >}}
-**First time in a workshop?** Instructions are on the left; your live environment is on the
-right. Clickable blocks run commands or open files for you.
+**First time in one of these labs?** Take two minutes to read the
+[DCS Academy environment guide]({{< param dcs_docs_base_url >}}/academy/environment-guide) —
+it explains the terminal, editor, console, slides and the clickable actions you'll use here.
 {{< /note >}}
 
 So far you've **deployed to** {{< param product_short >}}. This workshop is about developing

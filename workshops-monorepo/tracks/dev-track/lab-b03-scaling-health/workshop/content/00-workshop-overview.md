@@ -5,10 +5,9 @@ title: Overview
 Welcome to **Scaling, Health & Resources** on **{{< param product_name >}}**.
 
 {{< note >}}
-**First time in a workshop?** The panel on the left is the instructions; the panel on the
-right is your live environment (a terminal, an editor, and the OpenShift web console).
-Clickable code blocks run commands or open files for you — you don't have to type. Work
-top to bottom.
+**First time in one of these labs?** Take two minutes to read the
+[DCS Academy environment guide]({{< param dcs_docs_base_url >}}/academy/environment-guide) —
+it explains the terminal, editor, console, slides and the clickable actions you'll use here.
 {{< /note >}}
 
 Your `hello-dcs` app is already deployed and running — one replica, no health checks, modest

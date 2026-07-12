@@ -6,8 +6,8 @@ A workspace is only useful if you can change code and see the result. Do exactly
 the cluster.
 
 {{< note >}}
-The commands below run in the **workspace terminal** (inside Dev Spaces), *not* the Educates
-terminal on the right. In concept mode, read them as the steps you'd take in the IDE.
+The commands below run in the **workspace terminal** (inside Dev Spaces), *not* this session's
+Educates terminal. In concept mode, read them as the steps you'd take in the IDE.
 {{< /note >}}
 
 ## Edit, run, see it

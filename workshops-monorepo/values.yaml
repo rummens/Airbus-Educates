@@ -31,7 +31,7 @@ workshopImages:
 #     works when the -files content images aren't built. Air-gapped prod can't
 #     reach GitHub, so keep this false there and mirror content to the registry.
 workshopContent:
-  useGit: false
+  useGit: true
   gitUrl: https://github.com/rummens/Airbus-Educates
   gitRef: origin/main
 
