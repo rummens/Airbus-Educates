@@ -23,14 +23,15 @@ image:
 
 replicas: 1            # stateless (state in CNPG) → safe to raise for HA
 
-# Which Educates TrainingPortal this portal fronts. Its .status carries the
-# robot REST creds and the portal-UI namespace.
+# The Educates TrainingPortal this chart ships (71-trainingportal.yaml). Its
+# .status carries the robot REST creds + the backend namespace. Cluster-scoped;
+# Educates derives the backend namespace as <portalName>-ui (dcst-dcs-backend-ui)
+# — that pod serves the REST API/session runtime; the landing UI is this app.
 educates:
-  # MUST match the workshops chart's portal.name. Educates derives the backend
-  # namespace as <portalName>-ui (dcst-dcs-backend-ui) — that pod now only serves
-  # the REST API/session runtime; the landing UI is this app.
   portalName: dcst-dcs-backend
-  portalCrNamespace: dcs-educates-workshops   # where the TrainingPortal CR lives
+  # Default namespace for the admin SSAR only (trainingportals is cluster-scoped,
+  # so this is effectively ignored). The CR itself is read cluster-scoped.
+  portalCrNamespace: dcs-academy-portal
   # Empty = derive http://training-portal.<status.namespace>.svc at runtime.
   portalServiceUrl: ""
   # Cluster wildcard ingress domain (per-cluster; override via the ArgoCD env file).
@@ -72,6 +73,28 @@ auth:
   upstream: ""
 
 # -----------------------------------------------------------------------------
+# TrainingPortal settings (the Educates portal CR that hosts the catalog below).
+# Its name is educates.portalName; the public host is auth.hostname. The Educates
+# landing UI is superseded by this Flask app — this CR is the session backend.
+# -----------------------------------------------------------------------------
+portal:
+  title: "DCS Enablement"
+  registration:
+    # anonymous → no Educates signup form; the oauth-proxy is the sole gate.
+    type: anonymous
+  sessions:
+    maximum: 3
+
+# -----------------------------------------------------------------------------
+# Per-session vcluster (requires platform vcluster support). When true, every
+# workshop gets session.applications.vcluster + a larger budget. Override per
+# workshop with `<ws>.session.vcluster: true/false`.
+# -----------------------------------------------------------------------------
+vcluster:
+  enabled: true
+  budget: large
+
+# -----------------------------------------------------------------------------
 # Theme → CSS variables. Defaults reproduce the DCS docs look; only primary/
 # secondary/logo are conceptually required, all have on-brand defaults.
 # -----------------------------------------------------------------------------
@@ -93,6 +116,8 @@ theme:
 # -----------------------------------------------------------------------------
 feedback:
   minReviews: 5                 # course view shows ratings only at/above this count
+  # Educates analytics webhook target. Empty = this app's own /analytics (CNPG).
+  analyticsWebhookUrl: ""
   cnpg:
     enabled: true
     instances: 1                # raise to 3 for HA in prod
@@ -149,3 +174,46 @@ tracks:
     description: "Run and observe workloads on the shared platform."
     order: 20
     icon: cog
+
+# -----------------------------------------------------------------------------
+# Workshop catalog. One (independent, cluster-scoped) Workshop CR per entry; the
+# TrainingPortal references them by name. Add a workshop by appending here.
+# -----------------------------------------------------------------------------
+workshops:
+  # lab-k8s-fundamentals, loaded straight from its GitHub repo (git source).
+  - name: lab-k8s-fundamentals
+    title: "Kubernetes Fundamentals"
+    description: "An interactive workshop on Kubernetes fundamentals."
+    # Content source. type: git | image | githubRelease | http
+    source:
+      type: git
+      git:
+        url: https://github.com/educates/lab-k8s-fundamentals
+        ref: origin/main
+      # For air-gap prefer an image (mirror it; rewrites via global.registry.host):
+      # type: image
+      image:
+        repository: ghcr.io/educates/lab-k8s-fundamentals-files
+        tag: "8.1"
+    # Paths inside the source to serve.
+    includePaths:
+      - /workshop/**
+      - /templates/**
+      - /README.md
+    session:
+      budget: medium        # small|medium|large|x-large|custom
+      policy: restricted    # restricted|baseline|privileged
+      applications:
+        terminal: true
+        console: true
+        editor: true
+        slides: true
+      # Per-workshop vcluster override. Omit to follow global vcluster.enabled.
+      #   vcluster: true   -> force a per-session vcluster
+      #   vcluster: false  -> opt OUT: run in a native, isolated OpenShift session
+      #                       namespace (for OpenShift-specific topics: operators,
+      #                       SCCs, UID ranges). Set policy accordingly.
+      # vcluster: true
+    portal:
+      expires: 60m
+      orphaned: 5m

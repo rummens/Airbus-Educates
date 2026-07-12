@@ -1,9 +1,10 @@
 {{- if .Values.enabled }}
-# One Workshop CR per catalog entry. Requires the training.educates.dev CRDs
-# (installed by the educates-openshift platform chart) to already exist.
+# One (cluster-scoped) Workshop CR per catalog entry. These are independent
+# objects — the TrainingPortal (71) only references them by name. Requires the
+# training.educates.dev CRDs (installed by the platform chart) to already exist.
 {{- $ctx := . -}}
 {{- range .Values.workshops }}
-{{- $vc := eq (include "workshops.vcluster" (dict "ctx" $ctx "ws" .)) "true" }}
+{{- $vc := eq (include "portal.vcluster" (dict "ctx" $ctx "ws" .)) "true" }}
 {{- $app := default dict .session.applications }}
 ---
 apiVersion: training.educates.dev/v1beta1
@@ -11,7 +12,7 @@ kind: Workshop
 metadata:
   name: {{ .name }}
   labels:
-    {{- include "workshops.labels" $ctx | nindent 4 }}
+    {{- include "portal.labels" $ctx | nindent 4 }}
   annotations:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
@@ -28,7 +29,7 @@ spec:
           {{- toYaml .includePaths | nindent 10 }}
       {{- else if eq .source.type "image" }}
       - image:
-          url: {{ include "workshops.image" (dict "ctx" $ctx "ws" .) | quote }}
+          url: {{ include "portal.workshopImage" (dict "ctx" $ctx "ws" .) | quote }}
         includePaths:
           {{- toYaml .includePaths | nindent 10 }}
       {{- else if eq .source.type "http" }}
@@ -91,5 +92,4 @@ spec:
         enabled: true
       {{- end }}
 {{- end }}
-
 {{- end }}

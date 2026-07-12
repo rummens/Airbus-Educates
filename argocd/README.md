@@ -9,13 +9,13 @@ argocd/
   apps/
     01-kapp-controller.yaml     # sync-wave 0 -> dcs-academy-kapp-controller
     02-educates-platform.yaml   # sync-wave 1 -> dcs-academy-platform  (ns dcs-educates)
-    04-academy-portal.yaml      # sync-wave 2 -> dcs-academy-portal    (ns dcs-academy-portal; UI + oauth gate)
-    03-educates-workshops.yaml  # sync-wave 3 -> dcs-academy-workshops (ns dcs-educates-workshops)
+    04-academy-portal.yaml      # sync-wave 2 -> dcs-academy-portal    (ns dcs-academy-portal; catalog + TrainingPortal + oauth gate + UI + feedback)
 ```
 
-Per-cluster settings (ingress domain, router cert, auth/vcluster toggles) are
-**chart defaults** now — the apps are single-source (no env files). Override per
-cluster via each Application's `spec.source.helm.valuesObject`.
+Per-cluster settings (ingress domain, router cert) come from a shared env file
+under `argocd/envs/` referenced via `$values` (both platform + portal read
+`educates.ingressDomain` from the same file). Other overrides go in each
+Application's `spec.source.helm.valuesObject`.
 
 ## Prerequisites
 
@@ -48,9 +48,8 @@ oc get applications -n openshift-gitops
 ```
 
 Expected: `dcs-academy-kapp-controller`, `dcs-academy-platform`,
-`dcs-academy-portal`, `dcs-academy-workshops` all Synced/Healthy. Platform reconcile
-(installer App) is the long pole (a few minutes). Portal at
-`https://academy.<domain>` → OpenShift OAuth.
+`dcs-academy-portal` all Synced/Healthy. Platform reconcile (installer App) is the
+long pole (a few minutes). Portal at `https://academy.<domain>` → OpenShift OAuth.
 
 ## Why it converges cleanly
 
@@ -59,11 +58,10 @@ Expected: `dcs-academy-kapp-controller`, `dcs-academy-platform`,
   deadlock that plain `helm uninstall` hits).
 - **Async CRDs:** Workshop/TrainingPortal carry `SkipDryRunOnMissingResource=true`
   + retry, so ArgoCD waits for the platform CRDs instead of hard-failing.
-- **Auth route precedence:** the portal app (wave 2, incl. oauth-proxy + the
-  host-reservation VAP) syncs before the workshops app (wave 3) creates the
-  TrainingPortal, so the proxy claims `academy.<domain>` and the VAP denies
-  Educates' own auto-published portal route for that host — the proxy is the only
-  entry (see dcs-academy-portal chart).
+- **Auth route precedence:** within the portal chart the host-reservation VAP
+  (resource sync-wave -1) is admitted before the TrainingPortal (wave 5), so when
+  Educates auto-publishes its own portal route for `academy.<domain>` it's denied
+  — the oauth-proxy is the only entry (see dcs-academy-portal chart).
 - **Layered reconcilers:** ArgoCD manages the App CR + config + CRs; kapp-controller
   owns the platform resources (invisible to ArgoCD). `ignoreDifferences` on the App
   + tracking ConfigMap stop churn.

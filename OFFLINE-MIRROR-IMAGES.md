@@ -59,7 +59,7 @@ ghcr.io/loft-sh/kubernetes:v1.33.4
 ghcr.io/loft-sh/kubernetes:v1.34.0
 ghcr.io/loft-sh/vcluster-oss:0.30.2
 
-# --- Auth (dcs-academy-workshops, auth.enabled) ---
+# --- Auth (dcs-academy-portal, auth.enabled) ---
 registry.redhat.io/openshift4/ose-oauth-proxy:v4.14
 
 # --- Monitoring (dcs-academy-platform, monitoring.enabled) ---

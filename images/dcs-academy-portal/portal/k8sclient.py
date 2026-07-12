@@ -179,10 +179,10 @@ def list_courses():
 # --- Educates portal wiring (robot creds) -----------------------------------
 
 def portal_status():
-    """TrainingPortal .status.educates: robot creds + portal-UI namespace + url."""
-    obj = _co().get_namespaced_custom_object(
-        "training.educates.dev", "v1beta1", cfg.PORTAL_CR_NAMESPACE,
-        "trainingportals", cfg.PORTAL_NAME)
+    """TrainingPortal .status.educates: robot creds + portal-UI namespace + url.
+    TrainingPortal is a CLUSTER-scoped CRD — read it cluster-scoped (no namespace)."""
+    obj = _co().get_cluster_custom_object(
+        "training.educates.dev", "v1beta1", "trainingportals", cfg.PORTAL_NAME)
     return (obj.get("status", {}) or {}).get("educates", {}) or {}
 
 

@@ -2,10 +2,10 @@
 
 Installs the [Educates](https://educates.dev) training **platform** (cluster
 -essentials + training-platform) on OpenShift, plus optional CR metrics /
-monitoring. **Platform-only** — the TrainingPortal, Workshops, and the
-OpenShift-OAuth proxy live in [`dcs-academy-workshops`](../dcs-academy-workshops).
+monitoring. **Platform-only** — the Workshops, TrainingPortal, custom UI, and the
+OpenShift-OAuth gate live in [`dcs-academy-portal`](../dcs-academy-portal).
 
-Pinned to **Educates 3.7.2**. Deploy this first, then the workshops chart.
+Pinned to **Educates 3.7.2**. Deploy this first, then the portal chart.
 
 ## How it installs Educates
 

@@ -13,10 +13,12 @@ def _b(name, default):
 
 
 # --- who we talk to ---------------------------------------------------------
-# The TrainingPortal CR (name + the namespace it lives in) whose status carries
-# the Educates REST robot credentials and the portal-UI namespace.
+# The (cluster-scoped) TrainingPortal CR whose .status carries the Educates REST
+# robot credentials and the portal-UI namespace.
 PORTAL_NAME = os.environ.get("EDUCATES_PORTAL_NAME", "dcst-dcs-backend")
-PORTAL_CR_NAMESPACE = os.environ.get("EDUCATES_PORTAL_CR_NAMESPACE", "dcs-educates-workshops")
+# Only used as the default namespace for the admin SSAR (trainingportals is
+# cluster-scoped, so the SSAR namespace is effectively ignored).
+PORTAL_CR_NAMESPACE = os.environ.get("EDUCATES_PORTAL_CR_NAMESPACE", "dcs-academy-portal")
 # In-cluster base URL of the Educates training-portal Service. Empty = derive
 # http://training-portal.<status.educates.namespace>.svc  at runtime.
 PORTAL_SERVICE_URL = os.environ.get("EDUCATES_PORTAL_SERVICE_URL", "").rstrip("/")

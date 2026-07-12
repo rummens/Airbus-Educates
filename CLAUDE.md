@@ -20,7 +20,7 @@ especially **dcs-academy-course-design**, **dcs-domain-corrections**, and
 | `images/` | `dcs-workshop-base` (Educates base + oc) and `hello-dcs` (RH UBI9) Containerfiles + `build.sh`. Pushed to `ghcr.io/rummens/*` (public, multiarch). |
 | `crc-local-testing/` | Portal-less deploy + smoke-test to the local CRC cluster: `deploy_workshop.py`, `smoke_test.py`, `smoke-plans/`, README. |
 | `docs/dcs-academy/` | Learner-facing environment guide (linked from workshop overviews). |
-| `argocd/`, `dcs-academy-{platform,workshops,kapp-controller}/` | Platform install via ArgoCD app-of-apps (syncs from GitHub `main`; prune+selfHeal). |
+| `argocd/`, `dcs-academy-{platform,kapp-controller}/`, `dcs-academy-portal/chart/` | Platform install via ArgoCD app-of-apps (syncs from GitHub `main`; prune+selfHeal). The portal chart owns the catalog + TrainingPortal + oauth gate + custom UI + feedback (the old `dcs-academy-workshops` chart was merged into it). |
 
 ## Which skill to use
 

@@ -1,16 +1,17 @@
-apiVersion: argoproj.io/v1alpha1
+apiVersion: argoproj.io/v1beta1
 kind: Application
 metadata:
   name: dcs-academy-portal
   namespace: openshift-gitops
   annotations:
-    # BEFORE the workshops app (sync-wave 3): the oauth-proxy + host-reservation
-    # VAP must exist before the TrainingPortal is created, else Educates' auto-
-    # published portal Route claims the academy host unauthenticated first (router
-    # admission is oldest-claim-wins). Only needs the platform's Educates CRDs
-    # (wave 1) + the CNPG operator; the Track CRD ships in crds/, and the CNPG
-    # Cluster + -ui netpol carry SkipDryRunOnMissingResource so ArgoCD retries
-    # until the TrainingPortal-derived namespace exists.
+    # After the platform (wave 1): needs the Educates Workshop/TrainingPortal CRDs
+    # + the CNPG operator. This one chart owns the whole academy: catalog,
+    # TrainingPortal, oauth gate, custom UI, feedback. Ordering is handled INSIDE
+    # the chart by resource sync-waves (VAP -1 → app 3 → netpol 4 → CRs 5), so the
+    # host-reservation VAP is admitted before the TrainingPortal triggers Educates'
+    # auto-route. The Track CRD ships in crds/; the CNPG Cluster, Workshop/
+    # TrainingPortal CRs, and -ui netpol carry SkipDryRunOnMissingResource so
+    # ArgoCD retries until their deps exist instead of hard-failing.
     argocd.argoproj.io/sync-wave: "2"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
