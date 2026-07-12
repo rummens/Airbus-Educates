@@ -46,7 +46,11 @@ educates:
 # -----------------------------------------------------------------------------
 auth:
   # Default ON — SSO gate is the whole point. Disable only for local/no-auth tests.
-  enabled: true
+  # TEMPORARILY OFF: isolates the custom-portal auth bridge. With this off, oauth-proxy
+  # + VAP are gone, academy is freed, and Educates' NATIVE TrainingPortal Route serves
+  # academy directly → native (anonymous) portal handles session oauth correctly. Proves
+  # the platform. Re-enable (true) once the custom-portal login bridge is fixed.
+  enabled: false
   # Public host the proxy serves → <hostname>.<ingressDomain>. MUST equal the
   # workshops chart's portal.ingress.hostname (Educates PORTAL_HOSTNAME): the
   # session gateway's browser-side oauth_handshake + CSP frame-ancestors are built

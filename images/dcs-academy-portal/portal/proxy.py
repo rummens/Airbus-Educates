@@ -11,6 +11,8 @@ ALLOWLIST is intentionally minimal. Under-proxy → sessions break; over-proxy �
 the Educates UI leaks back. VERIFY the exact set against a live authenticated
 session (watch which academy/… paths the session gateway hits) and adjust here.
 """
+import logging
+
 import requests
 from flask import Blueprint, Response, request, abort
 
@@ -18,6 +20,7 @@ from . import config as cfg
 from . import k8sclient
 
 bp = Blueprint("proxy", __name__)
+log = logging.getLogger("portal.proxy")
 
 # Path PREFIXES forwarded to Educates. Keep this tight.
 ALLOW_PREFIXES = (
@@ -59,6 +62,11 @@ def forward(_path):
     headers["X-Forwarded-Host"] = host
     headers["X-Forwarded-Proto"] = "https"
 
+    log.info("PROXY-> %s %s%s cookies=%s xfwd-user=%r xfwd-token=%s",
+             request.method, base, path, sorted(request.cookies.keys()),
+             headers.get("X-Forwarded-User", ""),
+             bool(headers.get("X-Forwarded-Access-Token")))
+
     upstream = requests.request(
         method=request.method,
         url=base + path,
@@ -72,5 +80,9 @@ def forward(_path):
     )
     resp_headers = [(k, v) for k, v in upstream.raw.headers.items()
                     if k.lower() not in _HOP]
+    log.info("PROXY<- %s %s -> %d loc=%r set-cookie=%d",
+             request.method, path, upstream.status_code,
+             upstream.headers.get("Location", ""),
+             len(upstream.raw.headers.getlist("Set-Cookie")) if hasattr(upstream.raw.headers, "getlist") else 0)
     return Response(upstream.iter_content(chunk_size=8192),
                     status=upstream.status_code, headers=resp_headers)

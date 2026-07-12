@@ -4,6 +4,7 @@ Custom routes own the landing experience; proxy.bp forwards the Educates session
 runtime paths. Order matters: custom routes are registered first, the proxy
 blueprint last (it only claims allowlisted prefixes, else 404).
 """
+import logging
 import re
 import time
 
@@ -28,6 +29,25 @@ def _token():
 
 def create_app():
     app = Flask(__name__)
+    # Force INFO logging to stdout (gunicorn captures it). Debug the session-open
+    # chain: every request in/out, user identity, proxied upstream status.
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    logging.getLogger().setLevel(logging.INFO)
+    log = logging.getLogger("portal")
+
+    @app.before_request
+    def _log_req():
+        log.info("REQ %s %s user=%r cookies=%s", request.method, request.full_path,
+                 _user(), sorted(request.cookies.keys()))
+
+    @app.after_request
+    def _log_resp(resp):
+        loc = resp.headers.get("Location", "")
+        setc = len(resp.headers.getlist("Set-Cookie"))
+        log.info("RESP %s %s -> %s loc=%r set-cookie=%d",
+                 request.method, request.path, resp.status_code, loc, setc)
+        return resp
+
     try:
         feedback.init_db()
     except Exception as e:            # noqa: BLE001 — DB may be absent in pure-UI local dev

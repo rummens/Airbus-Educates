@@ -27,11 +27,13 @@
       const NAME = {{ session_name|tojson }};
       const T0 = {{ t0 }};
       const TARGET = {{ target|tojson }};
+      console.log('[launch] NAME=', NAME, 'TARGET=', TARGET);
       const steps = document.querySelectorAll('#steps li');
       async function poll(){
         try{
           const r = await fetch(`/api/session/${encodeURIComponent(NAME)}/status?t0=${T0}`);
           const d = await r.json();
+          console.log('[launch] poll', JSON.stringify(d));
           document.getElementById('msg').textContent = d.message || d.step + '…';
           steps.forEach((li,i)=>{
             li.classList.toggle('done', i < d.index);
@@ -47,6 +49,17 @@
           }
         }catch(e){ /* transient; keep polling */ }
         setTimeout(poll, 2000);
+      }
+      // Claim the allocation NOW so Educates doesn't reclaim the un-accessed
+      // session (~75s) while we sit on this custom progress page. TARGET is the
+      // same-origin (academy) activation URL: with credentials it sends the SSO
+      // cookie and receives the portal session cookie (needed for the later
+      // session-host oauth). redirect:'manual' = don't throw on the cross-origin
+      // 302 to the session host; the claim already ran server-side.
+      if (TARGET) {
+        fetch(TARGET, {credentials:'include', redirect:'manual'})
+          .then(r => console.log('[launch] claim', TARGET, '->', r.status, r.type))
+          .catch(e => console.log('[launch] claim FAILED', e));
       }
       poll();
     </script>

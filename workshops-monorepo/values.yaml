@@ -49,7 +49,9 @@ portal:
   # Default per-workshop session lifecycle for the TrainingPortal list. Override
   # per lab with annotations academy.dcs/expires + academy.dcs/orphaned.
   expires: 60m
-  orphaned: 5m
+  # Grace before an allocated-but-never-accessed session is reaped. Bumped from 5m
+  # to give a slow first connect (SSO + per-session host resolve) more headroom.
+  orphaned: 15m
 
 feedback:
   # Educates analytics webhook → the portal app's /analytics (CNPG-backed).

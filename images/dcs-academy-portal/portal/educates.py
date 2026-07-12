@@ -13,6 +13,7 @@ The returned session `url` is a path under the portal host (academy); the
 browser is 302-redirected there and the reverse-proxy (proxy.py) forwards it to
 Educates, keeping the oauth_handshake host-consistent.
 """
+import logging
 import threading
 import time
 
@@ -20,6 +21,8 @@ import requests
 
 from . import config as cfg
 from . import k8sclient
+
+log = logging.getLogger("portal.educates")
 
 _tok_lock = threading.Lock()
 _tok = {"value": "", "exp": 0.0}
@@ -96,7 +99,10 @@ def request_session(workshop_name, user):
         params["user"] = user
     r = s.get(f"{base}/workshops/environment/{env}/request/", params=params, timeout=30)
     r.raise_for_status()
-    return r.json()
+    data = r.json()
+    log.info("REQUEST-SESSION workshop=%s env=%s user=%r -> name=%s url=%r",
+             workshop_name, env, user, data.get("name"), data.get("url"))
+    return data
 
 
 def _public_host():
