@@ -174,6 +174,31 @@ def test_source_and_readme_url():
     assert k8sclient._source_url(img) == "" and k8sclient._readme_raw_url(img) == ""
 
 
+def test_session_route_ready(monkeypatch):
+    admitted = {"items": [{"spec": {"host": "s1.apps.test"},
+                           "status": {"ingress": [{"conditions": [{"type": "Admitted", "status": "True"}]}]}}]}
+    pending = {"items": [{"spec": {"host": "s1.apps.test"},
+                         "status": {"ingress": [{"conditions": [{"type": "Admitted", "status": "False"}]}]}}]}
+    class _CO:
+        def __init__(self, data): self.data = data
+        def list_cluster_custom_object(self, *a, **k): return self.data
+    monkeypatch.setattr(k8sclient, "_co", lambda: _CO(admitted))
+    assert k8sclient.session_route_ready("sess", "https://s1.apps.test/") is True
+    monkeypatch.setattr(k8sclient, "_co", lambda: _CO(pending))
+    assert k8sclient.session_route_ready("sess", "https://s1.apps.test/") is False
+    assert k8sclient.session_route_ready("sess", "") is False        # no url
+
+
+def test_trophies_dynamic_from_tracks(db):
+    # per-track/per-module trophies come from the live courses+tracks → adding a track grows them
+    courses = [{"name": "x1", "module": "B-Developer", "track": "dev"}]
+    tracks = [{"name": "dev", "title": "Developer — Build on DCS"}]
+    t = appmod._trophies("alice", courses, tracks)
+    titles = [x["title"] for x in t["items"]]
+    assert "Developer Module" in titles           # module label prettified (B- stripped)
+    assert "Developer — Build on DCS Track" in titles or "Developer — Build on DCS" in titles
+
+
 def test_vcluster_and_module():
     assert k8sclient._uses_vcluster({"session": {"applications": {"vcluster": {"enabled": True}}}}) is True
     assert k8sclient._uses_vcluster({"session": {"applications": {}}}) is False
@@ -273,7 +298,10 @@ def test_trophies_render_for_dev_user(client, monkeypatch):
     feedback.mark_progress("alice", "lab-a01-what-is-dcs", "completed")
     body = client.get("/").data
     assert b"Your trophies" in body
-    assert b"labs done" in body
+    assert b"view all" in body
+    # dedicated page renders with earned/locked cards
+    page = client.get("/trophies").data
+    assert b"Trophies" in page and (b"Earned" in page or b"Locked" in page)
 
 
 def test_launch_over_limit_page(client, monkeypatch):

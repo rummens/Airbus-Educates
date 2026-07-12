@@ -155,7 +155,14 @@ def create_app():
                                difficulty_icon=DIFFICULTY_ICON, progress=progress,
                                stats=_catalog_stats(courses, tracks), hidden=hidden,
                                cont=cont_course, banner=_banner(),
-                               trophies=_trophies(_user(), courses))
+                               trophies=_trophies(_user(), courses, tracks))
+
+    @app.route("/trophies")
+    def trophies():
+        courses = k8sclient.list_courses()
+        tracks = k8sclient.list_tracks()
+        return render_template("trophies.html", is_admin=_is_admin(),
+                               trophies=_trophies(_user(), courses, tracks))
 
     @app.route("/course/<name>")
     def course(name):
@@ -294,11 +301,19 @@ def _banner():
     return _safe(lambda: feedback.get_setting("banner", "")) or ""
 
 
-def _trophies(user, courses):
-    """Trophies from completed-lab progress: first lab, each module, each track,
-    and all-complete. Returns earned + locked (so the UI shows goals) + a count."""
+def _pretty_module(mod):
+    """'B-Developer' → 'Developer'; leaves a plain value untouched."""
+    return mod.split("-", 1)[1] if "-" in mod and len(mod.split("-", 1)[0]) <= 2 else mod
+
+
+def _trophies(user, courses, tracks=None):
+    """Trophies from completed-lab progress. DYNAMIC: the per-module and per-track
+    trophies are derived from the live Workshop CRs (module label) and Track CRs, so
+    adding a new track/module + its labs grows the trophy set automatically — no code
+    change. Each entry carries earned state, the requirement, and progress (done/need)."""
     done = {w for w, s in _progress_safe(user).items() if s == "completed"}
     total = len(courses)
+    track_title = {t["name"]: t.get("title", t["name"]) for t in (tracks or [])}
 
     def group(key):
         g = {}
@@ -306,20 +321,28 @@ def _trophies(user, courses):
             g.setdefault(c.get(key) or "", []).append(c["name"])
         return {k: v for k, v in g.items() if k}
 
-    trophies = [{"key": "first", "title": "First Lab", "icon": "trophy",
-                 "earned": len(done) >= 1, "detail": "Complete your first lab"}]
+    def entry(key, title, icon, labs, detail):
+        d = sum(1 for l in labs if l in done)
+        return {"key": key, "title": title, "icon": icon, "detail": detail,
+                "earned": bool(labs) and d == len(labs), "done": d, "need": len(labs)}
+
+    items = [{"key": "first", "title": "First Lab", "icon": "trophy",
+              "earned": len(done) >= 1, "detail": "Complete any one lab",
+              "done": min(len(done), 1), "need": 1}]
     for mod, labs in sorted(group("module").items()):
-        trophies.append({"key": f"module:{mod}", "title": f"{mod} Module", "icon": "medal",
-                         "earned": bool(labs) and all(l in done for l in labs),
-                         "detail": f"Complete every lab in {mod}"})
+        name = _pretty_module(mod)
+        items.append(entry(f"module:{mod}", f"{name} Module", "medal", labs,
+                           f"Complete all {len(labs)} labs in the {name} module"))
     for tr, labs in sorted(group("track").items()):
-        trophies.append({"key": f"track:{tr}", "title": f"{tr} Track", "icon": "award",
-                         "earned": bool(labs) and all(l in done for l in labs),
-                         "detail": f"Complete every lab in the {tr} track"})
+        title = track_title.get(tr, tr.title())
+        label = title if "track" in title.lower() else f"{title} Track"
+        items.append(entry(f"track:{tr}", label, "award", labs,
+                           f"Complete all {len(labs)} labs in {title}"))
     if total:
-        trophies.append({"key": "all", "title": "Academy Master", "icon": "star",
-                         "earned": len(done) >= total, "detail": "Complete every lab"})
-    return {"items": trophies, "earned": sum(t["earned"] for t in trophies),
+        items.append({"key": "all", "title": "Academy Master", "icon": "star",
+                      "earned": len(done) >= total, "detail": "Complete every lab in the academy",
+                      "done": len(done), "need": total})
+    return {"items": items, "earned": sum(t["earned"] for t in items),
             "done": len(done), "total": total}
 
 
@@ -387,9 +410,17 @@ def _status_feed(name, t0):
     # workshop pod being Ready + a session URL, gated to allocated/running phases.
     READY_PHASES = ("Running", "Allocated", "Available")
     url = st.get("url", "")
+    # Only call the session truly Ready once its Route is admitted by the router —
+    # otherwise the redirect hits the router's "Application is not available" page.
+    # session_route_ready → True (admitted), False (not yet), or None (couldn't check,
+    # e.g. no Routes RBAC). Fail OPEN on None so a missing check never hangs the launch.
+    rr = _safe(lambda: k8sclient.session_route_ready(name, url)) if url else None
+    route_ready = (rr is None) or bool(rr)
     step = "Reserving session"
-    if phase in READY_PHASES and ws_ready and (vc_ready or not vc) and url:
+    if phase in READY_PHASES and ws_ready and (vc_ready or not vc) and url and route_ready:
         step = "Ready"
+    elif phase in READY_PHASES and ws_ready and (vc_ready or not vc) and url:
+        step = "Waiting for route"
     elif ws_ready:
         step = "Loading content"
     elif ws:
@@ -399,11 +430,14 @@ def _status_feed(name, t0):
     ready = step == "Ready"
     if ready and t0:
         metrics.PROVISION.observe(max(0, time.time() - t0))
+    # "Waiting for route" sits between Loading content and Ready — show it on the
+    # last content step so the bar doesn't jump back to the start.
+    idx = STEPS.index(step) if step in STEPS else (len(STEPS) - 2 if step == "Waiting for route" else 0)
     return {
         "phase": phase,
         "message": st.get("message", ""),
         "step": step,
-        "index": STEPS.index(step) if step in STEPS else 0,
+        "index": idx,
         "total": len(STEPS),
         "ready": ready,
         "url": _abs_session_url(st.get("url", "")),

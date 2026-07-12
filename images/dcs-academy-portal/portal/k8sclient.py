@@ -244,6 +244,34 @@ def list_sessions():
         return []
 
 
+def session_route_ready(session_name, url):
+    """True once the session's main OpenShift Route is ADMITTED by the router.
+
+    The WorkshopSession can report Ready before its Route is admitted, so redirecting
+    on Ready alone lands on the router's "Application is not available" page (a reload
+    then works). Gating on Route admission removes that race. `url` is
+    status.educates.url; we match the Route whose host equals it."""
+    host = url.split("://", 1)[-1].split("/")[0] if url else ""
+    if not host:
+        return False
+    try:
+        routes = _co().list_cluster_custom_object(
+            "route.openshift.io", "v1", "routes",
+            label_selector=f"training.educates.dev/session.name={session_name}").get("items", [])
+    except ApiException:
+        # Can't check (e.g. no Routes RBAC) → fail OPEN: return None so the caller
+        # doesn't hang the launch waiting for a check it can never make.
+        return None
+    for r in routes:
+        if (r.get("spec", {}) or {}).get("host") != host:
+            continue
+        for ing in ((r.get("status", {}) or {}).get("ingress") or []):
+            for c in (ing.get("conditions") or []):
+                if c.get("type") == "Admitted" and c.get("status") == "True":
+                    return True
+    return False
+
+
 def sessions_for_workshop(workshop_name):
     """Running sessions of one workshop → [{name, url, status}]. Powers the
     over-capacity page where the user frees a session to launch another."""

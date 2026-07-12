@@ -23,6 +23,7 @@
          src="{{ theme.logo_url or url_for('static', filename='logo.png') }}">
   </a>
   <nav class="site-nav">
+    <a href="{{ url_for('trophies') }}" class="nav-link">{{ icon('trophy')|safe }} Trophies</a>
     {% if is_admin %}<a href="{{ url_for('admin') }}" class="nav-link">{{ icon('shield')|safe }} Admin</a>{% endif %}
   </nav>
 </header>

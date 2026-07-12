@@ -29,7 +29,7 @@
 <section class="trophies">
   <div class="trophies-head">
     <span class="eyebrow">Your trophies</span>
-    <span class="muted">{{ trophies.done }}/{{ trophies.total }} labs done · {{ trophies.earned }} earned</span>
+    <a class="muted" href="{{ url_for('trophies') }}">{{ trophies.earned }} earned · {{ trophies.done }}/{{ trophies.total }} labs · view all →</a>
   </div>
   <div class="trophy-row">
     {% for t in trophies['items'] %}

@@ -50,6 +50,9 @@
             // redirect once it actually answers.
             document.getElementById('msg').textContent = 'Session ready — waiting for its route…';
             await waitForRoute(dest);
+            // Even an admitted Route can briefly 503 while the router loads it; give it
+            // a short settle before redirecting so the first page load succeeds.
+            await new Promise(r=>setTimeout(r, 2500));
             document.getElementById('spinner').classList.add('ok');
             window.location.href = dest;
             return;
