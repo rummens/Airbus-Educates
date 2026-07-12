@@ -131,6 +131,15 @@ feedback:
 # Dev clusters use self-signed certs → false there.
 sessionTlsVerify: false
 
+# OpenSSL ARM capability override. Empty = OpenSSL's normal runtime CPU probe.
+# Set to "0" on Apple-Silicon CRC (Virtualization.framework): the probe reads ID
+# registers vz doesn't emulate, so the cryptography Rust ext SIGILLs on import
+# (worker exit code 132). armcap=0 skips the probe → software crypto. No-op on
+# x86 (arm-only var), so harmless to leave set; scope it per-cluster if you run
+# real arm64 in prod and want crypto HW acceleration.
+openssl:
+  armcap: ""
+
 # Admin gate: SelfSubjectAccessReview with the *user* token (no SA perms).
 admin:
   ssarGroup: training.educates.dev

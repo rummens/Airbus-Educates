@@ -1,6 +1,5 @@
-# Per-cluster values for the educates-openshift (platform) chart — CRC / OpenShift Local.
-# Use this file (instead of platform-x86.yaml) in the educates-platform Application
-# when deploying to CRC. Platform is install-only.
+# Per-cluster values for CRC / OpenShift Local — shared by the platform AND portal
+# apps via $values. Each chart reads the keys it knows; unknown keys are ignored.
 educates:
   ingressDomain: apps-crc.testing
   ingress:
@@ -8,3 +7,9 @@ educates:
     tlsCertificateRef:
       name: router-certs-default
       namespace: openshift-ingress
+
+# Portal chart: Apple-Silicon CRC can't run the cryptography Rust ext (SIGILL under
+# Virtualization.framework) unless OpenSSL's ARM cap-probe is skipped. See
+# dcs-academy-portal values.openssl.armcap.
+openssl:
+  armcap: "0"

@@ -56,6 +56,12 @@ spec:
             {{- else }}
             - { name: FEEDBACK_DB, value: /tmp/feedback.db }
             {{- end }}
+            {{- if (.Values.openssl.armcap | toString) }}
+            # Skip OpenSSL's aarch64 CPU-capability probe (software crypto). Set on
+            # Apple-Silicon CRC where the probe SIGILLs under Virtualization.framework.
+            # toString so a numeric 0 still renders (a bare `with 0` is falsy).
+            - { name: OPENSSL_armcap, value: {{ .Values.openssl.armcap | quote }} }
+            {{- end }}
             # --- theme → CSS vars ---
             - { name: THEME_PRIMARY_COLOR,   value: {{ .Values.theme.primaryColor | quote }} }
             - { name: THEME_SECONDARY_COLOR, value: {{ .Values.theme.secondaryColor | quote }} }
