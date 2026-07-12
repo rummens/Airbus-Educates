@@ -1,0 +1,33 @@
+{{- if .Values.enabled }}
+# Educates backend RBAC supplement.
+# The operator-owned training-portal pod (SA `training-portal` in the Educates-
+# created <portalName>-ui namespace) runs a kopf watcher that lists CRDs at
+# cluster scope on startup. Educates does not grant that on OpenShift, so the
+# watcher 403s and dies ("customresourcedefinitions ... is forbidden"). Grant it.
+# The -ui namespace is dynamic + operator-owned; we only reference the SA in it.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Chart.Name }}-educates-crd-reader
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Chart.Name }}-educates-crd-reader
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Chart.Name }}-educates-crd-reader
+subjects:
+  - kind: ServiceAccount
+    name: training-portal
+    namespace: {{ include "portal.uiNamespace" . }}
+{{- end }}
