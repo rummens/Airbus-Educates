@@ -16,7 +16,12 @@ metadata:
   labels:
     {{- include "portal.labels" . | nindent 4 }}
   annotations:
-    argocd.argoproj.io/sync-wave: "4"
+    # AFTER the TrainingPortal (wave 5): Educates creates + owns the <portalName>-ui
+    # namespace on reconcile and REFUSES if it already exists. Applying this netpol
+    # earlier makes ArgoCD create that namespace first → Educates fails with
+    # "Namespace <name>-ui already exists". SkipDryRunOnMissingResource + retry lets
+    # this apply once Educates has created the namespace.
+    argocd.argoproj.io/sync-wave: "6"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   podSelector:

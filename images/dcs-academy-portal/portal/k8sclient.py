@@ -249,10 +249,19 @@ def user_can_admin(user_token):
     if not user_token:
         return False
     _ensure()
-    base = client.Configuration.get_default_copy()
-    base.api_key = {"authorization": f"Bearer {user_token}"}
-    base.api_key_prefix = {}
-    api = client.AuthorizationV1Api(client.ApiClient(base))
+    # Build a FRESH Configuration (reusing only the discovered host/CA) rather than
+    # copying the default: load_incluster_config() installs a refresh_api_key_hook
+    # that re-injects the SA token on every request, so a copied config ignores the
+    # user token and the SSAR silently runs as the SA (which lacks delete → admin
+    # button never shows). A fresh config has no hook, so the user token stands.
+    d = client.Configuration.get_default_copy()
+    ucfg = client.Configuration()
+    ucfg.host = d.host
+    ucfg.ssl_ca_cert = d.ssl_ca_cert
+    ucfg.verify_ssl = d.verify_ssl
+    ucfg.api_key = {"authorization": user_token}
+    ucfg.api_key_prefix = {"authorization": "Bearer"}
+    api = client.AuthorizationV1Api(client.ApiClient(ucfg))
     review = client.V1SelfSubjectAccessReview(
         spec=client.V1SelfSubjectAccessReviewSpec(
             resource_attributes=client.V1ResourceAttributes(
