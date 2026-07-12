@@ -1,0 +1,26 @@
+{{- if and .Values.enabled (not .Values.auth.enabled) }}
+# No-auth Route (auth.enabled=false). With the gate off there is no oauth-proxy
+# Route, so the portal Service would be unreachable and Educates' native portal
+# Route would win the academy host. This exposes the portal Service DIRECTLY at
+# academy (edge TLS, no SSO). The VAP (62) reserves academy for this namespace, so
+# Educates' Route is still denied and this one wins. TEST/LOCAL ONLY — ungated.
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ .Chart.Name }}-direct
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+  annotations:
+    haproxy.router.openshift.io/timeout: {{ .Values.auth.routeTimeout | quote }}
+spec:
+  host: {{ include "portal.authHostname" . }}
+  to:
+    kind: Service
+    name: {{ .Chart.Name }}
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+{{- end }}
