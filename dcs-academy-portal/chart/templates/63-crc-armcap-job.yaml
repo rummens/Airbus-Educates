@@ -1,0 +1,102 @@
+{{- if and .Values.enabled .Values.crcWorkaround.enabled }}
+{{- $uiNs := include "portal.uiNamespace" . }}
+# CRC-ONLY workaround. The Educates backend `training-portal` pod (Django +
+# cryptography) SIGILLs on Apple-Silicon CRC — the OpenSSL aarch64 cap-probe hits
+# instructions Virtualization.framework doesn't emulate (exit 132, same wall as
+# this app before OPENSSL_armcap=0). That Deployment is created + owned by the
+# Educates operator (NOT this chart), so we can't set the env declaratively —
+# instead a PostSync hook Job injects OPENSSL_armcap=0 into it after each sync
+# (idempotent; re-applies if the TrainingPortal recreates the backend). Leave OFF
+# everywhere except CRC — on x86 there is no SIGILL and this is pure overhead.
+#
+# RBAC is scoped to get/patch the single Deployment named training-portal (any ns,
+# via a ClusterRole since <portalName>-ui is operator-created and dynamic).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Chart.Name }}-crc-armcap
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Chart.Name }}-crc-armcap
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["training-portal"]
+    verbs: ["get", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Chart.Name }}-crc-armcap
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Chart.Name }}-crc-armcap
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}-crc-armcap
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-crc-armcap
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+  annotations:
+    # Run after the sync so the Educates operator has created the training-portal
+    # Deployment (TrainingPortal → Running). Keep on failure for inspection; delete
+    # on success so the next sync re-runs a fresh one.
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  backoffLimit: 10
+  activeDeadlineSeconds: 600
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        {{- include "portal.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Chart.Name }}-crc-armcap
+      restartPolicy: Never
+      {{- with .Values.global.registry.pullSecret }}
+      imagePullSecrets:
+        - name: {{ . }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: patch
+          image: {{ .Values.crcWorkaround.image | quote }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              ns={{ $uiNs | quote }}
+              echo "waiting for deployment/training-portal in $ns ..."
+              for i in $(seq 1 60); do
+                oc get deployment/training-portal -n "$ns" >/dev/null 2>&1 && break
+                sleep 5
+              done
+              echo "setting OPENSSL_armcap=0 (CRC cryptography SIGILL workaround)"
+              oc set env deployment/training-portal -n "$ns" OPENSSL_armcap=0
+              echo "done"
+{{- end }}

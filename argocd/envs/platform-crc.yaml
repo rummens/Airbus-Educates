@@ -9,7 +9,11 @@ educates:
       namespace: openshift-ingress
 
 # Portal chart: Apple-Silicon CRC can't run the cryptography Rust ext (SIGILL under
-# Virtualization.framework) unless OpenSSL's ARM cap-probe is skipped. See
-# dcs-academy-portal values.openssl.armcap.
+# Virtualization.framework) unless OpenSSL's ARM cap-probe is skipped. armcap covers
+# THIS app's pod; crcWorkaround deploys a PostSync Job that injects the same env into
+# the operator-owned Educates backend pod. Both CRC-only. See dcs-academy-portal
+# values + HANDOVER-portal-bringup.md.
 openssl:
   armcap: "0"
+crcWorkaround:
+  enabled: true

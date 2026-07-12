@@ -140,6 +140,17 @@ sessionTlsVerify: false
 openssl:
   armcap: ""
 
+# CRC-ONLY workaround for the Educates BACKEND portal pod. That pod (operator-owned,
+# not in this chart) SIGILLs on Apple-Silicon CRC the same way — but we can't set its
+# env declaratively. When enabled, a PostSync hook Job (63-crc-armcap-job.yaml)
+# injects OPENSSL_armcap=0 into the training-portal Deployment after each sync. Leave
+# OFF except on CRC. See HANDOVER-portal-bringup.md.
+crcWorkaround:
+  enabled: false
+  # Needs `oc` + bash. registry.redhat.io is already pullable on CRC (oauth-proxy
+  # uses it). Override for air-gap.
+  image: registry.redhat.io/openshift4/ose-cli:latest
+
 # Admin gate: SelfSubjectAccessReview with the *user* token (no SA perms).
 admin:
   ssarGroup: training.educates.dev
