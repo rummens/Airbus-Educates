@@ -28,7 +28,8 @@ spec:
   # grouping/order live in the academy.dcs/* metadata labels above — keep only
   # descriptive labels here (the track label moved up, so it's dropped).
   labels:
-    module: "A-Foundations"
+    - name: module
+      value: "A-Foundations"
   publish:
     image: "$(image_repository)/lab-a01-what-is-dcs-files:$(workshop_version)"
     files:

@@ -14,7 +14,8 @@ spec:
   duration: 45m
   difficulty: beginner
   labels:
-    module: "A-Foundations"
+    - name: module
+      value: "A-Foundations"
   publish:
     image: "$(image_repository)/lab-a04-harbor-registry-files:$(workshop_version)"
     files:

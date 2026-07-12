@@ -14,7 +14,8 @@ spec:
   duration: 40m
   difficulty: beginner
   labels:
-    module: "A-Foundations"
+    - name: module
+      value: "A-Foundations"
   publish:
     image: "$(image_repository)/lab-a03-namespace-model-files:$(workshop_version)"
     files:

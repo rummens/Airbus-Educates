@@ -14,7 +14,8 @@ spec:
   duration: 45m
   difficulty: intermediate
   labels:
-    module: "A-Foundations"
+    - name: module
+      value: "A-Foundations"
   publish:
     image: "$(image_repository)/lab-a08-rbac-deep-dive-files:$(workshop_version)"
     files:
