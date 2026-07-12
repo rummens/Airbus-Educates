@@ -43,12 +43,30 @@
           const pods = document.getElementById('pods');
           pods.innerHTML = d.pods.map(p=>`<li><span>${p.name}</span><span>${p.ready} ${p.phase}${p.vcluster?' · vcluster':''}</span></li>`).join('');
           if(d.ready && (d.url || TARGET)){
+            const dest = d.url || TARGET;
+            // The session reports Ready before its OpenShift Route is necessarily
+            // admitted by the router — redirecting too early lands on a dead host
+            // that a reload later fixes. Probe the session host first and only
+            // redirect once it actually answers.
+            document.getElementById('msg').textContent = 'Session ready — waiting for its route…';
+            await waitForRoute(dest);
             document.getElementById('spinner').classList.add('ok');
-            window.location.href = d.url || TARGET;
+            window.location.href = dest;
             return;
           }
         }catch(e){ /* transient; keep polling */ }
         setTimeout(poll, 2000);
+      }
+      // Wait until the (cross-origin) session host answers. A no-cors fetch resolves
+      // opaquely once the Route serves anything (incl. its oauth redirect) and rejects
+      // while the Route isn't admitted yet. Bounded — after ~15s redirect anyway so a
+      // genuinely slow route still proceeds (a reload recovers, as before).
+      async function waitForRoute(url, tries=10, gapMs=1500){
+        for(let i=0;i<tries;i++){
+          try{ await fetch(url, {mode:'no-cors', cache:'no-store'}); console.log('[launch] route ready after', i, 'tries'); return; }
+          catch(e){ await new Promise(r=>setTimeout(r, gapMs)); }
+        }
+        console.log('[launch] route probe gave up; redirecting anyway');
       }
       // Claim the allocation NOW so Educates doesn't reclaim the un-accessed
       // session (~75s) while we sit on this custom progress page. TARGET is the

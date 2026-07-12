@@ -37,7 +37,10 @@ spec:
   workshops:
   {{- $root := . }}
   {{- range $path, $_ := .Files.Glob "tracks/*/*/resources/workshop.yaml" }}
-  {{- $meta := (($root.Files.Get $path | fromYaml).metadata) }}
+  {{- /* tpl first: the workshop.yaml files carry {{- if .Values.workshopContent.useGit }}
+         toggle lines, which are invalid YAML raw — parsing without rendering yields nil
+         metadata → every workshops[].name comes out null and the CR is rejected. */ -}}
+  {{- $meta := ((tpl ($root.Files.Get $path) $root | fromYaml).metadata) }}
   {{- $ann := $meta.annotations | default dict }}
     - name: {{ $meta.name }}
       expires: {{ index $ann "academy.dcs/expires" | default $root.Values.portal.expires }}
