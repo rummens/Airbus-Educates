@@ -6,8 +6,6 @@ metadata:
   annotations:
     # Deploy first; on delete this is torn down last (reverse wave order).
     argocd.argoproj.io/sync-wave: "0"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:

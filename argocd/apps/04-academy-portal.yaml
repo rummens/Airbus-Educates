@@ -13,8 +13,6 @@ metadata:
     # TrainingPortal CRs, and -ui netpol carry SkipDryRunOnMissingResource so
     # ArgoCD retries until their deps exist instead of hard-failing.
     argocd.argoproj.io/sync-wave: "2"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   sources:

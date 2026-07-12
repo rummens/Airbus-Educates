@@ -7,8 +7,6 @@ metadata:
     # After kapp-controller. On delete, removed before kapp-controller so the
     # installer App's finalizer can run its cleanup while kapp-controller lives.
     argocd.argoproj.io/sync-wave: "1"
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   # Per-cluster settings (ingressDomain, router cert) are chart defaults now.
