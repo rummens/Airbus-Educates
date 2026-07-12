@@ -44,7 +44,9 @@ course** (the `planning/` docs + all workshops). Confirm scope, then review.
 
 1. **Gather.** List the workshop dir(s) and, for a course, the `planning/` docs.
    Read each workshop's `resources/workshop.yaml`, `workshop/config.yaml`,
-   `workshop/content/**`, `workshop/examiner/tests/**`, and `exercises/**`.
+   `workshop/content/**`, `workshop/examiner/tests/**`, and `exercises/**`. For a
+   catalog-repo workshop, also read the owning `tracks/<track>/track.yaml` (needed
+   for dimension B2).
 2. **Review by dimension** (the rubric below). For each check, look at the actual
    files; cite `file:line` for every finding.
 3. **Offer the documentation check (optional — must ask).** The DCS documentation
@@ -82,6 +84,10 @@ the usual remedy. References point at the authoritative source.
 
 ### B. Workshop definition (`resources/workshop.yaml`)
 - **Rule:** required sections present; `spec.publish` + `spec.workshop.files` (not deprecated `spec.content.files`); `duration`/`difficulty` set; only needed apps enabled; `examiner.enabled: true`. **Check:** read the YAML. **Fix:** add/correct sections. *(workshop-yaml-reference.)*
+
+### B2. DCS Academy catalog metadata *(catalog-repo workshops)*
+- **Rule:** the workshop lives at `tracks/<track-folder>/<lab>/resources/workshop.yaml`; its `metadata.labels` set `academy.dcs/track` (matching an existing `track.yaml` `id`) and `academy.dcs/order` (a **string**); `metadata.annotations` carry argocd `sync-wave: "5"` + `SkipDryRunOnMissingResource=true`; the owning `track.yaml` has an explicit `id` + `title`. **Check:** read the workshop `metadata` and the sibling `tracks/*/track.yaml`; confirm the `track` label resolves to a real track id. **Fix:** add the `academy.dcs/*` labels / the track.yaml `id`. *(dcs-catalog-metadata-reference — **Blocker**: a workshop with no/mismatched `academy.dcs/track` never renders in the portal.)*
+- **Rule (vcluster explicit):** `spec.session.applications.vcluster.enabled` is stated explicitly (`true` or `false`); an `enabled: true` lab **also** has the `educates-privileged-scc` RoleBinding in `spec.session.objects` and `namespaces.budget: large`; operator/SCC/UID topics are native (`false`). **Check:** read the session block. **Fix:** add the flag; for a vcluster lab add the SCC RoleBinding + budget. *(dcs-catalog-metadata-reference — **Blocker**: vcluster `true` without the SCC binding crashloops CoreDNS on OpenShift.)*
 
 ### C. Variablization & `config.yaml`
 - **Rule:** `workshop/config.yaml` declares `params` as a **list of `{name, value}`** (NOT a map) with the trio `product_name`, `dcs_registry`, `dcs_docs_base_url`. No hardcoded registry/domain/route/namespace/version anywhere. **Check:** open `config.yaml` (a map fails setup with ytt `string index: got string, want int`); grep content/definition for literals. **Fix:** convert to list; replace literals with the right variable plane. *(workshop-variables-reference — Blocker if map.)*

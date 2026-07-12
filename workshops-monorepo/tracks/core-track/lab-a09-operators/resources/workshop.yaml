@@ -1,0 +1,54 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-a09-operators
+  labels:
+    academy.dcs/track: core
+    academy.dcs/order: "90"
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Operators on DCS
+  description: Understand the OpenShift Operator pattern and how DCS offers operators — the platform runs the operator, you own the instances (Custom Resources) it manages.
+  duration: 40m
+  difficulty: beginner
+  labels:
+    module: "A-Foundations"
+  publish:
+    image: "$(image_repository)/lab-a09-operators-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "$(image_repository)/dcs-workshop-base:$(workshop_version)"
+    files:
+    - image:
+        url: "$(image_repository)/lab-a09-operators-files:$(workshop_version)"
+  session:
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # Native OpenShift session namespace (required): operators/SCC/CR work must run
+      # on the real cluster, not a vcluster.
+      vcluster:
+        enabled: false

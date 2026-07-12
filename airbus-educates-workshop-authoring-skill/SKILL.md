@@ -82,6 +82,13 @@ Create the following directory structure in the chosen location:
     └── content/                 # Workshop instruction pages (Markdown)
 ```
 
+**DCS Academy catalog placement.** When the workshop is part of the DCS Academy,
+`<workshop-root>` lives in the catalog repo under a track:
+`dcs-academy/tracks/<track-folder>/<workshop-name>/`. Each track folder also has a
+`track.yaml`. The workshops Helm chart discovers everything by globbing the tree —
+so the Workshop CR must carry catalog metadata (track, order) on `metadata`. See
+[references/dcs-catalog-metadata-reference.md](references/dcs-catalog-metadata-reference.md).
+
 #### The workshop/config.yaml File
 
 Always create `workshop/config.yaml` with a `params:` block at creation time. This is where house variables are declared once and rendered in content via `{{< param name >}}`. Seed it with the mandatory param trio:
@@ -159,7 +166,17 @@ spec:
 - Enable only the additional session applications the workshop requires
 - Set `spec.session.namespaces.security.token.enabled` to `false` by default (it is enabled by default for historical reasons)
 - Only set `spec.session.namespaces.security.token.enabled` to `true` if the workshop needs kubectl or uses the Kubernetes console
-- Omit any applications that are not needed (do not include with `enabled: false`)
+- Omit any applications that are not needed (do not include with `enabled: false`) — **except `vcluster`**, which the DCS Academy always states explicitly (`enabled: true` or `false`) to record the vcluster-vs-native-namespace decision
+
+**DCS Academy catalog metadata (required for the workshop to appear in the portal).**
+The custom portal reads extra fields off `metadata` — not `spec`. Set on every DCS
+Academy workshop:
+- `metadata.labels."academy.dcs/track"` = the owning track's `id` (else the lab is hidden)
+- `metadata.labels."academy.dcs/order"` = sort within the track (string, low first)
+- `metadata.annotations` argocd `sync-wave: "5"` + `SkipDryRunOnMissingResource=true`
+- vcluster: state `spec.session.applications.vcluster.enabled` explicitly; if `true`, also add the `educates-privileged-scc` RoleBinding in `spec.session.objects` and `namespaces.budget: large`, or CoreDNS crashloops on OpenShift.
+
+Full contract + track.yaml schema: [references/dcs-catalog-metadata-reference.md](references/dcs-catalog-metadata-reference.md).
 
 **Variablization (house standard).** Do not hardcode infrastructure values in `workshop.yaml`. Registry hosts, domains, route/ingress hosts, and namespaces must use data variables (`$(image_repository)`, `$(ingress_domain)`, `$(session_namespace)`, `$(session_hostname)`, etc.). Author-controlled values that must also reach the terminal or definition go in `spec.session.env`. See [references/workshop-variables-reference.md](references/workshop-variables-reference.md) for the three variable planes and how to keep a single source of truth.
 

@@ -1,0 +1,53 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-a08-rbac-deep-dive
+  labels:
+    academy.dcs/track: core
+    academy.dcs/order: "80"
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: RBAC Deep Dive
+  description: Go beyond "can I?" — understand Roles, ClusterRoles, and their bindings, and how DCS composes them to scope what your tenant can do.
+  duration: 45m
+  difficulty: intermediate
+  labels:
+    module: "A-Foundations"
+  publish:
+    image: "$(image_repository)/lab-a08-rbac-deep-dive-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "$(image_repository)/dcs-workshop-base:$(workshop_version)"
+    files:
+    - image:
+        url: "$(image_repository)/lab-a08-rbac-deep-dive-files:$(workshop_version)"
+  session:
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # Native OpenShift session namespace — no per-session vcluster needed.
+      vcluster:
+        enabled: false

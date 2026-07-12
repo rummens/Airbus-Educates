@@ -72,27 +72,10 @@ auth:
   # only to hand the landing experience to something else.
   upstream: ""
 
-# -----------------------------------------------------------------------------
-# TrainingPortal settings (the Educates portal CR that hosts the catalog below).
-# Its name is educates.portalName; the public host is auth.hostname. The Educates
-# landing UI is superseded by this Flask app — this CR is the session backend.
-# -----------------------------------------------------------------------------
-portal:
-  title: "DCS Enablement"
-  registration:
-    # anonymous → no Educates signup form; the oauth-proxy is the sole gate.
-    type: anonymous
-  sessions:
-    maximum: 3
-
-# -----------------------------------------------------------------------------
-# Per-session vcluster (requires platform vcluster support). When true, every
-# workshop gets session.applications.vcluster + a larger budget. Override per
-# workshop with `<ws>.session.vcluster: true/false`.
-# -----------------------------------------------------------------------------
-vcluster:
-  enabled: true
-  budget: large
+# NOTE: the TrainingPortal + Workshop + Track CRs moved to the dcs-academy-workshops
+# chart (the workshops monorepo owns the catalog + session engine). This chart keeps
+# only the portal app, oauth gate, CNPG/feedback, and the Track CRD. It must agree with
+# that chart on educates.portalName and auth.hostname.
 
 # -----------------------------------------------------------------------------
 # Theme → CSS variables. Defaults reproduce the DCS docs look; only primary/
@@ -116,8 +99,8 @@ theme:
 # -----------------------------------------------------------------------------
 feedback:
   minReviews: 5                 # course view shows ratings only at/above this count
-  # Educates analytics webhook target. Empty = this app's own /analytics (CNPG).
-  analyticsWebhookUrl: ""
+  # NOTE: the Educates analytics webhook URL is configured on the TrainingPortal,
+  # which now lives in the dcs-academy-workshops chart (feedback.analyticsWebhookUrl there).
   cnpg:
     enabled: true
     instances: 1                # raise to 3 for HA in prod
@@ -179,61 +162,6 @@ resources:
     cpu: "1"
     memory: 512Mi
 
-# -----------------------------------------------------------------------------
-# Tracks → Track CRs (GitOps-managed catalog grouping). Workshops join a track
-# via label academy.dcs/track=<name> and order via academy.dcs/order.
-# -----------------------------------------------------------------------------
-tracks:
-  - name: developer-basics
-    title: "Developer — Basics"
-    description: "Get productive on DCS: namespaces, workloads, registry."
-    order: 10
-    icon: code
-  - name: platform-operations
-    title: "Platform & Operations"
-    description: "Run and observe workloads on the shared platform."
-    order: 20
-    icon: cog
-
-# -----------------------------------------------------------------------------
-# Workshop catalog. One (independent, cluster-scoped) Workshop CR per entry; the
-# TrainingPortal references them by name. Add a workshop by appending here.
-# -----------------------------------------------------------------------------
-workshops:
-  # lab-k8s-fundamentals, loaded straight from its GitHub repo (git source).
-  - name: lab-k8s-fundamentals
-    title: "Kubernetes Fundamentals"
-    description: "An interactive workshop on Kubernetes fundamentals."
-    # Content source. type: git | image | githubRelease | http
-    source:
-      type: git
-      git:
-        url: https://github.com/educates/lab-k8s-fundamentals
-        ref: origin/main
-      # For air-gap prefer an image (mirror it; rewrites via global.registry.host):
-      # type: image
-      image:
-        repository: ghcr.io/educates/lab-k8s-fundamentals-files
-        tag: "8.1"
-    # Paths inside the source to serve.
-    includePaths:
-      - /workshop/**
-      - /templates/**
-      - /README.md
-    session:
-      budget: medium        # small|medium|large|x-large|custom
-      policy: restricted    # restricted|baseline|privileged
-      applications:
-        terminal: true
-        console: true
-        editor: true
-        slides: true
-      # Per-workshop vcluster override. Omit to follow global vcluster.enabled.
-      #   vcluster: true   -> force a per-session vcluster
-      #   vcluster: false  -> opt OUT: run in a native, isolated OpenShift session
-      #                       namespace (for OpenShift-specific topics: operators,
-      #                       SCCs, UID ranges). Set policy accordingly.
-      # vcluster: true
-    portal:
-      expires: 60m
-      orphaned: 5m
+# Tracks + Workshops + the TrainingPortal are NOT defined here anymore — they moved
+# to the dcs-academy-workshops chart (the workshops monorepo, glob-driven). This chart
+# still ships the Track CRD (crds/track.yaml); the workshops chart fills it with Track CRs.

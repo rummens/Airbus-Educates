@@ -1,0 +1,64 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-a07-storage
+  labels:
+    academy.dcs/track: core
+    academy.dcs/order: "70"
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Storage on DCS
+  description: Request persistent storage on DCS with a PVC, compare File vs Block storage classes, mount a volume, and prove data survives a pod restart.
+  duration: 40m
+  difficulty: beginner
+  labels:
+    module: "A-Foundations"
+  publish:
+    image: "$(image_repository)/lab-a07-storage-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "$(image_repository)/dcs-workshop-base:$(workshop_version)"
+    files:
+    - image:
+        url: "$(image_repository)/lab-a07-storage-files:$(workshop_version)"
+  session:
+    # DCS_REGISTRY is the single terminal/manifest source for the sample-image
+    # registry (Plane 3). Keep it in sync with dcs_registry in workshop/config.yaml,
+    # which is the content-rendering copy. Placeholder value — re-pointable per deploy.
+    # DCS_SC_FILE / DCS_SC_BLOCK are the storage-class names used by the exercise
+    # PVC manifests applied from the terminal (via envsubst). They mirror
+    # dcs_sc_file / dcs_sc_block in workshop/config.yaml (the content-rendering copies)
+    # — keep the two in sync. Placeholder values until confirmed with the storage team.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    - name: DCS_SC_FILE
+      value: "dcs-file"
+    - name: DCS_SC_BLOCK
+      value: "dcs-block"
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # Native OpenShift session namespace — no per-session vcluster needed.
+      vcluster:
+        enabled: false

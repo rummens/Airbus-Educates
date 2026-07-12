@@ -1,0 +1,25 @@
+{{- /*
+  Track CRs — one per tracks/<folder>/track.yaml. The track id comes from the
+  explicit `id` field in track.yaml (NOT the folder name), and must match the
+  academy.dcs/track label the workshops use to join it.
+*/ -}}
+{{- if .Values.enabled }}
+{{- range $path, $_ := .Files.Glob "tracks/*/track.yaml" }}
+{{- $t := $.Files.Get $path | fromYaml }}
+{{- $id := required (printf "%s: track.yaml needs an `id` field" $path) $t.id }}
+---
+apiVersion: academy.dcs/v1alpha1
+kind: Track
+metadata:
+  name: {{ $id }}
+  labels:
+    {{- include "ws.labels" $ | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: {{ $t.title | quote }}
+  description: {{ $t.description | default "" | quote }}
+  order: {{ $t.order | default 100 }}
+  icon: {{ $t.icon | default "layers" | quote }}
+{{- end }}
+{{- end }}

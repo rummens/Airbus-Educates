@@ -700,6 +700,11 @@ labels:
 
 Old Educates documentation incorrectly showed labels as a dictionary (key-value pairs). This format is wrong. Always use the array format with objects containing `name` and `value` properties as shown in the correct example above.
 
+> **DCS Academy:** `spec.labels` are for Educates' own search only. The DCS portal
+> groups/orders workshops from **`metadata.labels`** (`academy.dcs/track`,
+> `academy.dcs/order`) — a different section and format (a normal k8s label map).
+> See [dcs-catalog-metadata-reference.md](dcs-catalog-metadata-reference.md).
+
 ## Session Ingresses
 
 Session ingresses use the workshop session proxy to expose an HTTP service for browser access within the workshop. They are configured under `spec.session.ingresses`.
@@ -792,6 +797,6 @@ When generating a workshop.yaml, determine:
 4. **Does it need Kubernetes access?** → If yes, keep security token enabled; if no, explicitly disable with `enabled: false`
 5. **Does it teach Kubernetes?** → Enable console (and keep security token enabled)
 6. **Does it involve containers?** → Enable docker and possibly registry
-7. **Does it need cluster-admin access?** → Enable vcluster
+7. **Does it need cluster-admin access?** → Enable vcluster. *(DCS Academy: state `vcluster.enabled` explicitly either way; a `true` lab also needs the `educates-privileged-scc` RoleBinding + `budget: large` — see [dcs-catalog-metadata-reference.md](dcs-catalog-metadata-reference.md).)*
 8. **Does it need a local Git repository?** → Enable git (e.g., for CI/CD pipeline workshops)
 9. **Does it include a presentation?** → Enable slides and add content to `workshop/slides/`

@@ -27,35 +27,6 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- printf "%s-ui" .Values.educates.portalName -}}
 {{- end -}}
 
-{{/*
-Workshop content image ref for source.type=image, applying the registry
-override (air-gap → Harbor). Arg: dict "ctx" $ "ws" <workshop>
-*/}}
-{{- define "portal.workshopImage" -}}
-{{- $ctx := .ctx -}}
-{{- $img := .ws.source.image -}}
-{{- $host := $ctx.Values.global.registry.host -}}
-{{- if $host -}}
-{{- $path := regexReplaceAll "^[^/]+/" $img.repository "" -}}
-{{- printf "%s/%s:%s" $host $path (toString $img.tag) -}}
-{{- else -}}
-{{- printf "%s:%s" $img.repository (toString $img.tag) -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Whether vcluster is on for a workshop (per-workshop override beats global).
-Arg: dict "ctx" $ "ws" <workshop>
-*/}}
-{{- define "portal.vcluster" -}}
-{{- $ws := .ws -}}
-{{- if hasKey (default dict $ws.session) "vcluster" -}}
-{{- $ws.session.vcluster -}}
-{{- else -}}
-{{- .ctx.Values.vcluster.enabled -}}
-{{- end -}}
-{{- end -}}
-
 {{/* CNPG cluster name. */}}
 {{- define "portal.cnpgName" -}}
 {{- printf "%s-db" .Chart.Name -}}

@@ -1,5 +1,8 @@
 # Local workshop testing on CRC (portal-less)
 
+
+# TODO Rewrite
+
 Test OpenShift-targeted workshops on local CRC (Apple Silicon) **without the
 training portal**.
 

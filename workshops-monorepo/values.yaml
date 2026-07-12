@@ -1,0 +1,41 @@
+# =============================================================================
+# dcs-academy-workshops — values
+# =============================================================================
+# Deliberately small. There is NO workshop/track list here — the catalog is the
+# git tree (globbed at render). These are only cross-cutting defaults + the
+# single TrainingPortal's settings.
+# =============================================================================
+
+enabled: true
+
+# Extra labels merged onto the Track CRs + TrainingPortal this chart emits.
+# (Workshop CRs are emitted verbatim from each lab's file, so label those there.)
+labels: {}
+
+# The one Educates TrainingPortal that hosts the whole catalog. Its name +
+# hostname MUST match the portal chart (educates.portalName / auth.hostname):
+# the portal app reads this CR's status for the robot REST creds + backend ns.
+educates:
+  portalName: dcst-dcs-backend
+
+portal:
+  title: "DCS Enablement"
+  # Public academy host = portal chart's auth.hostname. Educates uses it for
+  # PORTAL_HOSTNAME (URLs, cookies, CSP). The oauth-proxy claims it.
+  hostname: academy
+  registration:
+    type: anonymous            # oauth-proxy is the sole gate; no Educates signup
+  sessions:
+    maximum: 3
+  workshop:
+    reserved: 1
+    initial: 0
+  # Default per-workshop session lifecycle for the TrainingPortal list. Override
+  # per lab with annotations academy.dcs/expires + academy.dcs/orphaned.
+  expires: 60m
+  orphaned: 5m
+
+feedback:
+  # Educates analytics webhook → the portal app's /analytics (CNPG-backed).
+  # Default targets the portal chart's Service by its known name+ns.
+  analyticsWebhookUrl: "http://dcs-academy-portal.dcs-academy-portal.svc:8080/analytics"

@@ -1,0 +1,9 @@
+apiVersion: v2
+name: dcs-academy-workshops
+description: >-
+  Git-driven Educates catalog for the DCS Academy. Discovers every
+  <track>/<lab>/workshop.yaml + <track>/track.yaml in this repo and emits the
+  Workshop CRs (verbatim), the Track CRs, and one TrainingPortal listing them
+  all. Add a lab = add a folder + push. No central catalog list.
+type: application
+version: 0.1.0

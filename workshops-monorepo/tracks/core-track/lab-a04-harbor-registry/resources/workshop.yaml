@@ -1,0 +1,65 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-a04-harbor-registry
+  labels:
+    academy.dcs/track: core
+    academy.dcs/order: "40"
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Working with Harbor
+  description: Use the DCS Harbor registry — pull images from catalogs, browse the Harbor UI, and see how vulnerability scanning gates images. Pull-only; pushing is out of scope in Foundations.
+  duration: 45m
+  difficulty: beginner
+  labels:
+    module: "A-Foundations"
+  publish:
+    image: "$(image_repository)/lab-a04-harbor-registry-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    # Pull-only workshop: image inspection/pull uses skopeo (daemonless — no
+    # docker/podman inside the container, avoiding double-virtualization). Runs on
+    # dcs-workshop-base, NOT dcs-tools.
+    # NOTE: skopeo must be present in dcs-workshop-base. Adding it is a separate
+    # base-image rebuild task (see air-gapped-images-reference / image-manifest).
+    image: "$(image_repository)/dcs-workshop-base:$(workshop_version)"
+    files:
+    - image:
+        url: "$(image_repository)/lab-a04-harbor-registry-files:$(workshop_version)"
+  session:
+    # DCS_REGISTRY is the single terminal/manifest source for the sample-image
+    # registry (Plane 3). Keep it in sync with dcs_registry in workshop/config.yaml,
+    # which is the content-rendering copy. Placeholder value — re-pointable per deploy.
+    #
+    # NOTE (env dependency): skopeo pulls/inspects against Harbor authenticate with a
+    # read-only Harbor robot account. Those credentials (e.g. a mounted auth file /
+    # REGISTRY_AUTH_FILE) are provisioned at deploy time, not hardcoded here.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # Native OpenShift session namespace — no per-session vcluster needed.
+      vcluster:
+        enabled: false

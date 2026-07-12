@@ -1,0 +1,46 @@
+{{- /*
+  The one TrainingPortal hosting the whole catalog. The workshops list is the
+  aggregation the per-folder files can't do themselves: we re-glob, parse each
+  Workshop CR (fromYaml) for its name, and pull per-workshop session lifetimes
+  from annotations academy.dcs/expires|orphaned (default from values).
+*/ -}}
+{{- if .Values.enabled }}
+apiVersion: training.educates.dev/v1beta1
+kind: TrainingPortal
+metadata:
+  name: {{ .Values.educates.portalName }}
+  labels:
+    {{- include "ws.labels" . | nindent 4 }}
+  annotations:
+    # Very high wave: this CR must settle LAST — after the Workshop CRs it names
+    # exist, and (cross-app) after the portal app is up. See README warning.
+    argocd.argoproj.io/sync-wave: "100"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  portal:
+    title: {{ .Values.portal.title | quote }}
+    ingress:
+      hostname: {{ .Values.portal.hostname }}
+    registration:
+      type: {{ .Values.portal.registration.type }}
+    updates:
+      workshop: true
+    sessions:
+      maximum: {{ .Values.portal.sessions.maximum }}
+    workshop:
+      defaults:
+        reserved: {{ .Values.portal.workshop.reserved }}
+        initial: {{ .Values.portal.workshop.initial }}
+  analytics:
+    webhook:
+      url: {{ .Values.feedback.analyticsWebhookUrl | quote }}
+  workshops:
+  {{- $root := . }}
+  {{- range $path, $_ := .Files.Glob "tracks/*/*/resources/workshop.yaml" }}
+  {{- $meta := (($root.Files.Get $path | fromYaml).metadata) }}
+  {{- $ann := $meta.annotations | default dict }}
+    - name: {{ $meta.name }}
+      expires: {{ index $ann "academy.dcs/expires" | default $root.Values.portal.expires }}
+      orphaned: {{ index $ann "academy.dcs/orphaned" | default $root.Values.portal.orphaned }}
+  {{- end }}
+{{- end }}

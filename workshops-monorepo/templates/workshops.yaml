@@ -1,0 +1,15 @@
+{{- /*
+  Workshop CRs — emitted VERBATIM from each lab's authored file.
+  Discovery: every tracks/<track>/<lab>/resources/workshop.yaml (Educates keeps
+  the Workshop CR under resources/).
+  No synthesis, no central list — the file IS the Educates Workshop CR. Grouping
+  + within-track order come from the academy.dcs/* labels the author sets there
+  (see README). Adding a lab = drop a folder with a workshop.yaml + push.
+*/ -}}
+{{- if .Values.enabled }}
+{{- range $path, $_ := .Files.Glob "tracks/*/*/resources/workshop.yaml" }}
+---
+# from: {{ $path }}
+{{ $.Files.Get $path }}
+{{- end }}
+{{- end }}

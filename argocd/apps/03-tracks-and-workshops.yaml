@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dcs-academy-tracks-and-workshops
+  namespace: openshift-gitops
+  annotations:
+    # After the custom Academy portal has been deployed (wave 2), most importantly the track CRD, the
+    # tracks and workshops can be deployed. This has to go into two steps:
+    # First the TrainingPortal CR needs to be up and healthy. This is the backend and the API
+    # source for the portal. Unfortunately this CR needs the list of workshops to track, this
+    # way to decouple is the cleanest solution forced by dirty design dependency.
+    # Tracks and workshops are then dynamically read from the repo and created as CRs, which
+    # are then picked up by the custom Academy Portal.
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/rummens/Airbus-Educates
+      targetRevision: main
+      path: workshops-monorepo
+      helm:
+        valueFiles:
+          - $values/argocd/envs/platform-crc.yaml
+    - repoURL: https://github.com/rummens/Airbus-Educates
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dcs-academy-tracks-and-workshops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 20
+      backoff:
+        duration: 15s
+        maxDuration: 5m
+        factor: 2
