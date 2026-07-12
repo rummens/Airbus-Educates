@@ -13,10 +13,16 @@ spec:
   project: default
   # Per-cluster settings (ingressDomain, router cert) are chart defaults now.
   # Override per cluster via spec.source.helm.valuesObject if needed.
-  source:
-    repoURL: https://github.com/rummens/Airbus-Educates
-    targetRevision: main
-    path: dcs-academy-platform
+  sources:
+    - repoURL: https://github.com/rummens/Airbus-Educates
+      targetRevision: main
+      path: dcs-academy-platform
+      helm:
+        valueFiles:
+          - $values/argocd/envs/platform-crc.yaml
+    - repoURL: https://github.com/rummens/Airbus-Educates
+      targetRevision: main
+      ref: values
   destination:
     server: https://kubernetes.default.svc
     # Static platform release namespace (dcs-). Holds the helm release + monitoring

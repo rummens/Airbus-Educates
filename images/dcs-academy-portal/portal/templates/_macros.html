@@ -1,0 +1,56 @@
+{% macro stars(avg) -%}
+<span class="stars" title="{{ '%.1f'|format(avg) }} / 5" aria-label="{{ '%.1f'|format(avg) }} out of 5">
+  {%- for i in range(1,6) -%}
+    <span class="star {{ 'on' if avg >= i - 0.25 else ('half' if avg >= i - 0.75 else '') }}">{{ icon('star')|safe }}</span>
+  {%- endfor -%}
+</span>
+{%- endmacro %}
+
+{% macro rating_badge(name, ratings, min_reviews) -%}
+  {%- set r = ratings.get(name) -%}
+  {%- if r and r.n >= min_reviews -%}
+    <span class="rating">{{ stars(r.avg) }}<span class="rating-n">({{ r.n }})</span></span>
+  {%- elif r and r.n > 0 -%}
+    <span class="rating-soft">Not yet rated</span>
+  {%- else -%}
+    <span class="rating-soft new">New</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro status_badge(status) -%}
+  {%- if status == 'completed' -%}
+    <span class="status done">{{ icon('check-circle')|safe }} Completed</span>
+  {%- elif status == 'started' -%}
+    <span class="status wip">{{ icon('refresh')|safe }} In progress</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro meta_pills(c, difficulty_icon) -%}
+<div class="pills">
+  {%- if c.difficulty -%}
+  <span class="pill">{{ icon(difficulty_icon.get(c.difficulty, 'signal'))|safe }}{{ c.difficulty|capitalize }}</span>
+  {%- endif -%}
+  {%- if c.duration -%}
+  <span class="pill">{{ icon('clock')|safe }}{{ c.duration }}</span>
+  {%- endif -%}
+</div>
+{%- endmacro %}
+
+{% macro tile(c, ratings, min_reviews, difficulty_icon, sicon, status, idx, total) -%}
+<a class="tile" href="{{ url_for('course', name=c.name) }}"
+   data-title="{{ c.title|lower }}" data-difficulty="{{ c.difficulty }}"
+   data-track="{{ c.track }}" data-mins="{{ c.duration }}">
+  <div class="tile-top">
+    <span class="tile-icon">{{ icon(c.icon or sicon or 'book')|safe }}</span>
+    {{ status_badge(status) }}
+  </div>
+  {% if total %}<span class="tile-seq">Lab {{ idx }} of {{ total }}</span>{% endif %}
+  <h3 class="tile-title">{{ c.title }}</h3>
+  <p class="tile-summary">{{ c.summary }}</p>
+  {{ meta_pills(c, difficulty_icon) }}
+  <div class="tile-foot">
+    {{ rating_badge(c.name, ratings, min_reviews) }}
+    <span class="tile-go">{{ icon('arrow-right')|safe }}</span>
+  </div>
+</a>
+{%- endmacro %}

@@ -16,8 +16,8 @@ Every chart has a top-level `enabled: true` toggle (set `false` to render nothin
 
 ## Namespaces
 
-- **Static (platform)** → `dcs-*` (e.g. `dcs-educates-installer`, `dcs-educates`, `dcs-educates-workshops`).
-- **Dynamic (user sessions)** → `dcst-*` (from the portal name `dcst-dcs`, e.g. `dcst-dcs-w01-xxxx`, `...-vc`).
+- **Static (platform)** → `dcs-*` (e.g. `dcs-educates-installer`, `dcs-educates`, `dcs-educates-workshops`, `dcs-academy-portal` = custom UI + oauth gate).
+- **Dynamic (user sessions)** → `dcst-*` (from the portal name `dcst-dcs-backend`, e.g. `dcst-dcs-backend-w01-xxxx`, `...-vc`); the Educates backend runs in `dcst-dcs-backend-ui`.
 - Educates' own operator namespace stays `educates` (created by the upstream installer).
 
 ## Deploy (ArgoCD — the target flow)

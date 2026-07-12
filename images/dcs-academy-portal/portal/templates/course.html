@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block title %}{{ c.title }} — {{ product }}{% endblock %}
+{% block content %}
+<a class="back" href="{{ url_for('index') }}">{{ icon('chevron')|safe }} All workshops</a>
+
+<article class="detail">
+  <span class="eyebrow">Workshop</span>
+  <h1>{{ c.title }} {{ m.status_badge(status) }}</h1>
+  {{ m.meta_pills(c, difficulty_icon) }}
+  {% set r = ratings.get(c.name) %}
+  {% if r and r.n >= min_reviews %}
+    <div class="detail-rating">{{ m.stars(r.avg) }}<span class="rating-n">{{ '%.1f'|format(r.avg) }} · {{ r.n }} reviews</span></div>
+  {% endif %}
+
+  <p class="detail-desc">{{ c.description }}</p>
+  {% if c.details_md %}<div class="detail-more">{{ c.details_md }}</div>{% endif %}
+  {% if c.author %}<p class="detail-author">{{ icon('user')|safe }} {{ c.author }}</p>{% endif %}
+
+  <div class="detail-actions">
+    <a class="btn btn-primary btn-lg" href="{{ url_for('launch', name=c.name) }}">
+      {{ icon('rocket')|safe }} Start session</a>
+    {% if c.source_url %}
+    <a class="btn btn-ghost btn-lg" href="{{ c.source_url }}" target="_blank" rel="noopener">
+      {{ icon('code')|safe }} View source</a>
+    {% endif %}
+  </div>
+</article>
+{% endblock %}

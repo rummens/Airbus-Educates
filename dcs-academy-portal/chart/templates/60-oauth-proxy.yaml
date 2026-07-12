@@ -1,13 +1,11 @@
-{{- if .Values.enabled }}
-{{- if .Values.auth.enabled }}
-{{- $authHost := include "workshops.portalHostname" . }}
-{{- $portalNs := include "workshops.portalNamespace" . }}
-{{- $secName := .Values.auth.existingSecret | default "educates-oauth-proxy" }}
-# OpenShift OAuth gate for the portal. oauth-proxy (ServiceAccount-as-OAuthClient)
-# serves the public portal host (training.<domain>) and proxies to the Educates
-# portal Service; only cluster-authenticated (SSO) users get through. The portal
-# trusts X-Forwarded-Host so its self-URLs use the proxy host. Educates' own
-# portal route is blocked by the NetworkPolicy (50-portal-netpol.yaml).
+{{- if and .Values.enabled .Values.auth.enabled }}
+{{- $authHost := include "portal.authHostname" . }}
+{{- $secName := .Values.auth.existingSecret | default "oauth-proxy" }}
+# OpenShift OAuth gate for this portal. oauth-proxy (ServiceAccount-as-OAuthClient)
+# serves the academy host and proxies to this app's Service; only cluster-
+# authenticated (SSO) users get through. The Educates operator still publishes its
+# own portal Ingress/Route for the academy host, but the VAP (62-oauth-route-vap)
+# reserves the host to this namespace so that bypass is denied.
 {{- if and (not .Values.auth.existingSecret) (not .Values.auth.sealedSecret.enabled) }}
 {{- $existing := lookup "v1" "Secret" .Release.Namespace $secName }}
 {{- $cookie := "" }}
@@ -22,7 +20,7 @@ metadata:
   name: {{ $secName }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "workshops.labels" . | nindent 4 }}
+    {{- include "portal.labels" . | nindent 4 }}
   annotations:
     helm.sh/resource-policy: keep
 stringData:
@@ -32,35 +30,35 @@ stringData:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: educates-oauth-proxy
+  name: oauth-proxy
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "workshops.labels" . | nindent 4 }}
+    {{- include "portal.labels" . | nindent 4 }}
   annotations:
     serviceaccounts.openshift.io/oauth-redirecturi.primary: {{ printf "https://%s/oauth/callback" $authHost | quote }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: educates-oauth-proxy-auth-delegator
+  name: {{ .Chart.Name }}-oauth-proxy-auth-delegator
   labels:
-    {{- include "workshops.labels" . | nindent 4 }}
+    {{- include "portal.labels" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: system:auth-delegator
 subjects:
   - kind: ServiceAccount
-    name: educates-oauth-proxy
+    name: oauth-proxy
     namespace: {{ .Release.Namespace }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: educates-oauth-proxy
+  name: oauth-proxy
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "workshops.labels" . | nindent 4 }}
+    {{- include "portal.labels" . | nindent 4 }}
   annotations:
     service.beta.openshift.io/serving-cert-secret-name: oauth-proxy-tls
 spec:
@@ -74,10 +72,10 @@ spec:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: educates-portal-oauth
+  name: oauth-proxy
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "workshops.labels" . | nindent 4 }}
+    {{- include "portal.labels" . | nindent 4 }}
   annotations:
     # Portal session-start (esp. with vcluster) can take longer than the router's
     # 30s default; raise the timeout so opening a still-provisioning workshop shows
@@ -87,7 +85,7 @@ spec:
   host: {{ $authHost }}
   to:
     kind: Service
-    name: educates-oauth-proxy
+    name: oauth-proxy
   port:
     targetPort: https
   tls:
@@ -97,11 +95,13 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: educates-oauth-proxy
+  name: oauth-proxy
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "workshops.labels" . | nindent 4 }}
+    {{- include "portal.labels" . | nindent 4 }}
     app.kubernetes.io/component: oauth-proxy
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   replicas: 1
   selector:
@@ -110,25 +110,28 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "workshops.labels" . | nindent 8 }}
+        {{- include "portal.labels" . | nindent 8 }}
         app.kubernetes.io/component: oauth-proxy
     spec:
-      serviceAccountName: educates-oauth-proxy
-      {{- if .Values.global.registry.pullSecret }}
+      serviceAccountName: oauth-proxy
+      {{- with .Values.global.registry.pullSecret }}
       imagePullSecrets:
-        - name: {{ .Values.global.registry.pullSecret }}
+        - name: {{ . }}
       {{- end }}
       securityContext:
         runAsNonRoot: true
       containers:
         - name: oauth-proxy
-          image: {{ include "workshops.oauthProxyImage" . | quote }}
+          image: {{ include "portal.oauthProxyImage" . | quote }}
           args:
             - --provider=openshift
             - --https-address=:8443
             - --http-address=
-            - --upstream=http://training-portal.{{ $portalNs }}.svc:80
-            - --openshift-service-account=educates-oauth-proxy
+            # Upstream = this chart's portal Service (the landing UI). It reverse-
+            # proxies the Educates session paths back to the in-cluster backend, so
+            # PORTAL_HOSTNAME=academy keeps working.
+            - --upstream={{ .Values.auth.upstream | default (printf "http://%s.%s.svc:8080" .Chart.Name .Release.Namespace) }}
+            - --openshift-service-account=oauth-proxy
             - --cookie-secret-file=/etc/proxy/secrets/cookie-secret
             - --redirect-url=https://{{ $authHost }}/oauth/callback
             - --tls-cert=/etc/tls/private/tls.crt
@@ -169,6 +172,4 @@ spec:
         - name: proxy-tls
           secret:
             secretName: oauth-proxy-tls
-{{- end }}
-
 {{- end }}

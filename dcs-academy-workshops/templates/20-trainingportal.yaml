@@ -19,12 +19,12 @@ spec:
       # Portal hostname = the PUBLIC host users reach (academy). Educates uses this
       # for PORTAL_HOSTNAME → the URLs, session cookies, and CSP frame-ancestors it
       # generates, so the workshop dashboard's cross-origin iframes work when served
-      # through the oauth-proxy. REQUIRED for the proxy to function.
+      # through the oauth-proxy. REQUIRED, and MUST match the dcs-academy-portal
+      # chart's auth.hostname.
       #
-      # With auth.enabled the oauth-proxy also claims this host. The proxy runs at
-      # an earlier sync-wave, so its Route is admitted first and Educates' own
-      # portal Route is rejected (HostAlreadyClaimed) — deterministic under ArgoCD:
-      # the proxy is the only serving route (gated), and there is no bypass route.
+      # The oauth-proxy (dcs-academy-portal chart) also claims this host and its VAP
+      # reserves it, so Educates' own auto-published portal Route for this host is
+      # denied — the proxy is the only serving route (SSO-gated), no bypass.
       hostname: {{ .hostname }}
     {{- end }}
     registration:
@@ -37,13 +37,15 @@ spec:
       defaults:
         reserved: 1
         initial: 0
-  {{- if .Values.feedback.enabled }}
+  {{- if or .Values.feedback.enabled .Values.feedback.analyticsWebhookUrl }}
   # One-click Likert ratings on the feedback page fire report-analytics-event;
-  # Educates POSTs every analytics event to this webhook. The collector stores
-  # rating events and ignores the rest. In-cluster Service DNS (release ns).
+  # Educates POSTs every analytics event to this webhook. Default = the standalone
+  # feedback-collector; set feedback.analyticsWebhookUrl to the custom portal's
+  # /analytics (e.g. http://dcs-academy-portal.dcs-academy-portal.svc:8080/analytics)
+  # once feedback is absorbed there, so the sink survives retiring the collector.
   analytics:
     webhook:
-      url: "http://feedback-collector.{{ .Release.Namespace }}.svc:8080/analytics"
+      url: {{ .Values.feedback.analyticsWebhookUrl | default (printf "http://feedback-collector.%s.svc:8080/analytics" .Release.Namespace) | quote }}
   {{- end }}
   workshops:
   {{- range .Values.workshops }}

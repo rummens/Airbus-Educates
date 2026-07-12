@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Thanks — {{ product }}{% endblock %}
+{% block content %}
+<section class="thanks">
+  <span class="tile-icon big">{{ icon('check-circle')|safe }}</span>
+  <h1>Thank you!</h1>
+  <p class="muted">Your feedback was recorded.</p>
+</section>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Help — {{ product }}{% endblock %}
+{% block content %}
+<a class="back" href="{{ url_for('index') }}">{{ icon('chevron')|safe }} All workshops</a>
+
+<article class="help">
+  <span class="eyebrow">Help</span>
+  <h1>How the labs work</h1>
+  <p class="help-lead">First time in a {{ product }} lab? Everything runs in your browser —
+     nothing to install. This page explains what you see and how to get through a lab.</p>
+
+  <span class="eyebrow">Getting started</span>
+  <h2>From catalog to running lab</h2>
+  <div class="help-steps">
+    <div class="help-step"><span class="n">1</span><div>
+      <b>Pick a workshop</b><p>Browse the tracks on the home page and open a workshop for its
+      summary, difficulty and duration.</p></div></div>
+    <div class="help-step"><span class="n">2</span><div>
+      <b>Start session</b><p>Click <em>Start session</em>. A provisioning screen shows live
+      progress while your private environment spins up (a workshop pod, and for some labs a
+      virtual cluster).</p></div></div>
+    <div class="help-step"><span class="n">3</span><div>
+      <b>You're dropped into the lab</b><p>When ready you're redirected automatically. Your
+      session is bound to your login — come back later and you resume the same one.</p></div></div>
+  </div>
+
+  <span class="eyebrow">The lab screen</span>
+  <h2>Two panes</h2>
+  <div class="help-grid">
+    <div class="help-card"><span class="tile-icon">{{ icon('book')|safe }}</span>
+      <h3>Left — Instructions</h3>
+      <p>Step-by-step content. You scroll through and click the highlighted actions.</p></div>
+    <div class="help-card"><span class="tile-icon">{{ icon('grid')|safe }}</span>
+      <h3>Right — Work area</h3>
+      <p>Tabs — Terminal, Editor, Console, Slides — where the work happens. One at a time;
+         click a tab header to switch. Which tabs appear depends on the lab.</p></div>
+  </div>
+
+  <span class="eyebrow">You rarely type</span>
+  <h2>Clickable actions</h2>
+  <div class="help-grid">
+    <div class="help-card"><span class="tile-icon">{{ icon('terminal')|safe }}</span>
+      <h3>Run a command</h3><p>A blue box with a shell command. Click it — it types and runs
+      in the terminal for you (using the OpenShift CLI, <code>oc</code>).</p></div>
+    <div class="help-card"><span class="tile-icon">{{ icon('edit')|safe }}</span>
+      <h3>Edit a file</h3><p>Click to open a file in the editor and apply the change —
+      highlight, insert or replace. You watch it happen; no hand-editing.</p></div>
+    <div class="help-card"><span class="tile-icon">{{ icon('list-checks')|safe }}</span>
+      <h3>Verify (examiner)</h3><p>A green check box runs a test to confirm the step worked
+      (pod running, service reachable) before you move on.</p></div>
+  </div>
+  <p class="help-note">If a box doesn't seem to do anything, make sure the right tab (usually
+     Terminal) is visible, then click again.</p>
+
+  <span class="eyebrow">The tabs</span>
+  <h2>What each tab is for</h2>
+  <dl class="help-defs">
+    <dt>{{ icon('terminal')|safe }} Terminal</dt>
+    <dd>A shell in your session, starting in <code>~/exercises</code>. Many labs use a
+        <b>split terminal</b> — an upper and a lower — e.g. one to <code>watch</code> while the
+        other makes a change.</dd>
+    <dt>{{ icon('edit')|safe }} Editor</dt>
+    <dd>A full VS Code editor on <code>~/exercises</code> for viewing and editing files.</dd>
+    <dt>{{ icon('monitor')|safe }} Console</dt>
+    <dd>The cluster web console — a visual view of what you deploy (Deployments, Pods,
+        Services). Labs send you here to <em>see</em> what you created.</dd>
+    <dt>{{ icon('book')|safe }} Slides</dt>
+    <dd>Concept slides alongside the hands-on steps, when a lab includes them.</dd>
+  </dl>
+
+  <span class="eyebrow">Tips</span>
+  <h2>Getting the most out of a lab</h2>
+  <ul class="help-tips">
+    <li><b>Follow the order.</b> Steps build on each other; verify checks gate progress on purpose.</li>
+    <li><b>Watch the visible tab.</b> Running a command switches you to the Terminal — switch
+        back to the Console or app when a step points there.</li>
+    <li><b>Take your time.</b> Sessions have a generous limit; read the <em>why</em>, not just the <em>what</em>.</li>
+    <li><b>Stuck?</b> Re-read the last expected output, check the Terminal tab is visible, re-run
+        the action. Diagnose steps include hints.</li>
+    <li><b>Tell us how it went.</b> At the end, the feedback form takes 15 seconds and shapes the next labs.</li>
+  </ul>
+
+  <div class="help-links">
+    <a class="btn btn-primary" href="{{ url_for('index') }}">{{ icon('arrow-right')|safe }} Browse workshops</a>
+    <a class="btn btn-ghost" href="https://docs.educates.dev/" target="_blank" rel="noopener">Educates platform docs</a>
+  </div>
+</article>
+{% endblock %}

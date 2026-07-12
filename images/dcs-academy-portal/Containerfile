@@ -1,0 +1,37 @@
+# DCS Academy custom training portal — Flask BFF + reverse-proxy.
+#
+# Runtime = Red Hat HARDENED image (hummingbird/python, distroless: no shell,
+# no package manager, nonroot uid 65532, Python 3.14). Deps can't be pip-installed
+# there, so this is a multi-stage build: a Python-3.14 builder installs them into
+# a portable target dir, the hardened runtime just copies it in.
+#
+# The builder Python MINOR version must match the runtime (3.14) so the wheels'
+# ABI tags (cp314) line up. --only-binary=:all: forces manylinux wheels — no
+# source compiles, nothing built against the builder distro leaks in.
+
+# --- stage 1: build deps -----------------------------------------------------
+FROM python:3.14 AS builder
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir --target=/opt/deps --only-binary=:all: \
+      -r /tmp/requirements.txt
+
+# --- stage 2: hardened runtime ----------------------------------------------
+# Pinned by digest for reproducibility (hi/python:latest = Python 3.14 hummingbird,
+# captured 2026-07-12). Re-pin when bumping: docker pull … && docker inspect
+# --format '{{index .RepoDigests 0}}' registry.access.redhat.com/hi/python:latest
+FROM registry.access.redhat.com/hi/python@sha256:0d19741c9bb891e4b359dc1e6c948dbfff01bef1fc77052f5b9ac9c4ec691829
+WORKDIR /app
+COPY --from=builder /opt/deps /opt/deps
+COPY portal /app/portal
+
+# /opt/deps on the path (no console scripts in distroless → run gunicorn as a
+# module). /tmp is the writable spot for the sqlite dev fallback (prod uses CNPG).
+ENV PYTHONPATH=/opt/deps \
+    PORT=8080 \
+    PYTHONUNBUFFERED=1 \
+    FEEDBACK_DB=/tmp/feedback.db
+EXPOSE 8080
+# Single worker + threads: stateless app, keeps the Prometheus default registry
+# simple. Scale with replicas. Exec form — the runtime has no shell.
+CMD ["python3", "-m", "gunicorn", "-b", "0.0.0.0:8080", "-w", "1", \
+     "--threads", "8", "-k", "gthread", "--timeout", "120", "portal.app:app"]

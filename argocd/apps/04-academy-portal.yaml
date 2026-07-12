@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dcs-academy-portal
+  namespace: openshift-gitops
+  annotations:
+    # BEFORE the workshops app (sync-wave 3): the oauth-proxy + host-reservation
+    # VAP must exist before the TrainingPortal is created, else Educates' auto-
+    # published portal Route claims the academy host unauthenticated first (router
+    # admission is oldest-claim-wins). Only needs the platform's Educates CRDs
+    # (wave 1) + the CNPG operator; the Track CRD ships in crds/, and the CNPG
+    # Cluster + -ui netpol carry SkipDryRunOnMissingResource so ArgoCD retries
+    # until the TrainingPortal-derived namespace exists.
+    argocd.argoproj.io/sync-wave: "2"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/rummens/Airbus-Educates
+      targetRevision: main
+      path: dcs-academy-portal/chart
+      helm:
+        valueFiles:
+          - $values/argocd/envs/platform-crc.yaml
+    - repoURL: https://github.com/rummens/Airbus-Educates
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dcs-academy-portal
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    retry:
+      limit: 20
+      backoff:
+        duration: 15s
+        maxDuration: 5m
+        factor: 2

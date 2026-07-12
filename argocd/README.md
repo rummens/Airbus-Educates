@@ -9,7 +9,8 @@ argocd/
   apps/
     01-kapp-controller.yaml     # sync-wave 0 -> dcs-academy-kapp-controller
     02-educates-platform.yaml   # sync-wave 1 -> dcs-academy-platform  (ns dcs-educates)
-    03-educates-workshops.yaml  # sync-wave 2 -> dcs-academy-workshops (ns dcs-educates-workshops)
+    04-academy-portal.yaml      # sync-wave 2 -> dcs-academy-portal    (ns dcs-academy-portal; UI + oauth gate)
+    03-educates-workshops.yaml  # sync-wave 3 -> dcs-academy-workshops (ns dcs-educates-workshops)
 ```
 
 Per-cluster settings (ingress domain, router cert, auth/vcluster toggles) are
@@ -30,14 +31,14 @@ cluster via each Application's `spec.source.helm.valuesObject`.
    ```sh
    oc edit argocd openshift-gitops -n openshift-gitops   # delete the apiregistration/APIService exclusion
    ```
-4. **oauth cookie secret** (never committed) in the workshops release namespace:
+4. **oauth cookie secret** (never committed) in the portal namespace:
    ```sh
-   oc create namespace dcs-educates-workshops --dry-run=client -o yaml | oc apply -f -
-   oc create secret generic educates-oauth-proxy \
-     --from-literal=cookie-secret="$(openssl rand -hex 16)" -n dcs-educates-workshops
+   oc create namespace dcs-academy-portal --dry-run=client -o yaml | oc apply -f -
+   oc create secret generic oauth-proxy \
+     --from-literal=cookie-secret="$(openssl rand -hex 16)" -n dcs-academy-portal
    ```
    (16/24/32 bytes required — `-hex 16` = 32B; `base64 32` = 44B and fails. Or use
-   the SealedSecret: `auth.sealedSecret.enabled=true`.)
+   the SealedSecret: `auth.sealedSecret.enabled=true` on the portal chart.)
 
 ## Deploy
 
@@ -47,9 +48,9 @@ oc get applications -n openshift-gitops
 ```
 
 Expected: `dcs-academy-kapp-controller`, `dcs-academy-platform`,
-`dcs-academy-workshops` all Synced/Healthy. Platform reconcile (installer App) is
-the long pole (a few minutes). Portal at `https://academy.<domain>` →
-OpenShift OAuth.
+`dcs-academy-portal`, `dcs-academy-workshops` all Synced/Healthy. Platform reconcile
+(installer App) is the long pole (a few minutes). Portal at
+`https://academy.<domain>` → OpenShift OAuth.
 
 ## Why it converges cleanly
 
@@ -58,9 +59,11 @@ OpenShift OAuth.
   deadlock that plain `helm uninstall` hits).
 - **Async CRDs:** Workshop/TrainingPortal carry `SkipDryRunOnMissingResource=true`
   + retry, so ArgoCD waits for the platform CRDs instead of hard-failing.
-- **Auth route precedence:** the oauth-proxy (earlier wave) is admitted on
-  `academy.<domain>` before the portal reconciles, so Educates' own portal route
-  for that host is rejected — the proxy is the only entry (see workshops README).
+- **Auth route precedence:** the portal app (wave 2, incl. oauth-proxy + the
+  host-reservation VAP) syncs before the workshops app (wave 3) creates the
+  TrainingPortal, so the proxy claims `academy.<domain>` and the VAP denies
+  Educates' own auto-published portal route for that host — the proxy is the only
+  entry (see dcs-academy-portal chart).
 - **Layered reconcilers:** ArgoCD manages the App CR + config + CRs; kapp-controller
   owns the platform resources (invisible to ArgoCD). `ignoreDifferences` on the App
   + tracking ConfigMap stop churn.

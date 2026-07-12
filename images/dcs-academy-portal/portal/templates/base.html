@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ product }}{% endblock %}</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>{{ theme.favicon }}</text></svg>">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+:root{
+  --primary:{{ theme.primary }};
+  --secondary:{{ theme.secondary }};
+  --accent:{{ theme.accent }};
+  --bg:{{ theme.background }};
+  --font:"{{ theme.font_family }}",-apple-system,Segoe UI,Roboto,sans-serif;
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="{{ url_for('index') }}">
+    <img class="brand-logo" alt="{{ product }}"
+         src="{{ theme.logo_url or url_for('static', filename='logo.png') }}">
+  </a>
+  <nav class="site-nav">
+    {% if is_admin %}<a href="{{ url_for('admin') }}" class="nav-link">{{ icon('shield')|safe }} Admin</a>{% endif %}
+  </nav>
+</header>
+
+<main class="wrap">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  {% if theme.footer_html %}
+    {{ theme.footer_html|safe }}
+  {% else %}
+    <img class="footer-logo" alt="Digital Container Services" src="{{ url_for('static', filename='logo-full.png') }}">
+    <span class="footer-tag">Training Academy</span>
+  {% endif %}
+</footer>
+
+{% if request.endpoint != 'help_page' %}
+<a class="help-fab" href="{{ url_for('help_page') }}" title="Help &amp; how the labs work">
+  {{ icon('help')|safe }} Help
+</a>
+{% endif %}
+</body>
+</html>

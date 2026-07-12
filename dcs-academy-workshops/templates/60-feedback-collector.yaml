@@ -7,7 +7,7 @@
 {{- $fqdn := printf "%s.%s" $f.hostname .Values.ingressDomain }}
 # =============================================================================
 # Feedback collector — stores Likert ratings + comments (SQLite on a PV).
-# See dcs-academy/planning/feedback-capture.md.
+# See dcs-academy/planning/feedback-capture.md. TODO Remove?
 # =============================================================================
 apiVersion: v1
 kind: PersistentVolumeClaim

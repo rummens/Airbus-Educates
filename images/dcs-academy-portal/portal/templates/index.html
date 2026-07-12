@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m with context %}
+{% block content %}
+
+<section class="hero">
+  <span class="eyebrow">Interactive training platform</span>
+  <h1>DCS <span class="accent">Academy.</span></h1>
+  <p class="hero-sub">Hands-on labs for the Digital Container Service — namespaces, workloads,
+    registry, tenancy and more, on real OpenShift.</p>
+  <div class="statbar">
+    <div class="stat"><span class="stat-n">{{ stats.workshops }}</span><span class="stat-l">workshops</span></div>
+    <div class="stat"><span class="stat-n">{{ stats.tracks }}</span><span class="stat-l">tracks</span></div>
+    <div class="stat"><span class="stat-n">~{{ stats.hours }}h</span><span class="stat-l">total content</span></div>
+  </div>
+</section>
+
+{% if cont %}
+<a class="continue" href="{{ url_for('course', name=cont.name) }}">
+  <span class="continue-icon">{{ icon('rocket')|safe }}</span>
+  <span><span class="continue-eyebrow">Continue where you left off</span>
+    <span class="continue-title">{{ cont.title }}</span></span>
+  <span class="continue-go">{{ icon('arrow-right')|safe }}</span>
+</a>
+{% endif %}
+
+<div class="toolbar">
+  <label class="search">{{ icon('search')|safe }}
+    <input type="search" id="q" placeholder="Search workshops…" autocomplete="off">
+  </label>
+  <div class="filters" id="difficulty">
+    <button class="chip active" data-diff="">All levels</button>
+    <button class="chip" data-diff="beginner">Beginner</button>
+    <button class="chip" data-diff="intermediate">Intermediate</button>
+    <button class="chip" data-diff="advanced">Advanced</button>
+  </div>
+</div>
+
+<div id="catalog">
+{% for s in sections %}
+  {% if s.courses %}
+  <details class="track" {% if loop.first %}open{% endif %} data-track="{{ s.name }}">
+    <summary>
+      <span class="track-head">
+        <span class="track-icon">{{ icon(s.icon)|safe }}</span>
+        <span>
+          <span class="eyebrow">Track · {{ s.courses|length }} labs</span>
+          <span class="track-title">{{ s.title }}</span>
+        </span>
+      </span>
+      <span class="track-toggle">{{ icon('chevron')|safe }}</span>
+    </summary>
+    {% if s.description %}<p class="track-desc">{{ s.description }}</p>{% endif %}
+    <div class="grid">
+      {% for c in s.courses %}
+        {{ m.tile(c, ratings, min_reviews, difficulty_icon, s.icon, progress.get(c.name, ''), loop.index, s.courses|length) }}
+      {% endfor %}
+    </div>
+  </details>
+  {% endif %}
+{% else %}
+  <p class="empty">No workshops published yet.</p>
+{% endfor %}
+</div>
+<p class="empty hidden" id="noresults">No workshops match your search.</p>
+
+<script>
+(function(){
+  const q = document.getElementById('q');
+  const chips = document.querySelectorAll('#difficulty .chip');
+  const tracks = document.querySelectorAll('#catalog .track');
+  let diff = '';
+  function apply(){
+    const term = (q.value || '').trim().toLowerCase();
+    let anyVisible = false;
+    tracks.forEach(tr => {
+      let shown = 0;
+      tr.querySelectorAll('.tile').forEach(t => {
+        const okText = !term || t.dataset.title.includes(term);
+        const okDiff = !diff || t.dataset.difficulty === diff;
+        const vis = okText && okDiff;
+        t.style.display = vis ? '' : 'none';
+        if (vis) shown++;
+      });
+      tr.style.display = shown ? '' : 'none';
+      if (shown){ anyVisible = true; if (term || diff) tr.open = true; }
+    });
+    document.getElementById('noresults').classList.toggle('hidden', anyVisible);
+  }
+  q.addEventListener('input', apply);
+  chips.forEach(c => c.addEventListener('click', () => {
+    chips.forEach(x => x.classList.remove('active'));
+    c.classList.add('active'); diff = c.dataset.diff; apply();
+  }));
+})();
+</script>
+{% endblock %}

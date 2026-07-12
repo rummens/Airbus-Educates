@@ -1,18 +1,17 @@
-{{- if .Values.auth.enabled }}
+{{- if and .Values.enabled .Values.auth.enabled }}
 # Fail-closed backstop for the SSO gate: reserve the academy host at the API
 # level so ONLY the oauth-proxy Route (this namespace) may claim it. Without
-# this, deleting/recreating the proxy Route lets Educates' auto-published
-# portal Route win the host and serve the portal UNAUTHENTICATED (router
-# admission is oldest-claim-wins). With it, Educates' Route (created by the
-# ingress-to-route controller from the operator's Ingress) is denied at
-# creation — the controller just retries and logs warning events; the portal
-# itself is unaffected.
+# this, deleting/recreating the proxy Route lets the Educates auto-published
+# portal Route (in the <portalName>-ui namespace) win the host and serve the
+# backend UNAUTHENTICATED (router admission is oldest-claim-wins). With it, that
+# Route is denied at creation — the ingress-to-route controller just retries and
+# logs warning events; the backend itself is unaffected.
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:
   name: reserve-academy-host
   labels:
-    {{- include "workshops.labels" . | nindent 4 }}
+    {{- include "portal.labels" . | nindent 4 }}
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
 spec:
@@ -27,18 +26,18 @@ spec:
     - expression: >-
         object.metadata.namespace == '{{ .Release.Namespace }}' ||
         !has(object.spec.host) ||
-        object.spec.host != '{{ include "workshops.portalHostname" . }}'
+        object.spec.host != '{{ include "portal.authHostname" . }}'
       message: >-
-        Host {{ include "workshops.portalHostname" . }} is reserved for the
-        educates oauth-proxy route in {{ .Release.Namespace }} (SSO gate,
-        fail-closed backstop).
+        Host {{ include "portal.authHostname" . }} is reserved for the
+        oauth-proxy route in {{ .Release.Namespace }} (SSO gate, fail-closed
+        backstop).
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicyBinding
 metadata:
   name: reserve-academy-host
   labels:
-    {{- include "workshops.labels" . | nindent 4 }}
+    {{- include "portal.labels" . | nindent 4 }}
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
 spec:

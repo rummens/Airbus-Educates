@@ -28,10 +28,12 @@ ingressDomain: apps-crc.testing
 # -----------------------------------------------------------------------------
 portal:
   # Portal name drives the DYNAMIC namespaces Educates creates per session
-  # (<name>-w0N, <name>-w0N-xxxx, ...-vc). Keep the dcst- prefix so every
-  # user-started (dynamic) namespace sorts under dcst-*. The public URL is set
-  # separately by ingress.hostname, so the prefix here does not affect the DNS.
-  name: dcst-dcs
+  # (<name>-w0N, <name>-w0N-xxxx, ...-vc) AND the backend namespace <name>-ui.
+  # Keep the dcst- prefix so every user-started (dynamic) namespace sorts under
+  # dcst-*. The Educates portal in <name>-ui is now just the REST/session backend
+  # (the landing UI is the dcs-academy-portal chart); -backend names it as such.
+  # MUST match the dcs-academy-portal chart's educates.portalName.
+  name: dcst-dcs-backend
   title: "DCS Enablement"
   ingress:
     # Public portal hostname, independent of portal.name → academy.<domain>.
@@ -44,51 +46,15 @@ portal:
   sessions:
     maximum: 3
   route:
-    # The portal is fronted by the oauth-proxy (auth below). Educates still makes
-    # its own portal Ingress; when auth.enabled a NetworkPolicy blocks direct
-    # access so the proxy is the only way in. This explicit Route is for
-    # non-auth setups only.
+    # Optional explicit Route straight to the Educates backend (bypasses the SSO
+    # gate) — for non-auth/debug setups only. OFF by default; the SSO gate and the
+    # academy host live in the dcs-academy-portal chart now.
     enabled: false
     tls: edge
 
-# -----------------------------------------------------------------------------
-# OpenShift OAuth gate (oauth-proxy + ServiceAccount-as-OAuthClient). Fronts the
-# portal so only cluster-authenticated (SSO) users can reach it and start a
-# workshop. Served at portal.ingress.hostname (training.<domain>); a NetworkPolicy
-# blocks the Educates portal route bypass. Native OIDC is NOT possible (the
-# Educates portal is an OAuth provider, not a client), so this proxy is the way.
-# -----------------------------------------------------------------------------
-auth:
-  # Default ON — SSO gate is the whole point. Disable only for local/no-auth tests.
-  enabled: true
-  # PRE-CREATED secret with key cookie-secret (16/24/32 bytes; use
-  # `openssl rand -hex 16`). Leave empty for plain helm (generated via lookup).
-  # For ArgoCD, set this or use sealedSecret below (helm template has no cluster
-  # access, so a generated cookie churns every sync).
-  existingSecret: ""
-  sealedSecret:
-    enabled: false
-    encryptedCookieSecret: ""
-  # oauth-proxy image (registry-overridable via global.registry.host).
-  proxyImage: ""
-  proxyImageRegistry: registry.redhat.io
-  proxyImageRepository: openshift4/ose-oauth-proxy
-  proxyImageTag: "v4.14"
-  # Router wildcard cert for the reencrypt route. Default = the x86 cluster's
-  # cert; override per cluster (CRC uses router-certs-default).
-  tlsCertificateRef:
-    name: globomantics-ingress-cert
-    namespace: openshift-ingress
-  # OpenShift router timeout for the academy route. Session start (with vcluster)
-  # can exceed the 30s default → 504. Raise it.
-  routeTimeout: "120s"
-  # NetworkPolicy that restricts the portal pod to the oauth-proxy, blocking the
-  # Educates default portal route (the auth bypass). Default on for the ArgoCD
-  # target cluster. NOTE: ineffective when the ingress router runs on HostNetwork
-  # (traffic comes from the node), and it BLOCKS `helm install` because the portal
-  # namespace doesn't exist yet — set false for plain-helm testing on such clusters.
-  # Under ArgoCD it carries SkipDryRunOnMissingResource + retry, so it applies fine.
-  networkPolicy: true
+# NOTE: the OpenShift OAuth gate (oauth-proxy + host-reservation VAP + the -ui
+# NetworkPolicy) moved to the dcs-academy-portal chart — it fronts the custom
+# portal at the academy host and keeps this Educates backend in-cluster only.
 
 # -----------------------------------------------------------------------------
 # Phase 3 passthrough — per-session vcluster (requires platform vcluster support).
@@ -136,6 +102,12 @@ feedback:
   # Future CNPG swap seam: set to postgres://... (needs a psycopg-enabled image).
   # Empty = SQLite on the PV (v1).
   databaseUrl: ""
+  # Analytics-webhook override. Empty = the standalone feedback-collector Service.
+  # Point at the custom portal once feedback is absorbed there:
+  #   analyticsWebhookUrl: http://dcs-academy-portal.dcs-academy-portal.svc:8080/analytics
+  # Set independently of feedback.enabled so the analytics sink survives retiring
+  # the standalone collector (feedback.enabled=false).
+  analyticsWebhookUrl: ""
   serviceMonitor:
     # Expose /metrics to user-workload monitoring (Thanos → Grafana).
     enabled: true

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Admin — {{ product }}{% endblock %}
+{% macro avg(v) %}{{ '%.2f'|format(v) if v is not none else '—' }}{% endmacro %}
+{% block content %}
+<section class="admin">
+  <span class="eyebrow">Admin</span>
+  <h1>Feedback &amp; usage</h1>
+  <p class="muted"><strong>{{ overall.n }}</strong> responses · avg rating {{ avg(overall.avg_rating) }}
+     · avg clarity {{ avg(overall.avg_clarity) }} · {{ overall.n_comment }} comments</p>
+
+  <h2>Running sessions</h2>
+  <table class="tbl">
+    <tr><th>Session</th><th>Workshop</th><th>User</th><th>Phase</th></tr>
+    {% for s in sessions %}<tr><td>{{ s.name }}</td><td>{{ s.workshop }}</td><td>{{ s.user }}</td><td>{{ s.phase }}</td></tr>
+    {% else %}<tr><td colspan="4" class="muted">No sessions.</td></tr>{% endfor %}
+  </table>
+
+  <h2>By workshop</h2>
+  <table class="tbl">
+    <tr><th>Workshop</th><th>Responses</th><th>Avg rating (n)</th><th>Avg clarity (n)</th><th>Comments</th></tr>
+    {% for r in rows %}
+    <tr><td>{{ r.workshop }}</td><td>{{ r.n }}</td>
+      <td>{{ avg(r.avg_rating) }} ({{ r.n_rating }})</td>
+      <td>{{ avg(r.avg_clarity) }} ({{ r.n_clarity }})</td>
+      <td>{{ r.n_comment }}</td></tr>
+    {% else %}<tr><td colspan="5" class="muted">No feedback yet.</td></tr>{% endfor %}
+  </table>
+
+  <h2>Comments</h2>
+  <table class="tbl">
+    <tr><th>When</th><th>Workshop</th><th>Rating</th><th>Comment</th></tr>
+    {% for c in comments %}
+    <tr><td>{{ c.ts|de }}</td><td>{{ c.workshop }}</td><td>{{ c.rating }}</td>
+      <td class="cmt" data-full="{{ c.comment }}" onclick="showComment(this)">
+        {{ c.comment if c.comment|length <= 80 else c.comment[:80] ~ '…' }}</td></tr>
+    {% else %}<tr><td colspan="4" class="muted">No comments yet.</td></tr>{% endfor %}
+  </table>
+</section>
+
+<div id="modal" onclick="this.classList.remove('open')"><div id="modalbox"></div></div>
+<script>
+function showComment(td){document.getElementById('modalbox').textContent=td.getAttribute('data-full');
+  document.getElementById('modal').classList.add('open');}
+</script>
+{% endblock %}

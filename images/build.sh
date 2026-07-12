@@ -26,4 +26,5 @@ build_push() {           # <dir> <image> [extra_tag]
 build_push dcs-workshop-base dcs-workshop-base:dev
 build_push hello-dcs hello-dcs:dev samples/hello-dcs:1.0
 build_push feedback-collector feedback-collector:dev
-echo "done -> $REG/{dcs-workshop-base:dev, hello-dcs:dev, samples/hello-dcs:1.0, feedback-collector:dev}"
+build_push dcs-academy-portal dcs-academy-portal:dev
+echo "done -> $REG/{dcs-workshop-base:dev, hello-dcs:dev, samples/hello-dcs:1.0, feedback-collector:dev, dcs-academy-portal:dev}"

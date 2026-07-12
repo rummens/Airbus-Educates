@@ -1,13 +1,18 @@
 # dcs-academy-workshops
 
-Workshop catalog + portal + OpenShift-OAuth gate, **separate from the platform
-install** ([dcs-academy-platform](../dcs-academy-platform)). Renders one `Workshop`
-CR per entry, a `TrainingPortal` that hosts them, and the `oauth-proxy` that fronts
-it. Ships [lab-k8s-fundamentals](https://github.com/educates/lab-k8s-fundamentals)
-from its GitHub repo. Add more by appending to the list.
+Workshop catalog + Educates backend portal, **separate from the platform install**
+([dcs-academy-platform](../dcs-academy-platform)). Renders one `Workshop` CR per
+entry and a `TrainingPortal` that hosts them. Ships
+[lab-k8s-fundamentals](https://github.com/educates/lab-k8s-fundamentals) from its
+GitHub repo. Add more by appending to the list.
 
-Portal name `dcst-dcs` → dynamic session namespaces are `dcst-*`; the public UI is
-served at `academy.<ingressDomain>` (set by `portal.ingress.hostname`).
+The OpenShift-OAuth gate (oauth-proxy + host-reservation VAP) lives in the
+[dcs-academy-portal](../dcs-academy-portal) chart now — it fronts the custom portal
+at `academy.<ingressDomain>` and keeps this Educates backend in-cluster only.
+
+Portal name `dcst-dcs-backend` → dynamic session namespaces are `dcst-*`; the
+Educates backend runs in `dcst-dcs-backend-ui`. `portal.ingress.hostname` (academy)
+must match the portal chart's `auth.hostname`.
 
 ---
 
@@ -15,8 +20,6 @@ served at `academy.<ingressDomain>` (set by `portal.ingress.hostname`).
 
 - Platform installed ([dcs-academy-platform](../dcs-academy-platform)) — Educates
   CRDs + control plane running.
-- oauth cookie secret in the release namespace (see argocd/README) — or leave
-  `auth.existingSecret` empty for plain helm (auto-generated via lookup).
 
 ## Install
 
@@ -29,7 +32,7 @@ Verify:
 
 ```sh
 oc get workshops
-oc get trainingportal dcst-dcs
+oc get trainingportal dcst-dcs-backend
 echo "https://academy.apps.test.ocp.globomantics.com"   # -> OpenShift OAuth, then portal
 ```
 

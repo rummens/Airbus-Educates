@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Starting {{ course.title }} — {{ product }}{% endblock %}
+{% block content %}
+<section class="launch">
+  <span class="eyebrow">Preparing your environment</span>
+  <h1>{{ course.title }}</h1>
+
+  {% if error %}
+    <div class="launch-error">
+      <p>Could not start the session.</p>
+      <pre>{{ error }}</pre>
+      <a class="btn btn-primary" href="{{ url_for('course', name=course.name) }}">Try again</a>
+    </div>
+  {% else %}
+    <div class="spinner" id="spinner"></div>
+    <p class="launch-msg" id="msg">Reserving session…</p>
+
+    <ol class="steps" id="steps">
+      {% for s in steps %}<li data-i="{{ loop.index0 }}">{{ s }}</li>{% endfor %}
+    </ol>
+
+    <details class="pods-wrap"><summary>Details</summary>
+      <ul class="pods" id="pods"></ul>
+    </details>
+
+    <script>
+      const NAME = {{ session_name|tojson }};
+      const T0 = {{ t0 }};
+      const TARGET = {{ target|tojson }};
+      const steps = document.querySelectorAll('#steps li');
+      async function poll(){
+        try{
+          const r = await fetch(`/api/session/${encodeURIComponent(NAME)}/status?t0=${T0}`);
+          const d = await r.json();
+          document.getElementById('msg').textContent = d.message || d.step + '…';
+          steps.forEach((li,i)=>{
+            li.classList.toggle('done', i < d.index);
+            li.classList.toggle('active', i === d.index && !d.ready);
+            if(d.ready) li.classList.add('done');
+          });
+          const pods = document.getElementById('pods');
+          pods.innerHTML = d.pods.map(p=>`<li><span>${p.name}</span><span>${p.ready} ${p.phase}${p.vcluster?' · vcluster':''}</span></li>`).join('');
+          if(d.ready && (d.url || TARGET)){
+            document.getElementById('spinner').classList.add('ok');
+            window.location.href = d.url || TARGET;
+            return;
+          }
+        }catch(e){ /* transient; keep polling */ }
+        setTimeout(poll, 2000);
+      }
+      poll();
+    </script>
+  {% endif %}
+</section>
+{% endblock %}

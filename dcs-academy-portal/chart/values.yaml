@@ -1,0 +1,151 @@
+# =============================================================================
+# dcs-academy-portal — values
+# =============================================================================
+# Custom training portal that replaces the Educates landing UI at the academy
+# host. Deploy AFTER the Educates platform + workshops chart and the CNPG
+# operator. Re-skin entirely via theme.* (injected as CSS variables) — no
+# rebuild needed.
+# =============================================================================
+
+enabled: true
+
+global:
+  registry:
+    # Private/mirror registry host. EMPTY = pull from ghcr (dev). When set, the
+    # portal image ref is rewritten to this host (air-gap → Harbor).
+    host: ""
+    pullSecret: ""
+
+image:
+  repository: ghcr.io/rummens/dcs-academy-portal
+  tag: dev
+  pullPolicy: Always
+
+replicas: 1            # stateless (state in CNPG) → safe to raise for HA
+
+# Which Educates TrainingPortal this portal fronts. Its .status carries the
+# robot REST creds and the portal-UI namespace.
+educates:
+  # MUST match the workshops chart's portal.name. Educates derives the backend
+  # namespace as <portalName>-ui (dcst-dcs-backend-ui) — that pod now only serves
+  # the REST API/session runtime; the landing UI is this app.
+  portalName: dcst-dcs-backend
+  portalCrNamespace: dcs-educates-workshops   # where the TrainingPortal CR lives
+  # Empty = derive http://training-portal.<status.namespace>.svc at runtime.
+  portalServiceUrl: ""
+  # Cluster wildcard ingress domain (per-cluster; override via the ArgoCD env file).
+  ingressDomain: apps-crc.testing
+
+# -----------------------------------------------------------------------------
+# OpenShift OAuth gate (oauth-proxy + ServiceAccount-as-OAuthClient). Fronts THIS
+# portal at the academy host so only cluster-authenticated (SSO) users reach it.
+# Native OIDC isn't possible (the Educates portal is an OAuth provider, not a
+# client), so this proxy is the way. The proxy is the ONLY externally-routed
+# component; the Flask app + the Educates backend stay in-cluster only.
+# -----------------------------------------------------------------------------
+auth:
+  # Default ON — SSO gate is the whole point. Disable only for local/no-auth tests.
+  enabled: true
+  # Public host the proxy serves → <hostname>.<ingressDomain>. MUST equal the
+  # workshops chart's portal.ingress.hostname (Educates PORTAL_HOSTNAME): the
+  # session gateway's browser-side oauth_handshake + CSP frame-ancestors are built
+  # for this host, so it must keep serving the Educates session paths (via this
+  # app's reverse proxy).
+  hostname: academy
+  # PRE-CREATED secret with key cookie-secret (16/24/32 bytes; `openssl rand -hex
+  # 16`). Empty for plain helm (generated via lookup). For ArgoCD set this or use
+  # sealedSecret (helm template has no cluster access, so a generated cookie churns).
+  existingSecret: ""
+  sealedSecret:
+    enabled: false
+    encryptedCookieSecret: ""
+  # oauth-proxy image (registry-overridable via global.registry.host).
+  proxyImage: ""
+  proxyImageRegistry: registry.redhat.io
+  proxyImageRepository: openshift4/ose-oauth-proxy
+  proxyImageTag: "v4.14"
+  # Router timeout for the academy route. Session start (with vcluster) can exceed
+  # the 30s default → 504. Raise it.
+  routeTimeout: "120s"
+  # Proxy upstream. Empty = this chart's portal Service (the landing UI). Override
+  # only to hand the landing experience to something else.
+  upstream: ""
+
+# -----------------------------------------------------------------------------
+# Theme → CSS variables. Defaults reproduce the DCS docs look; only primary/
+# secondary/logo are conceptually required, all have on-brand defaults.
+# -----------------------------------------------------------------------------
+theme:
+  primaryColor: "#002157"       # DCS navy (logo "DC" + cube)
+  secondaryColor: "#00a2c1"     # DCS teal (logo "S" + flower)
+  accentColor: ""               # empty → secondary
+  background: "#f7fafb"
+  productName: "DCS Academy"
+  logoUrl: ""                   # empty → built-in inline DCS hex-atom mark
+  favicon: "🧊"
+  fontFamily: "Poppins"
+  footerHtml: ""
+
+# -----------------------------------------------------------------------------
+# Feedback (absorbed) → CloudNativePG. The chart ships the Cluster CR; the CNPG
+# operator must already be installed. DATABASE_URL is wired from the CNPG app
+# secret. Fresh start — no SQLite migration.
+# -----------------------------------------------------------------------------
+feedback:
+  minReviews: 5                 # course view shows ratings only at/above this count
+  cnpg:
+    enabled: true
+    instances: 1                # raise to 3 for HA in prod
+    storageSize: 1Gi
+    storageClass: ""            # empty = cluster default
+    imageName: ""               # empty = CNPG operator default postgres image
+    database: academy
+    owner: academy
+
+# Server-side TLS verification for Educates REST + reachability probes.
+# Dev clusters use self-signed certs → false there.
+sessionTlsVerify: false
+
+# Admin gate: SelfSubjectAccessReview with the *user* token (no SA perms).
+admin:
+  ssarGroup: training.educates.dev
+  ssarResource: trainingportals
+  ssarVerb: delete
+  ssarNamespace: ""             # empty → educates.portalCrNamespace
+
+# oauth-proxy passthrough headers (set by the existing proxy).
+userHeader: X-Forwarded-User
+tokenHeader: X-Forwarded-Access-Token
+
+# NetworkPolicy locking the Educates training-portal Service (in the portal-UI
+# namespace) to this app + session namespaces. Same HostNetwork caveat as the
+# workshops chart's netpol; the VAP is the router-level enforcement.
+networkPolicy:
+  enabled: true
+
+serviceMonitor:
+  enabled: true
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi
+
+# -----------------------------------------------------------------------------
+# Tracks → Track CRs (GitOps-managed catalog grouping). Workshops join a track
+# via label academy.dcs/track=<name> and order via academy.dcs/order.
+# -----------------------------------------------------------------------------
+tracks:
+  - name: developer-basics
+    title: "Developer — Basics"
+    description: "Get productive on DCS: namespaces, workloads, registry."
+    order: 10
+    icon: code
+  - name: platform-operations
+    title: "Platform & Operations"
+    description: "Run and observe workloads on the shared platform."
+    order: 20
+    icon: cog

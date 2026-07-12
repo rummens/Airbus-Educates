@@ -1,0 +1,15 @@
+apiVersion: v2
+name: dcs-academy-portal
+description: >-
+  DCS Academy custom training portal — Flask UI + backend-for-frontend +
+  reverse-proxy that replaces the Educates landing/catalog UI at the academy
+  host while leaving the Educates session runtime untouched. Ships the Track
+  CRD, a CNPG Cluster for feedback storage, RBAC, NetworkPolicy, a
+  ServiceMonitor, and the OpenShift-OAuth gate (oauth-proxy + host-reservation
+  VAP) that fronts it — the proxy is the only externally-routed component.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+# NOTE: depends on the CloudNativePG operator (for the Cluster CR) and the
+# Educates platform (Workshop/TrainingPortal CRDs) — both installed separately.
+# This chart does NOT install either operator.

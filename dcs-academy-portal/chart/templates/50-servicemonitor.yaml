@@ -1,0 +1,20 @@
+{{- if and .Values.enabled .Values.serviceMonitor.enabled }}
+# Scrape /metrics via user-workload monitoring (Thanos → Grafana), matching the
+# workshops chart's ServiceMonitor pattern. Requires enableUserWorkload: true.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "portal.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scheme: http
+{{- end }}

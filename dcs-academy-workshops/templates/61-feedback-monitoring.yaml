@@ -2,7 +2,7 @@
 # Scrape the feedback collector's /metrics via user-workload monitoring so the
 # per-course rating/count metrics reach Thanos and the Grafana feedback board.
 # (Requires enableUserWorkload: true in openshift-monitoring — same prerequisite
-# as the platform's educates-metrics ServiceMonitor.)
+# as the platform's educates-metrics ServiceMonitor.)TODO Remove?
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:

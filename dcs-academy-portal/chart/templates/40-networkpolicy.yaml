@@ -1,0 +1,46 @@
+{{- if and .Values.enabled .Values.networkPolicy.enabled }}
+# Lock the Educates training-portal Service (in the <portalName>-ui namespace) to
+# just this app + workshop session namespaces — no Route, in-cluster only. This is
+# the sole guard on that backend (the old workshops-chart educates-portal-oauth-only
+# policy is retired now the oauth-proxy fronts THIS app, not the Educates portal).
+#
+# HostNetwork caveat: when the ingress router runs on HostNetwork its traffic comes
+# from the node and podSelector rules don't match it — there the VAP reserving the
+# academy host (62-oauth-route-vap) is the router-level enforcement.
+# SkipDryRunOnMissingResource + retry lets it apply once the -ui namespace exists.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: educates-portal-from-academy
+  namespace: {{ include "portal.uiNamespace" . }}
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  podSelector:
+    matchLabels:
+      deployment: training-portal
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        # This portal app (BFF REST + reverse-proxy).
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Release.Namespace }}
+          podSelector:
+            matchLabels:
+              {{- include "portal.selectorLabels" . | nindent 14 }}
+        # Workshop session gateways exchange their OAuth code server-to-server at
+        # the portal's in-cluster service (PORTAL_API_URL). Blocking this hangs
+        # /oauth_callback on the session host → browser timeout. The token endpoint
+        # is self-protecting (client id+secret per session).
+        - namespaceSelector:
+            matchLabels:
+              training.educates.dev/portal.name: {{ .Values.educates.portalName }}
+      ports:
+        - protocol: TCP
+          port: 8080
+{{- end }}

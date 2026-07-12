@@ -1,0 +1,31 @@
+{{- if and .Values.enabled .Values.feedback.cnpg.enabled }}
+{{- $c := .Values.feedback.cnpg }}
+# CloudNativePG Cluster for feedback storage. The CNPG OPERATOR must already be
+# installed (separately, via OLM/ArgoCD) — this chart only ships the Cluster CR.
+# CNPG auto-creates Secret <name>-app with the connection "uri" the Deployment
+# reads as DATABASE_URL, and bootstraps the initdb database/owner below.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "portal.cnpgName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  instances: {{ $c.instances }}
+  {{- with $c.imageName }}
+  imageName: {{ . }}
+  {{- end }}
+  bootstrap:
+    initdb:
+      database: {{ $c.database | quote }}
+      owner: {{ $c.owner | quote }}
+  storage:
+    size: {{ $c.storageSize }}
+    {{- with $c.storageClass }}
+    storageClass: {{ . }}
+    {{- end }}
+{{- end }}
