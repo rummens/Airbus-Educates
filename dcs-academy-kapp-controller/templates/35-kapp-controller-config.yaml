@@ -1,0 +1,17 @@
+{{- if .Values.enabled and .Values.skipTLS}}
+# kapp-controller ConfigMap to skip TLS verification for the internal registry.
+# The Educates installer fetches its imgpkg bundle from the internal Harbor
+# registry which uses a self-signed certificate. This ConfigMap tells kapp-
+# controller (via vendir/imgpkg) to skip TLS verification for that host.
+# Must be in the same namespace as kapp-controller.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kapp-controller-config
+  namespace: {{ .Values.global.kappControllerNamespace | default "kapp-controller" }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+type: Opaque
+stringData:
+  dangerousSkipTLSVerify: "true"
+{{- end }}

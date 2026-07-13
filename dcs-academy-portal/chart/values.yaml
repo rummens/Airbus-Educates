@@ -172,6 +172,4 @@ resources:
     cpu: "1"
     memory: 512Mi
 
-# Tracks + Workshops + the TrainingPortal are NOT defined here anymore — they moved
-# to the dcs-academy-workshops chart (the workshops monorepo, glob-driven). This chart
-# still ships the Track CRD (crds/track.yaml); the workshops chart fills it with Track CRs.
+enableKyvernoException: true

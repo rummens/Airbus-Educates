@@ -1,0 +1,47 @@
+{{- if .Values.auth.enabled }}
+# Fail-closed backstop for the SSO gate: reserve the academy host at the API
+# level so ONLY the oauth-proxy Route (this namespace) may claim it. Without
+# this, deleting/recreating the proxy Route lets Educates' auto-published
+# portal Route win the host and serve the portal UNAUTHENTICATED (router
+# admission is oldest-claim-wins). With it, Educates' Route (created by the
+# ingress-to-route controller from the operator's Ingress) is denied at
+# creation — the controller just retries and logs warning events; the portal
+# itself is unaffected.
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: reserve-academy-host
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["route.openshift.io"]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["routes"]
+  validations:
+    - expression: >-
+        object.metadata.namespace == '{{ include "portal.uiNamespace" . }}' ||
+        !has(object.spec.host) ||
+        object.spec.host != '{{ include "portal.authHostname" . }}'
+      message: >-
+        Host {{ include "portal.authHostname" . }} is reserved for the
+        DCS custom portal route in {{ .Release.Namespace }} (SSO gate,
+        fail-closed backstop).
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: reserve-academy-host
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  policyName: reserve-academy-host
+  validationActions: ["Deny"]
+{{- end }}

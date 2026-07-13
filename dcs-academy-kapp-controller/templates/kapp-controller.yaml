@@ -2473,6 +2473,8 @@ spec:
           value: /etc/kappctrl-mem-tmp/sidecarexec.sock
         - name: IMGPKG_ACTIVE_KEYCHAINS
           value: gke,aks,ecr
+        - name: SSL_CERT_FILE
+          value: /etc/ssl/certs/registry-ca/ca-bundle.crt
         image: {{ include "kappController.image" . }}
         name: kapp-controller-sidecarexec
         resources:
@@ -2495,6 +2497,12 @@ spec:
           name: home
         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
           name: empty-sa
+        - mountPath: /etc/kapp-controller
+          name: kapp-controller-config
+          readOnly: true
+        - mountPath: /etc/ssl/certs/registry-ca
+          name: registry-ca
+          readOnly: true
       serviceAccount: kapp-controller-sa
       volumes:
       - emptyDir:
@@ -2505,6 +2513,12 @@ spec:
         name: home
       - emptyDir: {}
         name: empty-sa
+      - secret:
+          secretName: kapp-controller-config
+        name: kapp-controller-config
+      - configMap:
+          name: registry-ca
+        name: registry-ca
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -2632,6 +2646,15 @@ rules:
   - prioritylevelconfigurations
   - flowschemas
   verbs:
+  - list
+  - watch
+- apiGroups:
+  - config.openshift.io
+  resources:
+  - infrastructures
+  - proxies
+  verbs:
+  - get
   - list
   - watch
 ---

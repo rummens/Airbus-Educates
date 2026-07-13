@@ -1,0 +1,93 @@
+# Mutating Kyverno policy to enforce security compliance on Educates workshop
+# deployments.
+#
+# The Educates session-manager creates workshop deployments dynamically using
+# base images (base-environment, jdk8/11/17/21-environment, conda-environment)
+# that do not comply with cluster Kyverno security policies:
+#   - require-requests-limits: missing CPU requests/limits
+#   - require-ro-rootfs: missing readOnlyRootFilesystem
+#   - restrict-seccomp-strict: missing seccompProfile
+#   - require-readiness-and-liveness-probes: missing probes
+#   - require-secrets-in-secret: sensitive env vars use plain value
+#
+# Instead of patching Educates upstream or creating per-policy exceptions,
+# this mutating policy automatically injects the required security context,
+# resource limits, and probes into workshop deployments. The mutation is
+# scoped to namespaces labeled with training.educates.dev/environment.name.
+#
+# See DCS-ACADEMY-TROUBLESHOOTING.md section 3 for details.
+{{ if .Values.enableKyvernoException }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: mutate-educates-workshops
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    policies.kyverno.io/title: Mutate Educates Workshop Security Context
+    policies.kyverno.io/category: Educates Academy
+    policies.kyverno.io/severity: low
+    policies.kyverno.io/description: >-
+      Mutates Educates workshop deployments to add required security context,
+      resource limits, and health probes. This ensures compliance with cluster
+      Kyverno policies without requiring changes to the Educates base images.
+spec:
+  background: false
+  rules:
+    - name: mutate-workshop-deployment
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+              namespaceSelector:
+                matchExpressions:
+                  - key: training.educates.dev/environment.name
+                    operator: Exists
+      preconditions:
+        any:
+          - key: "{{ "{{" }} request.operation {{ "}}" }}"
+            operator: AnyIn
+            value: ["CREATE", "UPDATE"]
+      mutate:
+        patchStrategicMerge:
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: workshop
+                    securityContext:
+                      readOnlyRootFilesystem: true
+                      seccompProfile:
+                        type: RuntimeDefault
+                    resources:
+                      requests:
+                        cpu: 100m
+                        memory: 512Mi
+                      limits:
+                        cpu: 500m
+                        memory: 1Gi
+                    livenessProbe:
+                      httpGet:
+                        path: /healthz
+                        port: 10080
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                    readinessProbe:
+                      httpGet:
+                        path: /healthz
+                        port: 10080
+                      initialDelaySeconds: 5
+                      periodSeconds: 10
+                    volumeMounts:
+                      - name: workshop-tmp
+                        mountPath: /tmp
+                      - name: workshop-opt
+                        mountPath: /opt/workshop
+                volumes:
+                  - name: workshop-tmp
+                    emptyDir: {}
+                  - name: workshop-opt
+                    emptyDir: {}
+{{end}}
