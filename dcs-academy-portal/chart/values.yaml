@@ -140,15 +140,6 @@ admin:
   ssarVerb: delete
   ssarNamespace: ""             # empty → educates.portalCrNamespace
 
-# NetworkPolicy locking the Educates training-portal Service (in the portal-UI
-# namespace) to this app + session namespaces. Same HostNetwork caveat as the
-# workshops chart's netpol; the VAP is the router-level enforcement.
-networkPolicy:
-  enabled: true
-
-serviceMonitor:
-  enabled: true
-
 # Kasten K10 backup of this namespace (incl. the CNPG feedback DB). OFF by default
 # and UNTESTED on dev — needs K10 + Kanister CRDs. Policy/Blueprint render into the
 # K10 namespace; a CHECKPOINT hook quiesces the DB before the snapshot. See

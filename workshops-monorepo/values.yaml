@@ -86,3 +86,9 @@ crcWorkaround:
   # Needs `oc` + bash. registry.redhat.io is already pullable on CRC (oauth-proxy
   # uses it). Override for air-gap.
   image: registry.redhat.io/openshift4/ose-cli:latest
+
+# NetworkPolicy locking the Educates training-portal Service (in the portal-UI
+# namespace) to this app + workshop session namespaces. Same HostNetwork caveat
+# as the workshops chart's netpol; the VAP is the router-level enforcement.
+networkPolicy:
+  enabled: true
