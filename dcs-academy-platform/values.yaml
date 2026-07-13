@@ -49,6 +49,35 @@ educates:
     tlsCertificateRef:
       name: router-certs-default
       namespace: openshift-ingress
+    # Extra trusted CA for workshop sessions. Set this to the CA (root/issuing)
+    # that signs your INTERNAL endpoints — a private GitLab or Harbor behind your
+    # own CA. Educates builds it into every session's trust store and mounts it
+    # into the vendir content-download step, so `spec.workshop.files` git/http
+    # pulls over HTTPS stop failing x509 "unknown authority". Empty = public CAs
+    # only. Provide the PEM inline (one or more certs), OR point caCertificateRef
+    # at an existing Secret with a `ca.crt` key (inline wins if both set).
+    #
+    # Three ways to supply it (first non-empty wins):
+    #   1. caCertificate — inline PEM. Simple, but commits the cert to git.
+    #   2. caCertificateRef — a Secret (key: ca.crt) you create out-of-band
+    #      (`oc create secret generic org-ca -n dcs-educates-installer
+    #        --from-file=ca.crt=org-ca.pem`). Cert stays out of git.
+    #   3. caFromClusterBundle — let OpenShift own it (cleanest, nothing in git):
+    #      the chart creates a ConfigMap labelled
+    #      config.openshift.io/inject-trusted-cabundle=true (the Cluster Network
+    #      Operator fills its ca-bundle.crt with the system + custom cluster CAs),
+    #      and a small hook Job copies that bundle into the ca.crt Secret Educates
+    #      reads. Educates can't read a ConfigMap for this directly, hence the copy.
+    caCertificate: ""            # 1) inline PEM, e.g. |-\n  -----BEGIN CERTIFICATE-----\n  ...
+    caCertificateRef:            # 2) existing Secret ref (key: ca.crt)
+      name: ""
+      namespace: ""
+    caFromClusterBundle: true   # 3) sync the cluster trust bundle into the CA Secret
+
+  # Image + settings for the caFromClusterBundle sync Job (option 3 above). Needs
+  # `oc`. registry.redhat.io/ose-cli is pullable on most clusters; mirror for air-gap.
+  caBundleSync:
+    image: registry.redhat.io/openshift4/ose-cli:latest
 
   # UI theming stubs. Injected into the Educates platform websiteStyling so the
   # portal + workshop dashboard pick up brand colors and a logo. Selectors are a

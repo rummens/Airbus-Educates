@@ -1,0 +1,117 @@
+{{- if and .Values.enabled .Values.educates.ingress.caFromClusterBundle }}
+{{- $ns := .Values.educates.installer.namespace }}
+# OpenShift-owned trust for workshop sessions (option 3 in values).
+# The Cluster Network Operator watches for this label and fills ca-bundle.crt with
+# the cluster's full trust bundle (system CAs + any custom CA added cluster-wide via
+# Proxy .spec.trustedCA). Educates can't read a ConfigMap for its CA, so the Job
+# below copies the bundle into the `educates-cluster-ca` Secret (key ca.crt) that
+# the installer config's caCertificateRef points at. Nothing is committed to git.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: educates-cluster-ca-bundle
+  namespace: {{ $ns }}
+  labels:
+    config.openshift.io/inject-trusted-cabundle: "true"
+    {{- include "educates.labels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: educates-ca-sync
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: educates-ca-sync
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: educates-ca-sync
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: educates-ca-sync
+subjects:
+  - kind: ServiceAccount
+    name: educates-ca-sync
+    namespace: {{ $ns }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: educates-ca-sync
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+  annotations:
+    # Re-run on every ArgoCD sync so CA rotations are picked up; delete the prior
+    # Job first. (CA changes are rare — force a sync, or add a CronJob, if you need
+    # tighter tracking than per-sync.)
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 6
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        {{- include "educates.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: educates-ca-sync
+      restartPolicy: OnFailure
+      containers:
+        - name: sync
+          image: {{ .Values.educates.caBundleSync.image | quote }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              CM=educates-cluster-ca-bundle
+              SECRET=educates-cluster-ca
+              NS={{ $ns }}
+              # The CNO fills the ConfigMap asynchronously after creation — wait for it.
+              i=0
+              while [ "$i" -lt 30 ]; do
+                if oc get configmap "$CM" -n "$NS" -o jsonpath='{.data.ca-bundle\.crt}' 2>/dev/null | grep -q "BEGIN CERTIFICATE"; then
+                  break
+                fi
+                echo "waiting for $CM to be populated by the Cluster Network Operator..."
+                sleep 5
+                i=$((i+1))
+              done
+              oc get configmap "$CM" -n "$NS" -o jsonpath='{.data.ca-bundle\.crt}' > /tmp/ca.crt
+              if ! grep -q "BEGIN CERTIFICATE" /tmp/ca.crt; then
+                echo "ERROR: $CM has no ca-bundle.crt — is the inject-trusted-cabundle label set and the CNO healthy?" >&2
+                exit 1
+              fi
+              # Upsert the Secret Educates reads (key: ca.crt).
+              oc create secret generic "$SECRET" -n "$NS" \
+                --from-file=ca.crt=/tmp/ca.crt \
+                --dry-run=client -o yaml | oc apply -f -
+              echo "synced $CM -> secret/$SECRET ($(wc -l < /tmp/ca.crt) lines)"
+{{- end }}

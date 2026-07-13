@@ -113,6 +113,13 @@ Key points:
 - **Feedback** is captured by the portal's `/form` route (the old standalone
   `feedback.*` collector was absorbed) and stored in CNPG (Postgres) in prod / SQLite in
   dev. Course pages show a **live** star rating from that DB; `/admin` shows comments.
+- **Workshop content** is fetched at session start by vendir from `spec.workshop.files`
+  (a published OCI files-image in prod, or git for dev). Behind a private CA (internal
+  GitLab/Harbor), that HTTPS fetch fails TLS unless the CA is trusted — set one of
+  `educates.ingress.caCertificate` / `caCertificateRef` / `caFromClusterBundle` (the last
+  syncs the OpenShift cluster trust bundle, nothing in git) and Educates mounts it into the
+  download + workshop containers' trust store. See the platform README's *Private CA for
+  workshop content*.
 
 ## Namespaces at a glance
 

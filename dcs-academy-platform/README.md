@@ -33,6 +33,7 @@ Requires **kapp-controller** ([`dcs-academy-kapp-controller`](../dcs-academy-kap
 | `educates.version` | `3.7.2` | Educates release / bundle tag. |
 | `educates.ingressDomain` | `apps.test.ocp.globomantics.com` | Cluster wildcard domain. |
 | `educates.ingress.tlsCertificateRef` | `globomantics-ingress-cert` / `openshift-ingress` | Router wildcard cert (edge TLS on all Educates ingresses). |
+| `educates.ingress.caCertificate` / `caCertificateRef` / `caFromClusterBundle` | `""` / `""` / `false` | Extra trusted CA for **workshop sessions** — inline PEM, an existing `ca.crt` Secret, or (recommended) sync from the OpenShift cluster trust bundle. Educates mounts it into the session trust store **and the vendir content-download step**, so `spec.workshop.files` git/http pulls from a private-CA host (GitLab/Harbor) pass TLS. See [Private CA for workshop content](#private-ca-for-workshop-content). |
 | `educates.security.policyEngine` | `security-context-constraints` | Forced on OpenShift. |
 | `educates.security.rulesEngine` | `none` | Kyverno off on OpenShift. |
 | `educates.theming.*` | off | Brand color + logo stubs → Educates `websiteStyling`. |
@@ -54,6 +55,40 @@ Set `global.registry.host` and mirror the images in
 [../OFFLINE-MIRROR-IMAGES.md](../OFFLINE-MIRROR-IMAGES.md). The installer bundle is
 relocated with `imgpkg copy` (carries every platform image); kbld resolves them
 from the mirror.
+
+## Private CA for workshop content
+
+**Symptom:** sessions never load content; the workshop-download step fails with an
+x509 "certificate signed by unknown authority" against your GitLab (or Harbor). The
+container fetching `spec.workshop.files` doesn't trust your internal CA.
+
+**How the fix works:** whenever a trusted CA is configured (any of the three ways
+below), Educates' session-manager adds a `ca-trust-store-initialization` init
+container that builds it into a shared `/etc/pki/ca-trust` volume and mounts that into
+**both** the workshop container **and** the `workshop-downloads-initialization`
+(vendir) container — so git/http pulls over HTTPS validate. Verified against the
+operator's `session-manager/handlers/workshopsession.py` (the CA-trust mounts are
+gated on this being set). One knob covers every workshop — no per-lab patch or session
+ConfigMap.
+
+**Pick how you supply the CA** (first non-empty wins; none commits secrets you care
+about to git except option 1):
+
+1. **Inline PEM** — `educates.ingress.caCertificate`. Simplest, but puts the cert in git.
+2. **Existing Secret** — `educates.ingress.caCertificateRef: {name, namespace}`, a Secret
+   with a `ca.crt` key you create out-of-band:
+   ```sh
+   oc create secret generic org-ca -n dcs-educates-installer --from-file=ca.crt=org-ca.pem
+   ```
+   Cert stays out of git.
+3. **Let OpenShift own it (recommended)** — `educates.ingress.caFromClusterBundle: true`.
+   The chart creates a ConfigMap labelled `config.openshift.io/inject-trusted-cabundle=true`
+   (the Cluster Network Operator fills `ca-bundle.crt` with the system CAs plus any custom
+   CA you added cluster-wide via Proxy `spec.trustedCA`), and a small PostSync hook Job
+   copies that bundle into the `educates-cluster-ca` Secret's `ca.crt` that Educates reads.
+   Nothing in git; the cluster trust bundle is the source of truth. The copy exists because
+   Educates reads a **Secret**, not the injected **ConfigMap**; the Job re-runs each sync,
+   so force a sync (or add a CronJob) after a CA rotation.
 
 ## Security grants
 
