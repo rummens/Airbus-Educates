@@ -75,8 +75,15 @@ def wait_for_pod(ctx, ns, prefix, timeout):
 
 
 def pod_exec(ctx, ns, pod, script, timeout):
-    return sh(["oc", "--context", ctx, "-n", ns, "exec", pod, "-c", "workshop", "--",
-               "bash", "-lc", script], timeout=timeout)
+    cmd = ["oc", "--context", ctx, "-n", ns, "exec", pod, "-c", "workshop", "--",
+           "bash", "-lc", script]
+    try:
+        return sh(cmd, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        # A step that never returns (e.g. an interactive `-w` watch left in a plan) must
+        # fail THAT step, not crash the whole run. Synthesize a failed result.
+        return subprocess.CompletedProcess(cmd, 124, "",
+                                           f"step timed out after {timeout}s (interactive/watch command?)")
 
 
 def check_links(content_dir):
@@ -92,13 +99,20 @@ def check_links(content_dir):
         print("\nlink check: no external links found.")
         return 0
     print(f"\nlink check ({len(urls)} external links):")
+    # Codes that mean "valid URL, server just refuses automated clients" (docs.openshift.com
+    # 403s any non-browser request) — reachable, not broken. Matches link_check.py.
+    soft = {"401", "403", "405", "429"}
+    ua = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
+          "Chrome/124 Safari/537.36")
     bad = 0
     for u in sorted(urls):
-        code = sh(["curl", "-sSL", "-m", "20", "-A", "Mozilla/5.0",
+        code = sh(["curl", "-sSL", "-m", "20", "-A", ua,
+                   "-H", "Accept: text/html,application/xhtml+xml",
                    "-o", "/dev/null", "-w", "%{http_code}", u]).stdout.strip()
-        ok = bool(code) and code[0] in "23"
+        ok = bool(code) and (code[0] in "23" or code in soft)
         bad += 0 if ok else 1
-        print(f"  {(GREEN if ok else RED)}{code or 'ERR'}{RST}  {u}")
+        tag = code or "ERR"
+        print(f"  {(GREEN if ok else RED)}{tag}{RST}  {u}")
     return bad
 
 

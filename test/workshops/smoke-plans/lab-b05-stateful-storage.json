@@ -15,9 +15,6 @@
       "run": "envsubst < pvc.yaml | oc apply -f -"
     },
     {
-      "run": "oc get pvc hello-dcs-data -w --request-timeout=60s"
-    },
-    {
       "check": "verify-pvc-bound",
       "args": [
         "hello-dcs-data"
@@ -49,9 +46,6 @@
         "/data/marker",
         "persisted-by-dcs"
       ]
-    },
-    {
-      "run": "watch -n1 'oc get pods,pvc -l app=hello-dcs'"
     },
     {
       "run": "oc delete pod -l app=hello-dcs"

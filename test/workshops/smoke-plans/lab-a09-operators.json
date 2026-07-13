@@ -2,10 +2,10 @@
   "workshop": "lab-a09-operators",
   "_note": "Operators lab. REQUIRES the CloudNativePG operator pre-installed (CRDs + operand images mirrored). CRC here has NO CNPG operator, so all checks (CRDs present, api-resource, CR created, CR reconciled) are EXPECTED TO FAIL. This validates the workshop deploys/renders; the reconcile path needs the operator on the platform.",
   "steps": [
-    {"check": "verify-crds", "args": ["cnpg"]},
+    {"check": "verify-crds", "args": ["cnpg"], "expect_fail": true},
     {"check": "verify-api-resource", "args": ["cnpg"]},
     {"run": "envsubst < sample-cr.yaml | oc apply -f - || echo 'CNPG CRD absent (expected on CRC)'"},
-    {"check": "verify-cr-created", "args": ["cluster.postgresql.cnpg.io", "demo-db"]},
-    {"check": "verify-cr-ready", "args": ["demo-db"]}
+    {"check": "verify-cr-created", "args": ["cluster.postgresql.cnpg.io", "demo-db"], "expect_fail": true},
+    {"check": "verify-cr-ready", "args": ["demo-db"], "expect_fail": true}
   ]
 }

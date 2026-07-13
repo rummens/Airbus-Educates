@@ -1,17 +1,12 @@
 {
   "workshop": "lab-b06-dev-spaces",
-  "_note": "SCAFFOLD from content \u2014 review run steps (add rollout waits/env) before trusting the smoke run.",
+  "_note": "Only the devfile-registry check is smoke-testable (it greps the fixture devfile for a Harbor image). Creating a workspace needs the OpenShift Dev Spaces operator + an interactive dashboard action, so verify-workspace is excluded on CRC.",
   "steps": [
-    {
-      "check": "verify-devfile-registry",
-      "args": []
-    },
-    {
-      "run": "oc get pods -l controller.devfile.io/devworkspace_name"
-    },
-    {
-      "check": "verify-workspace",
-      "args": []
-    }
+    {"run": "test -f ~/exercises/devfile.yaml && grep -q . ~/exercises/devfile.yaml"},
+    {"check": "verify-devfile-registry", "args": []}
+  ],
+  "exclude": [
+    {"check": "verify-workspace", "args": [],
+     "reason": "needs the OpenShift Dev Spaces operator and an interactive 'Create Workspace' action — neither is present/scriptable on CRC."}
   ]
 }

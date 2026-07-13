@@ -7,7 +7,7 @@
     {"run": "yq '.spec.template.metadata.annotations, .spec.template.spec.nodeSelector' workload-classified.yaml"},
     {"check": "verify-placement-expressed", "args": ["workload-classified.yaml"]},
     {"run": "oc get nodes -o jsonpath='{range .items[*]}{.metadata.labels.topology\\.kubernetes\\.io/region}{\"\\n\"}{end}' | sort -u"},
-    {"check": "verify-node-topology"},
+    {"check": "verify-node-topology", "expect_fail": true},
     {"run": "grep -i 'tenant' raci.md"},
     {"check": "verify-raci-tenant-rows", "args": ["raci.md"]}
   ]

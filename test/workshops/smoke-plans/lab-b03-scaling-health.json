@@ -64,9 +64,6 @@
       "run": "oc get endpoints hello-dcs"
     },
     {
-      "run": "oc get pods -l app=hello-dcs -w"
-    },
-    {
       "run": "oc rollout restart deployment/hello-dcs"
     },
     {

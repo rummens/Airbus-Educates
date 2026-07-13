@@ -58,9 +58,6 @@
       "run": "oc scale deployment/hello-dcs --replicas=2"
     },
     {
-      "run": "oc get pods -l app=hello-dcs -w"
-    },
-    {
       "check": "verify-replicas",
       "args": [
         "hello-dcs",

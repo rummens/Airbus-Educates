@@ -91,7 +91,9 @@ def run_variant(mode, workshop, ctx, sid, keep, timeout):
         for label, u in [("dashboard", url),
                          ("editor", url.replace("https://", "https://editor-", 1))]:
             code = http_code(u)
-            good = code == "200"
+            # 2xx = served; 3xx = redirect (Educates dashboard 302s to its own path / login)
+            # — both mean the endpoint is up. A dead endpoint gives 000/502/503.
+            good = bool(code) and code[0] in "23"
             ok &= good
             print(f"  {(GREEN+'PASS' if good else RED+'FAIL')}{RST}  {label} HTTP {code or 'ERR'}  {DIM}{u}{RST}")
             if not good:

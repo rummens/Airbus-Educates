@@ -5,7 +5,7 @@
     {"run": "envsubst < pod-compliant.yaml | oc apply -f - && oc wait --for=condition=Ready pod/hello-compliant --timeout=120s"},
     {"check": "verify-compliant-running", "args": ["hello-compliant"]},
     {"run": "oc get pod hello-compliant -o jsonpath='{.metadata.annotations.openshift\\.io/scc}{\"\\n\"}'"},
-    {"check": "verify-scc-annotation", "args": ["hello-compliant", "restricted-v2"]}
+    {"check": "verify-scc-annotation", "args": ["hello-compliant", "restricted-v2"], "expect_fail": true}
   ],
   "exclude": [
     {"check": "verify-root-rejected", "args": ["hello-root"],

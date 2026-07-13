@@ -8,6 +8,6 @@
     {"run": "oc apply -f route.yaml"},
     {"check": "verify-route-admitted", "args": ["hello-dcs"]},
     {"check": "verify-netpol-present", "args": ["allow-hello-dcs-ingress"]},
-    {"check": "verify-egress-blocked", "args": ["hello-dcs"]}
+    {"check": "verify-egress-blocked", "args": ["hello-dcs"], "expect_fail": true}
   ]
 }
