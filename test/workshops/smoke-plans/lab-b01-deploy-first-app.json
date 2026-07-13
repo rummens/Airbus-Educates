@@ -1,0 +1,87 @@
+{
+  "workshop": "lab-b01-deploy-first-app",
+  "_note": "SCAFFOLD from content \u2014 review run steps (add rollout waits/env) before trusting the smoke run.",
+  "steps": [
+    {
+      "run": "envsubst < deployment.yaml | oc apply -f -"
+    },
+    {
+      "run": "oc rollout status deployment/hello-dcs"
+    },
+    {
+      "check": "verify-replicas",
+      "args": [
+        "hello-dcs",
+        "1"
+      ]
+    },
+    {
+      "run": "oc get pods -l app=hello-dcs"
+    },
+    {
+      "check": "verify-pods-running",
+      "args": [
+        "hello-dcs",
+        "1"
+      ]
+    },
+    {
+      "run": "oc apply -f service.yaml"
+    },
+    {
+      "check": "verify-service",
+      "args": [
+        "hello-dcs"
+      ]
+    },
+    {
+      "run": "oc get endpoints hello-dcs"
+    },
+    {
+      "run": "curl -s http://hello-dcs.$SESSION_NAMESPACE.svc:8080"
+    },
+    {
+      "check": "verify-svc-reachable",
+      "args": [
+        "hello-dcs",
+        "8080"
+      ]
+    },
+    {
+      "check": "verify-svc-reachable",
+      "args": [
+        "hello-dcs",
+        "8080"
+      ]
+    },
+    {
+      "run": "oc scale deployment/hello-dcs --replicas=2"
+    },
+    {
+      "run": "oc get pods -l app=hello-dcs -w"
+    },
+    {
+      "check": "verify-replicas",
+      "args": [
+        "hello-dcs",
+        "2"
+      ]
+    },
+    {
+      "run": "oc rollout restart deployment/hello-dcs"
+    },
+    {
+      "run": "oc rollout status deployment/hello-dcs"
+    },
+    {
+      "check": "verify-replicas",
+      "args": [
+        "hello-dcs",
+        "2"
+      ]
+    },
+    {
+      "run": "oc scale deployment/hello-dcs --replicas=2"
+    }
+  ]
+}

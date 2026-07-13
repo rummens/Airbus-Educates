@@ -7,7 +7,7 @@ root cause you have three lenses, each showing a different angle. Use them in or
 
 ## Lens 1: `oc describe` — the Pod's story
 
-[`oc describe`](https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pods/)
+[`oc describe`](https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/)
 prints everything Kubernetes knows about the Pod, and — crucially — its recent **Events**
 at the bottom. That Events section is where a Pod explains itself.
 

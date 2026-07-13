@@ -36,6 +36,10 @@ DEMO = _b("PORTAL_DEMO", False)
 # clusters use self-signed certs → set false there. Default true.
 SESSION_TLS_VERIFY = _b("PORTAL_SESSION_TLS_VERIFY", True)
 FEEDBACK_MIN_REVIEWS = int(os.environ.get("FEEDBACK_MIN_REVIEWS", "5"))
+# Background refresh of the catalog (Educates env catalog + Workshop/Track CRs).
+# Keeps the workshop→environment map warm + last-known-good so a stale/empty read
+# never makes request_session 404/503 on a dead reference. Seconds.
+CATALOG_REFRESH_SECONDS = int(os.environ.get("PORTAL_CATALOG_REFRESH_SECONDS", "300"))
 DATABASE_URL = os.environ.get("DATABASE_URL", "")      # postgres://… → CNPG; empty → sqlite
 FEEDBACK_DB = os.environ.get("FEEDBACK_DB", "/tmp/feedback.db")   # sqlite path (dev/local)
 

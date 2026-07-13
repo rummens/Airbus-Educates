@@ -55,9 +55,11 @@ course** (the `planning/` docs + all workshops). Confirm scope, then review.
    want to grant access to the internal DCS docs for this run (e.g. an internal
    URL/portal, an export, or a proxy). If they decline, skip dimension L and note
    it as not-checked. If they grant it, run dimension L. Never require it.
-4. **Verify live (optional but recommended).** If a cluster is available, deploy
-   and run the smoke test — setup/ytt/render/link errors only show at runtime
-   (see dimension K).
+4. **Run the no-cluster checks (always).** `test/workshops/coverage_check.py <lab>` and
+   `link_check.py <lab>` need no cluster and catch the two most common regressions —
+   a command with no smoke test (dimension I2) and a dead link (I3). Run them every review.
+   **Verify live (optional but recommended).** If a cluster is available, also deploy and
+   run the smoke test / flow test — setup/ytt/render errors only show at runtime (dim K).
 5. **Report.** Ranked findings with severity, location, the problem, and a
    concrete fix. End with prioritized improvement suggestions. Do not edit files
    unless the user asks; this skill advises.
@@ -113,11 +115,17 @@ the usual remedy. References point at the authoritative source.
 ### I. Assessment
 - **Rule:** **every command** has a paired `examiner:execute-test` (automated-pipeline coverage; atomic sequences may share one); checks emit **diagnostic** failure messages; a **knowledge check** per workshop and (recommended) an unguided **challenge** with hint + reveal-solution; long-running steps have an experience note + polling check. **Check:** map each `terminal:execute` to a check; read test scripts for diagnostics; confirm the summary section. **Fix:** add missing checks/diagnostics/knowledge-check. *(assessment-reference — Blocker for an unverified command.)*
 
+### I2. Smoke-plan coverage (test ↔ workshop linkage)
+- **Rule:** the workshop has a smoke plan (`test/workshops/smoke-plans/<lab>.json`) and **every** content `examiner:execute-test` block is either exercised by a plan `check` step (matching test name + args) or listed in the plan's `exclude` with a reason. No content check may be silently untested. **Check:** run `python3 test/workshops/coverage_check.py <lab>` — it must exit 0 (100% accounted for). A workshop with no plan, or a plan missing a content check, fails. **Fix:** add the missing plan step (`--scaffold` bootstraps one from content), or an `exclude` entry with a reason for a CRC-impossible check; use `expect_fail: true` for a step that only passes on the real platform. *(**Blocker**: an untested command can break silently; the whole point of the plan is to catch it.)*
+
+### I3. Link integrity
+- **Rule:** every link in the workshop description resolves — external links return 2xx, relative targets (SVGs, sibling pages) exist, and `{{< param dcs_docs_base_url >}}` links use a declared param. **Check:** run `python3 test/workshops/link_check.py <lab>` — external must be reachable (bot-blocked 401/403 are tolerated), relative targets must exist. Internal/air-gapped DCS-docs links are validated separately under dimension L (with `--check-internal --param dcs_docs_base_url=…`). **Fix:** repoint the dead link; add the missing asset. *(a dead upstream link = a learner clicking into a 404; Major.)*
+
 ### J. Clickable actions & terminal
 - **Rule:** guided experience (no manual typing); YAML block-scalar safety (`|-`, indent indicators, `|+`+`eot`); dashboard tab visibility tracked; split terminal referred to as **upper/lower** (`execute-1`=upper, `execute-2`=lower), never left/right; terminal working directory tracked. **Check:** read actions and prose. **Fix:** correct wording/YAML/tab guidance. *(clickable-actions reference, workshop-dashboard-reference, content-depth-reference.)*
 
 ### K. Live verification *(optional)*
-- **Rule:** the workshop actually deploys, renders, its links resolve, and every examiner check passes. **Check:** `crc-local-testing/deploy_workshop.py <name>` then `smoke_test.py <name>` (examiner + link check + restart). **Fix:** address whatever the run surfaces (setup/ytt, render, unreachable link, failing check). *(authoring SKILL "Smoke-Test in a Live Session".)*
+- **Rule:** the workshop actually deploys, renders, its links resolve, and every examiner check passes. **Check:** `test/workshops/deploy_workshop.py <name>` then `test/workshops/smoke_test.py <name>` (examiner + link check + restart); optionally `test/workshops/flow_test.py` for the session-comes-up + basic-commands user flow. **Fix:** address whatever the run surfaces (setup/ytt, render, unreachable link, failing check). *(authoring SKILL "Smoke-Test in a Live Session".)*
 
 ### L. Internal DCS documentation currency *(optional — only if access was granted)*
 Run this dimension **only when the user has explicitly granted access** to the internal DCS docs (see Review process step 3). The DCS docs are internal and unreachable by default, so **always ask first**; if access isn't given, skip and report "internal-docs check: not run (no access granted)". Never treat missing access as a finding.

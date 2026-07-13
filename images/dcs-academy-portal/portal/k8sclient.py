@@ -17,6 +17,7 @@ from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
 from . import config as cfg
+from .cache import Cached
 from .icons import resolve_icon
 
 _lock = threading.Lock()
@@ -145,15 +146,13 @@ def ping():
     _core().get_api_resources()       # cheap authenticated round-trip
 
 
-def list_tracks():
-    """Track CRs → sorted list of dicts. Empty if the CRD isn't installed."""
+def _list_tracks_live():
+    """Track CRs → sorted list of dicts. Empty if the CRD isn't installed.
+    Raises on API error so the cache retains last-known-good (see list_tracks)."""
     if cfg.DEMO:
         return _DEMO_TRACKS
-    try:
-        items = _co().list_cluster_custom_object(
-            cfg.TRACK_GROUP, cfg.TRACK_VERSION, "tracks").get("items", [])
-    except Exception:                 # noqa: BLE001 — never 500 the landing page on a read
-        return []
+    items = _co().list_cluster_custom_object(
+        cfg.TRACK_GROUP, cfg.TRACK_VERSION, "tracks").get("items", [])
     out = []
     for t in items:
         spec = t.get("spec", {})
@@ -168,21 +167,20 @@ def list_tracks():
     return out
 
 
-def list_courses():
+def _list_courses_live():
     """Educates Workshop CRs → course dicts, enriched from academy.dcs/* meta.
 
     Native Educates fields (title, description) are read from spec; difficulty/
     duration/summary/track/order/author/details come from academy.dcs
     annotations+labels (verified: real Workshop CRs don't populate spec.difficulty
     or spec.duration), each with a sensible spec fallback.
+
+    Raises on API error so the cache retains last-known-good (see list_courses).
     """
     if cfg.DEMO:
         return _DEMO_COURSES
-    try:
-        items = _co().list_cluster_custom_object(
-            "training.educates.dev", "v1beta1", "workshops").get("items", [])
-    except Exception:                 # noqa: BLE001
-        return []
+    items = _co().list_cluster_custom_object(
+        "training.educates.dev", "v1beta1", "workshops").get("items", [])
     out = []
     for w in items:
         meta, spec = w["metadata"], w.get("spec", {})
@@ -213,6 +211,21 @@ def list_courses():
         })
     out.sort(key=lambda x: (x["order"], x["title"]))
     return out
+
+
+# Cached + background-refreshed (cache.py). Reads serve the last good catalog if
+# the API blips, so a transient failure can't blank the landing page or (worse)
+# feed request_session an empty catalog. default [] keeps cold reads from 500ing.
+_courses = Cached("workshops", _list_courses_live, ttl=cfg.CATALOG_REFRESH_SECONDS, default=[])
+_tracks = Cached("tracks", _list_tracks_live, ttl=cfg.CATALOG_REFRESH_SECONDS, default=[])
+
+
+def list_courses():
+    return _courses.get()
+
+
+def list_tracks():
+    return _tracks.get()
 
 
 # --- Educates portal wiring (robot creds) -----------------------------------
@@ -367,17 +380,17 @@ _DEMO_COURSES = [
      "description": "A gentle introduction to the DCS platform, its layers and self-service model.",
      "details_md": "", "difficulty": "beginner", "duration": "20 min", "author": "DCS Team",
      "source_url": "https://github.com/rummens/Airbus-Educates/tree/main/dcs-academy/workshops/lab-a01-what-is-dcs",
-     "icon": "cloud"},
+     "vcluster": False, "module": "", "readme_url": "", "icon": "cloud"},
     {"name": "lab-a02-kubernetes-essentials", "title": "Kubernetes Essentials", "track": "developer-basics",
      "order": 20, "summary": "Pods, deployments and services — the objects you use every day.",
      "description": "Hands-on with the core Kubernetes objects on real OpenShift.",
      "details_md": "", "difficulty": "beginner", "duration": "45 min", "author": "DCS Team",
      "source_url": "https://github.com/rummens/Airbus-Educates/tree/main/dcs-academy/workshops/lab-a02-kubernetes-essentials",
-     "icon": "box"},
+     "vcluster": False, "module": "", "readme_url": "", "icon": "box"},
     {"name": "lab-a04-harbor-registry", "title": "Harbor Registry", "track": "platform",
      "order": 10, "summary": "Push and pull images from the on-prem Harbor registry with skopeo.",
      "description": "Work with the air-gapped Harbor registry: projects, pull-through, skopeo copies.",
      "details_md": "", "difficulty": "intermediate", "duration": "40 min", "author": "DCS Team",
      "source_url": "https://github.com/rummens/Airbus-Educates/tree/main/dcs-academy/workshops/lab-a04-harbor-registry",
-     "icon": "database"},
+     "vcluster": True, "module": "", "readme_url": "", "icon": "database"},
 ]

@@ -1,0 +1,82 @@
+{
+  "workshop": "lab-b05-stateful-storage",
+  "_note": "SCAFFOLD from content \u2014 review run steps (add rollout waits/env) before trusting the smoke run.",
+  "steps": [
+    {
+      "run": "oc exec deployment/hello-dcs -- sh -c 'echo \"written-inside-the-container\" > /tmp/note; cat /tmp/note'"
+    },
+    {
+      "run": "oc delete pod -l app=hello-dcs"
+    },
+    {
+      "run": "oc exec deployment/hello-dcs -- cat /tmp/note"
+    },
+    {
+      "run": "envsubst < pvc.yaml | oc apply -f -"
+    },
+    {
+      "run": "oc get pvc hello-dcs-data -w --request-timeout=60s"
+    },
+    {
+      "check": "verify-pvc-bound",
+      "args": [
+        "hello-dcs-data"
+      ]
+    },
+    {
+      "run": "envsubst < deployment-stateful.yaml | oc apply -f -"
+    },
+    {
+      "run": "oc rollout status deployment/hello-dcs"
+    },
+    {
+      "check": "verify-pods-running",
+      "args": [
+        "hello-dcs",
+        "1"
+      ]
+    },
+    {
+      "run": "oc exec deployment/hello-dcs -- sh -c 'echo \"persisted-by-dcs\" > /data/marker'"
+    },
+    {
+      "run": "oc exec deployment/hello-dcs -- cat /data/marker"
+    },
+    {
+      "check": "verify-marker",
+      "args": [
+        "hello-dcs",
+        "/data/marker",
+        "persisted-by-dcs"
+      ]
+    },
+    {
+      "run": "watch -n1 'oc get pods,pvc -l app=hello-dcs'"
+    },
+    {
+      "run": "oc delete pod -l app=hello-dcs"
+    },
+    {
+      "check": "verify-pods-running",
+      "args": [
+        "hello-dcs",
+        "1"
+      ]
+    },
+    {
+      "run": "oc exec deployment/hello-dcs -- cat /data/marker"
+    },
+    {
+      "check": "verify-marker",
+      "args": [
+        "hello-dcs",
+        "/data/marker",
+        "persisted-by-dcs"
+      ]
+    },
+    {
+      "check": "verify-marker",
+      "args": []
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+# Coverage config for the portal unit tests (test/ci/run-python.sh).
+[run]
+branch = false
+
+[report]
+# Lines that are not shipped behaviour, so they don't count against the gate.
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:
+    raise NotImplementedError

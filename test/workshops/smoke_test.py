@@ -121,13 +121,23 @@ def run_plan(ctx, ns, pod, steps, tests_dir, workdir, oc_shim, timeout):
             argstr = " ".join(f"'{a}'" for a in step.get("args", []))
             r = pod_exec(ctx, ns, pod, f'{prefix}{tests_dir}/{step["check"]} {argstr}', timeout)
             label = f"check: {step['check']} {' '.join(step.get('args', []))}".rstrip()
-        ok = r.returncode == 0
+        # `expect_fail` steps invert the verdict: they only pass on the real DCS platform
+        # (e.g. Kyverno-enforced PROD deploys) and are EXPECTED to fail on CRC. Encoding it
+        # keeps the run green here while still catching a regression (an unexpected PASS).
+        want_fail = bool(step.get("expect_fail"))
+        raw_ok = r.returncode == 0
+        ok = (not raw_ok) if want_fail else raw_ok
         passed, failed = (passed + 1, failed) if ok else (passed, failed + 1)
-        print(f"  [{i:>2}] {(GREEN + 'PASS' if ok else RED + 'FAIL')}{RST}  {label}")
+        tag = "XFAIL" if (want_fail and ok) else ("XPASS" if want_fail else ("PASS" if ok else "FAIL"))
+        colour = GREEN if ok else RED
+        print(f"  [{i:>2}] {colour}{tag:<5}{RST}  {label}")
         if not ok:
             diag = (r.stderr.strip() or r.stdout.strip()).splitlines()
+            hint = " (expected to FAIL on CRC but PASSED — platform regression?)" if want_fail else ""
             if diag:
-                print(f"        {DIM}{diag[-1]}{RST}")
+                print(f"        {DIM}{diag[-1]}{hint}{RST}")
+            elif hint:
+                print(f"        {DIM}{hint.strip()}{RST}")
     return passed, failed
 
 
@@ -150,11 +160,17 @@ def main():
     p.add_argument("--no-links", action="store_true", help="skip external link checking")
     args = p.parse_args()
 
-    # Resolve the workshop's repo subpath (no hard-coded layout).
-    targets = dw.resolve_targets(args.name, args.base)
-    if not targets:
-        sys.exit(f"could not resolve workshop {args.name!r} under {args.base}")
-    name, subpath = targets[0]
+    # Resolve the workshop's repo subpath (no hard-coded layout). Search all tracks
+    # first (so a dev-/security-track lab resolves without --base), then fall back to
+    # the --base-relative resolver for anything outside the monorepo.
+    subpath = dw.find_subpath(args.name)
+    if subpath:
+        name = args.name
+    else:
+        targets = dw.resolve_targets(args.name, args.base)
+        if not targets:
+            sys.exit(f"could not resolve workshop {args.name!r} under {args.base}")
+        name, subpath = targets[0]
     ns = name                                    # portal-less deploy: env ns == name
     plan_path = pathlib.Path(args.plan) if args.plan else HERE / "smoke-plans" / f"{name}.json"
     if not plan_path.exists():

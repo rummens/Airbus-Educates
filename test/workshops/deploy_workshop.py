@@ -17,7 +17,15 @@ Examples:
 """
 import argparse, json, subprocess, sys, time, pathlib
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+def _repo_root():
+    r = subprocess.run(["git", "rev-parse", "--show-toplevel"],
+                       capture_output=True, text=True,
+                       cwd=str(pathlib.Path(__file__).resolve().parent))
+    if r.returncode == 0 and r.stdout.strip():
+        return pathlib.Path(r.stdout.strip())
+    return pathlib.Path(__file__).resolve().parents[2]   # test/workshops/x.py -> repo root
+
+REPO_ROOT = _repo_root()
 DEFAULT_BASE = "workshops-monorepo/tracks/core-track"
 
 
@@ -109,7 +117,31 @@ def resolve_targets(name, base):
     if is_workshop_dir(given):                          # a path straight to one workshop
         return [(given.name, str(given.resolve().relative_to(REPO_ROOT)))]
 
+    cross = all_workshop_paths().get(name)              # any track (dev-/security-track)
+    if cross:
+        return [(name, cross)]
+
     return [(name, f"{base}/{name}")]                   # fall back to single name (may be built elsewhere)
+
+
+def all_workshop_paths():
+    """Every workshop in the monorepo, across all tracks → {name: repo_relative_subpath}."""
+    root = REPO_ROOT / "workshops-monorepo" / "tracks"
+    out = {}
+    if root.is_dir():
+        for track in sorted(root.iterdir()):
+            if not track.is_dir():
+                continue
+            for d in sorted(track.iterdir()):
+                if d.is_dir() and is_workshop_dir(d):
+                    out[d.name] = str(d.relative_to(REPO_ROOT))
+    return out
+
+
+def find_subpath(name):
+    """Repo-relative subpath of a workshop by name, searching ALL tracks (not just --base).
+    Returns None if not found."""
+    return all_workshop_paths().get(name)
 
 
 def list_labs(ctx):

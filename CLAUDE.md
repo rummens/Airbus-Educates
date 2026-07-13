@@ -18,7 +18,7 @@ especially **dcs-academy-course-design**, **dcs-domain-corrections**, and
 | `airbus-educates-course-review-skill/` | Skill: review/QA a workshop or course against all house standards; reports findings + suggestions (advises, doesn't rewrite). |
 | `dcs-academy/` | The course: `planning/` (brief, topics, module maps, per-workshop plans) + `workshops/` (built workshops: A01, A02 done; A03–A06 planned). See `dcs-academy/CLAUDE.md`. |
 | `images/` | `dcs-workshop-base` (Educates base + oc) and `hello-dcs` (RH UBI9) Containerfiles + `build.sh`. Pushed to `ghcr.io/rummens/*` (public, multiarch). |
-| `crc-local-testing/` | Portal-less deploy + smoke-test to the local CRC cluster: `deploy_workshop.py`, `smoke_test.py`, `smoke-plans/`, README. |
+| `test/` | All tests. `portal/` (Layer 1 pytest, 90% gate), `workshops/` (Layer 3: `deploy_workshop.py`, `smoke_test.py`, `flow_test.py`, `coverage_check.py`, `link_check.py`, `smoke-plans/`, README), `ci/` (GitLab CI scripts). See `test/README.md` + `TEST_STRATEGY.md`. |
 | `docs/dcs-academy/` | Learner-facing environment guide (linked from workshop overviews). |
 | `argocd/`, `dcs-academy-{platform,kapp-controller}/`, `dcs-academy-portal/chart/` | Platform install via ArgoCD app-of-apps (syncs from GitHub `main`; prune+selfHeal). The portal chart owns the catalog + TrainingPortal + oauth gate + custom UI + feedback (the old `dcs-academy-workshops` chart was merged into it). |
 
@@ -54,13 +54,15 @@ isn't self-service yet (teach as observe).
 ## Testing a workshop (local CRC OpenShift, arm64)
 
 ```bash
-cd crc-local-testing
+cd test/workshops
 ./deploy_workshop.py lab-a02-kubernetes-essentials      # portal-less, git source
 ./smoke_test.py     lab-a02-kubernetes-essentials       # examiner checks + link check + restart
+./coverage_check.py --all    # (no cluster) every command has a smoke test
+./link_check.py     --all    # (no cluster) every content link resolves
 ```
 The CRC git-source reads `origin/main`, so **push content changes before re-deploying**.
 Portal is broken on CRC arm64 (SIGILL) — always portal-less. Editor/console tabs need the
-CRC self-signed cert trusted (see crc-local-testing/README).
+CRC self-signed cert trusted (see test/workshops/README). Full test strategy: `TEST_STRATEGY.md`.
 
 ## Deploy / git
 

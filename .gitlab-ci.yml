@@ -1,0 +1,71 @@
+# DCS Academy test pipeline.
+#
+# Two tiers, split by whether they need a cluster:
+#   FAST (stage: test)     — no cluster; runs on plain python; blocks merges. Path-gated so a
+#                            python-only change skips workshop jobs and vice-versa.
+#   CLUSTER (stage: e2e)   — needs a live OpenShift/CRC runner (tag: crc); manual on MRs,
+#                            automatic on scheduled pipelines. Does NOT block merges (cluster
+#                            flakiness is not a code defect) — read its report before release.
+#
+# Selective triggering is done with `rules: changes:` (per-job) plus, for the cluster smoke
+# job, test/ci/changed.py (only re-smokes the workshops whose files actually changed).
+
+stages: [test, e2e]
+
+variables:
+  COVERAGE_MIN: "90"
+  GIT_DEPTH: "0"                     # full history so changed.py can diff against the base
+
+# ---------- FAST TIER (no cluster, blocks merges) ----------
+
+portal-tests:
+  stage: test
+  image: python:3.13-slim
+  rules:
+    - changes:
+        - images/dcs-academy-portal/**/*
+        - test/portal/**/*
+        - test/ci/**/*
+  before_script:
+    - pip install --quiet -r images/dcs-academy-portal/requirements.txt pytest-cov
+  script:
+    - bash test/ci/run-python.sh
+  coverage: '/^TOTAL\s+.*\s+(\d+%)$/'
+
+workshop-static:
+  stage: test
+  image: python:3.13-slim
+  rules:
+    - changes:
+        - workshops-monorepo/**/*
+        - test/workshops/**/*
+        - test/ci/**/*
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git curl >/dev/null
+  script:
+    # coverage: every workshop command has a smoke test (or an explicit exclude);
+    # links: every workshop description link resolves (200 / reachable).
+    - bash test/ci/run-workshops.sh
+
+# ---------- CLUSTER TIER (needs a crc runner; does not block merges) ----------
+
+.cluster:
+  stage: e2e
+  tags: [crc]                        # a runner with `oc` logged in to the CRC/OpenShift test cluster
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes: [workshops-monorepo/**/*, test/workshops/**/*]
+      when: manual
+      allow_failure: true
+
+workshop-smoke:
+  extends: .cluster
+  script:
+    # only the workshops whose files changed (full set on a scheduled run via CHANGED fallback)
+    - bash test/ci/run-workshops.sh --changed --smoke
+
+user-flow:
+  extends: .cluster
+  script:
+    - python3 test/workshops/flow_test.py --mode both

@@ -15,7 +15,7 @@ from flask import (Flask, render_template, request, redirect, abort, jsonify,
 from markupsafe import Markup
 
 from . import config as cfg
-from . import k8sclient, educates, feedback, metrics, proxy, auth
+from . import k8sclient, educates, feedback, metrics, proxy, auth, cache
 from .icons import ICONS, DIFFICULTY_ICON, resolve_icon
 
 STEPS = ["Reserving session", "Starting virtual cluster", "Starting workshop pod",
@@ -302,6 +302,12 @@ def create_app():
     @app.route("/metrics")
     def metrics_ep():
         return Response(metrics.render(), mimetype="text/plain; version=0.0.4")
+
+    # Background refresh of the catalog + Workshop/Track CRs (keeps the
+    # workshop→env map and CR lists warm + last-known-good, so a stale ref never
+    # 404/503s a session launch). Skip in DEMO (no cluster/portal to poll).
+    if not cfg.DEMO:
+        cache.start_refresher(cfg.CATALOG_REFRESH_SECONDS)
 
     # proxy LAST — only allowlisted Educates paths, everything else 404.
     app.register_blueprint(proxy.bp)

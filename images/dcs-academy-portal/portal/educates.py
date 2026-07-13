@@ -21,11 +21,22 @@ import requests
 
 from . import config as cfg
 from . import k8sclient
+from .cache import Cached
 
 log = logging.getLogger("portal.educates")
 
 _tok_lock = threading.Lock()
 _tok = {"value": "", "exp": 0.0}
+
+
+class _StaleRef(Exception):
+    """request_session hit a dead reference (401 stale token / 404 unknown env),
+    as opposed to a legitimate 503 no-capacity. Triggers one refresh + retry."""
+
+
+def invalidate_token():
+    with _tok_lock:
+        _tok["value"], _tok["exp"] = "", 0.0
 
 _readme_lock = threading.Lock()
 _readme_cache = {}                    # url -> (text, exp)
@@ -80,12 +91,22 @@ def _session():
     return base, s
 
 
-def catalog():
+def _catalog_live():
     """List of environments the portal serves: [{name, workshop, ...}]."""
     base, s = _session()
     r = s.get(f"{base}/workshops/catalog/environments/", timeout=10)
     r.raise_for_status()
     return r.json().get("environments", [])
+
+
+# Cached + background-refreshed (see cache.py). Last-known-good on API blips so
+# _env_for never falls back to a raw name → 404. default [] keeps cold reads safe.
+_catalog = Cached("educates-catalog", _catalog_live,
+                  ttl=cfg.CATALOG_REFRESH_SECONDS, default=[])
+
+
+def catalog(force=False):
+    return _catalog.get(force=force)
 
 
 def _env_for(workshop_name):
@@ -102,7 +123,21 @@ def request_session(workshop_name, user):
 
     Returns {"name", "url", "user", ...}; `url` is a portal-host path to redirect
     the browser to. Bound to `user` so the same person resumes their session.
-    """
+
+    On a stale reference (401 dead token / 404 unknown env — e.g. the workshop CR
+    or portal was updated and our cached catalog/token lagged), we refresh the
+    token + catalog once and retry, instead of surfacing a 502 to the learner."""
+    try:
+        return _request_session(workshop_name, user)
+    except _StaleRef as e:
+        log.info("REQUEST-SESSION workshop=%s stale ref (%s) -> refresh token+catalog, retry",
+                 workshop_name, e)
+        invalidate_token()
+        catalog(force=True)
+        return _request_session(workshop_name, user)
+
+
+def _request_session(workshop_name, user):
     base, s = _session()
     env = _env_for(workshop_name)
     params = {"index_url": f"https://{_public_host()}/"}
@@ -112,6 +147,8 @@ def request_session(workshop_name, user):
     if r.status_code == 503:
         log.info("REQUEST-SESSION workshop=%s env=%s -> 503 (no capacity)", workshop_name, env)
         raise CapacityError(workshop_name)
+    if r.status_code in (401, 404):
+        raise _StaleRef(f"{r.status_code} for env={env}")
     r.raise_for_status()
     data = r.json()
     log.info("REQUEST-SESSION workshop=%s env=%s user=%r -> name=%s url=%r",

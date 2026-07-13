@@ -9,6 +9,8 @@
     {"run": "oc exec deployment/hello-dcs -- sh -c 'echo persisted-by-dcs > /data/marker'"},
     {"check": "verify-marker", "args": ["hello-dcs", "/data/marker", "persisted-by-dcs"]},
     {"run": "oc delete pod -l app=hello-dcs && oc rollout status deployment/hello-dcs --timeout=150s"},
-    {"check": "verify-marker", "args": ["hello-dcs", "/data/marker", "persisted-by-dcs"]}
+    {"check": "verify-marker", "args": ["hello-dcs", "/data/marker", "persisted-by-dcs"]},
+    {"run": "DCS_SC_BLOCK=crc-csi-hostpath-provisioner envsubst < pvc-block.yaml | oc apply -f -"},
+    {"check": "verify-pvc-bound", "args": ["hello-dcs-block"]}
   ]
 }

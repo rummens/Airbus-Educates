@@ -1,0 +1,38 @@
+{
+  "workshop": "lab-b04-debugging-logs",
+  "_note": "SCAFFOLD from content \u2014 review run steps (add rollout waits/env) before trusting the smoke run.",
+  "steps": [
+    {
+      "run": "oc get pods -l app=hello-dcs"
+    },
+    {
+      "check": "verify-not-ready",
+      "args": [
+        "hello-dcs"
+      ]
+    },
+    {
+      "run": "oc describe pod -l app=hello-dcs"
+    },
+    {
+      "run": "oc get events --sort-by=.lastTimestamp"
+    },
+    {
+      "run": "oc logs -l app=hello-dcs --tail=20"
+    },
+    {
+      "run": "oc apply -f ~/exercises/broken-deployment.yaml"
+    },
+    {
+      "run": "oc rollout status deployment/hello-dcs"
+    },
+    {
+      "check": "verify-recovered",
+      "args": [
+        "hello-dcs",
+        "hello-dcs",
+        "8080"
+      ]
+    }
+  ]
+}

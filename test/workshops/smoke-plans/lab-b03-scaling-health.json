@@ -1,0 +1,87 @@
+{
+  "workshop": "lab-b03-scaling-health",
+  "_note": "SCAFFOLD from content \u2014 review run steps (add rollout waits/env) before trusting the smoke run.",
+  "steps": [
+    {
+      "run": "oc scale deployment/hello-dcs --replicas=3"
+    },
+    {
+      "run": "oc get pods -l app=hello-dcs"
+    },
+    {
+      "check": "verify-replicas",
+      "args": [
+        "hello-dcs",
+        "3"
+      ]
+    },
+    {
+      "run": "oc get resourcequota"
+    },
+    {
+      "run": "oc describe quota"
+    },
+    {
+      "check": "verify-quota",
+      "args": []
+    },
+    {
+      "run": "oc apply -f ~/exercises/deployment-oversized.yaml"
+    },
+    {
+      "run": "oc get pods -l app=hello-dcs"
+    },
+    {
+      "run": "oc get events --sort-by=.lastTimestamp | tail -n 15"
+    },
+    {
+      "run": "oc describe deployment hello-dcs"
+    },
+    {
+      "check": "verify-oversized-pending",
+      "args": []
+    },
+    {
+      "run": "oc apply -f ~/exercises/deployment-probes.yaml"
+    },
+    {
+      "run": "oc rollout status deployment/hello-dcs"
+    },
+    {
+      "run": "oc get pods -l app=hello-dcs"
+    },
+    {
+      "check": "verify-pods-running",
+      "args": []
+    },
+    {
+      "check": "verify-probes",
+      "args": [
+        "hello-dcs"
+      ]
+    },
+    {
+      "run": "oc get endpoints hello-dcs"
+    },
+    {
+      "run": "oc get pods -l app=hello-dcs -w"
+    },
+    {
+      "run": "oc rollout restart deployment/hello-dcs"
+    },
+    {
+      "check": "verify-replicas",
+      "args": [
+        "hello-dcs",
+        "2"
+      ]
+    },
+    {
+      "check": "verify-replicas",
+      "args": [
+        "hello-dcs",
+        "2"
+      ]
+    }
+  ]
+}

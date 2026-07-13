@@ -1,0 +1,18 @@
+{
+  "workshop": "lab-c02-pod-security-scc",
+  "_note": "Deterministic subset only; the CRC-impossible content checks are declared in `exclude` (with reasons) so coverage_check accounts for every content check instead of silently dropping them.",
+  "steps": [
+    {"run": "envsubst < pod-compliant.yaml | oc apply -f - && oc wait --for=condition=Ready pod/hello-compliant --timeout=120s"},
+    {"check": "verify-compliant-running", "args": ["hello-compliant"]},
+    {"run": "oc get pod hello-compliant -o jsonpath='{.metadata.annotations.openshift\\.io/scc}{\"\\n\"}'"},
+    {"check": "verify-scc-annotation", "args": ["hello-compliant", "restricted-v2"]}
+  ],
+  "exclude": [
+    {"check": "verify-root-rejected", "args": ["hello-root"],
+     "reason": "CRC portless session SA can be granted anyuid/privileged, so the root Pod is ADMITTED instead of rejected; the admission-rejection lesson only reproduces on a real DCS restricted namespace."},
+    {"check": "verify-remediated-running", "args": ["hello-root"],
+     "reason": "remediation is an interactive editor edit of pod-root.yaml a headless smoke run can't perform."},
+    {"check": "verify-scc-annotation", "args": ["hello-root", "restricted-v2"],
+     "reason": "depends on the excluded remediation step; CRC SCC priority may also report a different SCC than restricted-v2."}
+  ]
+}
