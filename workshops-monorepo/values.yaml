@@ -34,6 +34,10 @@ workshopContent:
   useGit: true
   gitUrl: https://github.com/rummens/Airbus-Educates
   gitRef: origin/main
+  # Root path prefix for git-source includePaths. Mirrors the monorepo layout
+  # (e.g. /workshops-monorepo/tracks/...). Override per-cluster if the tracks
+  # live elsewhere (air-gap mirror, different repo, etc).
+  tracksRoot: /workshops-monorepo/tracks
 
 # Extra labels merged onto the Track CRs + TrainingPortal this chart emits.
 # (Workshop CRs are NOT verbatim — rendered through `tpl`, so .Values work there.)

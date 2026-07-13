@@ -33,10 +33,10 @@ spec:
         url: "{{ .Values.workshopContent.gitUrl }}"
         ref: "{{ .Values.workshopContent.gitRef }}"
       includePaths:
-      - /workshops-monorepo/tracks/core-track/lab-a08-rbac-deep-dive/workshop/**
-      - /workshops-monorepo/tracks/core-track/lab-a08-rbac-deep-dive/exercises/**
-      - /workshops-monorepo/tracks/core-track/lab-a08-rbac-deep-dive/README.md
-      newRootPath: workshops-monorepo/tracks/core-track/lab-a08-rbac-deep-dive
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a08-rbac-deep-dive/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a08-rbac-deep-dive/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a08-rbac-deep-dive/README.md"
+      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a08-rbac-deep-dive"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-a08-rbac-deep-dive-files:$(workshop_version)"

@@ -38,10 +38,10 @@ spec:
         url: "{{ .Values.workshopContent.gitUrl }}"
         ref: "{{ .Values.workshopContent.gitRef }}"
       includePaths:
-      - /workshops-monorepo/tracks/security-track/lab-c01-image-scanning/workshop/**
-      - /workshops-monorepo/tracks/security-track/lab-c01-image-scanning/exercises/**
-      - /workshops-monorepo/tracks/security-track/lab-c01-image-scanning/README.md
-      newRootPath: workshops-monorepo/tracks/security-track/lab-c01-image-scanning
+      - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c01-image-scanning/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c01-image-scanning/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c01-image-scanning/README.md"
+      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c01-image-scanning"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-c01-image-scanning-files:$(workshop_version)"
