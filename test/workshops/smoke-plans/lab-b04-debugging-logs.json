@@ -1,6 +1,6 @@
 {
   "workshop": "lab-b04-debugging-logs",
-  "_note": "SCAFFOLD from content \u2014 review run steps (add rollout waits/env) before trusting the smoke run.",
+  "_note": "SCAFFOLD DRAFT \u2014 not CRC-validated. Needs authoring: the lab diagnoses an ALREADY-broken hello-dcs, but the portless session deploys nothing. Prepend applying the broken deployment, THEN verify-not-ready, diagnose, fix, verify-recovered.",
   "steps": [
     {
       "run": "oc get pods -l app=hello-dcs"

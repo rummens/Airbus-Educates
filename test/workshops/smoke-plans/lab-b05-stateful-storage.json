@@ -1,6 +1,6 @@
 {
   "workshop": "lab-b05-stateful-storage",
-  "_note": "SCAFFOLD from content \u2014 review run steps (add rollout waits/env) before trusting the smoke run.",
+  "_note": "SCAFFOLD DRAFT \u2014 not CRC-validated. Needs authoring: the first exec steps assume a running hello-dcs (from the ephemeral-storage demo) that no step deploys. Prepend a plain deploy before the ephemeral exec, then the PVC + stateful-deploy + marker-persist flow.",
   "steps": [
     {
       "run": "oc exec deployment/hello-dcs -- sh -c 'echo \"written-inside-the-container\" > /tmp/note; cat /tmp/note'"

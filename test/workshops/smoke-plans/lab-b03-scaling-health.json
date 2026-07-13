@@ -1,6 +1,6 @@
 {
   "workshop": "lab-b03-scaling-health",
-  "_note": "SCAFFOLD from content \u2014 review run steps (add rollout waits/env) before trusting the smoke run.",
+  "_note": "SCAFFOLD DRAFT \u2014 not CRC-validated. Needs authoring: the scale/probe steps operate on a hello-dcs deployment that no earlier step creates. Prepend a deploy (apply deployment.yaml + rollout status) before the scale/quota/probe steps.",
   "steps": [
     {
       "run": "oc scale deployment/hello-dcs --replicas=3"

@@ -55,7 +55,7 @@
       ]
     },
     {
-      "run": "oc scale deployment/hello-dcs --replicas=2"
+      "run": "oc scale deployment/hello-dcs --replicas=2 && oc rollout status deployment/hello-dcs --timeout=120s"
     },
     {
       "check": "verify-replicas",
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "run": "oc rollout restart deployment/hello-dcs"
+      "run": "oc rollout restart deployment/hello-dcs && oc rollout status deployment/hello-dcs --timeout=120s"
     },
     {
       "run": "oc rollout status deployment/hello-dcs"
@@ -78,7 +78,7 @@
       ]
     },
     {
-      "run": "oc scale deployment/hello-dcs --replicas=2"
+      "run": "oc scale deployment/hello-dcs --replicas=2 && oc rollout status deployment/hello-dcs --timeout=120s"
     }
   ]
 }
