@@ -1,0 +1,71 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-c02-pod-security-scc
+  labels:
+    academy.dcs/track: security
+    academy.dcs/order: "20"
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Pod Security & SCC on DCS
+  description: See why DCS runs workloads under the restricted policy, watch a root-assuming Pod get rejected at admission, and remediate its securityContext so it complies.
+  duration: 40m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "C-Security"
+  publish:
+    image: "$(image_repository)/lab-c02-pod-security-scc-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - /workshops-monorepo/tracks/security-track/lab-c02-pod-security-scc/workshop/**
+      - /workshops-monorepo/tracks/security-track/lab-c02-pod-security-scc/exercises/**
+      - /workshops-monorepo/tracks/security-track/lab-c02-pod-security-scc/README.md
+      newRootPath: workshops-monorepo/tracks/security-track/lab-c02-pod-security-scc
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-c02-pod-security-scc-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY is the single terminal/manifest source for the sample-image
+    # registry (Plane 3). Keep it in sync with dcs_registry in workshop/config.yaml,
+    # which is the content-rendering copy. Placeholder value — re-pointable per deploy.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    # NOTE: security.policy is deliberately left UNSET — the session namespace keeps its
+    # default `restricted` Pod Security enforcement + `restricted-v2` SCC. That enforcement
+    # is the entire subject of this workshop; relaxing it would defeat the lesson.
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # Native OpenShift session namespace — no per-session vcluster needed.
+      vcluster:
+        enabled: false

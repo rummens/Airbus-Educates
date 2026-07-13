@@ -1,0 +1,20 @@
+#!/bin/bash
+# verify-source-is-harbor <image-ref-without-transport>
+# The image's resolved .Name is served under the DCS registry (not an external one).
+ref="${1:?image reference required (e.g. \$DCS_REGISTRY/samples/hello-dcs:1.0)}"
+name=$(skopeo inspect "docker://${ref}" 2>/dev/null | jq -r '.Name // empty' 2>/dev/null)
+if [ -z "$name" ]; then
+  echo "Could not read .Name for 'docker://${ref}'. Is the image in Harbor and the robot account configured? (Needs a real Harbor.)" >&2
+  exit 1
+fi
+# DCS_REGISTRY is host/project (e.g. harbor.example.dcs/dcs-academy); .Name must start with its host.
+registry_host="${DCS_REGISTRY%%/*}"
+case "$name" in
+  "${DCS_REGISTRY}"/*|"${registry_host}"/*)
+    echo "OK: ${name} is served from the DCS registry (${registry_host})."
+    ;;
+  *)
+    echo "Image name '${name}' is not under the DCS registry '${registry_host}'. Every runtime image must come from Harbor." >&2
+    exit 1
+    ;;
+esac

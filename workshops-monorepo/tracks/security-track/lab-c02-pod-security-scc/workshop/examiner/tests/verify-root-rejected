@@ -1,0 +1,12 @@
+#!/bin/bash
+# verify-root-rejected <pod>
+# The root/privileged pod must NOT be admitted: 'oc apply' was denied by the
+# restricted Pod Security Standard / restricted-v2 SCC, so the pod is absent
+# (or at least never reaches Running).
+name="${1:?pod name required}"
+phase=$(oc get pod "$name" -o jsonpath='{.status.phase}' 2>/dev/null)
+if [ "$phase" = "Running" ]; then
+  echo "Pod '$name' is Running — it should have been REJECTED at admission (restricted PSA / restricted-v2 SCC deny privileged + runAsUser:0). If it is Running, the namespace is not enforcing restricted. Re-check the 'oc apply -f pod-root.yaml' output for the denial message." >&2
+  exit 1
+fi
+echo "OK: pod '$name' is '${phase:-absent}' — not Running. Admission rejected the root/privileged spec, as expected."

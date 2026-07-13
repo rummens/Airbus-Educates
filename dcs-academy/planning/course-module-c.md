@@ -2,11 +2,13 @@
 
 For security and compliance practitioners. Builds on Foundations. Carries a security-focused sample workload. Sequential within the track. All follow the house standards. Names: `lab-c0N-name`.
 
-*Breakdown-level plan — lighter than Modules A/B; expand to full per-workshop plans when this track is scheduled (see `tasks.md`).*
+*Per-workshop detailed plans written 2026-07-13 (all in `workshop-plans/`); workshops authored under `workshops-monorepo/tracks/security-track/`. Run location for all five: native OpenShift session namespace (no vcluster) — none need cluster-admin. All use `dcs-workshop-base` + the existing `samples/hello-dcs:1.0`; scan/provenance/governance artefacts are static fixtures (testable air-gapped). See [[dcs-domain-corrections]].*
 
 ---
 
 ### Workshop C01: Image Scanning & Harbor Gates
+
+**Detailed plan:** [workshop-plans/lab-c01-image-scanning.md](workshop-plans/lab-c01-image-scanning.md)
 
 **Directory name:** `lab-c01-image-scanning`
 **Covers ideas:** 12
@@ -19,6 +21,8 @@ For security and compliance practitioners. Builds on Foundations. Carries a secu
 
 ### Workshop C02: Pod Security / SCC on DCS
 
+**Detailed plan:** [workshop-plans/lab-c02-pod-security-scc.md](workshop-plans/lab-c02-pod-security-scc.md)
+
 **Directory name:** `lab-c02-pod-security-scc`
 **Covers ideas:** 13
 **Type:** Elective (Security)
@@ -30,6 +34,8 @@ For security and compliance practitioners. Builds on Foundations. Carries a secu
 
 ### Workshop C03: Secrets Management
 
+**Detailed plan:** [workshop-plans/lab-c03-secrets-management.md](workshop-plans/lab-c03-secrets-management.md)
+
 **Directory name:** `lab-c03-secrets-management`
 **Covers ideas:** 14
 **Type:** Elective (Security)
@@ -40,6 +46,8 @@ For security and compliance practitioners. Builds on Foundations. Carries a secu
 
 ### Workshop C04: Supply Chain & Provenance
 
+**Detailed plan:** [workshop-plans/lab-c04-supply-chain.md](workshop-plans/lab-c04-supply-chain.md)
+
 **Directory name:** `lab-c04-supply-chain`
 **Covers ideas:** 15
 **Type:** Elective (Security)
@@ -49,6 +57,8 @@ For security and compliance practitioners. Builds on Foundations. Carries a secu
 **Code exercises:** Inspect image provenance/signatures available in Harbor.
 
 ### Workshop C05: EU Data-Residency & Compliance
+
+**Detailed plan:** [workshop-plans/lab-c05-data-residency.md](workshop-plans/lab-c05-data-residency.md)
 
 **Directory name:** `lab-c05-data-residency`
 **Covers ideas:** 16

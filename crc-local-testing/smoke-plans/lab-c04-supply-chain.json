@@ -1,0 +1,16 @@
+{
+  "workshop": "lab-c04-supply-chain",
+  "_note": "skopeo/jq + a static provenance fixture. Digest pinning is deterministic: the run step reads the live digest from ghcr and envsubst-pins pod-by-digest.yaml. verify-labels depends on the sample image actually carrying OCI labels — if hello-dcs ships none, that check fails on env grounds (finding for the image, not the workshop). Live cosign verify is out of scope air-gapped; provenance is read from the fixture.",
+  "steps": [
+    {"run": "skopeo inspect --format '{{.Digest}}' docker://$DCS_REGISTRY/samples/hello-dcs:1.0"},
+    {"check": "verify-digest", "args": ["ghcr.io/rummens/samples/hello-dcs:1.0"]},
+    {"run": "export DIGEST=$(skopeo inspect --format '{{.Digest}}' docker://$DCS_REGISTRY/samples/hello-dcs:1.0) && echo \"Pinning to $DIGEST\" && envsubst < pod-by-digest.yaml | oc apply -f - && oc wait --for=condition=Ready pod/hello-pinned --timeout=120s"},
+    {"check": "verify-pinned-running", "args": ["hello-pinned"]},
+    {"run": "skopeo inspect docker://$DCS_REGISTRY/samples/hello-dcs:1.0 | jq '.Labels'"},
+    {"check": "verify-labels", "args": ["ghcr.io/rummens/samples/hello-dcs:1.0"]},
+    {"run": "jq -r '.predicate.builder.id, .predicate.invocation.configSource.uri' provenance.json"},
+    {"check": "verify-provenance"},
+    {"run": "skopeo inspect docker://$DCS_REGISTRY/samples/hello-dcs:1.0 | jq -r '.Name'"},
+    {"check": "verify-source-is-harbor", "args": ["ghcr.io/rummens/samples/hello-dcs:1.0"]}
+  ]
+}

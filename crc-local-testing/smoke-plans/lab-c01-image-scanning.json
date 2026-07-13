@@ -1,0 +1,14 @@
+{
+  "workshop": "lab-c01-image-scanning",
+  "_note": "Scan reports are static fixtures (jq), so every check is deterministic + air-gap-safe. Image checks hit the concrete CRC registry ghcr.io/rummens (smoke single-quotes args so $DCS_REGISTRY won't expand; the workshop content uses {{< param dcs_registry >}}/$DCS_REGISTRY correctly). deploy-flagged.yaml is narrated/observe in the content and intentionally NOT applied here.",
+  "steps": [
+    {"run": "jq '.summary.severityCount' scan-report.json"},
+    {"check": "verify-report-summary", "args": ["scan-report.json"]},
+    {"run": "jq -r '.vulnerabilities[] | \"\\(.severity)\\t\\(.id)\\t\\(.package)\"' scan-report.json"},
+    {"check": "verify-report-cves", "args": ["scan-report.json"]},
+    {"run": "jq '[.vulnerabilities[] | select(.severity == \"Critical\")] | length' scan-report-flagged.json"},
+    {"check": "verify-flagged-criticals", "args": ["scan-report-flagged.json"]},
+    {"check": "verify-clean-image", "args": ["ghcr.io/rummens/samples/hello-dcs:1.0"]},
+    {"check": "verify-no-criticals", "args": ["scan-report.json"]}
+  ]
+}

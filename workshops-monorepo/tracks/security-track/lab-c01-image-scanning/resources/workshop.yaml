@@ -1,0 +1,78 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-c01-image-scanning
+  labels:
+    academy.dcs/track: security
+    academy.dcs/order: "10"
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Image Scanning & Harbor Gates
+  description: Read Harbor vulnerability and compliance scan results, understand the gate policy that blocks unsafe images, and remediate a flagged image on air-gapped DCS.
+  duration: 40m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "C-Security"
+  publish:
+    image: "$(image_repository)/lab-c01-image-scanning-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    # Report-reading + remediation workshop: image work is skopeo (daemonless — no
+    # docker/podman inside the container, avoiding double-virtualization) plus jq over
+    # static scan-report fixtures. Runs on dcs-workshop-base, NOT dcs-tools.
+    # NOTE: skopeo and jq must be present in dcs-workshop-base (base-image rebuild task,
+    # see air-gapped-images-reference / image-manifest).
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - /workshops-monorepo/tracks/security-track/lab-c01-image-scanning/workshop/**
+      - /workshops-monorepo/tracks/security-track/lab-c01-image-scanning/exercises/**
+      - /workshops-monorepo/tracks/security-track/lab-c01-image-scanning/README.md
+      newRootPath: workshops-monorepo/tracks/security-track/lab-c01-image-scanning
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-c01-image-scanning-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY is the single terminal/manifest source for the sample-image
+    # registry (Plane 3). Keep it in sync with dcs_registry in workshop/config.yaml,
+    # which is the content-rendering copy. Placeholder value — re-pointable per deploy.
+    #
+    # NOTE (env dependency): skopeo inspects against Harbor authenticate with a read-only
+    # Harbor robot account. Those credentials (e.g. a mounted auth file / REGISTRY_AUTH_FILE)
+    # are provisioned at deploy time, not hardcoded here. The scan reports themselves are
+    # static fixtures shipped in exercises/ — no live scanner is required in-session.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # Native OpenShift session namespace — no per-session vcluster needed.
+      vcluster:
+        enabled: false

@@ -1,0 +1,74 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-c05-data-residency
+  labels:
+    academy.dcs/track: security
+    academy.dcs/order: "50"
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: EU Data-Residency & Compliance
+  description: Understand DCS data-classification and multi-national residency guarantees, see how workload placement is expressed, and walk the governance workflows a tenant is responsible for.
+  duration: 35m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "C-Security"
+  publish:
+    image: "$(image_repository)/lab-c05-data-residency-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    # Observe/concept workshop: all work is read-only oc against the session namespace
+    # plus yq/grep on local fixtures (classification matrix, a classified workload
+    # manifest, a RACI table). No image build/push, no live registry needed. Runs on
+    # dcs-workshop-base (oc + jq/yq), NOT dcs-tools.
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - /workshops-monorepo/tracks/security-track/lab-c05-data-residency/workshop/**
+      - /workshops-monorepo/tracks/security-track/lab-c05-data-residency/exercises/**
+      - /workshops-monorepo/tracks/security-track/lab-c05-data-residency/README.md
+      newRootPath: workshops-monorepo/tracks/security-track/lab-c05-data-residency
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-c05-data-residency-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY is the single terminal/manifest source for the sample-image
+    # registry (Plane 3). Keep it in sync with dcs_registry in workshop/config.yaml,
+    # which is the content-rendering copy. Placeholder value — re-pointable per deploy.
+    # Used only inside the read-only workload-classified.yaml fixture (image ref); this
+    # workshop does not deploy it.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # Native OpenShift session namespace — no per-session vcluster needed.
+      vcluster:
+        enabled: false

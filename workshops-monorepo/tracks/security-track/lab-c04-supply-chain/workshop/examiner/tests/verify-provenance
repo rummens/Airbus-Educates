@@ -1,0 +1,15 @@
+#!/bin/bash
+# verify-provenance [attestation-file]
+# The SLSA attestation fixture yields a builder id and a config source URI.
+file="${1:-$HOME/exercises/provenance.json}"
+if [ ! -f "$file" ]; then
+  echo "Attestation file '$file' not found. Expected the provenance.json fixture in ~/exercises." >&2
+  exit 1
+fi
+builder=$(jq -r '.predicate.builder.id // empty' "$file" 2>/dev/null)
+source_uri=$(jq -r '.predicate.invocation.configSource.uri // empty' "$file" 2>/dev/null)
+if [ -z "$builder" ] || [ -z "$source_uri" ]; then
+  echo "Attestation '$file' is missing .predicate.builder.id or .predicate.invocation.configSource.uri." >&2
+  exit 1
+fi
+echo "OK: builder '${builder}' built from '${source_uri}'."

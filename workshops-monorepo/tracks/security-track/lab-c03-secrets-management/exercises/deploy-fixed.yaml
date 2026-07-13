@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fixed-app
+  labels:
+    app: fixed-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fixed-app
+  template:
+    metadata:
+      labels:
+        app: fixed-app
+    spec:
+      containers:
+      - name: fixed-app
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        ports:
+        - containerPort: 8080
+        env:
+        # FIXED PATTERN: the value is sourced by reference from the Secret, never
+        # written in the manifest. No literal here — nothing to leak into git or a dump.
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: api-token
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi

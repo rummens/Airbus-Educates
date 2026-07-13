@@ -1,0 +1,7 @@
+# Track metadata → one Track CR. `id` is EXPLICIT (not the folder name). A workshop
+# joins this track with label academy.dcs/track: <id>. Only `id` + `title` required.
+id: security         # track id — must equal the workshops' academy.dcs/track label
+title: "Security & Compliance — Secure on DCS"
+description: "Scan and gate images, meet pod security, handle secrets, trust your supply chain, and satisfy EU data-residency and governance on DCS."
+order: 30            # after the core foundations + developer tracks
+icon: shield         # FA-style icon name the portal vendors

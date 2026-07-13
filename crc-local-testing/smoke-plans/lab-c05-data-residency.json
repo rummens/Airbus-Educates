@@ -1,0 +1,14 @@
+{
+  "workshop": "lab-c05-data-residency",
+  "_note": "Observe/concept lab — governance artefacts are fixtures (grep/yq), so checks are deterministic. verify-node-topology is intentionally tolerant: it passes if nodes are queryable even when region labels are absent (CRC is single-node with no topology.kubernetes.io/region label). workload-classified.yaml is READ (yq), never scheduled.",
+  "steps": [
+    {"run": "grep -c '|' data-classification-matrix.md"},
+    {"check": "verify-matrix-present", "args": ["data-classification-matrix.md"]},
+    {"run": "yq '.spec.template.metadata.annotations, .spec.template.spec.nodeSelector' workload-classified.yaml"},
+    {"check": "verify-placement-expressed", "args": ["workload-classified.yaml"]},
+    {"run": "oc get nodes -o jsonpath='{range .items[*]}{.metadata.labels.topology\\.kubernetes\\.io/region}{\"\\n\"}{end}' | sort -u"},
+    {"check": "verify-node-topology"},
+    {"run": "grep -i 'tenant' raci.md"},
+    {"check": "verify-raci-tenant-rows", "args": ["raci.md"]}
+  ]
+}

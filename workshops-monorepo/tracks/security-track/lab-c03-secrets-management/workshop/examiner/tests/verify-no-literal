@@ -1,0 +1,21 @@
+#!/bin/bash
+# verify-no-literal <deployment> <literal> <secret-name>
+# The env dump sources the value by reference (secretKeyRef → <secret-name>) and the
+# plaintext <literal> is NOT present. This is the contrast with the leaky deployment.
+name="${1:?deployment name required}"
+literal="${2:?plaintext literal that must be absent required}"
+secret="${3:?referenced secret name required}"
+env=$(oc set env "deploy/$name" --list 2>/dev/null)
+if [ -z "$env" ]; then
+  echo "Could not read env for deploy/$name. Did you apply deploy-fixed.yaml?" >&2
+  exit 1
+fi
+if echo "$env" | grep -q "$literal"; then
+  echo "The plaintext literal is still visible in deploy/$name's env — the credential is still leaking. Are you sure this is the fixed deployment using secretKeyRef?" >&2
+  exit 1
+fi
+if ! echo "$env" | grep -q "$secret"; then
+  echo "deploy/$name's env does not reference secret '$secret'. Expected a secretKeyRef to '$secret', not a literal. Did you apply deploy-fixed.yaml?" >&2
+  exit 1
+fi
+echo "OK: deploy/$name sources the token by reference to secret '$secret' — no literal in the env dump."

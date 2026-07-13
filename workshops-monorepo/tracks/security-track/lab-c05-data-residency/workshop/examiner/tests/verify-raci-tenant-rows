@@ -1,0 +1,14 @@
+#!/bin/bash
+# verify-raci-tenant-rows <raci-file> — the RACI fixture is readable and lists tenant-owned rows.
+file="${1:?raci file required (e.g. raci.md)}"
+path="$HOME/exercises/${file}"
+if [ ! -f "$path" ]; then
+  echo "RACI fixture '$path' not found in ~/exercises." >&2
+  exit 1
+fi
+rows=$(grep -ic 'tenant' "$path")
+if [ "$rows" -lt 1 ]; then
+  echo "No lines mentioning 'tenant' found in '$path'. Expected a Responsibility Matrix with tenant-owned duties." >&2
+  exit 1
+fi
+echo "OK: ${file} lists ${rows} line(s) referencing the tenant."

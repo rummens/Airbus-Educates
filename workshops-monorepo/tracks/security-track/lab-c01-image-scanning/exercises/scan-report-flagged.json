@@ -1,0 +1,77 @@
+{
+  "artifact": "samples/hello-dcs:flagged",
+  "scanner": {
+    "name": "Trivy",
+    "vendor": "Harbor",
+    "version": "0.50.1"
+  },
+  "generatedAt": "2026-06-30T09:14:00Z",
+  "summary": {
+    "severityCount": {
+      "Critical": 2,
+      "High": 3,
+      "Medium": 1,
+      "Low": 1
+    },
+    "total": 7,
+    "fixable": 7
+  },
+  "vulnerabilities": [
+    {
+      "id": "CVE-2021-3711",
+      "severity": "Critical",
+      "package": "openssl",
+      "installedVersion": "1.1.1k-4.el8",
+      "FixedVersion": "1.1.1k-7.el8_4",
+      "description": "SM2 decryption buffer overflow allowing remote code execution."
+    },
+    {
+      "id": "CVE-2022-0778",
+      "severity": "Critical",
+      "package": "openssl",
+      "installedVersion": "1.1.1k-4.el8",
+      "FixedVersion": "1.1.1k-6.el8_5",
+      "description": "Infinite loop in BN_mod_sqrt when parsing a crafted certificate (DoS)."
+    },
+    {
+      "id": "CVE-2021-33574",
+      "severity": "High",
+      "package": "glibc",
+      "installedVersion": "2.28-151.el8",
+      "FixedVersion": "2.28-164.el8",
+      "description": "Use-after-free in mq_notify affecting thread attributes."
+    },
+    {
+      "id": "CVE-2019-25013",
+      "severity": "High",
+      "package": "glibc",
+      "installedVersion": "2.28-151.el8",
+      "FixedVersion": "2.28-164.el8",
+      "description": "Out-of-bounds read in the EUC-KR to UTF-8 conversion."
+    },
+    {
+      "id": "CVE-2023-38545",
+      "severity": "High",
+      "package": "curl",
+      "installedVersion": "7.61.1-25.el8",
+      "FixedVersion": "7.61.1-33.el8_9.3",
+      "description": "SOCKS5 heap buffer overflow in the hostname resolution path."
+    },
+    {
+      "id": "CVE-2024-2961",
+      "severity": "Medium",
+      "package": "glibc",
+      "installedVersion": "2.28-151.el8",
+      "FixedVersion": "2.28-164.el8",
+      "description": "Out-of-bounds write in the ISO-2022-CN-EXT charset conversion."
+    },
+    {
+      "id": "CVE-2023-29491",
+      "severity": "Low",
+      "package": "ncurses",
+      "installedVersion": "6.1-9.20180224.el8",
+      "FixedVersion": "6.1-10.20180224.el8",
+      "description": "Local privilege escalation via crafted terminfo under setuid."
+    }
+  ]
+}
