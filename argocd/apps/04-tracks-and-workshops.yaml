@@ -36,6 +36,14 @@ spec:
       jqPathExpressions:
         - '.spec.publish.files[].path'
         - '.spec.workshop.files[].path'
+    # The memory-limit PostSync Job patches the operator-owned training-portal
+    # Deployment's memory limit to 512Mi. Ignore so ArgoCD doesn't report
+    # OutOfSync against the git state.
+    - group: apps
+      kind: Deployment
+      name: training-portal
+      jsonPointers:
+        - /spec/template/spec/containers/0/resources/limits/memory
   syncPolicy:
     automated:
       prune: true

@@ -1,0 +1,100 @@
+{{- if .Values.enabled }}
+{{- $uiNs := include "portal.uiNamespace" . }}
+# The Educates operator creates the training-portal Deployment in <portalName>-ui
+# with default memory limits that are too low for production workloads. Since the
+# Deployment is operator-owned (not chart-managed), we can't declare the limits
+# directly. A PostSync hook Job patches the Deployment after each sync to set
+# memory limits to 512Mi (idempotent; re-applies if the operator recreates the pod).
+#
+# RBAC is scoped to get/patch the single Deployment named training-portal (any ns,
+# via a ClusterRole since the namespace is operator-created and dynamic).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Chart.Name }}-memory-limit
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ws.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Chart.Name }}-memory-limit
+  labels:
+    {{- include "ws.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["training-portal"]
+    verbs: ["get", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Chart.Name }}-memory-limit
+  labels:
+    {{- include "ws.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Chart.Name }}-memory-limit
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}-memory-limit
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-memory-limit
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ws.labels" . | nindent 4 }}
+  annotations:
+    # Run after the sync so the Educates operator has created the training-portal
+    # Deployment (TrainingPortal → Running). Keep on failure for inspection; delete
+    # on success so the next sync re-runs a fresh one.
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  backoffLimit: 10
+  activeDeadlineSeconds: 600
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        {{- include "ws.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Chart.Name }}-memory-limit
+      restartPolicy: Never
+      {{- with .Values.global.registry.pullSecret }}
+      imagePullSecrets:
+        - name: {{ . }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: patch
+          image: {{ .Values.crcWorkaround.image | quote }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              ns={{ $uiNs | quote }}
+              echo "waiting for deployment/training-portal in $ns ..."
+              for i in $(seq 1 60); do
+                oc get deployment/training-portal -n "$ns" >/dev/null 2>&1 && break
+                sleep 5
+              done
+              echo "setting memory limit to 512Mi on deployment/training-portal"
+              oc patch deployment training-portal -n "$ns" --type=json \
+                -p '[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/memory", "value": "512Mi"}]'
+              echo "done"
+{{- end }}

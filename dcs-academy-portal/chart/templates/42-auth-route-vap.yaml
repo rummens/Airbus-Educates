@@ -25,7 +25,7 @@ spec:
         resources: ["routes"]
   validations:
     - expression: >-
-        object.metadata.namespace == '{{ include "portal.uiNamespace" . }}' ||
+        object.metadata.namespace == '{{ .Release.Namespace }}' ||
         !has(object.spec.host) ||
         object.spec.host != '{{ include "portal.authHostname" . }}'
       message: >-

@@ -74,6 +74,9 @@ feedback:
 # env declaratively. When enabled, a PostSync hook Job (63-crc-armcap-job.yaml)
 # injects OPENSSL_armcap=0 into the training-portal Deployment after each sync. Leave
 # OFF except on CRC. See HANDOVER-portal-bringup.md.
+# --
+# Note that the image must still be synced even if the workaround is disabled. The image is needed for the
+# memory limit fix.
 crcWorkaround:
   enabled: false
   # Needs `oc` + bash. registry.redhat.io is already pullable on CRC (oauth-proxy

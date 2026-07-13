@@ -13,8 +13,15 @@ metadata:
     # TrainingPortal CRs, and -ui netpol carry SkipDryRunOnMissingResource so
     # ArgoCD retries until their deps exist instead of hard-failing.
     argocd.argoproj.io/sync-wave: "2"
-spec:
+    argocd.argoproj.io/sync-options: "skipBackgroundRequests=true"
   project: default
+  # Kyverno mutates ClusterPolicy rules with skipBackgroundRequests, making the
+  # live resource differ from git. Ignore it.
+  ignoreDifferences:
+    - group: kyverno.io
+      kind: ClusterPolicy
+      jsonPointers:
+        - /spec/rules/0/skipBackgroundRequests
   sources:
     - repoURL: https://github.com/rummens/Airbus-Educates
       targetRevision: main
