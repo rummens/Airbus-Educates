@@ -109,7 +109,8 @@ def create_app():
 
     @app.context_processor
     def _inject():
-        return {"theme": cfg.THEME, "icon": _icon, "product": cfg.THEME["product_name"]}
+        return {"theme": cfg.THEME, "icon": _icon, "product": cfg.THEME["product_name"],
+                "current_user": _user()}
 
     @app.template_filter("de")
     def _de(ts):

@@ -25,6 +25,10 @@
   <nav class="site-nav">
     <a href="{{ url_for('trophies') }}" class="nav-link">{{ icon('trophy')|safe }} Trophies</a>
     {% if is_admin %}<a href="{{ url_for('admin') }}" class="nav-link">{{ icon('shield')|safe }} Admin</a>{% endif %}
+    {% if current_user %}
+    <span class="nav-user">{{ icon('user')|safe }} {{ current_user }}</span>
+    <a href="{{ url_for('auth.logout') }}" class="nav-link" title="Sign out">{{ icon('logout')|safe }}</a>
+    {% endif %}
   </nav>
 </header>
 

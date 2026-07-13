@@ -56,11 +56,12 @@ auth:
   # session gateway's browser-side oauth_handshake + CSP frame-ancestors are built
   # for this host, so the app must keep serving the Educates session paths (proxy).
   hostname: academy
-  # OAuth scope. Needs user:full (not user:info): the admin gate runs a
-  # SelfSubjectAccessReview with the user's token, and a user:info-scoped token can
-  # only read userinfo — SSAR 403s and the admin button never appears. user:full is
-  # a normal user token (same power the old oauth-proxy --pass-access-token carried).
-  scope: user:full
+  # OAuth scope. A ServiceAccount-as-OAuthClient can ONLY request user:info,
+  # user:check-access, user:list-*-projects, or role:<role>:<ns> — user:full is
+  # rejected by the OAuth server ("scope denied: user:full"). So: user:info reads
+  # the username (users/~), user:check-access lets the admin gate's
+  # SelfSubjectAccessReview run with the user's token. Space-separated = both.
+  scope: user:info user:check-access
   # Server-side calls (discovery + token exchange + users/~). The OAuth route cert
   # is the cluster ingress cert (self-signed on CRC) → false there; true on real
   # clusters where the ingress cert is trusted / the SA CA covers it.

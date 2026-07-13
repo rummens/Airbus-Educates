@@ -24,6 +24,7 @@ ICONS = {
     "medal": '<circle cx="12" cy="15" r="5"/><path d="M12 13v4M10.5 15h3"/><path d="M8.5 8 6 3h4l2 3M15.5 8 18 3h-4l-2 3"/>',
     "award": '<circle cx="12" cy="9" r="5"/><path d="M9 13.5 7.5 21 12 18l4.5 3L15 13.5"/>',
     "info": '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
+    "logout": '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>',
     "rocket": '<path d="M4.5 16.5c-1.5 1.3-2 5-2 5s3.7-.5 5-2c.7-.8.7-2 0-2.8a2 2 0 0 0-3 .8Z"/><path d="M12 15 9 12c.5-3 2-6 8-9 .3 6-2.7 7.5-5 8Z"/><path d="M9 12H4s.5-3 3-4c1.5-.6 3 0 3 0"/><path d="M12 15v5s3-.5 4-3c.6-1.5 0-3 0-3"/>',
     "user": '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/>',
     "arrow-right": '<path d="M5 12h14"/><path d="m13 5 7 7-7 7"/>',

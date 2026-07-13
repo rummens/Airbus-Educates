@@ -266,3 +266,8 @@ code{background:var(--card-2);border-radius:5px;padding:.06em .35em;font-size:.9
 .tcard-prog{font-size:.78rem;color:var(--muted);display:flex;justify-content:space-between}
 .tcard-mini{height:6px;border-radius:999px;background:var(--card-2);overflow:hidden;margin-top:.3rem}
 .tcard-mini>span{display:block;height:100%;background:var(--secondary);transition:width .4s}
+
+/* signed-in user in the nav */
+.nav-user{display:inline-flex;align-items:center;gap:.4rem;font-size:.86rem;font-weight:600;color:var(--muted);
+  padding:.35rem .7rem;border:1px solid var(--border);border-radius:999px}
+.nav-user svg{width:16px;height:16px}
