@@ -39,3 +39,13 @@ namespace where you can safely create Roles and RoleBindings.
 
 - **Estimated time:** 45 minutes
 - **Difficulty:** Intermediate
+
+## Leaving the workshop
+
+Want to switch labs or come back later? This opens the **{{< param product_name >}}**
+portal in a **new browser tab** — your session here keeps running.
+
+```dashboard:open-url
+url: "https://academy.{{< param ingress_domain >}}/"
+title: Open the DCS Academy portal
+```

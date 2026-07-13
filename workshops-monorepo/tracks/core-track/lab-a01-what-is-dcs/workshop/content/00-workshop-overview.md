@@ -40,3 +40,13 @@ editor**, and the OpenShift **web console**. You already have access to your own
 
 - **Estimated time:** 20 minutes
 - **Difficulty:** Beginner
+
+## Leaving the workshop
+
+Want to switch labs or come back later? This opens the **{{< param product_name >}}**
+portal in a **new browser tab** — your session here keeps running.
+
+```dashboard:open-url
+url: "https://academy.{{< param ingress_domain >}}/"
+title: Open the DCS Academy portal
+```

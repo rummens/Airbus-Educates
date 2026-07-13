@@ -41,3 +41,13 @@ expose the sample app through the session proxy. The sample image is served from
 
 - **Estimated time:** 55 minutes
 - **Difficulty:** Beginner
+
+## Leaving the workshop
+
+Want to switch labs or come back later? This opens the **{{< param product_name >}}**
+portal in a **new browser tab** — your session here keeps running.
+
+```dashboard:open-url
+url: "https://academy.{{< param ingress_domain >}}/"
+title: Open the DCS Academy portal
+```

@@ -61,3 +61,13 @@ ones you'd hit in production. Commands are run with `oc` in the terminal.
 - [Managing Security Context Constraints (OpenShift)](https://docs.openshift.com/container-platform/latest/authentication/managing-security-context-constraints.html)
 - [Pod Security Standards (Kubernetes)](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
 - [Configure a Security Context for a Pod or Container (Kubernetes)](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+
+## Leaving the workshop
+
+Want to switch labs or come back later? This opens the **{{< param product_name >}}**
+portal in a **new browser tab** — your session here keeps running.
+
+```dashboard:open-url
+url: "https://academy.{{< param ingress_domain >}}/"
+title: Open the DCS Academy portal
+```

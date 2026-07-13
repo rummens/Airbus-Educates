@@ -216,7 +216,11 @@ def create_app():
 
     @app.route("/api/session/<name>/status")
     def session_status(name):
-        return jsonify(_status_feed(name, request.args.get("t0", type=int)))
+        # vc=1 when the launched workshop uses a vcluster (authoritative, from the
+        # launch page which read the course flag). Don't infer it from live pods —
+        # early in provisioning the -vc pods don't exist yet.
+        return jsonify(_status_feed(name, request.args.get("t0", type=int),
+                                    request.args.get("vc") == "1"))
 
     # --- feedback (absorbed) -----------------------------------------------
     @app.route("/form")
@@ -396,8 +400,14 @@ def _abs_session_url(path):
     return path if path.startswith("/") else "/" + path
 
 
-def _status_feed(name, t0):
-    """Merge WorkshopSession phase + pods → a human step + progress %."""
+def _status_feed(name, t0, expect_vc=False):
+    """Merge WorkshopSession phase + pods → a human step + progress %.
+
+    expect_vc: this workshop uses a vcluster (from the course flag). When True the
+    session is NOT ready until the -vc pods exist AND are ready. The old code
+    inferred "needs vcluster" from whether -vc pods were currently present, so in
+    the window before they spawn `vc` was empty and the gate `(vc_ready or not vc)`
+    waved it straight through → "Waiting for virtual cluster" flashed by."""
     st = k8sclient.session_status(name)
     phase = st.get("phase", "Pending")
     pods = k8sclient.session_pods(name)
@@ -405,6 +415,8 @@ def _status_feed(name, t0):
     ws = [p for p in pods if not p["vcluster"]]
     vc_ready = bool(vc) and all(p["ready"] == p["total"] and p["total"] for p in vc)
     ws_ready = bool(ws) and all(p["ready"] == p["total"] and p["total"] for p in ws)
+    # A vcluster lab gates on a real vc-ready; a plain-namespace lab ignores vc.
+    vc_ok = vc_ready if expect_vc else True
 
     # WorkshopSession.status.educates.phase for a live session is "Allocated"
     # (assigned) — "Running" is never reported here, so we key readiness off the
@@ -418,16 +430,16 @@ def _status_feed(name, t0):
     rr = _safe(lambda: k8sclient.session_route_ready(name, url)) if url else None
     route_ready = (rr is None) or bool(rr)
     step = "Reserving session"
-    if phase in READY_PHASES and ws_ready and (vc_ready or not vc) and url and route_ready:
+    if phase in READY_PHASES and ws_ready and vc_ok and url and route_ready:
         step = "Ready"
-    elif phase in READY_PHASES and ws_ready and (vc_ready or not vc) and url:
+    elif phase in READY_PHASES and ws_ready and vc_ok and url:
         step = "Waiting for route"
-    elif ws_ready:
+    elif ws_ready and vc_ok:
         step = "Loading content"
+    elif expect_vc and not vc_ready:
+        step = "Starting virtual cluster"
     elif ws:
         step = "Starting workshop pod"
-    elif vc and not vc_ready:
-        step = "Starting virtual cluster"
     ready = step == "Ready"
     if ready and t0:
         metrics.PROVISION.observe(max(0, time.time() - t0))

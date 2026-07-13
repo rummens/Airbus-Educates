@@ -52,3 +52,13 @@ A **split terminal**, an editor, and the web console, connected to your own
 
 - [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
 - [Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/)
+
+## Leaving the workshop
+
+Want to switch labs or come back later? This opens the **{{< param product_name >}}**
+portal in a **new browser tab** — your session here keeps running.
+
+```dashboard:open-url
+url: "https://academy.{{< param ingress_domain >}}/"
+title: Open the DCS Academy portal
+```

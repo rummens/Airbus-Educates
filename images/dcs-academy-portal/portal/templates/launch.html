@@ -27,11 +27,12 @@
       const NAME = {{ session_name|tojson }};
       const T0 = {{ t0 }};
       const TARGET = {{ target|tojson }};
+      const VC = {{ course.vcluster|tojson }};   // workshop uses a vcluster → gate readiness on it
       console.log('[launch] NAME=', NAME, 'TARGET=', TARGET);
       const steps = document.querySelectorAll('#steps li');
       async function poll(){
         try{
-          const r = await fetch(`/api/session/${encodeURIComponent(NAME)}/status?t0=${T0}`);
+          const r = await fetch(`/api/session/${encodeURIComponent(NAME)}/status?t0=${T0}&vc=${VC?1:0}`);
           const d = await r.json();
           console.log('[launch] poll', JSON.stringify(d));
           document.getElementById('msg').textContent = d.message || d.step + '…';

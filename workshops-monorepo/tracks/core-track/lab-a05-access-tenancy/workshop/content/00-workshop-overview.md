@@ -52,3 +52,13 @@ is the platform's actual configuration, not a mock-up. Commands are run with `oc
 - [Tenancy on {{< param product_short >}}]({{< param dcs_docs_base_url >}}/tenancy/tenants-and-namespaces)
 - [Using RBAC authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
 - [Resource quotas](https://kubernetes.io/docs/concepts/policy/resource-quotas/)
+
+## Leaving the workshop
+
+Want to switch labs or come back later? This opens the **{{< param product_name >}}**
+portal in a **new browser tab** — your session here keeps running.
+
+```dashboard:open-url
+url: "https://academy.{{< param ingress_domain >}}/"
+title: Open the DCS Academy portal
+```

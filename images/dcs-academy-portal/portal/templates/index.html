@@ -110,6 +110,19 @@
     chips.forEach(x => x.classList.remove('active'));
     c.classList.add('active'); diff = c.dataset.diff; apply();
   }));
+
+  // Deep-link from the docs: ?track=<slug> opens just that track (others closed)
+  // and scrolls to it. Slug = the Track CR name (the data-track value).
+  const want = (new URLSearchParams(location.search).get('track') || '').trim().toLowerCase();
+  if (want) {
+    let hit = null;
+    tracks.forEach(tr => {
+      const on = tr.dataset.track.toLowerCase() === want;
+      tr.open = on;
+      if (on) hit = tr;
+    });
+    if (hit) hit.scrollIntoView({behavior:'smooth', block:'start'});
+  }
 })();
 </script>
 {% endblock %}

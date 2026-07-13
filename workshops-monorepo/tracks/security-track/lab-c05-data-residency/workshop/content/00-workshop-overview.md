@@ -66,3 +66,13 @@ deployed, because residency is a platform guarantee, not something a tenant edit
 - [{{< param product_short >}} governance & compliance]({{< param dcs_docs_base_url >}}/governance/overview) — classification, RACI, exceptions, T&Cs.
 - [Labels and selectors (Kubernetes)](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
 - [Assigning Pods to nodes (Kubernetes)](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/)
+
+## Leaving the workshop
+
+Want to switch labs or come back later? This opens the **{{< param product_name >}}**
+portal in a **new browser tab** — your session here keeps running.
+
+```dashboard:open-url
+url: "https://academy.{{< param ingress_domain >}}/"
+title: Open the DCS Academy portal
+```

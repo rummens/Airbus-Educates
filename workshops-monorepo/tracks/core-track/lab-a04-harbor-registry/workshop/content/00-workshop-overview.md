@@ -55,3 +55,13 @@ without you logging in. Commands are run with `oc` and `skopeo` in the terminal.
 - [Harbor documentation](https://goharbor.io/docs/)
 - [`skopeo` documentation](https://github.com/containers/skopeo)
 - [Images (Kubernetes)](https://kubernetes.io/docs/concepts/containers/images/)
+
+## Leaving the workshop
+
+Want to switch labs or come back later? This opens the **{{< param product_name >}}**
+portal in a **new browser tab** — your session here keeps running.
+
+```dashboard:open-url
+url: "https://academy.{{< param ingress_domain >}}/"
+title: Open the DCS Academy portal
+```
