@@ -1,0 +1,76 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-c04-supply-chain
+  labels:
+    academy.dcs/track: security
+    academy.dcs/order: "40"
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Supply Chain & Provenance
+  description: Trace where images come from on an air-gapped platform — pin by digest, read image provenance and signatures, and understand trusted-source and mirroring practices on DCS.
+  duration: 40m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "C-Security"
+  publish:
+    image: "$(image_repository)/lab-c04-supply-chain-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    # Supply-chain workshop: image inspection uses skopeo (daemonless — no
+    # docker/podman inside the container, avoiding double-virtualization) and jq
+    # for reading manifests/provenance. Runs on dcs-workshop-base, NOT dcs-tools.
+    # NOTE: skopeo + jq must be present in dcs-workshop-base (same dependency as A04/C01).
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - /workshops-monorepo/tracks/security-track/lab-c04-supply-chain/workshop/**
+      - /workshops-monorepo/tracks/security-track/lab-c04-supply-chain/exercises/**
+      - /workshops-monorepo/tracks/security-track/lab-c04-supply-chain/README.md
+      newRootPath: workshops-monorepo/tracks/security-track/lab-c04-supply-chain
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-c04-supply-chain-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY is the single terminal/manifest source for the sample-image
+    # registry (Plane 3). Keep it in sync with dcs_registry in workshop/config.yaml,
+    # which is the content-rendering copy. Placeholder value — re-pointable per deploy.
+    #
+    # NOTE (env dependency): skopeo pulls/inspects against Harbor authenticate with a
+    # read-only Harbor robot account. Those credentials (e.g. a mounted auth file /
+    # REGISTRY_AUTH_FILE) are provisioned at deploy time, not hardcoded here.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # Native OpenShift session namespace — no per-session vcluster needed.
+      vcluster:
+        enabled: false

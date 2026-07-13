@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-tagged
+  labels:
+    app: hello-tagged
+spec:
+  containers:
+  - name: hello-tagged
+    # Referenced by a MUTABLE tag: whatever ':1.0' points at *right now*.
+    # A retag or re-push can change the content behind this same reference.
+    image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+    ports:
+    - containerPort: 8080
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi

@@ -1,0 +1,11 @@
+#!/bin/bash
+# verify-scc-annotation <pod> <expected-scc>
+# The SCC that admitted the pod is recorded in the openshift.io/scc annotation.
+name="${1:?pod name required}"
+want="${2:?expected scc required}"
+got=$(oc get pod "$name" -o jsonpath='{.metadata.annotations.openshift\.io/scc}' 2>/dev/null)
+if [ "$got" != "$want" ]; then
+  echo "Pod '$name' has openshift.io/scc='${got:-<none>}', expected '$want'. This annotation names the SCC that admitted the pod; a compliant restricted pod should be admitted under '$want'. Is the pod present ('oc get pod $name')?" >&2
+  exit 1
+fi
+echo "OK: pod '$name' was admitted under SCC '$got'."

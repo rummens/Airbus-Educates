@@ -1,0 +1,14 @@
+#!/bin/bash
+# verify-digest <image-ref-without-transport>
+# skopeo can inspect the image and it reports an immutable sha256 digest.
+ref="${1:?image reference required (e.g. \$DCS_REGISTRY/samples/hello-dcs:1.0)}"
+digest=$(skopeo inspect --format '{{.Digest}}' "docker://${ref}" 2>/dev/null)
+case "$digest" in
+  sha256:*)
+    echo "OK: ${ref} pins to ${digest}."
+    ;;
+  *)
+    echo "No sha256 digest for 'docker://${ref}' (got '${digest:-nothing}'). Is the image in Harbor and the read-only robot account configured? (Needs a real Harbor with the sample image.)" >&2
+    exit 1
+    ;;
+esac

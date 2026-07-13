@@ -64,6 +64,15 @@ Task tracking for the DCS Academy. Priorities: **P1** (blocker), **P2** (importa
 - [ ] **P2** Add a **`dcs_storage_class`** param placeholder (used by B05 `pvc.yaml`) to the workshop `config.yaml` param set when authoring.
 - [ ] **P3** Author B01–B06 workshops from these plans (workshop-authoring skill), reusing the hello-dcs manifests progressively (config → probes → fault → PVC).
 
-## Modules C / D / E
+## Module C — Security & Compliance
 
-- [ ] **P3** Plan after A + B are implemented and the format is proven.
+- [x] **P1** Write per-workshop plans C01–C05 — done (`workshop-plans/lab-c0*.md`, 2026-07-13). All run in the native OpenShift session namespace (no vcluster); all reuse `samples/hello-dcs:1.0` + static fixtures (no new sample images).
+- [~] **P1** Author C01–C05 from the plans (workshop-authoring skill) into `workshops-monorepo/tracks/security-track/`; new `security-track/track.yaml` (id `security`, order 30) added. Static authoring in progress this session; NOT yet live-smoke-tested.
+- [ ] **P1** Live smoke test C01–C05 on CRC (portal-less, kubectl/httpd variant) once authored — mirror the A03–A09 pass. Expected env-specific non-passes: C01 gate is observe-only (no live scanner); C04 cosign verify modelled from fixture; C05 `verify-node-topology` tolerant (CRC lacks region labels).
+- [ ] **P2** C01/C04 use **static scan/provenance fixtures** (`scan-report*.json`, `provenance.json`) because a live Harbor scanner + cosign trust policy aren't guaranteed reachable in-session. Wire live Harbor scan-API reads (C01) and real `cosign verify` (C04) once a scanner-backed Harbor + signed images + trust policy exist on the target cluster.
+- [ ] **P2** C05 `workload-classified.yaml` is *read* (yq), not scheduled — region nodes may be absent on test clusters. Tighten `verify-node-topology` / add a real scheduling step once the target cluster exposes `topology.kubernetes.io/region` labels.
+- [ ] **P3** Governance fixtures (data-classification matrix, RACI) in C05 are samples — align them to the real DCS governance docs when the docs portal is wired (`dcs_docs_base_url`).
+
+## Modules D / E
+
+- [ ] **P3** Plan after A + B + C are implemented and the format is proven.

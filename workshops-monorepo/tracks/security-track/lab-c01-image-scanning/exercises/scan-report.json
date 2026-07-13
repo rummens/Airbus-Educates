@@ -1,0 +1,61 @@
+{
+  "artifact": "samples/hello-dcs:1.0",
+  "scanner": {
+    "name": "Trivy",
+    "vendor": "Harbor",
+    "version": "0.50.1"
+  },
+  "generatedAt": "2026-06-30T09:12:00Z",
+  "summary": {
+    "severityCount": {
+      "Critical": 0,
+      "High": 0,
+      "Medium": 2,
+      "Low": 3
+    },
+    "total": 5,
+    "fixable": 4
+  },
+  "vulnerabilities": [
+    {
+      "id": "CVE-2024-2961",
+      "severity": "Medium",
+      "package": "glibc",
+      "installedVersion": "2.34-83.el9",
+      "FixedVersion": "2.34-100.el9",
+      "description": "Out-of-bounds write in the ISO-2022-CN-EXT charset conversion."
+    },
+    {
+      "id": "CVE-2023-4813",
+      "severity": "Medium",
+      "package": "glibc",
+      "installedVersion": "2.34-83.el9",
+      "FixedVersion": "2.34-100.el9",
+      "description": "Potential use-after-free in getaddrinfo."
+    },
+    {
+      "id": "CVE-2023-29491",
+      "severity": "Low",
+      "package": "ncurses",
+      "installedVersion": "6.2-10.20210508.el9",
+      "FixedVersion": "6.2-10.20210508.el9_4",
+      "description": "Local privilege escalation via crafted terminfo under setuid."
+    },
+    {
+      "id": "CVE-2024-0553",
+      "severity": "Low",
+      "package": "gnutls",
+      "installedVersion": "3.7.6-23.el9",
+      "FixedVersion": "3.7.6-23.el9_3.3",
+      "description": "Incomplete fix for a timing side-channel in RSA decryption."
+    },
+    {
+      "id": "CVE-2023-5981",
+      "severity": "Low",
+      "package": "gnutls",
+      "installedVersion": "3.7.6-23.el9",
+      "FixedVersion": "",
+      "description": "Timing side-channel in the RSA-PSK key exchange (no fix yet)."
+    }
+  ]
+}

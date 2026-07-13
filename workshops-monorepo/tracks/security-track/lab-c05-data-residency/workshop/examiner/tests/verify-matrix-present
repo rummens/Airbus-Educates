@@ -1,0 +1,15 @@
+#!/bin/bash
+# verify-matrix-present <matrix-file> — the classification matrix fixture is readable
+# and contains table rows (lines with a '|' column separator).
+file="${1:?matrix file required (e.g. data-classification-matrix.md)}"
+path="$HOME/exercises/${file}"
+if [ ! -f "$path" ]; then
+  echo "Matrix fixture '$path' not found. It should ship in ~/exercises." >&2
+  exit 1
+fi
+rows=$(grep -c '|' "$path")
+if [ "$rows" -lt 1 ]; then
+  echo "No table rows (lines containing '|') found in '$path'. Expected a classification matrix table." >&2
+  exit 1
+fi
+echo "OK: ${file} present with ${rows} table line(s)."

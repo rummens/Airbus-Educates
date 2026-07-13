@@ -1,0 +1,10 @@
+{
+  "workshop": "lab-c02-pod-security-scc",
+  "_note": "Deterministic subset only. The compliant Pod runs anywhere. TWO steps are DELIBERATELY OMITTED because they are environment-dependent or interactive: (1) verify-root-rejected — the CRC portless session SA is less constrained than a real DCS learner (it can be granted anyuid/privileged), so the root Pod may be ADMITTED on CRC instead of rejected; the admission-rejection lesson only reproduces on a real DCS restricted namespace (same class as A03's Kyverno note). (2) verify-remediated-running — remediation is an interactive editor edit of pod-root.yaml that smoke can't perform. verify-scc-annotation may report a different SCC than restricted-v2 on CRC depending on the session SA's SCC priority.",
+  "steps": [
+    {"run": "envsubst < pod-compliant.yaml | oc apply -f - && oc wait --for=condition=Ready pod/hello-compliant --timeout=120s"},
+    {"check": "verify-compliant-running", "args": ["hello-compliant"]},
+    {"run": "oc get pod hello-compliant -o jsonpath='{.metadata.annotations.openshift\\.io/scc}{\"\\n\"}'"},
+    {"check": "verify-scc-annotation", "args": ["hello-compliant", "restricted-v2"]}
+  ]
+}

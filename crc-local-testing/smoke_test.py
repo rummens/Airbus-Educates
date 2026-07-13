@@ -43,10 +43,14 @@ def sh(args, **kw):
     return subprocess.run(args, capture_output=True, text=True, **kw)
 
 
-def run_deploy_tool(name, ctx, sid, vcluster, delete=False):
+def run_deploy_tool(name, ctx, sid, vcluster, base=None, ref=None, delete=False):
     """Invoke deploy_workshop.py for the real deploy/teardown (single source of truth)."""
     cmd = [sys.executable, str(HERE / "deploy_workshop.py"), name,
            "--context", ctx, "--id", sid]
+    if base:
+        cmd += ["--base", base]
+    if ref:
+        cmd += ["--ref", ref]
     if vcluster:
         cmd.append("--vcluster")
     if delete:
@@ -133,6 +137,7 @@ def main():
     p.add_argument("--id", default="01")
     p.add_argument("--context", default="crc-admin")
     p.add_argument("--base", default=dw.DEFAULT_BASE, help="repo path prefix of workshops")
+    p.add_argument("--ref", default="origin/main", help="git ref the session pulls content from")
     p.add_argument("--plan", default=None, help="default: smoke-plans/<name>.json")
     p.add_argument("--tests-dir", default="/opt/workshop/examiner/tests")
     p.add_argument("--workdir", default="/home/eduk8s/exercises")
@@ -161,14 +166,14 @@ def main():
     # 1. deploy
     if not args.no_deploy:
         print(f"=== deploying {name} (vcluster={vcluster}) ===")
-        if not run_deploy_tool(name, args.context, args.id, vcluster):
+        if not run_deploy_tool(name, args.context, args.id, vcluster, args.base, args.ref):
             sys.exit("deploy failed")
 
     # 2. find the live session pod
     pod = wait_for_pod(args.context, ns, f"{name}-{args.id}", args.deploy_timeout)
     if not pod:
         if not args.keep:
-            run_deploy_tool(name, args.context, args.id, vcluster, delete=True)
+            run_deploy_tool(name, args.context, args.id, vcluster, args.base, args.ref, delete=True)
         sys.exit(f"no Running session pod for {name}-{args.id} in ns {ns}")
     print(f"session pod: {ns}/{pod}\n")
 
@@ -188,7 +193,7 @@ def main():
     # 5. teardown
     if not args.keep:
         print(f"\n=== tearing down {name} ===")
-        run_deploy_tool(name, args.context, args.id, vcluster, delete=True)
+        run_deploy_tool(name, args.context, args.id, vcluster, args.base, args.ref, delete=True)
     else:
         print(f"\n(kept {name} running; remove with ./deploy_workshop.py {name} --delete)")
 
