@@ -36,7 +36,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b04-debugging-logs/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b04-debugging-logs/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b04-debugging-logs/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b04-debugging-logs"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/dev-track/lab-b04-debugging-logs"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-b04-debugging-logs-files:$(workshop_version)"

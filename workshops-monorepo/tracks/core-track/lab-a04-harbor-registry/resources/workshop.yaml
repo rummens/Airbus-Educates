@@ -41,7 +41,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a04-harbor-registry/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a04-harbor-registry/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a04-harbor-registry/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a04-harbor-registry"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/core-track/lab-a04-harbor-registry"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-a04-harbor-registry-files:$(workshop_version)"

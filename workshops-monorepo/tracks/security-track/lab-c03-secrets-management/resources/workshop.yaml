@@ -39,7 +39,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c03-secrets-management/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c03-secrets-management/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c03-secrets-management/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c03-secrets-management"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/security-track/lab-c03-secrets-management"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-c03-secrets-management-files:$(workshop_version)"

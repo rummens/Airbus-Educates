@@ -36,7 +36,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b02-config-and-secrets/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b02-config-and-secrets/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b02-config-and-secrets/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b02-config-and-secrets"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/dev-track/lab-b02-config-and-secrets"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-b02-config-and-secrets-files:$(workshop_version)"

@@ -36,7 +36,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b03-scaling-health/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b03-scaling-health/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b03-scaling-health/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b03-scaling-health"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/dev-track/lab-b03-scaling-health"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-b03-scaling-health-files:$(workshop_version)"

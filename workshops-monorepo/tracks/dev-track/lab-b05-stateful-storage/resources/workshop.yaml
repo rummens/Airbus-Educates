@@ -36,7 +36,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b05-stateful-storage/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b05-stateful-storage/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b05-stateful-storage/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b05-stateful-storage"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/dev-track/lab-b05-stateful-storage"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-b05-stateful-storage-files:$(workshop_version)"

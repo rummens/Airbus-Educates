@@ -40,7 +40,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c04-supply-chain/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c04-supply-chain/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c04-supply-chain/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c04-supply-chain"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/security-track/lab-c04-supply-chain"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-c04-supply-chain-files:$(workshop_version)"

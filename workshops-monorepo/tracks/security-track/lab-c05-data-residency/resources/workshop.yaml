@@ -40,7 +40,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c05-data-residency/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c05-data-residency/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c05-data-residency/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c05-data-residency"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/security-track/lab-c05-data-residency"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-c05-data-residency-files:$(workshop_version)"

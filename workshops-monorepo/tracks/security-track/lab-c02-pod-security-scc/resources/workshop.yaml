@@ -36,7 +36,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c02-pod-security-scc/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c02-pod-security-scc/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c02-pod-security-scc/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/security-track/lab-c02-pod-security-scc"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/security-track/lab-c02-pod-security-scc"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-c02-pod-security-scc-files:$(workshop_version)"

@@ -50,7 +50,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a01-what-is-dcs/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a01-what-is-dcs/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a01-what-is-dcs/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a01-what-is-dcs"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/core-track/lab-a01-what-is-dcs"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-a01-what-is-dcs-files:$(workshop_version)"

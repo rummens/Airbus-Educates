@@ -36,7 +36,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a03-namespace-model/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a03-namespace-model/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a03-namespace-model/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a03-namespace-model"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/core-track/lab-a03-namespace-model"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-a03-namespace-model-files:$(workshop_version)"

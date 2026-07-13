@@ -36,7 +36,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a09-operators/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a09-operators/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a09-operators/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a09-operators"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/core-track/lab-a09-operators"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-a09-operators-files:$(workshop_version)"

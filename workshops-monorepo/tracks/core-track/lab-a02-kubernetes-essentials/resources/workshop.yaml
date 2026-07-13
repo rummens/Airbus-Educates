@@ -36,7 +36,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a02-kubernetes-essentials/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a02-kubernetes-essentials/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a02-kubernetes-essentials/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a02-kubernetes-essentials"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/core-track/lab-a02-kubernetes-essentials"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-a02-kubernetes-essentials-files:$(workshop_version)"

@@ -36,7 +36,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a05-access-tenancy/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a05-access-tenancy/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a05-access-tenancy/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a05-access-tenancy"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/core-track/lab-a05-access-tenancy"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-a05-access-tenancy-files:$(workshop_version)"

@@ -36,7 +36,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a06-networking/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a06-networking/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a06-networking/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a06-networking"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/core-track/lab-a06-networking"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-a06-networking-files:$(workshop_version)"

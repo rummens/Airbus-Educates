@@ -36,7 +36,7 @@ spec:
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a07-storage/workshop/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a07-storage/exercises/**"
       - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a07-storage/README.md"
-      newRootPath: "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a07-storage"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/core-track/lab-a07-storage"
     {{- else }}
     - image:
         url: "$(image_repository)/lab-a07-storage-files:$(workshop_version)"
