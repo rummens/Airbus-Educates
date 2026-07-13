@@ -303,15 +303,25 @@ def session_status(name):
 def session_pods(session_name):
     """Pods across the session + vcluster namespaces for a session.
 
-    Educates labels every namespace of a session (workshop ns AND <ns>-vc) with
-    training.educates.dev/session.name=<session>, and pods inherit it — so one
-    all-namespace label query covers both without guessing namespace names.
+    The workshop pod carries training.educates.dev/session.name=<session>, so one
+    all-namespace label query finds it. The vcluster pods (my-vcluster-0, coredns)
+    live in <session>-vc but are created by the vcluster chart with ITS OWN labels
+    — they do NOT carry the Educates session label (pods don't inherit namespace
+    labels). So query that namespace directly and merge, else the vcluster is
+    invisible and a vcluster lab's readiness gate never sees it.
     """
     sel = f"training.educates.dev/session.name={session_name}"
     try:
-        pods = _core().list_pod_for_all_namespaces(label_selector=sel).items
+        pods = list(_core().list_pod_for_all_namespaces(label_selector=sel).items)
     except ApiException:
-        return []
+        pods = []
+    seen = {(p.metadata.namespace, p.metadata.name) for p in pods}
+    try:
+        for p in _core().list_namespaced_pod(f"{session_name}-vc").items:
+            if (p.metadata.namespace, p.metadata.name) not in seen:
+                pods.append(p)
+    except ApiException:
+        pass          # no vcluster ns (non-vcluster lab) or no RBAC → just the workshop pod
     out = []
     for p in pods:
         cs = p.status.container_statuses or []

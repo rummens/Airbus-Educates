@@ -1,88 +1,164 @@
 {% extends "base.html" %}
 {% block title %}Help — {{ product }}{% endblock %}
 {% block content %}
-<a class="back" href="{{ url_for('index') }}">{{ icon('chevron')|safe }} All workshops</a>
+<a class="back" href="{{ url_for('index') }}">{{ icon('chevron')|safe }} Back to catalog</a>
 
 <article class="help">
   <span class="eyebrow">Help</span>
-  <h1>How the labs work</h1>
-  <p class="help-lead">First time in a {{ product }} lab? Everything runs in your browser —
-     nothing to install. This page explains what you see and how to get through a lab.</p>
+  <h1>How the {{ product }} Academy works</h1>
+  <p class="help-lead">Everything runs in your browser — nothing to install. This guide covers
+     how the catalog is organised, what you see inside a lab, and how to manage your sessions.</p>
 
+  <!-- ─────────────────────────────  Concepts  ───────────────────────────── -->
+  <span class="eyebrow">The big picture</span>
+  <h2>Tracks, labs and trophies</h2>
+  <div class="help-grid">
+    <div class="help-card"><span class="tile-icon">{{ icon('layers')|safe }}</span>
+      <h3>Tracks</h3>
+      <p>A <b>track</b> is a themed learning path — a group of related labs in a sensible order
+         (for example <em>Foundations</em>, <em>Developer</em>, <em>Security</em>). On the
+         catalog each track is a collapsible section.</p></div>
+    <div class="help-card"><span class="tile-icon">{{ icon('rocket')|safe }}</span>
+      <h3>Labs</h3>
+      <p>A <b>lab</b> (or workshop) is a single hands-on exercise with its own private
+         environment. Each shows its difficulty and rough duration. Work through them in order —
+         later labs build on earlier ones.</p></div>
+    <div class="help-card"><span class="tile-icon">{{ icon('trophy')|safe }}</span>
+      <h3>Trophies</h3>
+      <p>Finish a lab and you earn its <b>trophy</b>. A lab counts as complete when you submit
+         the short feedback form at the end. Your <a href="{{ url_for('trophies') }}">Trophies</a>
+         page shows what you've earned and what's left in each track.</p></div>
+  </div>
+  <p class="help-note">Your progress is tied to your login, so trophies and the
+     “Continue where you left off” shortcut follow you across visits and devices.</p>
+
+  <!-- ─────────────────────────────  Starting  ───────────────────────────── -->
   <span class="eyebrow">Getting started</span>
   <h2>From catalog to running lab</h2>
   <div class="help-steps">
     <div class="help-step"><span class="n">1</span><div>
-      <b>Pick a workshop</b><p>Browse the tracks on the home page and open a workshop for its
-      summary, difficulty and duration.</p></div></div>
+      <b>Pick a lab</b><p>Browse or search the <a href="{{ url_for('index') }}">Catalog</a>.
+      Use the difficulty filters, or open a track and pick a lab to see its full description.</p></div></div>
     <div class="help-step"><span class="n">2</span><div>
-      <b>Start session</b><p>Click <em>Start session</em>. A provisioning screen shows live
-      progress while your private environment spins up (a workshop pod, and for some labs a
-      virtual cluster).</p></div></div>
+      <b>Start session</b><p>Click <em>Start session</em>. It opens in a <b>new browser tab</b>
+      so the catalog stays open behind it. A progress screen shows your private environment
+      being provisioned (a workshop pod, and for some labs a virtual cluster).</p></div></div>
     <div class="help-step"><span class="n">3</span><div>
-      <b>You're dropped into the lab</b><p>When ready you're redirected automatically. Your
-      session is bound to your login — come back later and you resume the same one.</p></div></div>
+      <b>You're dropped into the lab</b><p>When it's ready you're taken in automatically. If the
+      progress bar seems stuck for a while, a page refresh resumes right where it left off.</p></div></div>
   </div>
 
-  <span class="eyebrow">The lab screen</span>
-  <h2>Two panes</h2>
-  <div class="help-grid">
-    <div class="help-card"><span class="tile-icon">{{ icon('book')|safe }}</span>
-      <h3>Left — Instructions</h3>
-      <p>Step-by-step content. You scroll through and click the highlighted actions.</p></div>
-    <div class="help-card"><span class="tile-icon">{{ icon('grid')|safe }}</span>
-      <h3>Right — Work area</h3>
-      <p>Tabs — Terminal, Editor, Console, Slides — where the work happens. One at a time;
-         click a tab header to switch. Which tabs appear depends on the lab.</p></div>
-  </div>
+  <!-- ─────────────────────────────  The window  ─────────────────────────── -->
+  <span class="eyebrow">Inside a lab</span>
+  <h2>The session window</h2>
+  <p>The screen is split in two: <b>instructions on the left</b>, your <b>work area on the
+     right</b>. You read a step on the left and carry it out on the right.</p>
 
+  <figure class="help-fig">
+    <img class="help-shot" src="{{ url_for('static', filename='help-page/workshop-terminal.jpg') }}"
+         alt="Lab window: instructions on the left, split terminal on the right">
+    <figcaption>Instructions (left) and the <b>Terminal</b> tab with an upper and lower terminal (right).</figcaption>
+  </figure>
+
+  <h3>Instructions toolbar (top-left)</h3>
+  <ul class="help-tips">
+    <li>{{ icon('circle-check')|safe }} <b>Home</b> — jump back to the lab's first page.</li>
+    <li><b>← Back / → Forward</b> — move one page at a time through the lab.</li>
+    <li>{{ icon('list-checks')|safe }} <b>Contents</b> — the page list; jump straight to any section.</li>
+    <li><b>Print</b> — a printable view of the instructions.</li>
+  </ul>
+
+  <h3>Session controls (top-right)</h3>
+  <ul class="help-tips">
+    <li>{{ icon('clock')|safe }} <b>Countdown</b> — time left before the session expires. Sessions
+        are generous but not forever; finish or restart before it runs out.</li>
+    <li>{{ icon('refresh')|safe }} <b>Reload</b> — refresh the workspace if a tab looks stuck.</li>
+    <li>{{ icon('grid')|safe }} <b>Fullscreen</b> — expand the work area to the whole window.</li>
+    <li>{{ icon('logout')|safe }} <b>Leave</b> — return to the portal. The session keeps running;
+        reopen it any time from <a href="{{ url_for('my_sessions') }}">My sessions</a>.</li>
+    <li>{{ icon('cog')|safe }} <b>Menu</b> — extra options for the session.</li>
+  </ul>
+
+  <!-- ─────────────────────────────  The tabs  ───────────────────────────── -->
+  <span class="eyebrow">The work area</span>
+  <h2>Terminal, Console and Editor</h2>
+  <p>Switch tabs with the headers at the top of the right pane. Which tabs appear depends on the
+     lab; most have all three.</p>
+
+  <h3>{{ icon('terminal')|safe }} Terminal</h3>
+  <p>A shell in your environment, starting in <code>~/exercises</code>. Many labs use a
+     <b>split terminal</b> — an <b>upper</b> and a <b>lower</b> one (numbered 1 and 2 in the
+     screenshot above) — so you can, for example, <code>watch</code> something in one while you
+     make a change in the other. Commands use the OpenShift CLI, <code>oc</code>.</p>
+
+  <h3>{{ icon('monitor')|safe }} Console</h3>
+  <p>A visual web console for your session's namespace — browse Deployments, Pods, Services,
+     ConfigMaps and Secrets without the command line. Labs send you here to <em>see</em> what you
+     just created.</p>
+  <figure class="help-fig">
+    <img class="help-shot" src="{{ url_for('static', filename='help-page/workshop-console.jpg') }}"
+         alt="Console tab showing the Kubernetes web console scoped to the session namespace">
+    <figcaption>The <b>Console</b> tab — a visual view of the resources in your session.</figcaption>
+  </figure>
+
+  <h3>{{ icon('edit')|safe }} Editor</h3>
+  <p>A full VS Code editor open on <code>~/exercises</code> for viewing and editing files. Use the
+     Explorer on the left to open files; many clickable actions in the instructions open and edit
+     files here for you.</p>
+  <figure class="help-fig">
+    <img class="help-shot" src="{{ url_for('static', filename='help-page/workshop-editor.jpg') }}"
+         alt="Editor tab showing the VS Code editor with the exercises folder">
+    <figcaption>The <b>Editor</b> tab — VS Code on your <code>~/exercises</code> folder.</figcaption>
+  </figure>
+
+  <!-- ─────────────────────────────  Actions  ────────────────────────────── -->
   <span class="eyebrow">You rarely type</span>
   <h2>Clickable actions</h2>
+  <p>Wherever the instructions show a coloured box, you can click it instead of typing:</p>
   <div class="help-grid">
     <div class="help-card"><span class="tile-icon">{{ icon('terminal')|safe }}</span>
-      <h3>Run a command</h3><p>A blue box with a shell command. Click it — it types and runs
-      in the terminal for you (using the OpenShift CLI, <code>oc</code>).</p></div>
+      <h3>Run a command</h3><p>Click a command box and it types and runs in the terminal for you.</p></div>
     <div class="help-card"><span class="tile-icon">{{ icon('edit')|safe }}</span>
-      <h3>Edit a file</h3><p>Click to open a file in the editor and apply the change —
-      highlight, insert or replace. You watch it happen; no hand-editing.</p></div>
+      <h3>Edit a file</h3><p>Click to open a file in the editor and apply the change — you watch
+      it happen, no hand-editing.</p></div>
     <div class="help-card"><span class="tile-icon">{{ icon('list-checks')|safe }}</span>
-      <h3>Verify (examiner)</h3><p>A green check box runs a test to confirm the step worked
-      (pod running, service reachable) before you move on.</p></div>
+      <h3>Verify</h3><p>A check box runs a test to confirm the step worked before you move on.</p></div>
   </div>
   <p class="help-note">If a box doesn't seem to do anything, make sure the right tab (usually
      Terminal) is visible, then click again.</p>
 
-  <span class="eyebrow">The tabs</span>
-  <h2>What each tab is for</h2>
+  <!-- ─────────────────────────────  Sessions  ───────────────────────────── -->
+  <span class="eyebrow">Managing your work</span>
+  <h2>The session manager</h2>
+  <p><a href="{{ url_for('my_sessions') }}">My sessions</a> (top-right menu) lists every lab you
+     currently have running.</p>
   <dl class="help-defs">
-    <dt>{{ icon('terminal')|safe }} Terminal</dt>
-    <dd>A shell in your session, starting in <code>~/exercises</code>. Many labs use a
-        <b>split terminal</b> — an upper and a lower — e.g. one to <code>watch</code> while the
-        other makes a change.</dd>
-    <dt>{{ icon('edit')|safe }} Editor</dt>
-    <dd>A full VS Code editor on <code>~/exercises</code> for viewing and editing files.</dd>
-    <dt>{{ icon('monitor')|safe }} Console</dt>
-    <dd>The cluster web console — a visual view of what you deploy (Deployments, Pods,
-        Services). Labs send you here to <em>see</em> what you created.</dd>
-    <dt>{{ icon('book')|safe }} Slides</dt>
-    <dd>Concept slides alongside the hands-on steps, when a lab includes them.</dd>
+    <dt>{{ icon('rocket')|safe }} Open</dt>
+    <dd>Jump back into a running session — the same environment you left, with your work intact.</dd>
+    <dt>{{ icon('refresh')|safe }} Delete</dt>
+    <dd>End a session completely and free its resources. This removes the environment, so anything
+        unsaved is lost — but it also lets you <b>start that lab fresh</b> next time instead of
+        resuming a broken or half-finished one. You'll be asked to confirm.</dd>
   </dl>
+  <p class="help-note">You can run a limited number of sessions at once. If you hit the limit,
+     the portal offers to free one so you can start another.</p>
 
+  <!-- ─────────────────────────────  Tips  ───────────────────────────────── -->
   <span class="eyebrow">Tips</span>
   <h2>Getting the most out of a lab</h2>
   <ul class="help-tips">
-    <li><b>Follow the order.</b> Steps build on each other; verify checks gate progress on purpose.</li>
-    <li><b>Watch the visible tab.</b> Running a command switches you to the Terminal — switch
-        back to the Console or app when a step points there.</li>
-    <li><b>Take your time.</b> Sessions have a generous limit; read the <em>why</em>, not just the <em>what</em>.</li>
-    <li><b>Stuck?</b> Re-read the last expected output, check the Terminal tab is visible, re-run
-        the action. Diagnose steps include hints.</li>
-    <li><b>Tell us how it went.</b> At the end, the feedback form takes 15 seconds and shapes the next labs.</li>
+    <li><b>Follow the order.</b> Steps build on each other, and verify checks gate progress on purpose.</li>
+    <li><b>Watch the visible tab.</b> Running a command switches you to the Terminal — switch to the
+        Console when a step points there.</li>
+    <li><b>Take your time.</b> Read the <em>why</em>, not just the <em>what</em>.</li>
+    <li><b>Stuck?</b> Re-read the last expected output, confirm the right tab is visible, and re-run the action.</li>
+    <li><b>Tell us how it went.</b> The feedback form at the end takes 15 seconds, earns your trophy,
+        and shapes the next labs.</li>
   </ul>
 
   <div class="help-links">
-    <a class="btn btn-primary" href="{{ url_for('index') }}">{{ icon('arrow-right')|safe }} Browse workshops</a>
-    <a class="btn btn-ghost" href="https://docs.educates.dev/" target="_blank" rel="noopener">Educates platform docs</a>
+    <a class="btn btn-primary" href="{{ url_for('index') }}">{{ icon('arrow-right')|safe }} Browse the catalog</a>
+    <a class="btn btn-ghost" href="{{ url_for('trophies') }}">{{ icon('trophy')|safe }} Your trophies</a>
   </div>
 </article>
 {% endblock %}

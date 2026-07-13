@@ -22,7 +22,8 @@
   {% if c.author %}<p class="detail-author">{{ icon('user')|safe }} {{ c.author }}</p>{% endif %}
 
   <div class="detail-actions">
-    <a class="btn btn-primary btn-lg" href="{{ url_for('launch', name=c.name) }}">
+    <a class="btn btn-primary btn-lg" href="{{ url_for('launch', name=c.name) }}"
+       target="_blank" rel="noopener">
       {{ icon('rocket')|safe }} Start session</a>
     {% if c.source_url %}
     <a class="btn btn-ghost btn-lg" href="{{ c.source_url }}" target="_blank" rel="noopener">

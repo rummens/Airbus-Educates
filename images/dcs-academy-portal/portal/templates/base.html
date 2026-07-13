@@ -23,6 +23,8 @@
          src="{{ theme.logo_url or url_for('static', filename='logo.png') }}">
   </a>
   <nav class="site-nav">
+    <a href="{{ url_for('index') }}" class="nav-link">{{ icon('grid')|safe }} Catalog</a>
+    {% if current_user %}<a href="{{ url_for('my_sessions') }}" class="nav-link">{{ icon('layers')|safe }} My sessions</a>{% endif %}
     <a href="{{ url_for('trophies') }}" class="nav-link">{{ icon('trophy')|safe }} Trophies</a>
     {% if is_admin %}<a href="{{ url_for('admin') }}" class="nav-link">{{ icon('shield')|safe }} Admin</a>{% endif %}
     {% if current_user %}
@@ -40,8 +42,7 @@
   {% if theme.footer_html %}
     {{ theme.footer_html|safe }}
   {% else %}
-    <img class="footer-logo" alt="Digital Container Services" src="{{ url_for('static', filename='logo-full.png') }}">
-    <span class="footer-tag">Training Academy</span>
+    <span class="footer-tag">DCS Training Academy</span>
   {% endif %}
 </footer>
 

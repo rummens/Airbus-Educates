@@ -19,6 +19,8 @@
       {% for s in steps %}<li data-i="{{ loop.index0 }}">{{ s }}</li>{% endfor %}
     </ol>
 
+    <p class="launch-hint">Taking a while? A refresh resumes right where it left off.</p>
+
     <details class="pods-wrap"><summary>Details</summary>
       <ul class="pods" id="pods"></ul>
     </details>
@@ -30,19 +32,23 @@
       const VC = {{ course.vcluster|tojson }};   // workshop uses a vcluster → gate readiness on it
       console.log('[launch] NAME=', NAME, 'TARGET=', TARGET);
       const steps = document.querySelectorAll('#steps li');
+      let maxIdx = 0;   // progress is monotonic: pod readiness can flap during startup
+                        // (e.g. the vcluster coredns pod appears late), so never regress.
       async function poll(){
         try{
           const r = await fetch(`/api/session/${encodeURIComponent(NAME)}/status?t0=${T0}&vc=${VC?1:0}`);
           const d = await r.json();
           console.log('[launch] poll', JSON.stringify(d));
-          document.getElementById('msg').textContent = d.message || d.step + '…';
+          maxIdx = Math.max(maxIdx, d.index);
+          const idx = d.ready ? d.index : maxIdx;
+          const label = steps[idx] ? steps[idx].textContent : d.step;
+          document.getElementById('msg').textContent = d.ready ? 'Ready — opening…' : (d.message || label) + '…';
           steps.forEach((li,i)=>{
-            li.classList.toggle('done', i < d.index);
-            li.classList.toggle('active', i === d.index && !d.ready);
-            if(d.ready) li.classList.add('done');
+            li.classList.toggle('done', d.ready || i < idx);
+            li.classList.toggle('active', i === idx && !d.ready);
           });
           const pods = document.getElementById('pods');
-          pods.innerHTML = d.pods.map(p=>`<li><span>${p.name}</span><span>${p.ready} ${p.phase}${p.vcluster?' · vcluster':''}</span></li>`).join('');
+          pods.innerHTML = d.pods.map(p=>`<li><span>${p.name}<br><small class="muted">${p.namespace}</small></span><span>${p.ready} ${p.phase}${p.vcluster?' · vcluster':''}</span></li>`).join('');
           if(d.ready && (d.url || TARGET)){
             const dest = d.url || TARGET;
             // The session reports Ready before its OpenShift Route is necessarily

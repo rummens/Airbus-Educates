@@ -119,11 +119,38 @@ def request_session(workshop_name, user):
     return data
 
 
-def delete_session(name):
-    """Ask the training portal (robot-authed) to delete a session, freeing capacity."""
+# NB: no delete_session() here — Educates' delete view is GET + @login_required and
+# authorizes only the session OWNER (allocated_session(name, request.user)). A robot
+# POST is refused (403). Deletion is driven by the owner's browser straight to the
+# proxied /workshops/session/<name>/delete/ (see my_sessions.html / over_limit.html).
+
+
+def user_sessions(user):
+    """The user's currently-active sessions, from the portal's OWN allocation DB
+    (authoritative). The WorkshopSession CR only carries the owner while Allocated —
+    WAITING/spare sessions have no owner — so the CR is not a reliable source.
+
+    GET /workshops/user/<user>/sessions/ (robot-authed; the robot is in the 'robots'
+    group Educates requires). Returns [{name, namespace, workshop, environment,
+    started, expires, countdown, ...}] — only non-stopped sessions owned by the user."""
+    if not user:
+        return []
     base, s = _session()
-    r = s.post(f"{base}/workshops/session/{name}/delete/", timeout=15)
-    log.info("DELETE-SESSION %s -> %s", name, r.status_code)
+    r = s.get(f"{base}/workshops/user/{user}/sessions/", timeout=10)
+    r.raise_for_status()
+    return r.json().get("sessions", []) or []
+
+
+def terminate_session(name):
+    """Hard-delete a session: deletes the WorkshopSession CR + frees the portal DB
+    record (Educates schedules `delete_workshop_session`). GET /workshops/session/
+    <name>/terminate/ — robot-authed (`@protected_resource`); the robot is in the
+    'robots' group so it may terminate ANY allocated session, unlike the owner-only
+    /delete/ view (which needs the user's browser cookie and 403s the robot). The
+    CALLER must enforce ownership. Educates 400s if the session isn't in use."""
+    base, s = _session()
+    r = s.get(f"{base}/workshops/session/{name}/terminate/", timeout=15)
+    log.info("TERMINATE-SESSION %s -> %s", name, r.status_code)
     r.raise_for_status()
     return True
 

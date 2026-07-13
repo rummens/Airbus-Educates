@@ -14,9 +14,10 @@
       <span class="session-name">{{ s.name }}</span>
       <span class="session-phase">{{ s.status or '—' }}</span>
       {% if s.url %}<a class="btn btn-ghost" href="{{ s.url }}" target="_blank" rel="noopener">Open</a>{% endif %}
-      <form method="post" action="{{ url_for('session_delete', name=s.name) }}" style="display:inline">
-        <input type="hidden" name="next" value="{{ url_for('launch', name=course.name) }}">
-        <button class="btn btn-danger" type="submit">Remove</button>
+      {# Hard delete via robot-authed terminate (session_end enforces ownership). #}
+      <form method="post" action="{{ url_for('session_end', name=s.name) }}" style="display:inline">
+        <button class="btn btn-danger" type="submit"
+                onclick="return confirm('Remove this session?')">Remove</button>
       </form>
     </li>
     {% endfor %}

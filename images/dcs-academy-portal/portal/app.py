@@ -207,12 +207,28 @@ def create_app():
                                session_name=sess.get("name", ""), target=target,
                                steps=steps, t0=int(time.time()))
 
-    @app.route("/session/<name>/delete", methods=["POST"])
-    def session_delete(name):
-        """Free a running session (from the over-capacity page), then retry launch."""
-        _safe(lambda: educates.delete_session(name))
-        nxt = request.form.get("next", "")
-        return redirect(nxt if nxt.startswith("/") else url_for("index"))
+    @app.route("/session/<name>/end", methods=["POST"])
+    def session_end(name):
+        """Hard-delete one of the user's own sessions (deletes the WorkshopSession CR
+        + frees the DB) via the robot-authed terminate. The robot can terminate ANY
+        session, so gate on ownership here: the name must be one of the caller's own
+        sessions (or the caller is an admin)."""
+        mine = {s["name"]: s for s in _my_sessions(_user())}
+        if name not in mine and not _is_admin():
+            abort(403)
+        _safe(lambda: educates.terminate_session(name))
+        # Deleting the session clears its in-progress marker so the tile/Continue
+        # banner reset (a 'completed' lab stays completed — see clear_progress).
+        ws = (mine.get(name) or {}).get("workshop", "")
+        if ws:
+            _safe(lambda: feedback.clear_progress(_user(), ws))
+        return redirect(url_for("my_sessions"))
+
+    @app.route("/my-sessions")
+    def my_sessions():
+        """The signed-in user's active sessions, with a delete/end button each."""
+        return render_template("my_sessions.html", sessions=_my_sessions(_user()),
+                               is_admin=_is_admin())
 
     @app.route("/api/session/<name>/status")
     def session_status(name):
@@ -413,8 +429,15 @@ def _status_feed(name, t0, expect_vc=False):
     pods = k8sclient.session_pods(name)
     vc = [p for p in pods if p["vcluster"]]
     ws = [p for p in pods if not p["vcluster"]]
-    vc_ready = bool(vc) and all(p["ready"] == p["total"] and p["total"] for p in vc)
-    ws_ready = bool(ws) and all(p["ready"] == p["total"] and p["total"] for p in ws)
+
+    def _grp_ready(g):
+        # Gate on the still-live pods; a Succeeded one-shot (e.g. a vcluster init
+        # job) reports ready<total forever and must not block readiness.
+        live = [p for p in g if p["phase"] != "Succeeded"]
+        return bool(live) and all(p["ready"] == p["total"] and p["total"] for p in live)
+
+    vc_ready = _grp_ready(vc)
+    ws_ready = _grp_ready(ws)
     # A vcluster lab gates on a real vc-ready; a plain-namespace lab ignores vc.
     vc_ok = vc_ready if expect_vc else True
 
@@ -454,7 +477,8 @@ def _status_feed(name, t0, expect_vc=False):
         "total": len(STEPS),
         "ready": ready,
         "url": _abs_session_url(st.get("url", "")),
-        "pods": [{"name": p["name"], "ready": f'{p["ready"]}/{p["total"]}',
+        "pods": [{"name": p["name"], "namespace": p["namespace"],
+                  "ready": f'{p["ready"]}/{p["total"]}',
                   "phase": p["phase"], "vcluster": p["vcluster"]} for p in pods],
     }
 
@@ -467,10 +491,43 @@ def _usage():
         spec = s.get("spec", {})
         out.append({
             "name": s["metadata"]["name"],
-            "workshop": (spec.get("environment", {}) or {}).get("name", ""),
-            "user": (spec.get("session", {}) or {}).get("username", ""),
+            # spec.session.username is empty; the real identity is status.educates.user
+            # and the lab is spec.workshop.name (environment.name is the env, not the lab).
+            "workshop": (spec.get("workshop", {}) or {}).get("name", "")
+                        or (spec.get("environment", {}) or {}).get("name", ""),
+            "user": stt.get("user", ""),
             "phase": stt.get("phase", ""),
         })
+    return out
+
+
+def _my_sessions(user):
+    """The user's own active sessions → [{name, title, phase, url}].
+
+    Source of truth is the Educates portal DB (educates.user_sessions) — the CR only
+    carries the owner while Allocated, so filtering CRs by status.educates.user misses
+    real sessions. We take the authoritative name+workshop from the REST call and enrich
+    url/phase from the CR (which does carry them for a live session)."""
+    if not user:
+        return []
+    mine = _safe(lambda: educates.user_sessions(user)) or []
+    if not mine:
+        return []
+    courses = {c["name"]: c for c in (_safe(k8sclient.list_courses) or [])}
+    crs = {c["metadata"]["name"]: c for c in (_safe(k8sclient.list_sessions) or [])}
+    out = []
+    for m in mine:
+        name = m.get("name", "")
+        wsname = m.get("workshop", "")
+        stt = ((crs.get(name) or {}).get("status", {}) or {}).get("educates", {}) or {}
+        out.append({
+            "name": name,
+            "workshop": wsname,
+            "title": (courses.get(wsname) or {}).get("title") or wsname or name,
+            "phase": stt.get("phase", "") or "Running",
+            "url": _abs_session_url(stt.get("url", "")),
+        })
+    out.sort(key=lambda x: x["title"])
     return out
 
 

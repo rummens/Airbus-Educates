@@ -172,6 +172,18 @@ def mark_progress(username, workshop, status):
     _exec(sql, (username, workshop, status, ts))
 
 
+def clear_progress(username, workshop):
+    """Drop a 'started' (in-progress) marker when the user deletes their session, so
+    the tile badge + 'Continue where you left off' no longer show it as active.
+    'completed' is kept — finishing a lab is permanent and independent of the session."""
+    username = (username or "").strip()
+    workshop = (workshop or "").strip()
+    if not username or not workshop:
+        return
+    _exec(f"DELETE FROM progress WHERE username={_PH} AND workshop={_PH} AND status='started'",
+          (username, workshop))
+
+
 def user_progress(username):
     """{workshop: status} for a user. Empty if no user (anon/local)."""
     username = (username or "").strip()
