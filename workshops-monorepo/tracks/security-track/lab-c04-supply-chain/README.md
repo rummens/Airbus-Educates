@@ -4,11 +4,11 @@
 
 On the air-gapped Digital Container Service (DCS) there is no public registry to pull from at runtime, so the software supply chain narrows to a small set of trusted sources plus a controlled mirroring on-ramp — which makes "where did this image come from?" answerable with certainty. In this lab you'll follow the whole chain (source, build, registry, run) and use the platform's own tools to account for an image: pin it by digest instead of a mutable tag, read its provenance with `skopeo` and `jq`, and reason about signatures and attestations. Image work is pull-only with `skopeo` and `jq` — no docker or podman — matching how DCS actually operates.
 
-- **Track / module:** Security & Compliance — Secure on DCS (Module C) · Lab 4 of 5
+- **Track:** Security & Compliance — Secure on DCS · Lab 4 of 5
 - **Audience:** Intermediate — comfortable inspecting images with `skopeo` and reading JSON with `jq`
 - **Duration:** ~40 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
-- **Prerequisites:** lab-c01-image-scanning, lab-a04-harbor-registry · external: basic Linux CLI
+- **Prerequisites:** lab-c01-image-scanning and lab-a04-harbor-registry; comfortable with the Linux CLI.
 
 ## By the end of this lab you'll be able to
 

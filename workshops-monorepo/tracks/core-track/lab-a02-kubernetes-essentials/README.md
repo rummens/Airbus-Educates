@@ -8,7 +8,7 @@ Pod, and Service — learning not just the commands but *what* each object is, *
 exists, and *how* the pieces fit. You'll also watch Kubernetes self-heal a deleted Pod and
 give your app a stable in-cluster address.
 
-- **Track / module:** Core — DCS Foundations (Module A) · Lab 2 of 9
+- **Track:** Core — DCS Foundations · Lab 2 of 9
 - **Audience:** Beginner to intermediate — comfortable at the `oc` command line
 - **Duration:** ~40 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace

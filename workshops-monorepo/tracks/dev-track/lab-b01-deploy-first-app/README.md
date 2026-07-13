@@ -4,11 +4,11 @@
 
 Every developer's day one on a container platform is the same — get an application off the shelf and actually running where people can reach it. This lab does exactly that on the Digital Container Service (DCS). You meet the `hello-dcs` sample app, deploy it from the DCS Harbor registry, give it a stable in-cluster address, expose it to your browser, and iterate. The manifests you build here carry through the rest of the Developer track.
 
-- **Track / module:** Developer — Build on DCS (Module B) · Lab 1 of 6
+- **Track:** Developer — Build on DCS · Lab 1 of 6
 - **Audience:** Beginner — comfortable with `oc` and the Foundations basics
 - **Duration:** ~40 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
-- **Prerequisites:** Module A (Foundations), especially lab-a02-kubernetes-essentials · external: a DCS login, basic Linux CLI
+- **Prerequisites:** the Core track, especially lab-a02-kubernetes-essentials; a DCS login and basic Linux CLI.
 
 ## By the end of this lab you'll be able to
 
@@ -24,4 +24,4 @@ Work with the `hello-dcs` sample app end to end: deploy it from a Harbor image w
 
 ## Before you start
 
-This lab builds directly on Module A (Foundations). You should be comfortable running `oc`, and know what a Deployment and Service are (A02), the DEV/PROD namespace model (A03), and in-cluster networking (A06).
+This lab builds directly on the Core track. You should be comfortable running `oc`, and know what a Deployment and Service are (A02), the DEV/PROD namespace model (A03), and in-cluster networking (A06).

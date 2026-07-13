@@ -4,11 +4,11 @@
 
 In the previous lab you deployed `hello-dcs`, but its settings were baked into the image and manifest — to change a value you'd have to rebuild. That doesn't scale, and credentials must never live in an image. In this lab you pull configuration out into a ConfigMap, inject a credential with a Secret without leaking its value, and roll out a config change on the very same image on the Digital Container Service (DCS).
 
-- **Track / module:** Developer — Build on DCS (Module B) · Lab 2 of 6
+- **Track:** Developer — Build on DCS · Lab 2 of 6
 - **Audience:** Intermediate — you've deployed an app and are comfortable with `oc`
 - **Duration:** ~35 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
-- **Prerequisites:** lab-b01-deploy-first-app · assumes Foundations (lab-a02-kubernetes-essentials)
+- **Prerequisites:** lab-b01-deploy-first-app; assumes the Core track (lab-a02-kubernetes-essentials).
 
 ## By the end of this lab you'll be able to
 

@@ -4,11 +4,11 @@
 
 Your `hello-dcs` app runs as a single replica with no health checks and modest resources — fine for a demo, not for something people rely on. In this lab you make it resilient and quota-friendly on the Digital Container Service (DCS): scale it, discover that your namespace has a real resource budget, deliberately hit that quota with an oversized request, right-size to fit, and add probes so the platform knows when the app is actually healthy.
 
-- **Track / module:** Developer — Build on DCS (Module B) · Lab 3 of 6
+- **Track:** Developer — Build on DCS · Lab 3 of 6
 - **Audience:** Intermediate — comfortable with `oc apply`, `oc scale`, and reading Pods
 - **Duration:** ~40 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
-- **Prerequisites:** lab-b01-deploy-first-app · assumes Foundations (lab-a02-kubernetes-essentials)
+- **Prerequisites:** lab-b01-deploy-first-app; assumes the Core track (lab-a02-kubernetes-essentials).
 
 ## By the end of this lab you'll be able to
 

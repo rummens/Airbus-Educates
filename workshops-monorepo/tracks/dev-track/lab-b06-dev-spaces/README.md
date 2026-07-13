@@ -4,11 +4,11 @@
 
 So far you've deployed applications to the Digital Container Service (DCS). This lab is about developing on it. OpenShift Dev Spaces gives every developer a consistent, browser-based IDE that runs inside the cluster — no laptop toolchain, no reaching out to the internet, fully policy-compliant on an air-gapped platform. You'll launch (or tour) a workspace from a devfile, change and run the sample app inside the cluster, and place Dev Spaces alongside the Educates editor and a plain `oc apply`.
 
-- **Track / module:** Developer — Build on DCS (Module B) · Lab 6 of 6
+- **Track:** Developer — Build on DCS · Lab 6 of 6
 - **Audience:** Intermediate — comfortable deploying an app with `oc`
 - **Duration:** ~45 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
-- **Prerequisites:** lab-b01-deploy-first-app · recommended: lab-a09-operators for the "platform installs it, you use it" idea · assumes Foundations (lab-a02-kubernetes-essentials)
+- **Prerequisites:** lab-b01-deploy-first-app; assumes the Core track (lab-a02-kubernetes-essentials); lab-a09-operators recommended for the "platform installs it, you use it" idea.
 
 ## By the end of this lab you'll be able to
 

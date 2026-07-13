@@ -4,11 +4,11 @@
 
 Anything written inside a container is gone the moment its pod is replaced, and pods get replaced readily. Most real apps need data to survive — uploads, a database's files, a queue. In this lab you take the stateless `hello-dcs` app you already know and give it persistence on the Digital Container Service (DCS): request a PersistentVolumeClaim from a DCS storage class, mount it, write to it, and prove the data outlives a pod restart. This is the developer's view of storage — wiring a volume into your own app.
 
-- **Track / module:** Developer — Build on DCS (Module B) · Lab 5 of 6
+- **Track:** Developer — Build on DCS · Lab 5 of 6
 - **Audience:** Intermediate — comfortable creating and scaling a Deployment with `oc`
 - **Duration:** ~35 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
-- **Prerequisites:** lab-b01-deploy-first-app · recommended: lab-a07-storage for the platform view · assumes Foundations (lab-a02-kubernetes-essentials)
+- **Prerequisites:** lab-b01-deploy-first-app; assumes the Core track (lab-a02-kubernetes-essentials); lab-a07-storage recommended for the platform view.
 
 ## By the end of this lab you'll be able to
 

@@ -9,7 +9,7 @@ instance. In this lab you learn the Operator pattern, tell a CRD from a CR, meet
 OperatorHub, then create a CloudNativePG Custom Resource and watch the operator reconcile it.
 The core takeaway is the DCS ownership model.
 
-- **Track / module:** Core — DCS Foundations (Module A) · Lab 9 of 9
+- **Track:** Core — DCS Foundations · Lab 9 of 9
 - **Audience:** Beginner — comfortable applying manifests and inspecting resources with `oc`
 - **Duration:** ~40 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
@@ -28,4 +28,3 @@ The core takeaway is the DCS ownership model.
 With a lightweight CloudNativePG operator pre-installed by the platform, you'll create a
 Custom Resource instance and watch the operator reconcile it into a running application —
 then reason about the ownership split: the platform owns the operator, you own the instance.
-This lab is also the gateway to the Operators track (Module F).

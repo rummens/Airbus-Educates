@@ -8,11 +8,11 @@ else: what the platform is and where it fits, what containers and images actuall
 and how you get work done in your session with the `oc` command line. It assumes no prior
 container or Kubernetes knowledge — every term you need is introduced here.
 
-- **Track / module:** Core — DCS Foundations (Module A) · Lab 1 of 9
+- **Track:** Core — DCS Foundations · Lab 1 of 9
 - **Audience:** Beginner — no container or Kubernetes experience needed
 - **Duration:** ~20 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
-- **Prerequisites:** None. External: a DCS login and basic comfort with a Linux command line.
+- **Prerequisites:** A DCS login and basic comfort with a Linux command line.
 
 ## By the end of this lab you'll be able to
 

@@ -8,7 +8,7 @@ your own namespaces, and how much of the cluster you're allowed to consume. The 
 inspection, not deployment — you ask the cluster about your identity, permissions, and quota
 and read the answers, because access and tenancy are things you observe and reason about.
 
-- **Track / module:** Core — DCS Foundations (Module A) · Lab 5 of 9
+- **Track:** Core — DCS Foundations · Lab 5 of 9
 - **Audience:** Beginner — comfortable running basic `oc` commands; no RBAC knowledge required
 - **Duration:** ~35 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace

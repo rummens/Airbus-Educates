@@ -8,7 +8,7 @@ run. In this lab you find images in catalogs, inspect and pull one with `skopeo`
 the cluster, browse it in the Harbor UI, and see how vulnerability scanning decides what is
 allowed to run. Pulling is hands-on; pushing and mirroring are covered as concepts.
 
-- **Track / module:** Core — DCS Foundations (Module A) · Lab 4 of 9
+- **Track:** Core — DCS Foundations · Lab 4 of 9
 - **Audience:** Beginner — familiar with container images and basic `oc`; no Harbor or `skopeo` experience assumed
 - **Duration:** ~45 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace

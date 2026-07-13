@@ -4,11 +4,11 @@
 
 Every workload on the Digital Container Service (DCS) is admitted under a restricted security policy — no root, no privilege, no assuming the image owns the box. This lab shows you why that floor exists, then makes it concrete: you'll deploy a compliant Pod and confirm which SCC admitted it, watch a non-compliant Pod get rejected the moment you apply it, read the rejection to spot the violated control, and remediate the workload's `securityContext` until it is admitted. The rules come from two standard OpenShift mechanisms — Security Context Constraints (SCC) and the Pod Security Standards (PSA) — working together at admission; what is DCS-specific is the governance that makes raising the floor a deliberate, governed exception rather than a self-service toggle.
 
-- **Track / module:** Security & Compliance — Secure on DCS (Module C) · Lab 2 of 5
+- **Track:** Security & Compliance — Secure on DCS · Lab 2 of 5
 - **Audience:** Intermediate — comfortable applying manifests and reading `oc get` / `oc describe`
 - **Duration:** ~40 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
-- **Prerequisites:** lab-a02-kubernetes-essentials · external: basic Linux CLI, familiarity with Pods
+- **Prerequisites:** lab-a02-kubernetes-essentials; comfortable with the Linux CLI and familiar with Pods.
 
 ## By the end of this lab you'll be able to
 

@@ -8,7 +8,7 @@ some traffic simply doesn't go anywhere. You'll expose an app first through the 
 proxy, then via an OpenShift Route, trace the full DCS traffic chain, and see the limits an
 air-gapped platform puts on network traffic.
 
-- **Track / module:** Core — DCS Foundations (Module A) · Lab 6 of 9
+- **Track:** Core — DCS Foundations · Lab 6 of 9
 - **Audience:** Beginner — comfortable applying a Deployment and Service with `oc`
 - **Duration:** ~55 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace

@@ -9,7 +9,7 @@ request into a real disk, mount it into the `hello-dcs` app, and prove the data 
 there after a pod restart. For each concept you'll learn *what* it is, *why* it exists, and
 *how* the pieces fit.
 
-- **Track / module:** Core — DCS Foundations (Module A) · Lab 7 of 9
+- **Track:** Core — DCS Foundations · Lab 7 of 9
 - **Audience:** Beginner — comfortable creating a Deployment and running `oc` against your project
 - **Duration:** ~40 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace

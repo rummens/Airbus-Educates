@@ -11,8 +11,8 @@ flow. It is the map; each chart's own README has the detail.
 
 ## One-paragraph summary
 
-Everything is **GitOps**: a single ArgoCD *app-of-apps* (`educates-root`) syncs four
-child Applications from `main`, in wave order, onto the cluster. Layer 1 installs
+Everything is **GitOps**: four ArgoCD `Application`s sync from `main`, in wave order,
+onto the cluster. Layer 1 installs
 kapp-controller. Layer 2 uses it to install the upstream Educates platform (operator +
 CRDs). Layer 3 deploys the **custom DCS Academy portal** (the landing UI, OAuth gate,
 feedback DB, and the Track CRD). Layer 4 fills the catalog with Track/Workshop CRs and
@@ -20,15 +20,13 @@ the TrainingPortal, all discovered by globbing the workshops monorepo. A learner
 the portal, authenticates via OpenShift OAuth, browses the catalog, and launches a
 session that Educates provisions on demand — the portal reverse-proxies that session.
 
-## GitOps layers (app-of-apps)
+## GitOps layers
+
+Four ArgoCD `Application`s (`argocd/apps/`), each pinned to a sync-wave, roll out in
+dependency order:
 
 ```mermaid
 graph TD
-  root["educates-root (app-of-apps)<br/>argocd/root-app.yaml"]
-  root --> a1
-  root --> a2
-  root --> a3
-  root --> a4
   a1["wave 0 · kapp-controller<br/>dcs-academy-kapp-controller/"]
   a2["wave 1 · dcs-academy-platform<br/>(Educates via kapp-controller App)"]
   a3["wave 2 · dcs-academy-portal<br/>(portal app + OAuth + feedback + Track CRD)"]
@@ -45,7 +43,7 @@ graph TD
 
 **Wave order is load-bearing** and enforced two ways:
 
-- **Across apps** — the child Applications carry `sync-wave: 0/1/2/3`, so ArgoCD rolls
+- **Across apps** — the four Applications carry `sync-wave: 0/1/2/3`, so ArgoCD rolls
   them out (and, in reverse, tears them down) in dependency order.
 - **Within an app** — resources carry their own sync-waves. The portal chart is the
   subtle one: its host-reservation ValidatingAdmissionPolicy (wave -1) must be admitted
@@ -142,4 +140,4 @@ itself is unusable on arm64 CRC — workshop **content** is tested portal-less a
 - `dcs-academy-platform/README.md` — how Educates is installed (kapp-controller App, ytt/kbld/kapp), values, air-gap, security grants.
 - `dcs-academy-portal/` — portal app, OAuth gate, feedback, Track CRD.
 - `workshops-monorepo/README.md` — the catalog contract (add a track/workshop) and deploy order.
-- `argocd/` — the app-of-apps and per-cluster env values.
+- `argocd/` — the four ArgoCD Applications and per-cluster env values.

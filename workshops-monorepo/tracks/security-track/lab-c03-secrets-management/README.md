@@ -4,11 +4,11 @@
 
 A credential ends up in the wrong place more than anything else — an API token, a database password, a signing key. The moment one is written in plaintext where it shouldn't be, it has leaked. On the Digital Container Service (DCS) handling credentials correctly is also a governance obligation: the platform's Terms & Conditions make secret and data protection the tenant's responsibility. In this lab you'll take a Deployment that leaks a token three different ways, move it into a Kubernetes Secret, wire the workload to it by reference, and verify the leak is gone — meeting head-on the single most common misconception about Secrets.
 
-- **Track / module:** Security & Compliance — Secure on DCS (Module C) · Lab 3 of 5
+- **Track:** Security & Compliance — Secure on DCS · Lab 3 of 5
 - **Audience:** Intermediate — comfortable applying manifests, setting env on a Deployment, and reading logs with `oc`
 - **Duration:** ~40 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
-- **Prerequisites:** Module A, especially lab-a02-kubernetes-essentials · external: basic Linux CLI, familiarity with Deployments and container env vars
+- **Prerequisites:** the Core track, especially lab-a02-kubernetes-essentials; familiar with Deployments and container env vars.
 
 ## By the end of this lab you'll be able to
 

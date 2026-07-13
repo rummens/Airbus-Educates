@@ -8,7 +8,7 @@ chain, RBAC stops being magic. You'll learn how rules compose from apiGroups, re
 verbs, trace an effective permission from subject through binding to rule, then create a Role
 and RoleBinding in your own namespace and prove it takes effect.
 
-- **Track / module:** Core — DCS Foundations (Module A) · Lab 8 of 9
+- **Track:** Core — DCS Foundations · Lab 8 of 9
 - **Audience:** Intermediate — you've run `oc auth can-i` and seen tenant isolation
 - **Duration:** ~45 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace

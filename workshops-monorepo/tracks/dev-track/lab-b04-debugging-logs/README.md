@@ -4,11 +4,11 @@
 
 Sooner or later every developer has to figure out why an app *isn't* working. In this lab you arrive to a `hello-dcs` app that is already deployed and already broken, and your job is to find out why and recover it on the Digital Container Service (DCS). The real skill isn't memorising commands — it's running a repeatable loop: observe, hypothesise, fix, verify. You practise it on one seeded fault, but the method diagnoses any outage.
 
-- **Track / module:** Developer — Build on DCS (Module B) · Lab 4 of 6
+- **Track:** Developer — Build on DCS · Lab 4 of 6
 - **Audience:** Intermediate — comfortable deploying and exposing an app with `oc`
 - **Duration:** ~35 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
-- **Prerequisites:** lab-b01-deploy-first-app · assumes Foundations (lab-a02-kubernetes-essentials)
+- **Prerequisites:** lab-b01-deploy-first-app; assumes the Core track (lab-a02-kubernetes-essentials).
 
 ## By the end of this lab you'll be able to
 
