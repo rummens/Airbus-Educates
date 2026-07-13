@@ -4,31 +4,13 @@
 <section class="launch">
   <span class="eyebrow">Session limit reached</span>
   <h1>{{ course.title }}</h1>
-  <p class="launch-msg">You already have the maximum number of running sessions for this
-    workshop, so a new one can't start. Finish or remove one below, then try again.</p>
-
-  {% if sessions %}
-  <ul class="session-list">
-    {% for s in sessions %}
-    <li class="session-row">
-      <span class="session-name">{{ s.name }}</span>
-      <span class="session-phase">{{ s.status or '—' }}</span>
-      {% if s.url %}<a class="btn btn-ghost" href="{{ s.url }}" target="_blank" rel="noopener">Open</a>{% endif %}
-      {# Hard delete via robot-authed terminate (session_end enforces ownership). #}
-      <form method="post" action="{{ url_for('session_end', name=s.name) }}" style="display:inline">
-        <button class="btn btn-danger" type="submit"
-                onclick="return confirm('Remove this session?')">Remove</button>
-      </form>
-    </li>
-    {% endfor %}
-  </ul>
-  {% else %}
-  <p class="muted">No running sessions found to remove — they may belong to another user.
-    Try again shortly.</p>
-  {% endif %}
+  <p class="launch-msg">You already have the maximum number of running sessions, so a new
+    one can't start. Open <strong>My Sessions</strong> to jump back into a running lab, or
+    end one to free a slot — then start this workshop again.</p>
 
   <div class="detail-actions">
-    <a class="btn btn-primary" href="{{ url_for('launch', name=course.name) }}">Try again</a>
+    <a class="btn btn-primary" href="{{ url_for('my_sessions') }}">My Sessions</a>
+    <a class="btn btn-ghost" href="{{ url_for('launch', name=course.name) }}">Try again</a>
     <a class="btn btn-ghost" href="{{ url_for('index') }}">Back to catalog</a>
   </div>
 </section>

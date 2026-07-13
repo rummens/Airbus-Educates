@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}My sessions — {{ product }}{% endblock %}
+{% block content %}
+<section class="my-sessions">
+  <span class="eyebrow">Your workspace</span>
+  <h1>Active sessions</h1>
+  <p class="muted">Labs you have running right now. Open one to jump back in, or end it
+    to free the resources — ending a session discards its work.</p>
+
+  {% if sessions %}
+  <ul class="session-list">
+    {% for s in sessions %}
+    <li class="session-row">
+      <span class="session-info">
+        <span class="session-title">{{ s.title }}</span>
+        <span class="session-name">{{ s.name }}{% if s.phase %} · {{ s.phase }}{% endif %}</span>
+      </span>
+      {% if s.url %}<a class="btn btn-primary" href="{{ s.url }}">Open</a>{% endif %}
+      {# Hard delete via robot-authed terminate (portal route enforces ownership):
+         removes the WorkshopSession CR so the next launch is fresh. #}
+      <form method="post" action="{{ url_for('session_end', name=s.name) }}"
+            onsubmit="return confirm('Delete this session? It is removed completely — any unsaved work is lost and the next launch starts fresh.')">
+        <button class="btn btn-danger" type="submit">Delete</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="empty">No active sessions. {{ '<a href="%s">Browse the catalog →</a>'|format(url_for('index'))|safe }}</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -174,6 +174,9 @@ def create_app():
         # Rich description = the lab's README.md (markdown), fetched from its git
         # source; falls back to the CR description if unavailable.
         readme = _safe(lambda: educates.fetch_readme(c.get("readme_url", ""))) or ""
+        # Drop the README's own leading H1 — the view already prints the course title
+        # as the page <h1> from the CR, so keeping the README title double-headlines it.
+        readme = re.sub(r"^#\s+.*$\n?", "", readme, count=1, flags=re.M)
         return render_template("course.html", c=c, ratings=ratings,
                                min_reviews=cfg.FEEDBACK_MIN_REVIEWS, is_admin=_is_admin(),
                                difficulty_icon=DIFFICULTY_ICON, readme_html=_render_md(readme),
@@ -191,12 +194,10 @@ def create_app():
             metrics.REQUESTS.labels(name, "ok").inc()
             _safe(lambda: feedback.mark_progress(_user(), name, "started"))
         except educates.CapacityError:
-            # Portal is at its session limit → don't dump a raw 503. Show the running
-            # sessions and let the user free one (task: clear error + self-service).
+            # Portal is at its session limit → don't dump a raw 503. Point the user at
+            # My Sessions (authoritative session list) to free a slot themselves.
             metrics.REQUESTS.labels(name, "error").inc()
-            running = _safe(lambda: k8sclient.sessions_for_workshop(name)) or []
-            return render_template("over_limit.html", course=c, sessions=running,
-                                   is_admin=_is_admin()), 503
+            return render_template("over_limit.html", course=c, is_admin=_is_admin()), 503
         except Exception as e:        # noqa: BLE001
             metrics.REQUESTS.labels(name, "error").inc()
             metrics.ERRORS.labels("session_request").inc()

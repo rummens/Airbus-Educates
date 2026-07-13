@@ -20,7 +20,8 @@ These standards are mandatory for all workshops produced with this skill. They a
 6. **Air-gapped images.** DCS is air-gapped — every image comes from Harbor via `$(image_repository)` or `{{< param dcs_registry >}}`; no external registries. Workshops use the `dcs-workshop-base` or `dcs-tools` image. See [references/air-gapped-images-reference.md](references/air-gapped-images-reference.md).
 7. **Assessment / automated-test coverage.** **Every command** is paired with an `examiner:execute-test` asserting its outcome (no exceptions — the examiner tests are the automated test pipeline that verifies workshops end-to-end), and every workshop ends with a knowledge check. See [references/assessment-reference.md](references/assessment-reference.md).
 8. **Teach concepts, don't script commands.** One concept per page; explain what/why/how and trade-offs, show and explain expected output, explain non-obvious flags, and cover the topic completely. Depth beats brevity — split long topics into more workshops rather than thinning explanations. See [references/content-depth-reference.md](references/content-depth-reference.md).
-9. **End-of-workshop feedback page.** Every workshop ends with a `98-your-feedback.md` page that opens the feedback form (rating + clarity + comment), collected by the academy feedback-collector. See [references/feedback-page-reference.md](references/feedback-page-reference.md).
+9. **End-of-workshop feedback page.** Every workshop ends with a `98-your-feedback.md` page that opens the feedback form (rating + clarity + comment), collected by the DCS Academy portal (`/form`). See [references/feedback-page-reference.md](references/feedback-page-reference.md).
+10. **Workshop README / description.** Every workshop's root `README.md` is its pre-launch prospectus — hook, lead, meta (audience/duration/prereqs/format), learning objectives, and what you'll do. It is the rich description shown in the portal course view. Don't hardcode the rating (portal shows it live) and don't double the title (portal strips the README's H1). See [references/workshop-readme-reference.md](references/workshop-readme-reference.md).
 
 ## Initial Workshop Creation
 
@@ -72,7 +73,7 @@ Create the following directory structure in the chosen location:
 
 ```
 <workshop-root>/
-├── README.md                    # Workshop title and description
+├── README.md                    # Workshop description / prospectus — see references/workshop-readme-reference.md
 ├── exercises/
 │   └── README.md                # Placeholder to ensure directory is preserved
 ├── resources/

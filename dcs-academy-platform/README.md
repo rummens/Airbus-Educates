@@ -7,6 +7,9 @@ OpenShift-OAuth gate live in [`dcs-academy-portal`](../dcs-academy-portal).
 
 Pinned to **Educates 3.7.2**. Deploy this first, then the portal chart.
 
+> New here? Read [architecture.md](architecture.md) for how all charts, CRDs, and the
+> GitOps layers fit together.
+
 ## How it installs Educates
 
 Educates ships as Carvel imgpkg bundles, not a Helm chart. This chart renders the

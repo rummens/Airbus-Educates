@@ -12,7 +12,7 @@ instructions were, and an optional comment:
 
 ```dashboard:create-dashboard
 name: Feedback
-url: "https://feedback.{{< param ingress_domain >}}/form?workshop=lab-c05-data-residency&session={{< param session_namespace >}}"
+url: "https://academy.{{< param ingress_domain >}}/form?workshop=lab-c05-data-residency&session={{< param session_namespace >}}"
 ```
 
 {{< note >}}

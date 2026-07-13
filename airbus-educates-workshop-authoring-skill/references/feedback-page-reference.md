@@ -2,13 +2,13 @@
 
 Every workshop ends with a **`98-your-feedback.md`** page (between the last content
 page and `99-workshop-summary.md`) that invites the learner to rate the workshop.
-Feedback is collected by the academy's **feedback-collector** service (SQLite on a
-PV; see `dcs-academy/planning/feedback-capture.md`) and surfaced in `/admin` and a
-Grafana dashboard.
+Feedback is collected by the **DCS Academy portal** (the `/form` route, backed by
+CloudNativePG in prod) and surfaced in the portal's `/admin` view, on each course's
+detail page as a live star rating, and in a Grafana dashboard.
 
 ## What the page does
 
-It opens a **Feedback** dashboard tab pointing at the collector's form, pre-filled
+It opens a **Feedback** dashboard tab pointing at the portal's form, pre-filled
 with this workshop's name and the session namespace. The form captures a 1–5
 rating, a 1–5 clarity score, and an optional comment — all stored per course.
 
@@ -29,7 +29,7 @@ instructions were, and an optional comment:
 
 ```dashboard:create-dashboard
 name: Feedback
-url: "https://feedback.{{< param ingress_domain >}}/form?workshop=<WORKSHOP-NAME>&session={{< param session_namespace >}}"
+url: "https://academy.{{< param ingress_domain >}}/form?workshop=<WORKSHOP-NAME>&session={{< param session_namespace >}}"
 ```
 
 {{< note >}}
@@ -45,6 +45,7 @@ name: Terminal
 
 - Replace `<WORKSHOP-NAME>` with the workshop's `metadata.name` (drives per-course reporting).
 - No examiner checks on this page — feedback is voluntary, not verified.
-- The collector host is `feedback.{{< param ingress_domain >}}` (edge Route). If a
-  workshop runs where that Route differs, adjust the host; the path/params are stable.
+- The form is served by the portal at `academy.{{< param ingress_domain >}}/form`
+  (same host as the catalog — the standalone `feedback.*` collector was absorbed into
+  the portal). The path/params are stable; only the host tracks the portal.
 - Keep it short: one tab, one form, back to the terminal.

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Your Trophies — {{ product }}{% endblock %}
+{% block content %}
+<a class="back" href="{{ url_for('index') }}">{{ icon('chevron')|safe }} Back to catalog</a>
+
+<section class="trophy-page-head">
+  <div>
+    <span class="eyebrow">Your progress</span>
+    <h1>Trophies</h1>
+    <p class="hero-sub">Earn a trophy for your first lab, for finishing each module and each
+      track, and for completing the whole academy. Trophies are tied to your account and stick
+      around across sessions.</p>
+  </div>
+  <div class="trophy-progress">
+    <div class="trophies-head" style="margin:0">
+      <strong>{{ trophies.earned }} / {{ trophies['items']|length }} trophies</strong>
+      <span class="muted">{{ trophies.done }} / {{ trophies.total }} labs done</span>
+    </div>
+    <div class="trophy-bar" aria-label="labs completed">
+      <span style="width: {{ ((trophies.done / trophies.total * 100) if trophies.total else 0)|round(0, 'floor') }}%"></span>
+    </div>
+  </div>
+</section>
+
+{% if trophies.total %}
+<div class="trophy-grid">
+  {% for t in trophies['items'] %}
+  <article class="tcard {{ 'earned' if t.earned else 'locked' }}">
+    <div class="tcard-top">
+      <span class="tcard-badge">{{ icon(t.icon)|safe }}</span>
+      <span class="tcard-state">{{ 'Earned' if t.earned else 'Locked' }}</span>
+    </div>
+    <div class="tcard-title">{{ t.title }}</div>
+    <div class="tcard-detail">{{ t.detail }}</div>
+    {% if t.need > 1 %}
+    <div>
+      <div class="tcard-prog"><span>Progress</span><span>{{ t.done }} / {{ t.need }}</span></div>
+      <div class="tcard-mini"><span style="width: {{ (t.done / t.need * 100)|round(0, 'floor') }}%"></span></div>
+    </div>
+    {% elif t.earned %}
+    <div class="tcard-prog"><span>Done</span><span>✓</span></div>
+    {% else %}
+    <div class="tcard-prog"><span>Not yet</span><span>0 / 1</span></div>
+    {% endif %}
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<p class="muted">No workshops in the catalog yet — trophies appear as labs are added.</p>
+{% endif %}
+{% endblock %}

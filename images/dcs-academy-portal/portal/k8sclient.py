@@ -272,24 +272,6 @@ def session_route_ready(session_name, url):
     return False
 
 
-def sessions_for_workshop(workshop_name):
-    """Running sessions of one workshop → [{name, url, status}]. Powers the
-    over-capacity page where the user frees a session to launch another."""
-    out = []
-    for s in list_sessions():
-        lbls = s.get("metadata", {}).get("labels", {}) or {}
-        if lbls.get("training.educates.dev/workshop.name") != workshop_name:
-            continue
-        st = (s.get("status", {}) or {}).get("educates", {}) or {}
-        out.append({
-            "name": s["metadata"]["name"],
-            "url": st.get("url", ""),
-            "status": st.get("phase", "") or "",
-        })
-    out.sort(key=lambda x: x["name"])
-    return out
-
-
 def session_status(name):
     """One WorkshopSession's .status.educates (phase/message/url)."""
     try:

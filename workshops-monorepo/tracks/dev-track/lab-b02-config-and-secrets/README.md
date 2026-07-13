@@ -1,11 +1,26 @@
-# lab-b02-config-and-secrets — Configuration & Secrets
+# Configuration & Secrets
 
-Developer-track (Module B) workshop. The learner externalises the `hello-dcs` sample app's
-config into a ConfigMap (env + mounted file), injects a credential via a Secret without leaking
-it, and rolls out a config change on the same image.
+**Stop baking settings into images: externalise config and inject credentials so one image runs anywhere on DCS.**
 
-- **Track:** Developer (`academy.dcs/track: dev`), order 20 · **Difficulty:** intermediate · **Duration:** 35m
-- **Prerequisites:** B01 (Deploy Your First App).
-- **Sample app:** `hello-dcs` (`{{< param dcs_registry >}}/samples/hello-dcs:1.0`), pre-deployed via `session.objects` (config still baked in — the problem this lab solves).
-- **Note:** hello-dcs is a static server, so config/secret **delivery** is verified at the container boundary with `oc exec` (printenv / cat), not via the HTTP body.
-- **Session:** native OpenShift namespace (no vcluster).
+In the previous lab you deployed `hello-dcs`, but its settings were baked into the image and manifest — to change a value you'd have to rebuild. That doesn't scale, and credentials must never live in an image. In this lab you pull configuration out into a ConfigMap, inject a credential with a Secret without leaking its value, and roll out a config change on the very same image on the Digital Container Service (DCS).
+
+- **Track / module:** Developer — Build on DCS (Module B) · Lab 2 of 6
+- **Audience:** Intermediate — you've deployed an app and are comfortable with `oc`
+- **Duration:** ~35 min
+- **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
+- **Prerequisites:** lab-b01-deploy-first-app · assumes Foundations (lab-a02-kubernetes-essentials)
+
+## By the end of this lab you'll be able to
+
+- Move settings into a ConfigMap and deliver them as environment variables and a mounted file
+- Store a credential in a Secret and inject it into a container without leaking the value
+- Explain why the same image should carry different config in dev and prod
+- Roll out a config change and watch old Pods give way to new ones
+
+## What you'll do
+
+Starting from the already-running `hello-dcs` app, you externalise its configuration into a ConfigMap (delivered both as env vars and as a mounted file), add a Secret for a credential, and trigger a rollout by changing a config value — all without rebuilding the image. Because `hello-dcs` is a static server, you verify delivery at the container boundary with `oc exec` rather than in the HTTP response.
+
+## Before you start
+
+Finish lab-b01-deploy-first-app first — this lab starts where it left off, with `hello-dcs` already deployed (config still baked in, which is the problem you'll solve).

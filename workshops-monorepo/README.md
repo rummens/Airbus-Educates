@@ -18,6 +18,36 @@ every workshop/track from the folder tree — there is no catalog list to edit.
         resources/workshop.yaml
 ```
 
+## Adding or changing content — use the skills
+
+Don't hand-write workshops. The DCS Academy is authored with three **Claude Code
+skills** that encode every house standard (OpenShift `oc`, air-gapped Harbor images,
+the param trio, examiner checks, split terminal, the README/overview/feedback
+contracts, …). **The skills live in a separate repo** (`airbus-educates-*-skill`) and
+are installed into Claude Code — they are not part of this catalog repo.
+
+| I want to… | Invoke the skill | It produces |
+|---|---|---|
+| Create or edit a single workshop | **airbus-educates-workshop-authoring** | a complete workshop folder — `resources/workshop.yaml` (CR + catalog metadata), `workshop/content/*.md`, `README.md`, `exercises/` |
+| Plan a multi-workshop course / module | **airbus-educates-course-design** | a course brief, topic/module map, and per-workshop plans |
+| Review / QA a workshop or course | **airbus-educates-course-review** | a findings + suggestions report against the house standards (advises, doesn't rewrite) |
+
+Typical flow for a new lab:
+
+1. **Design** (if it's a new course/module) — run *course-design* to get the plan and
+   per-workshop briefs.
+2. **Author** — run *workshop-authoring* against a brief. It writes the folder under
+   `tracks/<track-folder>/<lab-name>/` following the layout below, filling in the
+   `academy.dcs/*` catalog metadata the chart needs.
+3. **Review** — run *course-review* and apply its findings.
+4. **Test** — deploy portal-less to a local CRC cluster and run the examiner
+   smoke test (see `crc-local-testing/` in the skills/tooling repo).
+5. **Push** — merging to `main` deploys via ArgoCD (see deploy order below).
+
+The "Add a track" and "Add a workshop" sections further down document the *mechanical*
+contract the skill output must satisfy — read them to review or hand-fix generated
+files, but let the skill generate the first draft.
+
 > ## ⚠️ DEPLOY ORDER — READ THIS ⚠️
 >
 > This chart is **downstream of the `dcs-academy-portal` chart**. It must sync
