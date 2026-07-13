@@ -109,9 +109,13 @@ spec:
                 echo "ERROR: $CM has no ca-bundle.crt — is the inject-trusted-cabundle label set and the CNO healthy?" >&2
                 exit 1
               fi
-              # Upsert the Secret Educates reads (key: ca.crt).
+              # Upsert the Secret Educates reads (key: ca.crt). Use server-side apply:
+              # the full cluster trust bundle is large (>256KB), and client-side apply
+              # would stuff it into the last-applied-configuration annotation and blow
+              # the annotation size limit ("metadata.annotations: Too long").
               oc create secret generic "$SECRET" -n "$NS" \
                 --from-file=ca.crt=/tmp/ca.crt \
-                --dry-run=client -o yaml | oc apply -f -
+                --dry-run=client -o yaml \
+                | oc apply --server-side=true --force-conflicts -f -
               echo "synced $CM -> secret/$SECRET ($(wc -l < /tmp/ca.crt) lines)"
 {{- end }}
