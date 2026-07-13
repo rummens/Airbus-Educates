@@ -10,6 +10,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "3"
 spec:
   replicas: {{ .Values.replicas }}
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       {{- include "portal.selectorLabels" . | nindent 6 }}

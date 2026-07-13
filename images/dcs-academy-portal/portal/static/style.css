@@ -189,7 +189,17 @@ textarea{width:100%;min-height:6rem;font-family:inherit;border:1px solid var(--b
 .thanks{text-align:center;max-width:520px;margin:3rem auto}
 .thanks .tile-icon{color:var(--secondary)}
 
+/* site banner (message of the day) — prominent, top of landing page */
+.banner{display:flex;align-items:center;gap:.75rem;margin:0 0 1.8rem;padding:1rem 1.3rem;
+  background:var(--tint);border:1px solid var(--tint-border);border-left:6px solid var(--secondary);
+  border-radius:14px;color:var(--text);font-weight:600;font-size:1.08rem;box-shadow:var(--shadow)}
+.banner .ic{flex:none;width:1.5em;height:1.5em;color:var(--secondary)}
+
 /* admin */
+.banner-form{display:flex;gap:.7rem;align-items:center;margin:.4rem 0 1.8rem}
+.banner-form input{flex:1;font:inherit;font-size:1rem;color:var(--text);background:var(--card);
+  border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;outline:none}
+.banner-form input:focus{border-color:var(--secondary)}
 .tbl{border-collapse:collapse;width:100%;margin:.6rem 0 1.6rem;font-size:.92rem}
 .tbl th,.tbl td{border:1px solid var(--border);padding:.45rem .7rem;text-align:left;vertical-align:top}
 .tbl th{background:var(--card-2);font-weight:600}
