@@ -12,18 +12,23 @@
 ARG BASE=ghcr.io/educates/educates-base-environment@sha256:b7e55570e5b6a98251cc010e96b1615173c788d50f4833f0b9d3e821bb5fcd5a
 FROM ${BASE}
 
-ARG TARGETARCH=arm64
 ARG OC_CHANNEL=stable
 
 LABEL org.opencontainers.image.source="https://github.com/rummens/Airbus-Educates" \
       org.opencontainers.image.description="DCS Academy workshop base (educates-base-environment + oc)"
 
 USER root
+# Derive the arch from `uname -m` — authoritative for the image that will actually
+# run: under buildx each platform's RUN executes as (or QEMU-emulated as) its target,
+# so uname reports the right arch. Do NOT use the TARGETARCH build-arg — if the
+# builder doesn't inject it, its default silently bakes the wrong-arch oc (the classic
+# "cannot execute binary file: Exec format error" on the mismatched cluster). Note the
+# OpenShift mirror uses the token `x86_64` (not `amd64`).
 RUN set -eux; \
-    case "${TARGETARCH}" in \
-      arm64) OCARCH=arm64 ;; \
-      amd64) OCARCH=amd64 ;; \
-      *) echo "unsupported arch: ${TARGETARCH}" >&2; exit 1 ;; \
+    case "$(uname -m)" in \
+      x86_64)  OCARCH=x86_64 ;; \
+      aarch64) OCARCH=arm64 ;; \
+      *) echo "unsupported arch: $(uname -m)" >&2; exit 1 ;; \
     esac; \
     curl -fsSL "https://mirror.openshift.com/pub/openshift-v4/${OCARCH}/clients/ocp/${OC_CHANNEL}/openshift-client-linux.tar.gz" \
       -o /tmp/oc.tgz; \

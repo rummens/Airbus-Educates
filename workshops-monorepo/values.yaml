@@ -21,7 +21,7 @@ global:
 # templates/workshops.yaml renders those files through `tpl`. Air-gap: repoint
 # at Harbor. Edit here, not per-lab.
 workshopImages:
-  base: ghcr.io/rummens/dcs-workshop-base:dev
+  base: ghcr.io/rummens/dcs-workshop-base:develop
   # tools: ghcr.io/rummens/dcs-workshop-tools:dev
 
 # Where each lab's CONTENT (workshop/, exercises/, README.md) is fetched from.

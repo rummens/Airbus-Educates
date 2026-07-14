@@ -1,11 +1,17 @@
 {{- if and .Values.enabled .Values.educates.ingress.caFromClusterBundle }}
-{{- $ns := .Values.educates.installer.namespace }}
+{{- $ns := .Values.educates.operatorNamespace | default "educates" }}
 # OpenShift-owned trust for workshop sessions (option 3 in values).
 # The Cluster Network Operator watches for this label and fills ca-bundle.crt with
 # the cluster's full trust bundle (system CAs + any custom CA added cluster-wide via
 # Proxy .spec.trustedCA). Educates can't read a ConfigMap for its CA, so the Job
-# below copies the bundle into the `educates-cluster-ca` Secret (key ca.crt) that
-# the installer config's caCertificateRef points at. Nothing is committed to git.
+# below copies the bundle into the `educates-cluster-ca` Secret (key ca.crt).
+#
+# EVERYTHING here lives in the Educates OPERATOR namespace on purpose: Educates sources
+# the CA secret from there and, per workshop environment, creates a SecretCopier that
+# replicates it into each (dynamic) workshop namespace where the content-clone pod runs.
+# Put it anywhere else and the copier finds nothing → sessions can't trust the git host.
+# (First install: this namespace is created by the Educates installer; ArgoCD retries
+# these resources until it exists.)
 apiVersion: v1
 kind: ConfigMap
 metadata:

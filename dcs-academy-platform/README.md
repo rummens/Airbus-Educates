@@ -153,19 +153,27 @@ about to git except option 1):
 
 1. **Inline PEM** — `educates.ingress.caCertificate`. Simplest, but puts the cert in git.
 2. **Existing Secret** — `educates.ingress.caCertificateRef: {name, namespace}`, a Secret
-   with a `ca.crt` key you create out-of-band:
+   with a `ca.crt` key you create out-of-band **in the Educates operator namespace**
+   (`educates`) — that's where Educates reads it from (it ignores the `namespace` field
+   and always sources from the operator namespace):
    ```sh
-   oc create secret generic org-ca -n dcs-educates-installer --from-file=ca.crt=org-ca.pem
+   oc create secret generic org-ca -n educates --from-file=ca.crt=org-ca.pem
    ```
    Cert stays out of git.
 3. **Let OpenShift own it (recommended)** — `educates.ingress.caFromClusterBundle: true`.
    The chart creates a ConfigMap labelled `config.openshift.io/inject-trusted-cabundle=true`
    (the Cluster Network Operator fills `ca-bundle.crt` with the system CAs plus any custom
    CA you added cluster-wide via Proxy `spec.trustedCA`), and a small PostSync hook Job
-   copies that bundle into the `educates-cluster-ca` Secret's `ca.crt` that Educates reads.
-   Nothing in git; the cluster trust bundle is the source of truth. The copy exists because
-   Educates reads a **Secret**, not the injected **ConfigMap**; the Job re-runs each sync,
-   so force a sync (or add a CronJob) after a CA rotation.
+   copies that bundle into the `educates-cluster-ca` Secret's `ca.crt` **in the operator
+   namespace** — where Educates reads it. Nothing in git. The copy exists because Educates
+   reads a **Secret**, not the injected **ConfigMap**; the Job re-runs each sync, so force
+   a sync after a CA rotation.
+
+**How it reaches the (dynamic) session namespaces:** you do **not** copy the secret into
+each workshop namespace yourself. Educates' session-manager creates a `SecretCopier` per
+workshop environment that replicates the CA secret from the operator namespace into every
+workshop namespace — including ones created later — so the content-clone pod always has it.
+The only requirement is that the source secret sits in the operator namespace (above).
 
 ## Security grants
 

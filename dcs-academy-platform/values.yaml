@@ -59,9 +59,10 @@ educates:
     #
     # Three ways to supply it (first non-empty wins):
     #   1. caCertificate — inline PEM. Simple, but commits the cert to git.
-    #   2. caCertificateRef — a Secret (key: ca.crt) you create out-of-band
-    #      (`oc create secret generic org-ca -n dcs-educates-installer
-    #        --from-file=ca.crt=org-ca.pem`). Cert stays out of git.
+    #   2. caCertificateRef — a Secret (key: ca.crt) you create out-of-band IN THE
+    #      OPERATOR NAMESPACE (Educates ignores the namespace field and sources it from
+    #      there): `oc create secret generic org-ca -n educates --from-file=ca.crt=org-ca.pem`.
+    #      Cert stays out of git.
     #   3. caFromClusterBundle — let OpenShift own it (cleanest, nothing in git):
     #      the chart creates a ConfigMap labelled
     #      config.openshift.io/inject-trusted-cabundle=true (the Cluster Network
@@ -106,6 +107,12 @@ educates:
   # after mirroring (see README mirroring steps).
   imageRegistry:
     namespace: educates
+
+  # Namespace the Educates operator (session-manager) runs in. Educates sources the
+  # ingress + CA secrets from HERE and copies them (via its own SecretCopier) into
+  # every workshop namespace — so the CA Secret MUST live here, not in the installer
+  # namespace. Matches the upstream default; change only if you relocate the operator.
+  operatorNamespace: educates
 
   installer:
     # Namespace the kapp-controller installer App + RBAC + config secret live in.

@@ -253,7 +253,7 @@ def main():
     p.add_argument("--apps", default="terminal,editor,console,examiner",
                    help="comma list of session applications")
     p.add_argument("--vcluster", action="store_true", help="run in a per-session vcluster")
-    p.add_argument("--image", default="ghcr.io/rummens/dcs-workshop-base:dev",
+    p.add_argument("--image", default="ghcr.io/rummens/dcs-workshop-base:develop",
                    help="workshop container image; pass '' to use the default base-environment")
     p.add_argument("--registry", default="ghcr.io/rummens",
                    help="DCS_REGISTRY value for exercise image refs; pass '' to omit")
