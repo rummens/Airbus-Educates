@@ -1,0 +1,15 @@
+{
+  "_comment": "All fields optional. Omit the whole file to use pure defaults: Dockerfile/Containerfile build, push to $REGISTRY_BASE/<folder>:<branch>.",
+
+  "destinationRepo": "harbor.example.com/dcs/custom-name",
+  "tag": "stable",
+
+  "s2iImage": "harbor.example.com/base/python:3.12",
+  "dockerfilePath": "Dockerfile",
+  "contextDir": "src",
+
+  "env": [{ "name": "PIP_INDEX_URL", "value": "https://harbor.example.com/pypi/simple" }],
+  "buildArgs": [{ "name": "VERSION", "value": "1.2.3" }],
+  "resources": { "limits": { "cpu": "2", "memory": "2Gi" } },
+  "noCache": false
+}

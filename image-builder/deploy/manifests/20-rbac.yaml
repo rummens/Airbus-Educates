@@ -1,0 +1,37 @@
+# Least-privilege for the CI build-bot: manage BuildConfigs/Builds and the two
+# pull/push secrets, in this namespace only. No cluster-wide rights.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: image-builder
+  namespace: image-builds
+rules:
+  - apiGroups: ["build.openshift.io"]
+    resources: ["buildconfigs", "builds"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # `oc start-build` POSTs to the instantiate subresource
+  - apiGroups: ["build.openshift.io"]
+    resources: ["buildconfigs/instantiate", "builds/details"]
+    verbs: ["create"]
+  # stream build logs (start-build --follow)
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+  # create/update the registry push secret + git source secret
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: image-builder
+  namespace: image-builds
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: image-builder
+subjects:
+  - kind: ServiceAccount
+    name: build-bot
+    namespace: image-builds

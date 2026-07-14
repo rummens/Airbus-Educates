@@ -1,0 +1,51 @@
+# Monorepo image builds via OpenShift BuildConfigs.
+# Wire in from the repo-root .gitlab-ci.yml with:
+#   include: { local: image-builder/gitlab-ci.yml }
+# or point the project's CI config path at this file.
+#
+# Required CI/CD variables (Settings > CI/CD > Variables):
+#   OC_SERVER        https://api.cluster:6443
+#   OC_TOKEN         build-bot ServiceAccount token          (masked)
+#   REGISTRY_BASE    harbor.example.com/dcs                  (default push path <base>/<folder>)
+#   REGISTRY_SERVER  harbor.example.com
+#   REGISTRY_USER    registry robot user                     (masked)
+#   REGISTRY_PASS    registry robot password/token           (masked)
+#   GIT_USER         git user for in-cluster source clone    (masked)
+#   GIT_TOKEN        git PAT/deploy token                    (masked)
+# Optional: BUILD_NAMESPACE, PUSH_SECRET, GIT_SECRET, SOURCE_GIT_URI, BUILD_ALL.
+
+variables:
+  # oc + jq + skopeo all present. Swap for your air-gapped mirror of the same.
+  BUILDER_IMAGE: "quay.io/openshift/origin-cli:latest"
+  GIT_DEPTH: "0"   # full history so branch-diff + ls-remote reconcile are reliable
+                   # ponytail: full clone; lower if the monorepo history is huge
+
+.oc_login: &oc_login
+  - oc login "$OC_SERVER" --token="$OC_TOKEN" >/dev/null
+  - oc project "${BUILD_NAMESPACE:-image-builds}" >/dev/null
+
+stages: [build, cleanup]
+
+build-images:
+  stage: build
+  image: $BUILDER_IMAGE
+  before_script: *oc_login
+  script:
+    - bash image-builder/build.sh build
+  rules:
+    # feature-branch pushes and MRs: build changed folders for that branch
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+
+# Reconcile: delete BCs (and their registry tags) whose branch no longer exists
+# on the remote — i.e. merged+deleted source branches. Runs on the default
+# branch after merges; also safe to attach to a pipeline schedule.
+cleanup-orphans:
+  stage: cleanup
+  image: $BUILDER_IMAGE
+  before_script: *oc_login
+  script:
+    - bash image-builder/build.sh cleanup
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'

@@ -1,0 +1,26 @@
+# ArgoCD Application: rolls out the build-bot namespace, ServiceAccount, token,
+# and RBAC. Apply once into the ArgoCD namespace:
+#   oc apply -f image-builder/deploy/application.yaml
+#
+# EDIT repoURL/targetRevision to point at YOUR container-images monorepo. The
+# ArgoCD instance must have read creds for that repo (Settings > Repositories).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: image-builder
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: https://gitlab.example.com/your-group/container-images.git
+    targetRevision: main
+    path: image-builder/deploy/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: image-builds
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
