@@ -1,76 +1,18 @@
 {
   "workshop": "lab-b05-stateful-storage",
-  "_note": "SCAFFOLD DRAFT \u2014 not CRC-validated. Needs authoring: the first exec steps assume a running hello-dcs (from the ephemeral-storage demo) that no step deploys. Prepend a plain deploy before the ephemeral exec, then the PVC + stateful-deploy + marker-persist flow.",
+  "_note": "Prereq: a running hello-dcs for the ephemeral demo (deployed first, heredoc so $DCS_REGISTRY expands). The PVC is RWO on crc-csi-hostpath-provisioner (WaitForFirstConsumer), so it only binds once a pod mounts it — the plan deploys the stateful app BEFORE verify-pvc-bound (the content checks it earlier, which works only on an Immediate-binding class). DCS_STORAGE_CLASS is set for CRC.",
   "steps": [
-    {
-      "run": "oc exec deployment/hello-dcs -- sh -c 'echo \"written-inside-the-container\" > /tmp/note; cat /tmp/note'"
-    },
-    {
-      "run": "oc delete pod -l app=hello-dcs"
-    },
-    {
-      "run": "oc exec deployment/hello-dcs -- cat /tmp/note"
-    },
-    {
-      "run": "envsubst < pvc.yaml | oc apply -f -"
-    },
-    {
-      "check": "verify-pvc-bound",
-      "args": [
-        "hello-dcs-data"
-      ]
-    },
-    {
-      "run": "envsubst < deployment-stateful.yaml | oc apply -f -"
-    },
-    {
-      "run": "oc rollout status deployment/hello-dcs"
-    },
-    {
-      "check": "verify-pods-running",
-      "args": [
-        "hello-dcs",
-        "1"
-      ]
-    },
-    {
-      "run": "oc exec deployment/hello-dcs -- sh -c 'echo \"persisted-by-dcs\" > /data/marker'"
-    },
-    {
-      "run": "oc exec deployment/hello-dcs -- cat /data/marker"
-    },
-    {
-      "check": "verify-marker",
-      "args": [
-        "hello-dcs",
-        "/data/marker",
-        "persisted-by-dcs"
-      ]
-    },
-    {
-      "run": "oc delete pod -l app=hello-dcs"
-    },
-    {
-      "check": "verify-pods-running",
-      "args": [
-        "hello-dcs",
-        "1"
-      ]
-    },
-    {
-      "run": "oc exec deployment/hello-dcs -- cat /data/marker"
-    },
-    {
-      "check": "verify-marker",
-      "args": [
-        "hello-dcs",
-        "/data/marker",
-        "persisted-by-dcs"
-      ]
-    },
-    {
-      "check": "verify-marker",
-      "args": []
-    }
+    {"run": "oc apply -f - <<EOF\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: hello-dcs\n  labels: {app: hello-dcs}\nspec:\n  replicas: 1\n  selector: {matchLabels: {app: hello-dcs}}\n  template:\n    metadata: {labels: {app: hello-dcs}}\n    spec:\n      containers:\n      - name: hello-dcs\n        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0\n        ports: [{containerPort: 8080}]\nEOF\noc rollout status deployment/hello-dcs --timeout=180s"},
+    {"run": "oc exec deployment/hello-dcs -- sh -c 'echo written-inside-the-container > /tmp/note; cat /tmp/note'"},
+    {"run": "oc delete pod -l app=hello-dcs && oc rollout status deployment/hello-dcs --timeout=180s"},
+    {"run": "DCS_STORAGE_CLASS=crc-csi-hostpath-provisioner envsubst < ~/exercises/pvc.yaml | oc apply -f -"},
+    {"run": "DCS_STORAGE_CLASS=crc-csi-hostpath-provisioner envsubst < ~/exercises/deployment-stateful.yaml | oc apply -f - && oc rollout status deployment/hello-dcs --timeout=180s"},
+    {"check": "verify-pvc-bound", "args": ["hello-dcs-data"]},
+    {"check": "verify-pods-running", "args": ["hello-dcs", "1"]},
+    {"run": "oc exec deployment/hello-dcs -- sh -c 'echo persisted-by-dcs > /data/marker'"},
+    {"check": "verify-marker", "args": ["hello-dcs", "/data/marker", "persisted-by-dcs"]},
+    {"run": "oc delete pod -l app=hello-dcs && oc rollout status deployment/hello-dcs --timeout=180s"},
+    {"check": "verify-pods-running", "args": ["hello-dcs", "1"]},
+    {"check": "verify-marker", "args": ["hello-dcs", "/data/marker", "persisted-by-dcs"]}
   ]
 }

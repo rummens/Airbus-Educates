@@ -1,38 +1,10 @@
 {
   "workshop": "lab-b04-debugging-logs",
-  "_note": "SCAFFOLD DRAFT \u2014 not CRC-validated. Needs authoring: the lab diagnoses an ALREADY-broken hello-dcs, but the portless session deploys nothing. Prepend applying the broken deployment, THEN verify-not-ready, diagnose, fix, verify-recovered.",
+  "_note": "The lab diagnoses an ALREADY-broken hello-dcs (workshop setup provides it in production). The plan seeds that broken state with a bad image tag (guaranteed not-Ready), plus a Service the recovery check serves through. broken-deployment.yaml (image :2.0) is the FIX the learner applies. If :2.0 isn't mirrored to the CRC registry, verify-recovered will need attention.",
   "steps": [
-    {
-      "run": "oc get pods -l app=hello-dcs"
-    },
-    {
-      "check": "verify-not-ready",
-      "args": [
-        "hello-dcs"
-      ]
-    },
-    {
-      "run": "oc describe pod -l app=hello-dcs"
-    },
-    {
-      "run": "oc get events --sort-by=.lastTimestamp"
-    },
-    {
-      "run": "oc logs -l app=hello-dcs --tail=20"
-    },
-    {
-      "run": "oc apply -f ~/exercises/broken-deployment.yaml"
-    },
-    {
-      "run": "oc rollout status deployment/hello-dcs"
-    },
-    {
-      "check": "verify-recovered",
-      "args": [
-        "hello-dcs",
-        "hello-dcs",
-        "8080"
-      ]
-    }
+    {"run": "oc apply -f - <<EOF\napiVersion: v1\nkind: Service\nmetadata: {name: hello-dcs}\nspec:\n  selector: {app: hello-dcs}\n  ports: [{port: 8080, targetPort: 8080}]\nEOF\noc apply -f - <<EOF\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: hello-dcs\n  labels: {app: hello-dcs}\nspec:\n  replicas: 1\n  selector: {matchLabels: {app: hello-dcs}}\n  template:\n    metadata: {labels: {app: hello-dcs}}\n    spec:\n      containers:\n      - name: hello-dcs\n        image: ${DCS_REGISTRY}/samples/hello-dcs:broken-does-not-exist\n        ports: [{containerPort: 8080}]\nEOF\nsleep 15"},
+    {"check": "verify-not-ready", "args": ["hello-dcs"]},
+    {"run": "envsubst < ~/exercises/broken-deployment.yaml | oc apply -f - && oc rollout status deployment/hello-dcs --timeout=180s"},
+    {"check": "verify-recovered", "args": ["hello-dcs", "hello-dcs", "8080"]}
   ]
 }

@@ -136,6 +136,8 @@ def args_match(content_args, plan_args):
     placeholder (`$VAR` / `${VAR}` — Educates expands these at runtime, the plan encodes
     the concrete CRC value). So literal args stay coupled; env-substituted ones don't
     trip a false mismatch."""
+    if not content_args:
+        return True          # a no-arg content ref (e.g. a summary re-check) = "exercised somewhere"
     if len(content_args) != len(plan_args):
         return False
     return all("$" in c or c == p for c, p in zip(content_args, plan_args))
