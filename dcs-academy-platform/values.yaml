@@ -123,6 +123,55 @@ educates:
 # monitoring). See ../educates-workshops.
 
 # -----------------------------------------------------------------------------
+# Installer-bundle mirror Job (air-gap)
+# -----------------------------------------------------------------------------
+# Relocate the Educates installer imgpkg bundle into your registry FROM INSIDE the
+# cluster, so you don't need imgpkg + a big workstation. Runs the images/educates-
+# mirror image (imgpkg baked in) as an ArgoCD sync-hook Job. imgpkg copy is
+# idempotent — safe to re-run every sync.
+#
+# WHY: Harbor "replication" copies image tags but does NOT relocate the bundle's
+# internal ImagesLock or write the ImageLocations metadata kbld needs, so the
+# air-gapped install still resolves the bundle's inner refs to ghcr.io. Only
+# `imgpkg copy` fixes that. See dcs-academy-platform README + OFFLINE-MIRROR-IMAGES.md.
+#
+# REQUIRES global.registry.host (the destination). The SOURCE bundle is always the
+# upstream ghcr repo (educates.installer.bundleRepository), so the Job needs internet
+# egress — set bundleMirror.proxy if you only reach the internet through a proxy.
+bundleMirror:
+  enabled: false
+  # Image with imgpkg baked in (built from images/educates-mirror). Host is swapped
+  # to global.registry.host like every other image — so MIRROR THIS ONE IMAGE FIRST
+  # (plain image; Harbor replication is fine) so the Job can pull it in the air gap.
+  image: ghcr.io/rummens/educates-mirror:dev
+  # ArgoCD sync hook. PreSync = the bundle is relocated BEFORE the installer App
+  # fetches it (correct for a first install, but blocks the sync until the multi-GB
+  # copy finishes). PostSync = non-blocking; the installer App just retries its fetch
+  # until the bundle appears. Either works; PreSync is the safe default.
+  hook: PreSync
+  backoffLimit: 4
+  # Secret (in educates.installer.namespace) with keys `username` + `password` that
+  # give PUSH access to global.registry.host. REQUIRED — imgpkg needs creds to push.
+  #   oc create secret generic educates-mirror-creds -n dcs-educates-installer \
+  #     --from-literal=username=<robot> --from-literal=password=<token>
+  registryCredsSecret: ""
+  # Internet egress proxy for pulling the source bundle from ghcr.io. Leave empty if
+  # the cluster reaches ghcr directly. NO_PROXY should include your registry + .svc.
+  proxy:
+    httpProxy: ""
+    httpsProxy: ""
+    noProxy: ""
+  # The relocation is memory- and disk-hungry (multi-GB bundle). This is what a
+  # constrained DevSpace lacked; give the Job real room.
+  resources:
+    requests:
+      memory: 2Gi
+      ephemeral-storage: 20Gi
+    limits:
+      memory: 4Gi
+      ephemeral-storage: 25Gi
+
+# -----------------------------------------------------------------------------
 # Monitoring — ServiceMonitor + custom-resource metrics + Grafana bridge
 # -----------------------------------------------------------------------------
 # Deploys a kube-state-metrics (custom-resource-state-only) that turns the

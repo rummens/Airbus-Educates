@@ -1,0 +1,87 @@
+{{- if and .Values.enabled .Values.bundleMirror.enabled }}
+{{- if not .Values.global.registry.host }}
+{{- fail "bundleMirror.enabled=true requires global.registry.host (the destination registry, e.g. registry.example/dcs-internal-images)" }}
+{{- end }}
+{{- if not .Values.bundleMirror.registryCredsSecret }}
+{{- fail "bundleMirror.enabled=true requires bundleMirror.registryCredsSecret (a Secret with username+password that can PUSH to global.registry.host)" }}
+{{- end }}
+{{- $ns := .Values.educates.installer.namespace }}
+{{- /* SRC = upstream ghcr bundle (never host-swapped). DEST repo = host-swapped
+       path, no tag (imgpkg keeps the tag). DEST host = first path segment only. */ -}}
+{{- $srcRepo := .Values.educates.installer.bundleRepository }}
+{{- $path := regexReplaceAll "^[^/]+/" $srcRepo "" }}
+{{- $destRepo := printf "%s/%s" .Values.global.registry.host $path }}
+{{- $destHost := (splitList "/" .Values.global.registry.host) | first }}
+# Relocates the Educates installer imgpkg bundle into your registry as an ArgoCD
+# sync-hook Job. Idempotent (imgpkg copy skips existing blobs). See bundleMirror in
+# values.yaml. Runs FROM INSIDE the cluster so no workstation imgpkg is needed.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: educates-bundle-mirror
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/hook: {{ .Values.bundleMirror.hook | quote }}
+    # Re-run on each sync; clean up the previous Job first (idempotent copy).
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: {{ .Values.bundleMirror.backoffLimit }}
+  ttlSecondsAfterFinished: 1800
+  template:
+    metadata:
+      labels:
+        {{- include "educates.labels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      {{- if .Values.global.registry.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.global.registry.pullSecret }}
+      {{- end }}
+      containers:
+        - name: mirror
+          image: {{ include "educates.mirrorImage" . | quote }}
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            - name: SRC_BUNDLE
+              value: {{ printf "%s:%s" $srcRepo .Values.educates.version | quote }}
+            - name: DEST_REPO
+              value: {{ $destRepo | quote }}
+            # Push creds for the destination host (imgpkg matches by hostname).
+            - name: IMGPKG_REGISTRY_HOSTNAME_0
+              value: {{ $destHost | quote }}
+            - name: IMGPKG_REGISTRY_USERNAME_0
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.bundleMirror.registryCredsSecret | quote }}
+                  key: username
+            - name: IMGPKG_REGISTRY_PASSWORD_0
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.bundleMirror.registryCredsSecret | quote }}
+                  key: password
+            {{- with .Values.bundleMirror.proxy }}
+            {{- if .httpsProxy }}
+            - { name: HTTPS_PROXY, value: {{ .httpsProxy | quote }} }
+            - { name: https_proxy, value: {{ .httpsProxy | quote }} }
+            {{- end }}
+            {{- if .httpProxy }}
+            - { name: HTTP_PROXY, value: {{ .httpProxy | quote }} }
+            - { name: http_proxy, value: {{ .httpProxy | quote }} }
+            {{- end }}
+            {{- if .noProxy }}
+            - { name: NO_PROXY, value: {{ .noProxy | quote }} }
+            - { name: no_proxy, value: {{ .noProxy | quote }} }
+            {{- end }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.bundleMirror.resources | nindent 12 }}
+{{- end }}

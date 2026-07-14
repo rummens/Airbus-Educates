@@ -56,6 +56,40 @@ Set `global.registry.host` and mirror the images in
 relocated with `imgpkg copy` (carries every platform image); kbld resolves them
 from the mirror.
 
+**Harbor "replication" is not enough for the installer bundle.** It copies image
+tags but does NOT rewrite the bundle's internal ImagesLock or write the
+ImageLocations metadata kbld needs — so the install still resolves the bundle's
+inner refs to ghcr.io. Only `imgpkg copy` relocates a bundle correctly. Two ways:
+
+- **From a workstation / CI** — [../mirror-educates-bundle.sh](../mirror-educates-bundle.sh)
+  (needs the `imgpkg` binary; no container engine, but ~4 GB RAM + ~20 GB disk).
+- **In-cluster Job (recommended, air-gap-friendly)** — enable `bundleMirror`. The
+  chart runs the [`images/educates-mirror`](../images/educates-mirror) image (imgpkg
+  baked in) as an ArgoCD sync-hook Job that relocates the bundle into your registry.
+  Idempotent (re-runs are a cheap no-op). This is what to use when a DevSpace/pod was
+  too small to run imgpkg by hand.
+
+  ```yaml
+  global:
+    registry:
+      host: "registry.example/dcs-internal-images"   # destination (also where the install pulls)
+  bundleMirror:
+    enabled: true
+    registryCredsSecret: educates-mirror-creds        # Secret with username+password (PUSH rights)
+    proxy:
+      httpsProxy: "http://proxy.corp:3128"            # egress to ghcr.io for the SOURCE bundle
+      noProxy: ".svc,registry.example"
+  ```
+  ```sh
+  oc create secret generic educates-mirror-creds -n dcs-educates-installer \
+    --from-literal=username=<robot> --from-literal=password=<token>
+  ```
+  Mirror the small `educates-mirror` image itself into your registry first (plain
+  image — Harbor replication is fine) so the Job can pull it in the air gap. Source
+  bundle stays `ghcr.io/educates/educates-installer:<version>`; destination is
+  `<host>/educates/educates-installer:<version>`, which is exactly what the installer
+  App pulls once `global.registry.host` is set.
+
 ## Private CA for workshop content
 
 **Symptom:** sessions never load content; the workshop-download step fails with an

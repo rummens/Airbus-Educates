@@ -25,6 +25,22 @@ the repo path so mirrors live at <host>/educates/educates-installer:<version>.
 {{- end -}}
 
 {{/*
+Bundle-mirror image (imgpkg baked in). Host-swapped to global.registry.host like
+every other image, so set global.registry.host AND mirror this one small image
+into that registry first (plain image — Harbor replication is fine) so the Job can
+pull it in the air gap.
+*/}}
+{{- define "educates.mirrorImage" -}}
+{{- $ref := .Values.bundleMirror.image -}}
+{{- $host := .Values.global.registry.host -}}
+{{- if $host -}}
+{{- printf "%s/%s" $host (regexReplaceAll "^[^/]+/" $ref "") -}}
+{{- else -}}
+{{- $ref -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 kube-state-metrics image (custom-resource metrics exporter).
 */}}
 {{- define "educates.ksmImage" -}}
