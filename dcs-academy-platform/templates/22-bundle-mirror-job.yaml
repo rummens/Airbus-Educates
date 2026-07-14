@@ -15,6 +15,48 @@
 # Relocates the Educates installer imgpkg bundle into your registry as an ArgoCD
 # sync-hook Job. Idempotent (imgpkg copy skips existing blobs). See bundleMirror in
 # values.yaml. Runs FROM INSIDE the cluster so no workstation imgpkg is needed.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: educates-bundle-mirror
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: educates-bundle-mirror
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: educates-bundle-mirror
+  namespace: {{ $ns }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: educates-bundle-mirror
+subjects:
+  - kind: ServiceAccount
+    name: educates-bundle-mirror
+    namespace: {{ $ns }}
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -34,6 +76,8 @@ spec:
       labels:
         {{- include "educates.labels" . | nindent 8 }}
     spec:
+      serviceAccountName: educates-bundle-mirror
+      automountServiceAccountToken: false
       restartPolicy: Never
       {{- if .Values.global.registry.pullSecret }}
       imagePullSecrets:
@@ -50,6 +94,7 @@ spec:
               drop: ["ALL"]
             seccompProfile:
               type: RuntimeDefault
+            readOnlyRootFilesystem: true
           env:
             - name: SRC_BUNDLE
               value: {{ printf "%s:%s" $srcRepo .Values.educates.version | quote }}
@@ -83,5 +128,12 @@ spec:
             {{- end }}
             {{- end }}
           resources:
-            {{- toYaml .Values.bundleMirror.resources | nindent 12 }}
+            requests:
+              cpu: 100m
+              memory: {{ .Values.bundleMirror.resources.requests.memory | default "2Gi" }}
+              ephemeral-storage: {{ .Values.bundleMirror.resources.requests.ephemeralStorage | default "20Gi" }}
+            limits:
+              cpu: 500m
+              memory: {{ .Values.bundleMirror.resources.limits.memory | default "4Gi" }}
+              ephemeral-storage: {{ .Values.bundleMirror.resources.limits.ephemeralStorage | default "25Gi" }}
 {{- end }}
