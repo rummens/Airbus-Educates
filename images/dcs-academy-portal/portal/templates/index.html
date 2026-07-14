@@ -5,7 +5,7 @@
 {% if banner %}<div class="banner" role="status">{{ icon('info')|safe }} <span>{{ banner }}</span></div>{% endif %}
 
 <section class="hero">
-  <span class="eyebrow">{% if current_user %}Welcome back, {{ current_user }}{% else %}Interactive training platform{% endif %}</span>
+  <span class="eyebrow">{% if current_user %}Welcome back, {{ current_user|firstname }}{% else %}Interactive training platform{% endif %}</span>
   <h1>DCS <span class="accent">Academy.</span></h1>
   <p class="hero-sub">Hands-on labs for the Digital Container Service — namespaces, workloads,
     registry, tenancy and more, on real OpenShift.</p>

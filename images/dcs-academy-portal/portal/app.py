@@ -112,6 +112,14 @@ def create_app():
         return {"theme": cfg.THEME, "icon": _icon, "product": cfg.THEME["product_name"],
                 "current_user": _user()}
 
+    @app.template_filter("firstname")
+    def _firstname(user):
+        """Greet by first name only. Some clusters hand back an email or
+        firstName.lastName as the username; 'john.doe@corp.com' → 'John'."""
+        if not user:
+            return ""
+        return (user.split("@", 1)[0].split(".", 1)[0] or user).title()
+
     @app.template_filter("de")
     def _de(ts):
         """UTC/ISO (or a datetime from psycopg) → German date-time, Europe/Berlin."""
