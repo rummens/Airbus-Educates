@@ -86,7 +86,16 @@ def _git_source(spec):
             continue
         if url.endswith(".git"):
             url = url[:-4]
-        ref = (git.get("ref") or "main").split("/")[-1] or "main"   # origin/main → main
+        # Educates stores the ref remote-qualified (origin/<branch>). Strip only the
+        # leading remote — NOT every slash — or a branch like 'feature/academy'
+        # collapses to 'academy' and the raw/tree URL 404s. origin/feature/academy
+        # → feature/academy; origin/main → main; a bare 'main' is left as-is.
+        ref = git.get("ref") or "main"
+        for remote in ("origin/", "upstream/"):
+            if ref.startswith(remote):
+                ref = ref[len(remote):]
+                break
+        ref = ref or "main"
         return url, ref, (f.get("newRootPath") or "").strip("/")
     return None
 
@@ -120,6 +129,30 @@ def _readme_raw_url(spec):
         repo = url.split("github.com/", 1)[-1]                 # owner/repo
         return f"https://raw.githubusercontent.com/{repo}/{ref}/{path}"
     return f"{url}/-/raw/{ref}/{path}"                          # gitlab-style
+
+
+def workshop_file_sources(name):
+    """Debug: the raw file sources on one Workshop CR — [{type, url, ref, root}].
+    Shows whether content comes from git (README fetchable) or an image (not),
+    and the exact git url/ref so a wrong-host/wrong-ref is obvious in the logs."""
+    try:
+        w = _co().get_cluster_custom_object(
+            "training.educates.dev", "v1beta1", "workshops", name)
+    except Exception as e:            # noqa: BLE001
+        return f"<could not read Workshop {name}: {e}>"
+    files = ((w.get("spec", {}) or {}).get("workshop", {}) or {}).get("files", []) or []
+    out = []
+    for f in files:
+        if f.get("git"):
+            g = f["git"]
+            out.append({"type": "git", "url": g.get("url"), "ref": g.get("ref"),
+                        "root": f.get("newRootPath")})
+        elif f.get("image"):
+            out.append({"type": "image", "url": (f["image"] or {}).get("url"),
+                        "root": f.get("newRootPath")})
+        else:
+            out.append({"type": "other", "keys": list(f.keys())})
+    return out
 
 
 def _uses_vcluster(spec):
