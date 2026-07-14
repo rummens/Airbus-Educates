@@ -100,6 +100,20 @@ inner refs to ghcr.io. Only `imgpkg copy` relocates a bundle correctly. Two ways
   **Creds are optional.** Set `registryCredsSecret: ""` to run the Job with no creds
   env (anonymous/ambient auth) if your registry accepts the push that way.
 
+  **Docker Hub rate limit.** The bundle pulls a couple of `docker.io` images, and
+  anonymous pulls hit Docker Hub's limit (`toomanyrequests`). Provide a Docker Hub
+  PAT — same shape as the push creds (existing Secret or SealedSecret):
+  ```yaml
+  bundleMirror:
+    dockerHubCredsSecret: educates-dockerhub-creds
+    sealedDockerHubCredentials:            # or pre-create the Secret yourself
+      username: "AgB...<kubeseal --raw for the docker hub user>..."
+      password: "AgC...<kubeseal --raw for the docker hub PAT>..."
+  ```
+  It's wired as `IMGPKG_REGISTRY_*_1` for `index.docker.io` (the push creds are `_0` —
+  keep them set). The Job logs each login (host + user, never the password), calling
+  out the destination push target, so you can confirm auth in `oc logs`.
+
   **Private CA (internal registry / proxy behind your own CA).** Two options:
   ```yaml
   bundleMirror:

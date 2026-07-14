@@ -20,7 +20,7 @@ global:
     #   - Educates' own imageRegistry.host config field
     #   - workshop content images
     #   - vcluster images (carried inside the installer bundle)
-    host: "fwef"
+    host: ""
     # Name of an EXISTING pull secret (dockerconfigjson) for the private registry.
     # Optional. Must exist in the installer namespace (educates.installer.namespace)
     # so kapp-controller can pull the bundle, and is wired into Educates'
@@ -139,7 +139,7 @@ educates:
 # upstream ghcr repo (educates.installer.bundleRepository), so the Job needs internet
 # egress — set bundleMirror.proxy if you only reach the internet through a proxy.
 bundleMirror:
-  enabled: true
+  enabled: false
   # Image with imgpkg baked in (built from images/educates-mirror). Host is swapped
   # to global.registry.host like every other image — so MIRROR THIS ONE IMAGE FIRST
   # (plain image; Harbor replication is fine) so the Job can pull it in the air gap.
@@ -167,6 +167,16 @@ bundleMirror:
   sealedRegistryCredentials:
     username: ""
     password: ""
+  # OPTIONAL Docker Hub creds. The installer bundle pulls a couple of docker.io images
+  # (debian, docker-dind); ANONYMOUS pulls hit Docker Hub's rate limit ("toomanyrequests"),
+  # so provide a PAT. Wired as IMGPKG_REGISTRY_*_1 for index.docker.io (requires the push
+  # creds above to be present as _0). Empty name = no Docker Hub auth (will rate-limit).
+  # Same two ways as the push creds: an existing Secret (keys username/password) or a
+  # chart-rendered SealedSecret (set the name below + both sealed values).
+  dockerHubCredsSecret: ""          # e.g. educates-dockerhub-creds
+  sealedDockerHubCredentials:
+    username: ""
+    password: ""
   # Private-CA handling for imgpkg (internal registry / proxy behind your own CA):
   #   trustClusterCABundle — inject the cluster trust bundle the OpenShift way. The
   #     chart creates a ConfigMap labelled config.openshift.io/inject-trusted-cabundle
@@ -188,10 +198,10 @@ bundleMirror:
   resources:
     requests:
       memory: 2Gi
-      ephemeral-storage: 20Gi
+      ephemeralStorage: 20Gi
     limits:
       memory: 4Gi
-      ephemeral-storage: 25Gi
+      ephemeralStorage: 25Gi
 
 # -----------------------------------------------------------------------------
 # Monitoring — ServiceMonitor + custom-resource metrics + Grafana bridge

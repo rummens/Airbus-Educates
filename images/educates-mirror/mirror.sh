@@ -22,6 +22,23 @@ echo "    from: ${SRC_BUNDLE}"
 echo "    to:   ${DEST_REPO}"
 [ -n "${HTTPS_PROXY:-${https_proxy:-}}" ] && echo "    via proxy: ${HTTPS_PROXY:-$https_proxy}" || true
 
+# Log the registry logins imgpkg will use (creds come from IMGPKG_REGISTRY_* env;
+# imgpkg authenticates per-request, there is no separate login step). Passwords are
+# never printed. Index 0 is the destination push target.
+echo ">>> registry authentication:"
+n=0
+while [ "$n" -lt 5 ]; do
+  eval "h=\${IMGPKG_REGISTRY_HOSTNAME_${n}:-}"
+  eval "u=\${IMGPKG_REGISTRY_USERNAME_${n}:-}"
+  if [ -n "${h}" ]; then
+    role="source"
+    [ "$n" = "0" ] && role="DESTINATION (push)"
+    echo "    [${n}] logging in to ${h} as '${u:-<anonymous>}' — ${role}"
+  fi
+  n=$((n + 1))
+done
+[ -z "${IMGPKG_REGISTRY_HOSTNAME_0:-}" ] && echo "    (no destination creds set — pushing anonymously)" || true
+
 imgpkg copy -b "${SRC_BUNDLE}" --to-repo "${DEST_REPO}" ${IMGPKG_EXTRA_ARGS:-}
 
 echo ">>> relocated OK. Tags now present in ${DEST_REPO}:"

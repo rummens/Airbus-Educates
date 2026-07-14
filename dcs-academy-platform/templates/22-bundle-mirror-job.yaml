@@ -117,8 +117,13 @@ spec:
               value: {{ printf "%s:%s" $srcRepo .Values.educates.version | quote }}
             - name: DEST_REPO
               value: {{ $destRepo | quote }}
+            # Writable scratch (rootfs is read-only) — imgpkg needs TMP + HOME to write.
+            - name: HOME
+              value: /tmp
+            - name: TMPDIR
+              value: /tmp
             {{- if .Values.bundleMirror.registryCredsSecret }}
-            # Push creds for the destination host (imgpkg matches by hostname).
+            # Push creds for the destination host (imgpkg matches by hostname), index 0.
             - name: IMGPKG_REGISTRY_HOSTNAME_0
               value: {{ $destHost | quote }}
             - name: IMGPKG_REGISTRY_USERNAME_0
@@ -130,6 +135,23 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.bundleMirror.registryCredsSecret | quote }}
+                  key: password
+            {{- end }}
+            {{- if .Values.bundleMirror.dockerHubCredsSecret }}
+            # Docker Hub creds (index 1) — authenticates docker.io pulls in the bundle
+            # so they don't hit the anonymous rate limit. imgpkg reads _1 only if _0 is
+            # present, so keep the push creds above set.
+            - name: IMGPKG_REGISTRY_HOSTNAME_1
+              value: "index.docker.io"
+            - name: IMGPKG_REGISTRY_USERNAME_1
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.bundleMirror.dockerHubCredsSecret | quote }}
+                  key: username
+            - name: IMGPKG_REGISTRY_PASSWORD_1
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.bundleMirror.dockerHubCredsSecret | quote }}
                   key: password
             {{- end }}
             {{- if $extra }}
@@ -156,12 +178,15 @@ spec:
             - { name: no_proxy, value: {{ .noProxy | quote }} }
             {{- end }}
             {{- end }}
-          {{- if .Values.bundleMirror.trustClusterCABundle }}
           volumeMounts:
+            # Read-only rootfs → imgpkg's scratch/temp + HOME live on this emptyDir.
+            - name: scratch
+              mountPath: /tmp
+            {{- if .Values.bundleMirror.trustClusterCABundle }}
             - name: injected-ca
               mountPath: /etc/pki/injected-ca
               readOnly: true
-          {{- end }}
+            {{- end }}
           resources:
             requests:
               cpu: 100m
@@ -171,13 +196,16 @@ spec:
               cpu: 500m
               memory: {{ .Values.bundleMirror.resources.limits.memory | default "4Gi" }}
               ephemeral-storage: {{ .Values.bundleMirror.resources.limits.ephemeralStorage | default "25Gi" }}
-      {{- if .Values.bundleMirror.trustClusterCABundle }}
       volumes:
+        - name: scratch
+          emptyDir:
+            sizeLimit: {{ .Values.bundleMirror.resources.limits.ephemeralStorage | default "25Gi" }}
+        {{- if .Values.bundleMirror.trustClusterCABundle }}
         - name: injected-ca
           configMap:
             name: {{ $caName }}
             items:
               - key: ca-bundle.crt
                 path: ca-bundle.crt
-      {{- end }}
+        {{- end }}
 {{- end }}
