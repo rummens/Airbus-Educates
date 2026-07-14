@@ -122,6 +122,11 @@ spec:
               value: /tmp
             - name: TMPDIR
               value: /tmp
+            {{- if .Values.bundleMirror.debug }}
+            # Verbose imgpkg + shell trace (registry/HTTP debug output).
+            - name: DEBUG
+              value: "1"
+            {{- end }}
             {{- if .Values.bundleMirror.registryCredsSecret }}
             # Push creds for the destination host (imgpkg matches by hostname), index 0.
             - name: IMGPKG_REGISTRY_HOSTNAME_0

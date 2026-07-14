@@ -187,6 +187,9 @@ bundleMirror:
   #     (disables cert checking entirely). Use only if you can't supply the CA.
   trustClusterCABundle: true
   insecureSkipTLSVerify: false
+  # Verbose CLI output for troubleshooting — sets DEBUG=1 in the Job, which turns on
+  # imgpkg's --debug (registry/HTTP logging) plus shell tracing in mirror.sh.
+  debug: false
   # Internet egress proxy for pulling the source bundle from ghcr.io. Leave empty if
   # the cluster reaches ghcr directly. NO_PROXY should include your registry + .svc.
   proxy:

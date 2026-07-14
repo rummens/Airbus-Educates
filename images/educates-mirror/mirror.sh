@@ -17,6 +17,13 @@ set -eu
 : "${SRC_BUNDLE:?set SRC_BUNDLE (e.g. ghcr.io/educates/educates-installer:3.7.2)}"
 : "${DEST_REPO:?set DEST_REPO (e.g. myregistry/dcs/educates/educates-installer)}"
 
+# DEBUG=1 turns on imgpkg's --debug output and shell tracing (verbose registry/HTTP
+# logging). Set via bundleMirror.debug in the chart.
+DBG=""
+case "${DEBUG:-}" in
+  1|true|TRUE|yes|on) DBG="--debug"; echo ">>> DEBUG on (imgpkg --debug + shell trace)"; set -x ;;
+esac
+
 echo ">>> relocating bundle"
 echo "    from: ${SRC_BUNDLE}"
 echo "    to:   ${DEST_REPO}"
@@ -39,7 +46,7 @@ while [ "$n" -lt 5 ]; do
 done
 [ -z "${IMGPKG_REGISTRY_HOSTNAME_0:-}" ] && echo "    (no destination creds set — pushing anonymously)" || true
 
-imgpkg copy -b "${SRC_BUNDLE}" --to-repo "${DEST_REPO}" ${IMGPKG_EXTRA_ARGS:-}
+imgpkg copy -b "${SRC_BUNDLE}" --to-repo "${DEST_REPO}" ${DBG} ${IMGPKG_EXTRA_ARGS:-}
 
 echo ">>> relocated OK. Tags now present in ${DEST_REPO}:"
 imgpkg tag list -i "${DEST_REPO}" 2>/dev/null | sed 's/^/    /' || true
