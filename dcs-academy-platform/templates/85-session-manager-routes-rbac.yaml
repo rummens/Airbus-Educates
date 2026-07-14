@@ -1,0 +1,54 @@
+{{- if .Values.enabled }}
+# grants the Educates secrets-manager service account the permissions it
+# needs to watch/list CRDs at the cluster scope. kopf's watcher enumerates
+# every CRD on startup so it can watch for custom-resource events; without
+# this it logs APIForbiddenError on every startup retry.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: educates-secrets-manager
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+    app.kubernetes.io/component: secrets-manager
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+rules:
+  # kopf watches CRDs on startup to discover custom-resource handlers
+  - apiGroups: ["apiextensions.k8s.io"]
+    resources: ["customresourcedefinitions"]
+    verbs: ["get", "list", "watch"]
+  # secrets-manager watches SecretCopiers, SecretExporters, SecretInjectors, SecretImporters
+  - apiGroups: ["secrets.educates.dev"]
+    resources: ["secretcopiers", "secretexporters", "secretinjectors", "secretimporters"]
+    verbs: ["get", "list", "watch", "create", "update", "delete"]
+  # need to enumerate namespaces to scope secret-copier operations
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list", "watch"]
+  # need to read service accounts to resolve secret references
+  - apiGroups: [""]
+    resources: ["serviceaccounts"]
+    verbs: ["get", "list", "watch"]
+  # core secrets + configmaps used by the copy logic
+  - apiGroups: [""]
+    resources: ["secrets", "configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "delete", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: educates-secrets-manager
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+    app.kubernetes.io/component: secrets-manager
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: educates-secrets-manager
+subjects:
+  - kind: ServiceAccount
+    name: secrets-manager
+    namespace: educates
+{{- end }}
