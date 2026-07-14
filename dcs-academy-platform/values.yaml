@@ -20,7 +20,7 @@ global:
     #   - Educates' own imageRegistry.host config field
     #   - workshop content images
     #   - vcluster images (carried inside the installer bundle)
-    host: ""
+    host: "fwef"
     # Name of an EXISTING pull secret (dockerconfigjson) for the private registry.
     # Optional. Must exist in the installer namespace (educates.installer.namespace)
     # so kapp-controller can pull the bundle, and is wired into Educates'
@@ -139,22 +139,44 @@ educates:
 # upstream ghcr repo (educates.installer.bundleRepository), so the Job needs internet
 # egress — set bundleMirror.proxy if you only reach the internet through a proxy.
 bundleMirror:
-  enabled: false
+  enabled: true
   # Image with imgpkg baked in (built from images/educates-mirror). Host is swapped
   # to global.registry.host like every other image — so MIRROR THIS ONE IMAGE FIRST
   # (plain image; Harbor replication is fine) so the Job can pull it in the air gap.
   image: ghcr.io/rummens/educates-mirror:dev
-  # ArgoCD sync hook. PreSync = the bundle is relocated BEFORE the installer App
-  # fetches it (correct for a first install, but blocks the sync until the multi-GB
-  # copy finishes). PostSync = non-blocking; the installer App just retries its fetch
-  # until the bundle appears. Either works; PreSync is the safe default.
-  hook: PreSync
+  # ArgoCD sync hook. PostSync = default: the SealedSecret below is unsealed during
+  # the normal sync, so its Secret exists before this Job runs; the installer App
+  # just retries its bundle fetch until the copy lands (non-blocking). Use PreSync
+  # ONLY if you pre-create registryCredsSecret out-of-band (a PreSync Job runs before
+  # the sync, so it can't see a chart-rendered SealedSecret yet).
+  hook: PostSync
   backoffLimit: 4
-  # Secret (in educates.installer.namespace) with keys `username` + `password` that
-  # give PUSH access to global.registry.host. REQUIRED — imgpkg needs creds to push.
-  #   oc create secret generic educates-mirror-creds -n dcs-educates-installer \
-  #     --from-literal=username=<robot> --from-literal=password=<token>
-  registryCredsSecret: ""
+  # OPTIONAL push creds. Name of the Secret (in educates.installer.namespace) the Job
+  # reads — keys `username` + `password`. Empty = run without creds env (anonymous /
+  # ambient auth; only works if your registry accepts the push that way). Otherwise
+  # either fill sealedRegistryCredentials below (chart renders it) or pre-create this
+  # Secret yourself (`oc create secret generic ...`).
+  registryCredsSecret: educates-mirror-creds
+  # OPTIONAL registry PUSH creds as a SealedSecret rendered by the chart — paste the
+  # kubeseal-encrypted strings here (safe to commit; only the cluster's controller can
+  # decrypt them). Requires the sealed-secrets controller. BOTH must be set to render;
+  # leave empty to skip the SealedSecret entirely (use a pre-created Secret, or none).
+  # Seal each value scoped to name=<registryCredsSecret>, namespace=<installer ns>:
+  #   echo -n '<robot-user>'  | kubeseal --raw --name educates-mirror-creds --namespace dcs-educates-installer
+  #   echo -n '<robot-token>' | kubeseal --raw --name educates-mirror-creds --namespace dcs-educates-installer
+  sealedRegistryCredentials:
+    username: ""
+    password: ""
+  # Private-CA handling for imgpkg (internal registry / proxy behind your own CA):
+  #   trustClusterCABundle — inject the cluster trust bundle the OpenShift way. The
+  #     chart creates a ConfigMap labelled config.openshift.io/inject-trusted-cabundle
+  #     =true (CNO fills it with system + custom CAs) and mounts it into the Job via
+  #     SSL_CERT_FILE, so TLS to a private registry/proxy validates. Preferred. Needs
+  #     hook: PostSync (default) so the bundle is populated before the Job runs.
+  #   insecureSkipTLSVerify — last resort: pass --registry-verify-certs=false to imgpkg
+  #     (disables cert checking entirely). Use only if you can't supply the CA.
+  trustClusterCABundle: true
+  insecureSkipTLSVerify: false
   # Internet egress proxy for pulling the source bundle from ghcr.io. Leave empty if
   # the cluster reaches ghcr directly. NO_PROXY should include your registry + .svc.
   proxy:

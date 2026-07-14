@@ -2,9 +2,6 @@
 {{- if not .Values.global.registry.host }}
 {{- fail "bundleMirror.enabled=true requires global.registry.host (the destination registry, e.g. registry.example/dcs-internal-images)" }}
 {{- end }}
-{{- if not .Values.bundleMirror.registryCredsSecret }}
-{{- fail "bundleMirror.enabled=true requires bundleMirror.registryCredsSecret (a Secret with username+password that can PUSH to global.registry.host)" }}
-{{- end }}
 {{- $ns := .Values.educates.installer.namespace }}
 {{- /* SRC = upstream ghcr bundle (never host-swapped). DEST repo = host-swapped
        path, no tag (imgpkg keeps the tag). DEST host = first path segment only. */ -}}
@@ -12,6 +9,26 @@
 {{- $path := regexReplaceAll "^[^/]+/" $srcRepo "" }}
 {{- $destRepo := printf "%s/%s" .Values.global.registry.host $path }}
 {{- $destHost := (splitList "/" .Values.global.registry.host) | first }}
+{{- $caName := "educates-bundle-mirror-ca-bundle" }}
+{{- $caFile := "/etc/pki/injected-ca/ca-bundle.crt" }}
+{{- $extra := "" }}
+{{- if .Values.bundleMirror.insecureSkipTLSVerify }}{{- $extra = "--registry-verify-certs=false" }}{{- end }}
+{{- if .Values.bundleMirror.trustClusterCABundle }}
+# OpenShift trusted-CA ConfigMap for the mirror Job. The Cluster Network Operator
+# fills ca-bundle.crt with the system CAs + any custom cluster CA (Proxy .spec
+# .trustedCA), and the Job points Go/imgpkg at it via SSL_CERT_FILE so TLS to a
+# private registry OR proxy validates. Normal resource (synced before the PostSync
+# Job), so keep bundleMirror.hook=PostSync or the bundle won't be populated in time.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $caName }}
+  namespace: {{ $ns }}
+  labels:
+    config.openshift.io/inject-trusted-cabundle: "true"
+    {{- include "educates.labels" . | nindent 4 }}
+---
+{{- end }}
 # Relocates the Educates installer imgpkg bundle into your registry as an ArgoCD
 # sync-hook Job. Idempotent (imgpkg copy skips existing blobs). See bundleMirror in
 # values.yaml. Runs FROM INSIDE the cluster so no workstation imgpkg is needed.
@@ -100,6 +117,7 @@ spec:
               value: {{ printf "%s:%s" $srcRepo .Values.educates.version | quote }}
             - name: DEST_REPO
               value: {{ $destRepo | quote }}
+            {{- if .Values.bundleMirror.registryCredsSecret }}
             # Push creds for the destination host (imgpkg matches by hostname).
             - name: IMGPKG_REGISTRY_HOSTNAME_0
               value: {{ $destHost | quote }}
@@ -113,6 +131,17 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.bundleMirror.registryCredsSecret | quote }}
                   key: password
+            {{- end }}
+            {{- if $extra }}
+            - name: IMGPKG_EXTRA_ARGS
+              value: {{ $extra | quote }}
+            {{- end }}
+            {{- if .Values.bundleMirror.trustClusterCABundle }}
+            # Go/imgpkg honor SSL_CERT_FILE; the injected bundle is a superset of the
+            # system CAs, so public (ghcr) + private (registry/proxy) TLS both validate.
+            - name: SSL_CERT_FILE
+              value: {{ $caFile | quote }}
+            {{- end }}
             {{- with .Values.bundleMirror.proxy }}
             {{- if .httpsProxy }}
             - { name: HTTPS_PROXY, value: {{ .httpsProxy | quote }} }
@@ -127,6 +156,12 @@ spec:
             - { name: no_proxy, value: {{ .noProxy | quote }} }
             {{- end }}
             {{- end }}
+          {{- if .Values.bundleMirror.trustClusterCABundle }}
+          volumeMounts:
+            - name: injected-ca
+              mountPath: /etc/pki/injected-ca
+              readOnly: true
+          {{- end }}
           resources:
             requests:
               cpu: 100m
@@ -136,4 +171,13 @@ spec:
               cpu: 500m
               memory: {{ .Values.bundleMirror.resources.limits.memory | default "4Gi" }}
               ephemeral-storage: {{ .Values.bundleMirror.resources.limits.ephemeralStorage | default "25Gi" }}
+      {{- if .Values.bundleMirror.trustClusterCABundle }}
+      volumes:
+        - name: injected-ca
+          configMap:
+            name: {{ $caName }}
+            items:
+              - key: ca-bundle.crt
+                path: ca-bundle.crt
+      {{- end }}
 {{- end }}

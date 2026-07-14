@@ -69,21 +69,50 @@ inner refs to ghcr.io. Only `imgpkg copy` relocates a bundle correctly. Two ways
   Idempotent (re-runs are a cheap no-op). This is what to use when a DevSpace/pod was
   too small to run imgpkg by hand.
 
+  PUSH creds are supplied as a **SealedSecret** — seal them once with `kubeseal`
+  (scoped to the target name+namespace) and paste the encrypted strings into values;
+  safe to commit, only the cluster's sealed-secrets controller can decrypt them:
+  ```sh
+  echo -n '<robot-user>'  | kubeseal --raw --name educates-mirror-creds --namespace dcs-educates-installer
+  echo -n '<robot-token>' | kubeseal --raw --name educates-mirror-creds --namespace dcs-educates-installer
+  ```
   ```yaml
   global:
     registry:
       host: "registry.example/dcs-internal-images"   # destination (also where the install pulls)
   bundleMirror:
     enabled: true
-    registryCredsSecret: educates-mirror-creds        # Secret with username+password (PUSH rights)
+    # hook defaults to PostSync so the SealedSecret is unsealed before the Job runs.
+    registryCredsSecret: educates-mirror-creds        # Secret name the values are sealed against
+    sealedRegistryCredentials:
+      username: "AgB...<kubeseal --raw output for the user>..."
+      password: "AgC...<kubeseal --raw output for the token>..."
     proxy:
       httpsProxy: "http://proxy.corp:3128"            # egress to ghcr.io for the SOURCE bundle
       noProxy: ".svc,registry.example"
   ```
-  ```sh
-  oc create secret generic educates-mirror-creds -n dcs-educates-installer \
-    --from-literal=username=<robot> --from-literal=password=<token>
+  The chart renders a `SealedSecret`; the controller unseals it into
+  `educates-mirror-creds` (keys `username`/`password`) which the Job mounts. Requires
+  the **sealed-secrets controller** on the cluster. (Prefer to manage the Secret
+  yourself? Leave `sealedRegistryCredentials` empty and `oc create secret generic
+  educates-mirror-creds …` out-of-band — then you may also use `hook: PreSync`.)
+
+  **Creds are optional.** Set `registryCredsSecret: ""` to run the Job with no creds
+  env (anonymous/ambient auth) if your registry accepts the push that way.
+
+  **Private CA (internal registry / proxy behind your own CA).** Two options:
+  ```yaml
+  bundleMirror:
+    trustClusterCABundle: true    # preferred: inject the OpenShift trust bundle
+    # insecureSkipTLSVerify: true # last resort: imgpkg --registry-verify-certs=false
   ```
+  `trustClusterCABundle` creates a ConfigMap labelled
+  `config.openshift.io/inject-trusted-cabundle=true` (the Cluster Network Operator
+  fills it with the system + your custom cluster CAs), mounts it into the Job, and
+  points imgpkg at it via `SSL_CERT_FILE` — so TLS to a private registry **or** the
+  egress proxy validates while public (ghcr) TLS still works. Keep `hook: PostSync`
+  (default) so the bundle is populated before the Job runs.
+
   Mirror the small `educates-mirror` image itself into your registry first (plain
   image — Harbor replication is fine) so the Job can pull it in the air gap. Source
   bundle stays `ghcr.io/educates/educates-installer:<version>`; destination is
