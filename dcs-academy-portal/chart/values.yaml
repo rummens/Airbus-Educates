@@ -21,6 +21,23 @@ image:
   tag: dev
   pullPolicy: Always
 
+# Custom CA trust for the portal's OUTBOUND HTTPS. The only such call is the
+# course-view README fetch from the workshop content git host — an internal
+# GitLab behind a private CA in air-gapped installs. Without its CA the fetch
+# fails TLS and the course view silently falls back to the short CR description.
+# When enabled we mount a CA bundle and point REQUESTS_CA_BUNDLE at it; Python
+# `requests` then trusts it (this affects only calls with no explicit verify=,
+# i.e. exactly the README fetch — Educates REST + OAuth pass their own verify).
+trustedCA:
+  enabled: false
+  # Default (existingConfigMap empty): create an empty ConfigMap labelled for the
+  # OpenShift network operator to inject the cluster's merged trust bundle
+  # (system CAs + cluster-wide additionalTrustedCA/proxy CAs). Works when your
+  # GitLab CA is trusted cluster-wide.
+  # If it is NOT cluster-wide, create a ConfigMap holding your CA under key
+  # `ca-bundle.crt` and name it here — it's mounted as-is.
+  existingConfigMap: ""
+
 replicas: 1            # stateless (state in CNPG) → safe to raise for HA
 
 # The Educates TrainingPortal this chart ships (71-trainingportal.yaml). Its

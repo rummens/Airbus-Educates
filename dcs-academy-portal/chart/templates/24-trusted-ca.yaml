@@ -1,0 +1,14 @@
+{{- if and .Values.enabled .Values.trustedCA.enabled (not .Values.trustedCA.existingConfigMap) }}
+# Empty ConfigMap the OpenShift cluster-network-operator fills with the merged
+# trust bundle (system CAs + cluster-wide additionalTrustedCA/proxy CAs) under
+# key ca-bundle.crt. Mounted into the portal for outbound HTTPS (README fetch).
+# Use trustedCA.existingConfigMap instead if your GitLab CA isn't cluster-wide.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-trusted-ca
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+    config.openshift.io/inject-trusted-cabundle: "true"
+{{- end }}

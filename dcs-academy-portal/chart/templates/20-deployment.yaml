@@ -90,6 +90,16 @@ spec:
             - { name: THEME_FAVICON,         value: {{ .Values.theme.favicon | quote }} }
             - { name: THEME_FONT_FAMILY,     value: {{ .Values.theme.fontFamily | quote }} }
             - { name: THEME_FOOTER_HTML,     value: {{ .Values.theme.footerHtml | quote }} }
+            {{- if .Values.trustedCA.enabled }}
+            # requests() trusts this bundle for outbound HTTPS (README fetch).
+            - { name: REQUESTS_CA_BUNDLE, value: /etc/pki/portal-ca/ca-bundle.crt }
+            {{- end }}
+          {{- if .Values.trustedCA.enabled }}
+          volumeMounts:
+            - name: trusted-ca
+              mountPath: /etc/pki/portal-ca
+              readOnly: true
+          {{- end }}
           readinessProbe:
             httpGet: { path: /readyz, port: http }
             initialDelaySeconds: 5
@@ -100,4 +110,13 @@ spec:
             periodSeconds: 20
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      {{- if .Values.trustedCA.enabled }}
+      volumes:
+        - name: trusted-ca
+          configMap:
+            name: {{ .Values.trustedCA.existingConfigMap | default (printf "%s-trusted-ca" .Chart.Name) }}
+            items:
+              - key: ca-bundle.crt
+                path: ca-bundle.crt
+      {{- end }}
 {{- end }}

@@ -71,47 +71,55 @@ def _lbl(meta, key, default=""):
     return (meta.get("labels") or {}).get(f"{cfg.ACADEMY_PREFIX}/{key}", default)
 
 
-def _source_url(spec):
-    """Public git URL a workshop is built from → a browseable link.
+def _git_source(spec):
+    """First git file source on the workshop → (url, ref, root) or None.
 
-    Educates keeps it at spec.workshop.files[].git.{url,ref} (+ newRootPath for
-    a subfolder). For GitHub with a subpath we deep-link to /tree/<branch>/<path>;
-    otherwise the repo root. Empty if the source isn't git (e.g. an image)."""
-    files = (spec.get("workshop", {}) or {}).get("files", []) or []
-    for f in files:
-        git = f.get("git") or {}
-        url = git.get("url")
-        if not url:
-            continue
-        url = url.rstrip("/")
-        if url.endswith(".git"):
-            url = url[:-4]
-        ref = (git.get("ref") or "main").split("/")[-1] or "main"   # origin/main → main
-        root = (f.get("newRootPath") or "").strip("/")
-        if root and "github.com" in url:
-            return f"{url}/tree/{ref}/{root}"
-        return url
-    return ""
-
-
-def _readme_raw_url(spec):
-    """Raw URL of the lab's README.md from its git file source (for the course
-    view's rich description). GitHub → raw.githubusercontent.com/<repo>/<ref>/
-    <newRootPath>/README.md. Empty if the source isn't a github git source."""
+    Educates keeps it at spec.workshop.files[].git.{url,ref} (+ newRootPath for a
+    subfolder). Empty when the source isn't git (e.g. an OCI image — the air-gap
+    default useGit=false, so there is NO git source and both links below are '').
+    """
     files = (spec.get("workshop", {}) or {}).get("files", []) or []
     for f in files:
         git = f.get("git") or {}
         url = (git.get("url") or "").rstrip("/")
-        if not url or "github.com" not in url:
+        if not url:
             continue
         if url.endswith(".git"):
             url = url[:-4]
+        ref = (git.get("ref") or "main").split("/")[-1] or "main"   # origin/main → main
+        return url, ref, (f.get("newRootPath") or "").strip("/")
+    return None
+
+
+def _source_url(spec):
+    """Public git URL a workshop is built from → a browseable link (repo root, or
+    a subfolder deep-link). Handles GitHub and GitLab-style hosts."""
+    g = _git_source(spec)
+    if not g:
+        return ""
+    url, ref, root = g
+    if not root:
+        return url
+    if "github.com" in url:
+        return f"{url}/tree/{ref}/{root}"
+    return f"{url}/-/tree/{ref}/{root}"                         # gitlab-style
+
+
+def _readme_raw_url(spec):
+    """Raw URL of the lab's README.md from its git file source (for the course
+    view's rich description). GitHub → raw.githubusercontent.com; any other host
+    is assumed GitLab-style (<url>/-/raw/<ref>/<path>) — Airbus PROD is GitLab, not
+    github. Empty when there is no git source (useGit=false → OCI image source):
+    the course view then falls back to the CR's own (shorter) spec.description."""
+    g = _git_source(spec)
+    if not g:
+        return ""
+    url, ref, root = g
+    path = f"{root}/README.md" if root else "README.md"
+    if "github.com" in url:
         repo = url.split("github.com/", 1)[-1]                 # owner/repo
-        ref = (git.get("ref") or "main").split("/")[-1] or "main"
-        root = (f.get("newRootPath") or "").strip("/")
-        path = f"{root}/README.md" if root else "README.md"
         return f"https://raw.githubusercontent.com/{repo}/{ref}/{path}"
-    return ""
+    return f"{url}/-/raw/{ref}/{path}"                          # gitlab-style
 
 
 def _uses_vcluster(spec):

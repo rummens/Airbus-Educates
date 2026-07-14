@@ -23,6 +23,13 @@
 
   <aside class="detail-side">
     {{ m.meta_pills(c, difficulty_icon) }}
+    <div class="pills">
+      {% if c.vcluster %}
+      <span class="pill" title="This lab runs in its own virtual cluster — you get a full, isolated Kubernetes control plane.">{{ icon('layers')|safe }}Virtual cluster</span>
+      {% else %}
+      <span class="pill" title="This lab runs in a dedicated namespace on the shared cluster.">{{ icon('box')|safe }}Namespace</span>
+      {% endif %}
+    </div>
     {% if c.author %}<p class="detail-author">{{ icon('user')|safe }} {{ c.author }}</p>{% endif %}
     <div class="detail-actions">
       <a class="btn btn-primary btn-lg" href="{{ url_for('launch', name=c.name) }}"

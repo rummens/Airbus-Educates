@@ -194,7 +194,12 @@ def terminate_session(name):
 
 def fetch_readme(url, ttl=300):
     """Fetch a lab's README markdown (raw git URL), cached. '' on any failure so
-    the course view degrades to the CR description."""
+    the course view degrades to the CR description.
+
+    No explicit verify= → requests uses the system trust store, or REQUESTS_CA_BUNDLE
+    if set. For an internal GitLab behind a private CA, the chart sets that env from
+    a mounted CA bundle (values trustedCA.*), else the TLS handshake fails and this
+    returns ''."""
     if not url:
         return ""
     now = time.time()
