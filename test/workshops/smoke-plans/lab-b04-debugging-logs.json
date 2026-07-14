@@ -1,0 +1,10 @@
+{
+  "workshop": "lab-b04-debugging-logs",
+  "_note": "broken-deployment.yaml SHIPS with the seeded fault (image :2.0, an unmirrored tag -> ImagePullBackOff). The plan applies it as-is (= the broken state a learner starts from) plus a Service, confirms not-Ready, then replicates the learner's editor edit (:2.0 -> :1.0) with sed and re-applies to recover.",
+  "steps": [
+    {"run": "oc apply -f - <<EOF\napiVersion: v1\nkind: Service\nmetadata: {name: hello-dcs}\nspec:\n  selector: {app: hello-dcs}\n  ports: [{port: 8080, targetPort: 8080}]\nEOF\nenvsubst < ~/exercises/broken-deployment.yaml | oc apply -f -\nsleep 20"},
+    {"check": "verify-not-ready", "args": ["hello-dcs"]},
+    {"run": "sed 's/hello-dcs:2.0/hello-dcs:1.0/' ~/exercises/broken-deployment.yaml | envsubst | oc apply -f - && oc rollout status deployment/hello-dcs --timeout=180s"},
+    {"check": "verify-recovered", "args": ["hello-dcs", "hello-dcs", "8080"]}
+  ]
+}

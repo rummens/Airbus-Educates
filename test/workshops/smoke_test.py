@@ -75,8 +75,15 @@ def wait_for_pod(ctx, ns, prefix, timeout):
 
 
 def pod_exec(ctx, ns, pod, script, timeout):
-    return sh(["oc", "--context", ctx, "-n", ns, "exec", pod, "-c", "workshop", "--",
-               "bash", "-lc", script], timeout=timeout)
+    cmd = ["oc", "--context", ctx, "-n", ns, "exec", pod, "-c", "workshop", "--",
+           "bash", "-lc", script]
+    try:
+        return sh(cmd, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        # A step that never returns (e.g. an interactive `-w` watch left in a plan) must
+        # fail THAT step, not crash the whole run. Synthesize a failed result.
+        return subprocess.CompletedProcess(cmd, 124, "",
+                                           f"step timed out after {timeout}s (interactive/watch command?)")
 
 
 def check_links(content_dir):
@@ -92,13 +99,20 @@ def check_links(content_dir):
         print("\nlink check: no external links found.")
         return 0
     print(f"\nlink check ({len(urls)} external links):")
+    # Codes that mean "valid URL, server just refuses automated clients" (docs.openshift.com
+    # 403s any non-browser request) — reachable, not broken. Matches link_check.py.
+    soft = {"401", "403", "405", "429"}
+    ua = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
+          "Chrome/124 Safari/537.36")
     bad = 0
     for u in sorted(urls):
-        code = sh(["curl", "-sSL", "-m", "20", "-A", "Mozilla/5.0",
+        code = sh(["curl", "-sSL", "-m", "20", "-A", ua,
+                   "-H", "Accept: text/html,application/xhtml+xml",
                    "-o", "/dev/null", "-w", "%{http_code}", u]).stdout.strip()
-        ok = bool(code) and code[0] in "23"
+        ok = bool(code) and (code[0] in "23" or code in soft)
         bad += 0 if ok else 1
-        print(f"  {(GREEN if ok else RED)}{code or 'ERR'}{RST}  {u}")
+        tag = code or "ERR"
+        print(f"  {(GREEN if ok else RED)}{tag}{RST}  {u}")
     return bad
 
 
@@ -121,13 +135,23 @@ def run_plan(ctx, ns, pod, steps, tests_dir, workdir, oc_shim, timeout):
             argstr = " ".join(f"'{a}'" for a in step.get("args", []))
             r = pod_exec(ctx, ns, pod, f'{prefix}{tests_dir}/{step["check"]} {argstr}', timeout)
             label = f"check: {step['check']} {' '.join(step.get('args', []))}".rstrip()
-        ok = r.returncode == 0
+        # `expect_fail` steps invert the verdict: they only pass on the real DCS platform
+        # (e.g. Kyverno-enforced PROD deploys) and are EXPECTED to fail on CRC. Encoding it
+        # keeps the run green here while still catching a regression (an unexpected PASS).
+        want_fail = bool(step.get("expect_fail"))
+        raw_ok = r.returncode == 0
+        ok = (not raw_ok) if want_fail else raw_ok
         passed, failed = (passed + 1, failed) if ok else (passed, failed + 1)
-        print(f"  [{i:>2}] {(GREEN + 'PASS' if ok else RED + 'FAIL')}{RST}  {label}")
+        tag = "XFAIL" if (want_fail and ok) else ("XPASS" if want_fail else ("PASS" if ok else "FAIL"))
+        colour = GREEN if ok else RED
+        print(f"  [{i:>2}] {colour}{tag:<5}{RST}  {label}")
         if not ok:
             diag = (r.stderr.strip() or r.stdout.strip()).splitlines()
+            hint = " (expected to FAIL on CRC but PASSED — platform regression?)" if want_fail else ""
             if diag:
-                print(f"        {DIM}{diag[-1]}{RST}")
+                print(f"        {DIM}{diag[-1]}{hint}{RST}")
+            elif hint:
+                print(f"        {DIM}{hint.strip()}{RST}")
     return passed, failed
 
 
@@ -150,11 +174,17 @@ def main():
     p.add_argument("--no-links", action="store_true", help="skip external link checking")
     args = p.parse_args()
 
-    # Resolve the workshop's repo subpath (no hard-coded layout).
-    targets = dw.resolve_targets(args.name, args.base)
-    if not targets:
-        sys.exit(f"could not resolve workshop {args.name!r} under {args.base}")
-    name, subpath = targets[0]
+    # Resolve the workshop's repo subpath (no hard-coded layout). Search all tracks
+    # first (so a dev-/security-track lab resolves without --base), then fall back to
+    # the --base-relative resolver for anything outside the monorepo.
+    subpath = dw.find_subpath(args.name)
+    if subpath:
+        name = args.name
+    else:
+        targets = dw.resolve_targets(args.name, args.base)
+        if not targets:
+            sys.exit(f"could not resolve workshop {args.name!r} under {args.base}")
+        name, subpath = targets[0]
     ns = name                                    # portal-less deploy: env ns == name
     plan_path = pathlib.Path(args.plan) if args.plan else HERE / "smoke-plans" / f"{name}.json"
     if not plan_path.exists():

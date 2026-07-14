@@ -1,0 +1,13 @@
+{
+  "workshop": "lab-a06-networking",
+  "_note": "In-cluster access is the testable core. The real workshop grants the session SA a Route-management Role + an observe NetworkPolicy via spec.session.objects, but that block lives in a Helm-templated workshop.yaml the portless deploy can't extract, so on CRC the SA can't create the Route and the NetworkPolicy is absent. Hence route-admitted, netpol-present and egress-blocked are all expect_fail here — they pass on a real/portal deploy where the operator applies session.objects and the platform is air-gapped. Validate on x86.",
+  "steps": [
+    {"run": "envsubst < hello-dcs.yaml | oc apply -f - && oc rollout status deployment/hello-dcs --timeout=150s"},
+    {"check": "verify-deploy-ready", "args": ["hello-dcs"]},
+    {"check": "verify-svc-reachable", "args": ["hello-dcs", "8080"]},
+    {"run": "oc apply -f route.yaml || true"},
+    {"check": "verify-route-admitted", "args": ["hello-dcs"], "expect_fail": true},
+    {"check": "verify-netpol-present", "args": ["allow-hello-dcs-ingress"], "expect_fail": true},
+    {"check": "verify-egress-blocked", "args": ["hello-dcs"], "expect_fail": true}
+  ]
+}

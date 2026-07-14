@@ -144,6 +144,7 @@ itself is unusable on arm64 CRC — workshop **content** is tested portal-less a
 
 ## See also
 
+- [security.md](security.md) — trust boundaries, RBAC judgment per chart, and the vCluster-vs-namespace rule.
 - `dcs-academy-platform/README.md` — how Educates is installed (kapp-controller App, ytt/kbld/kapp), values, air-gap, security grants.
 - `dcs-academy-portal/` — portal app, OAuth gate, feedback, Track CRD.
 - `workshops-monorepo/README.md` — the catalog contract (add a track/workshop) and deploy order.

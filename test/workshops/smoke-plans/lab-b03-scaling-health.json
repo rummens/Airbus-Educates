@@ -1,0 +1,17 @@
+{
+  "workshop": "lab-b03-scaling-health",
+  "_note": "Prereq: the lab assumes a running hello-dcs (from earlier in the dev track) — the plan deploys one first (unquoted heredoc so the session's $DCS_REGISTRY expands). verify-quota / verify-oversized-pending rely on the Educates budget ResourceQuota being present and small enough to reject the oversized deploy; if CRC's budget quota differs they may need expect_fail.",
+  "steps": [
+    {"run": "oc apply -f - <<EOF\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: hello-dcs\n  labels: {app: hello-dcs}\nspec:\n  replicas: 1\n  selector: {matchLabels: {app: hello-dcs}}\n  template:\n    metadata: {labels: {app: hello-dcs}}\n    spec:\n      containers:\n      - name: hello-dcs\n        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0\n        ports: [{containerPort: 8080}]\n        resources: {requests: {cpu: 50m, memory: 64Mi}, limits: {cpu: 100m, memory: 128Mi}}\nEOF\noc rollout status deployment/hello-dcs --timeout=180s"},
+    {"run": "oc scale deployment/hello-dcs --replicas=3 && oc rollout status deployment/hello-dcs --timeout=180s"},
+    {"check": "verify-replicas", "args": ["hello-dcs", "3"]},
+    {"check": "verify-quota", "args": []},
+    {"run": "envsubst < ~/exercises/deployment-oversized.yaml | oc apply -f - || true"},
+    {"check": "verify-oversized-pending", "args": []},
+    {"run": "envsubst < ~/exercises/deployment-probes.yaml | oc apply -f - && oc rollout status deployment/hello-dcs --timeout=180s"},
+    {"check": "verify-pods-running", "args": []},
+    {"check": "verify-probes", "args": ["hello-dcs"]},
+    {"run": "oc rollout restart deployment/hello-dcs && oc rollout status deployment/hello-dcs --timeout=180s"},
+    {"check": "verify-replicas", "args": ["hello-dcs", "2"]}
+  ]
+}

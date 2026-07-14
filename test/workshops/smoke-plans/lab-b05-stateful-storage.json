@@ -1,0 +1,18 @@
+{
+  "workshop": "lab-b05-stateful-storage",
+  "_note": "Prereq: a running hello-dcs for the ephemeral demo (deployed first, heredoc so $DCS_REGISTRY expands). The PVC is RWO on crc-csi-hostpath-provisioner (WaitForFirstConsumer), so it only binds once a pod mounts it — the plan deploys the stateful app BEFORE verify-pvc-bound (the content checks it earlier, which works only on an Immediate-binding class). DCS_STORAGE_CLASS is set for CRC. CRC's session SCC is RunAsAny so it assigns no fsGroup and the mounted volume stays root-owned (non-root container can't write); the plan patches an explicit fsGroup — real DCS restricted-v2 auto-assigns one, so the workshop manifest stays portable.",
+  "steps": [
+    {"run": "oc apply -f - <<EOF\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: hello-dcs\n  labels: {app: hello-dcs}\nspec:\n  replicas: 1\n  selector: {matchLabels: {app: hello-dcs}}\n  template:\n    metadata: {labels: {app: hello-dcs}}\n    spec:\n      containers:\n      - name: hello-dcs\n        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0\n        ports: [{containerPort: 8080}]\nEOF\noc rollout status deployment/hello-dcs --timeout=180s"},
+    {"run": "oc exec deployment/hello-dcs -- sh -c 'echo written-inside-the-container > /tmp/note; cat /tmp/note'"},
+    {"run": "oc delete pod -l app=hello-dcs && oc rollout status deployment/hello-dcs --timeout=180s"},
+    {"run": "DCS_STORAGE_CLASS=crc-csi-hostpath-provisioner envsubst < ~/exercises/pvc.yaml | oc apply -f -"},
+    {"run": "DCS_STORAGE_CLASS=crc-csi-hostpath-provisioner envsubst < ~/exercises/deployment-stateful.yaml | oc apply -f - && oc patch deployment/hello-dcs --type=merge -p '{\"spec\":{\"template\":{\"spec\":{\"securityContext\":{\"fsGroup\":1000700000}}}}}' && oc rollout status deployment/hello-dcs --timeout=180s"},
+    {"check": "verify-pvc-bound", "args": ["hello-dcs-data"]},
+    {"check": "verify-pods-running", "args": ["hello-dcs", "1"]},
+    {"run": "oc exec deployment/hello-dcs -- sh -c 'echo persisted-by-dcs > /data/marker'"},
+    {"check": "verify-marker", "args": ["hello-dcs", "/data/marker", "persisted-by-dcs"]},
+    {"run": "oc delete pod -l app=hello-dcs && oc rollout status deployment/hello-dcs --timeout=180s"},
+    {"check": "verify-pods-running", "args": ["hello-dcs", "1"]},
+    {"check": "verify-marker", "args": ["hello-dcs", "/data/marker", "persisted-by-dcs"]}
+  ]
+}

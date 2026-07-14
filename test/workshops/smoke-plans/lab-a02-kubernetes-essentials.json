@@ -15,6 +15,8 @@
     {"check": "verify-replicas", "args": ["hello-dcs", "3"]},
     {"check": "verify-pods-running", "args": ["hello-dcs", "3"]},
     {"check": "verify-logs", "args": ["hello-dcs"]},
-    {"check": "verify-exec", "args": ["hello-dcs"]}
+    {"check": "verify-exec", "args": ["hello-dcs"]},
+    {"run": "oc scale deployment/hello-dcs --replicas=2 && oc rollout status deployment/hello-dcs --timeout=120s"},
+    {"check": "verify-replicas", "args": ["hello-dcs", "2"]}
   ]
 }
