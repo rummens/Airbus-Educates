@@ -181,7 +181,12 @@ def create_app():
         ratings = _ratings_safe()
         # Rich description = the lab's README.md (markdown), fetched from its git
         # source; falls back to the CR description if unavailable.
+        log.info("COURSE %s: readme_url=%r vcluster=%s", name, c.get("readme_url"), c.get("vcluster"))
         readme = _safe(lambda: educates.fetch_readme(c.get("readme_url", ""))) or ""
+        if not readme:
+            # Pinpoint why: dump the CR's actual file sources (git vs image, host, ref).
+            log.info("COURSE %s: empty README, CR file sources=%s",
+                     name, k8sclient.workshop_file_sources(name))
         # Drop the README's own leading H1 — the view already prints the course title
         # as the page <h1> from the CR, so keeping the README title double-headlines it.
         readme = re.sub(r"^#\s+.*$\n?", "", readme, count=1, flags=re.M)

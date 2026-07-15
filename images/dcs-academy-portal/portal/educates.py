@@ -201,18 +201,23 @@ def fetch_readme(url, ttl=300):
     a mounted CA bundle (values trustedCA.*), else the TLS handshake fails and this
     returns ''."""
     if not url:
+        log.info("README skip: no readme_url (workshop has no git file source — "
+                 "useGit=false/image source, or a host we don't build raw URLs for)")
         return ""
     now = time.time()
     with _readme_lock:
         hit = _readme_cache.get(url)
         if hit and now < hit[1]:
+            log.info("README cache hit %s (len=%d)", url, len(hit[0]))
             return hit[0]
     try:
         r = requests.get(url, timeout=10)
         r.raise_for_status()
         text = r.text
+        log.info("README fetch OK %s -> %s len=%d", url, r.status_code, len(text))
     except requests.RequestException as e:
-        log.info("README fetch failed %s: %s", url, e)
+        # TLS failures (private CA, see trustedCA.*) surface here as an SSLError.
+        log.warning("README fetch FAILED %s: %s: %s", url, type(e).__name__, e)
         text = ""
     with _readme_lock:
         _readme_cache[url] = (text, now + ttl)
