@@ -23,5 +23,3 @@ image:
   # global.registry.host is set; the digest is preserved.
   repository: ghcr.io/carvel-dev/kapp-controller
   digest: "sha256:610a14076cfe8864cd0bd961277b8c239298ab418234a1a8c324f2f5792c9b1d"
-
-skipTLS: false
