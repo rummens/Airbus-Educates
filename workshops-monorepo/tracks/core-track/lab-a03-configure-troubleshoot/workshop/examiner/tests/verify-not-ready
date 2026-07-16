@@ -1,9 +1,20 @@
 #!/bin/bash
-# Verify the app is currently broken: no available replicas.
-avail=$(oc get deploy hello-dcs -o jsonpath='{.status.availableReplicas}' 2>/dev/null)
-if [ "${avail:-0}" -lt 1 ] 2>/dev/null; then
-  echo "OK: the app is currently not ready (available=${avail:-0}) — the fault is live."
+# Verify the app is currently broken. A rolling update keeps the previous (healthy)
+# Pod Ready while the new ReplicaSet fails, so `availableReplicas < 1` is NOT a
+# reliable signal. Instead detect a container stuck in a failure waiting-state on
+# any hello-dcs Pod (the broken manifest yields CreateContainerConfigError).
+reasons=$(oc get pods -l app=hello-dcs \
+  -o jsonpath='{range .items[*]}{.status.containerStatuses[*].state.waiting.reason}{"\n"}{end}' 2>/dev/null)
+if echo "$reasons" | grep -qiE 'CreateContainerConfigError|CrashLoopBackOff|ImagePullBackOff|ErrImagePull|InvalidImageName|RunContainerError|CreateContainerError'; then
+  echo "OK: a hello-dcs Pod is failing to start ($(echo "$reasons" | grep -iE 'Error|BackOff' | head -1 | tr -d ' ')) — the fault is live."
   exit 0
 fi
-echo "Expected the app to be broken, but it has ${avail} available replica(s). Did the broken manifest apply?" >&2
+# Fallback: desired replicas not fully ready.
+desired=$(oc get deploy hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+ready=$(oc get deploy hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+if [ "${ready:-0}" -lt "${desired:-1}" ] 2>/dev/null; then
+  echo "OK: only ${ready:-0}/${desired:-1} replicas ready — the app is not healthy."
+  exit 0
+fi
+echo "Expected the app to be broken, but no failing Pod was found. Did the broken manifest apply?" >&2
 exit 1

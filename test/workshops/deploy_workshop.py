@@ -222,10 +222,16 @@ def deploy_one(args, name, subpath):
     ws = build_workshop(name, url, args.ref, subpath, args.budget, apps, args.vcluster,
                         args.image, args.registry, title=name, desc=f"{name} (CRC test, git source)")
 
-    # idempotent: drop any prior env/session so content re-pulls fresh
+    # idempotent: drop any prior env/session so content re-pulls fresh. Wait for the
+    # WorkshopEnvironment to actually disappear before recreating — recreating while the
+    # old env namespace is still Terminating makes the new session stick in Pending
+    # (the observed CRC flake). Poll up to 60s, then proceed regardless.
     oc_delete(ctx, "workshopsession", session_name)
     oc_delete(ctx, "workshopenvironment", name)
-    time.sleep(2)
+    for _ in range(30):
+        if sh(["oc", "--context", ctx, "get", "workshopenvironment", name]).returncode != 0:
+            break
+        time.sleep(2)
 
     oc_apply(ctx, ws)
     oc_apply(ctx, {"apiVersion": "training.educates.dev/v1beta1", "kind": "WorkshopEnvironment",
