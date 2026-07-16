@@ -14,6 +14,7 @@ metadata:
     # ArgoCD retries until their deps exist instead of hard-failing.
     argocd.argoproj.io/sync-wave: "2"
     argocd.argoproj.io/sync-options: "skipBackgroundRequests=true"
+spec:
   project: default
   # Kyverno mutates ClusterPolicy rules with skipBackgroundRequests, making the
   # live resource differ from git. Ignore it.
