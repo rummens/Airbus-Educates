@@ -2497,9 +2497,6 @@ spec:
           name: home
         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
           name: empty-sa
-        - mountPath: /etc/kapp-controller
-          name: kapp-controller-config
-          readOnly: true
         - mountPath: /etc/ssl/certs/registry-ca
           name: registry-ca
           readOnly: true
@@ -2513,9 +2510,6 @@ spec:
         name: home
       - emptyDir: {}
         name: empty-sa
-      - secret:
-          secretName: kapp-controller-config
-        name: kapp-controller-config
       - configMap:
           name: registry-ca
         name: registry-ca

@@ -1,0 +1,13 @@
+{{- if .Values.enabled }}
+# OpenShift injects the system trust bundle and any cluster-wide custom CA into
+# ca-bundle.crt. The kapp-controller sidecar uses it for registry and proxy TLS.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: registry-ca
+  namespace: {{ .Values.global.kappControllerNamespace | default "kapp-controller" }}
+  labels:
+    config.openshift.io/inject-trusted-cabundle: "true"
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+{{- end }}
