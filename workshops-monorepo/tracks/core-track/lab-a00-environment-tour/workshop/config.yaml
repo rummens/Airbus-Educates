@@ -4,9 +4,13 @@
 params:
 - name: product_name
   value: "Digital Container Service (DCS)"
+  aliases: [PRODUCT_NAME]
 - name: product_short
   value: "DCS"
+  aliases: [PRODUCT_SHORT]
 - name: dcs_registry
   value: "harbor.example.dcs/dcs-academy"
+  aliases: [DCS_REGISTRY]
 - name: dcs_docs_base_url
   value: "https://docs.example.dcs"
+  aliases: [DCS_DOCS_BASE_URL]

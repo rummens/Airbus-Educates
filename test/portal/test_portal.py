@@ -262,6 +262,7 @@ def test_fetch_readme_cached(monkeypatch):
     calls = {"n": 0}
     class _R:
         text = "# hi"
+        status_code = 200
         def raise_for_status(self): pass
     def fake_get(url, timeout=0):
         calls["n"] += 1

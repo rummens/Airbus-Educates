@@ -43,6 +43,17 @@ workshopContent:
 # (Workshop CRs are NOT verbatim — rendered through `tpl`, so .Values work there.)
 labels: {}
 
+# Author params shared by EVERY workshop, controlled here instead of in each lab's
+# workshop/config.yaml. The chart injects them as session env on every workshop
+# entry in the TrainingPortal; each config.yaml param carries `aliases: [ENV]` so
+# it reads the env (falling back to its own literal default when unset — e.g. a
+# plain content preview). Change a value here + resync → every lab updates.
+params:
+  productName: "Digital Container Service (DCS)"
+  productShort: "DCS"
+  dcsRegistry: "harbor.example.dcs/dcs-academy"
+  dcsDocsBaseUrl: "https://docs.example.dcs"
+
 # The one Educates TrainingPortal that hosts the whole catalog. Its name +
 # hostname MUST match the portal chart (educates.portalName / auth.hostname):
 # the portal app reads this CR's status for the robot REST creds + backend ns.

@@ -45,5 +45,16 @@ spec:
     - name: {{ $meta.name }}
       expires: {{ index $ann "academy.dcs/expires" | default $root.Values.portal.expires }}
       orphaned: {{ index $ann "academy.dcs/orphaned" | default $root.Values.portal.orphaned }}
+      # Shared author params → session env for every workshop. The lab's
+      # config.yaml params read these via `aliases:` (see values.params).
+      env:
+      - name: PRODUCT_NAME
+        value: {{ $root.Values.params.productName | quote }}
+      - name: PRODUCT_SHORT
+        value: {{ $root.Values.params.productShort | quote }}
+      - name: DCS_REGISTRY
+        value: {{ $root.Values.params.dcsRegistry | quote }}
+      - name: DCS_DOCS_BASE_URL
+        value: {{ $root.Values.params.dcsDocsBaseUrl | quote }}
   {{- end }}
 {{- end }}
