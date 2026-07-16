@@ -1,0 +1,12 @@
+{{- if and .Values.enabled .Values.educates.installer.createNamespace }}
+# Some clusters don't let ArgoCD auto-create namespaces for this app
+# (CreateNamespace=true sync option unavailable/blocked). Render it ourselves instead.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.educates.installer.namespace }}
+  labels:
+    {{- include "educates.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+{{- end }}

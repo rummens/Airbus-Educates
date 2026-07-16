@@ -7,6 +7,8 @@ educates:
     tlsCertificateRef:
       name: router-certs-default
       namespace: openshift-ingress
+  installer:
+    createNamespace: true
 
 # Portal chart: Apple-Silicon CRC can't run the cryptography Rust ext (SIGILL under
 # Virtualization.framework) unless OpenSSL's ARM cap-probe is skipped. armcap covers

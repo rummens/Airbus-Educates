@@ -118,6 +118,9 @@ educates:
     # Namespace the kapp-controller installer App + RBAC + config secret live in.
     # dcs- prefix marks it as a static platform namespace we create.
     namespace: dcs-educates-installer
+    # false = ArgoCD creates the namespace (CreateNamespace=true sync option).
+    # Set true on clusters where the app can't do that (render Namespace ourselves).
+    createNamespace: false
     # Base repo for the installer imgpkg bundle. When global.registry.host is set,
     # the host is swapped but this path is preserved (mirror to <host>/<this>).
     bundleRepository: ghcr.io/educates/educates-installer
