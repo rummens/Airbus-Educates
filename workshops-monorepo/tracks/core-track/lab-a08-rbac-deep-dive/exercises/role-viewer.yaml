@@ -1,9 +1,0 @@
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: pod-service-viewer
-rules:
-# Read-only on Pods and Services. Each rule = apiGroups x resources x verbs.
-- apiGroups: [""]           # "" is the core API group (Pods, Services live here)
-  resources: ["pods", "services"]
-  verbs: ["get", "list", "watch"]

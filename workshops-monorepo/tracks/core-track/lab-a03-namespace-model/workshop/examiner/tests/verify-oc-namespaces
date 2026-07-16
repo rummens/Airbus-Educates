@@ -1,7 +1,0 @@
-#!/bin/bash
-# verify-oc-namespaces — the vcluster is reachable and namespace listing works.
-if ! oc get namespaces >/dev/null 2>&1; then
-  echo "Could not list namespaces. Is the virtual cluster ready and is your context pointing at it?" >&2
-  exit 1
-fi
-echo "OK: namespaces are listable in the virtual cluster."

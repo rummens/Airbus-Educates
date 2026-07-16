@@ -1,8 +1,0 @@
-#!/bin/bash
-# verify-role <role-name> — a namespaced Role exists in the session namespace.
-name="${1:?role name required}"
-if ! oc get role "$name" >/dev/null 2>&1; then
-  echo "Role '$name' not found in the session namespace. Apply role-viewer.yaml first." >&2
-  exit 1
-fi
-echo "OK: Role '$name' exists."

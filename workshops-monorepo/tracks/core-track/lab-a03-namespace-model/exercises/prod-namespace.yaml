@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: team-prod
-  labels:
-    # PROD-type namespaces enforce Kyverno admission policies (see kyverno-policy.yaml).
-    dcs.airbus/namespace-type: prod

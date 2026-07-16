@@ -55,8 +55,9 @@ isn't self-service yet (teach as observe).
 
 ```bash
 cd test/workshops
-./deploy_workshop.py lab-a02-kubernetes-essentials      # portal-less, git source
-./smoke_test.py     lab-a02-kubernetes-essentials       # examiner checks + link check + restart
+./deploy_workshop.py lab-a02-deploy-first-app           # portal-less, git source
+./smoke_test.py     lab-a02-deploy-first-app            # examiner checks + link check + restart
+./run_track.sh workshops-monorepo/tracks/core-track     # whole track (ArgoCD pause/restore + per-lab logs)
 ./coverage_check.py --all    # (no cluster) every command has a smoke test
 ./link_check.py     --all    # (no cluster) every content link resolves
 ```

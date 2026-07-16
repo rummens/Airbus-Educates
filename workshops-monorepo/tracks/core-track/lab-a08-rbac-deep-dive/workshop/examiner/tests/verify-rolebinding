@@ -1,8 +1,0 @@
-#!/bin/bash
-# verify-rolebinding <rolebinding-name> — a RoleBinding exists in the session namespace.
-name="${1:?rolebinding name required}"
-if ! oc get rolebinding "$name" >/dev/null 2>&1; then
-  echo "RoleBinding '$name' not found. Apply rolebinding-viewer.yaml first." >&2
-  exit 1
-fi
-echo "OK: RoleBinding '$name' exists."

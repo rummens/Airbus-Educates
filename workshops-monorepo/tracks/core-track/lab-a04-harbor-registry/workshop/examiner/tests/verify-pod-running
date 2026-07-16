@@ -1,9 +1,0 @@
-#!/bin/bash
-# verify-pod-running <pod> — the pod is in the Running phase (catalog pull landed).
-name="${1:?pod name required}"
-phase=$(oc get pod "$name" -o jsonpath='{.status.phase}' 2>/dev/null)
-if [ "$phase" != "Running" ]; then
-  echo "Pod '$name' is '${phase:-not found}', expected Running. Check 'oc describe pod $name' (image pull from Harbor may still be in progress)." >&2
-  exit 1
-fi
-echo "OK: pod '$name' is Running."

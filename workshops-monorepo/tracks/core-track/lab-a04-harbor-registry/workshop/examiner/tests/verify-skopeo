@@ -1,8 +1,0 @@
-#!/bin/bash
-# verify-skopeo — skopeo is installed in the workshop image.
-if ! command -v skopeo >/dev/null 2>&1; then
-  echo "skopeo not found on PATH. It must be present in dcs-workshop-base (base-image rebuild task)." >&2
-  exit 1
-fi
-skopeo --version
-echo "OK: skopeo is available."

@@ -1,8 +1,0 @@
-#!/bin/bash
-# verify-deployment-exists <deployment>
-name="${1:?deployment name required}"
-if ! oc get deployment "$name" >/dev/null 2>&1; then
-  echo "Deployment '$name' not found. Apply deployment.yaml first." >&2
-  exit 1
-fi
-echo "OK: deployment '$name' exists."

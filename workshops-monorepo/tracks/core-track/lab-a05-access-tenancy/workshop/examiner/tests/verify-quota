@@ -1,8 +1,0 @@
-#!/bin/bash
-# verify-quota — at least one ResourceQuota is present on the namespace.
-n=$(oc get resourcequota -o name 2>/dev/null | wc -l | tr -d ' ')
-if [ "${n:-0}" -lt 1 ]; then
-  echo "No ResourceQuota found on this namespace. On DCS a quota is always set — this environment may not have one." >&2
-  exit 1
-fi
-echo "OK: $n ResourceQuota(s) present."

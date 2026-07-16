@@ -1,8 +1,0 @@
-#!/bin/bash
-# verify-can-i-list — the permissions listing works and is non-empty.
-out=$(oc auth can-i --list 2>/dev/null)
-if [ -z "$out" ]; then
-  echo "'oc auth can-i --list' returned nothing — could not read your permissions." >&2
-  exit 1
-fi
-echo "OK: your permissions are listable."

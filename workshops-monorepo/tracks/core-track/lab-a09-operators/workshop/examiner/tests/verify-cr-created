@@ -1,9 +1,0 @@
-#!/bin/bash
-# verify-cr-created <resource.group> <name> — the Custom Resource exists.
-res="${1:?resource required}"
-name="${2:?name required}"
-if ! oc get "$res" "$name" >/dev/null 2>&1; then
-  echo "Custom Resource '$res/$name' not found. Apply sample-cr.yaml." >&2
-  exit 1
-fi
-echo "OK: $res/$name exists."

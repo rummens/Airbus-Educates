@@ -1,8 +1,0 @@
-#!/bin/bash
-# verify-limitrange — at least one LimitRange is present on the namespace.
-n=$(oc get limitrange -o name 2>/dev/null | wc -l | tr -d ' ')
-if [ "${n:-0}" -lt 1 ]; then
-  echo "No LimitRange found on this namespace. On DCS defaults are set — this environment may not have one." >&2
-  exit 1
-fi
-echo "OK: $n LimitRange(s) present."
