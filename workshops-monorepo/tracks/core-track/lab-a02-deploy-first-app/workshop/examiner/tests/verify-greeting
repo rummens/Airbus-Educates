@@ -1,6 +1,7 @@
 #!/bin/bash
-# Verify the app serves the first customised greeting.
-body=$(curl -s --max-time 5 localhost:8080 2>/dev/null)
+# Verify the app serves the first customised greeting. Fetch from INSIDE the app
+# pod (works whether or not a port-forward is running) — the image ships python3.
+body=$(oc exec deploy/hello-dcs -- python3 -c "import urllib.request;print(urllib.request.urlopen('http://localhost:8080',timeout=5).read().decode())" 2>/dev/null)
 if echo "$body" | grep -q "Hello from the DCS Academy"; then
   echo "OK: the app served your greeting."
   exit 0

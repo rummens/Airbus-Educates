@@ -1,0 +1,12 @@
+{
+  "workshop": "lab-a08-openshift-console",
+  "_note": "Console<->oc parity tour. Deploys hello-dcs so Workloads has content; the Networking/Storage/Config parity checks only assert the oc view runs (objects may be empty). imagePullPolicy=Always re-pulls the mutable tag.",
+  "steps": [
+    {"run": "oc create deployment hello-dcs --image=${DCS_REGISTRY}/samples/hello-dcs:1.0 && oc patch deployment/hello-dcs --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/imagePullPolicy\",\"value\":\"Always\"}]' && oc rollout status deploy/hello-dcs --timeout=150s"},
+    {"check": "verify-app-ready"},
+    {"check": "verify-workloads"},
+    {"check": "verify-networking"},
+    {"check": "verify-storage"},
+    {"check": "verify-config"}
+  ]
+}

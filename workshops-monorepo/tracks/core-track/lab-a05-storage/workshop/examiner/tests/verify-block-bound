@@ -1,9 +1,16 @@
 #!/bin/bash
-# Verify the Block (RWO) PVC is Bound.
+# Verify the Block (RWO) PVC was accepted. It is Bound where the storage class binds
+# immediately; where the class is WaitForFirstConsumer it correctly stays Pending until
+# a workload mounts it (this challenge PVC has no consumer) — both are success here.
 phase=$(oc get pvc hello-dcs-block -o jsonpath='{.status.phase}' 2>/dev/null)
-if [ "$phase" = "Bound" ]; then
-  echo "OK: Block PVC hello-dcs-block is Bound."
-  exit 0
-fi
-echo "Block PVC hello-dcs-block is '${phase:-not found}', not Bound yet." >&2
-exit 1
+case "$phase" in
+  Bound)
+    echo "OK: Block PVC hello-dcs-block is Bound."
+    exit 0 ;;
+  Pending)
+    echo "OK: Block PVC hello-dcs-block is created and awaiting a consumer (WaitForFirstConsumer binding) — it binds when a Pod mounts it."
+    exit 0 ;;
+  *)
+    echo "Block PVC hello-dcs-block not found (phase='${phase:-none}')." >&2
+    exit 1 ;;
+esac

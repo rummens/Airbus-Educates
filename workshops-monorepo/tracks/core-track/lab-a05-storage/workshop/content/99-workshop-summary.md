@@ -32,8 +32,9 @@ delay: 2
 
 {{< note >}}
 **Hint:** `pvc-block.yaml` is already in `~/exercises` — open it to see the `ReadWriteOnce`
-access mode that makes it Block rather than File. Binding may take a few seconds while DCS
-provisions the volume.
+access mode that makes it Block rather than File. Depending on the storage class, the claim
+either binds right away or shows **Pending until a Pod mounts it** (a "wait for first
+consumer" policy) — both mean it was accepted correctly.
 {{< /note >}}
 
 ## Check Your Understanding

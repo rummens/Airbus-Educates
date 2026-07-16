@@ -1,6 +1,6 @@
 #!/bin/bash
-# Verify the app serves the updated greeting.
-body=$(curl -s --max-time 5 localhost:8080 2>/dev/null)
+# Verify the app serves the updated greeting (fetched from inside the app pod).
+body=$(oc exec deploy/hello-dcs -- python3 -c "import urllib.request;print(urllib.request.urlopen('http://localhost:8080',timeout=5).read().decode())" 2>/dev/null)
 if echo "$body" | grep -q "Updated without a rebuild"; then
   echo "OK: the app served the updated greeting from the new Pod."
   exit 0

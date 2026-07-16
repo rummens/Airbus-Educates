@@ -9,10 +9,10 @@ Two more console sections, two more `oc` twins.
 The console's **Networking** area lists **Services** and **Routes** — the objects you
 created in A04. _(screenshot: OpenShift console Routes list, with the external URL link.)_
 
-The CLI equivalent lists the same, and works even when nothing's there yet:
+The CLI equivalent lists Services, and works even when nothing's there yet:
 
 ```terminal:execute
-command: oc get svc,route
+command: oc get svc
 ```
 
 ```examiner:execute-test
@@ -21,8 +21,9 @@ title: Verify the Networking CLI view runs
 timeout: 10
 ```
 
-In the console you'd click a Route to open its external URL; from the CLI you read
-`oc get route -o jsonpath='{.spec.host}'`. In A04 you did exactly that.
+Routes live here too — but creating and listing them needs the PROD-namespace access you
+used in **A04** (`oc get route`, `oc get route -o jsonpath='{.spec.host}'`). This tour
+namespace is DEV, so we list Services here.
 
 ## Storage ↔ `oc`
 

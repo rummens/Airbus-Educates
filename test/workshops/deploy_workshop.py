@@ -16,6 +16,10 @@ Examples:
   ./deploy_workshop.py lab-a02-kubernetes-essentials --delete
 """
 import argparse, json, subprocess, sys, time, pathlib
+try:
+    import yaml                       # to lift the authored session block (objects/ingresses)
+except ImportError:
+    yaml = None
 
 def _repo_root():
     r = subprocess.run(["git", "rev-parse", "--show-toplevel"],
@@ -53,6 +57,36 @@ def oc_delete(ctx, kind, name):
     sh(["oc", "--context", ctx, "delete", kind, name, "--ignore-not-found", "--wait=false"])
 
 
+def authored_session_extras(subpath):
+    """Lift `session.objects` + `session.ingresses` from the workshop's real
+    resources/workshop.yaml so labs that pre-provision RBAC / extra namespaces /
+    NetworkPolicies / app ingresses (e.g. A04, A06) deploy faithfully on CRC.
+
+    The synthesized session spec below omits these; without them those labs'
+    examiner checks fail for reasons that would NOT happen on the real cluster.
+
+    The file is Helm-templated, but only spec.workshop.{image,files} carry `{{ }}`
+    — the session block (the last key under spec) is plain YAML, so we parse just
+    that fragment. Returns {} when there's nothing to add (or yaml is unavailable).
+    """
+    if yaml is None:
+        return {}
+    f = REPO_ROOT / subpath / "resources" / "workshop.yaml"
+    if not f.exists():
+        return {}
+    text = f.read_text()
+    idx = text.find("\n  session:")
+    if idx < 0:
+        return {}
+    frag = text[idx + 1:]                                 # from the '  session:' line to EOF
+    frag = "\n".join(l[2:] if l.startswith("  ") else l for l in frag.splitlines())  # dedent 2
+    try:
+        sess = (yaml.safe_load(frag) or {}).get("session", {}) or {}
+    except yaml.YAMLError:
+        return {}
+    return {k: sess[k] for k in ("objects", "ingresses") if k in sess}
+
+
 def build_workshop(name, url, ref, subpath, budget, apps, vcluster, image, registry, title, desc):
     inc = [f"/{subpath}/workshop/**", f"/{subpath}/exercises/**", f"/{subpath}/README.md"]
     application = {a: {"enabled": True} for a in apps}
@@ -75,6 +109,13 @@ def build_workshop(name, url, ref, subpath, budget, apps, vcluster, image, regis
             "subjects": [{"apiGroup": "rbac.authorization.k8s.io", "kind": "Group",
                           "name": "system:serviceaccounts:$(vcluster_namespace)"}],
         }]
+    # Merge the authored session extras (RBAC, extra namespaces, NetworkPolicies,
+    # app ingresses) so labs that pre-provision them test faithfully on CRC.
+    extras = authored_session_extras(subpath)
+    if extras.get("objects"):
+        session.setdefault("objects", []).extend(extras["objects"])
+    if extras.get("ingresses"):
+        session["ingresses"] = extras["ingresses"]
     workshop = {"files": [{"git": {"url": url, "ref": ref},
                            "includePaths": inc, "newRootPath": subpath}]}
     if image:

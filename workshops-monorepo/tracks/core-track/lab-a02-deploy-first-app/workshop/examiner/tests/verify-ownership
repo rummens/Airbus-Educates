@@ -1,9 +1,8 @@
 #!/bin/bash
 # Verify the Deployment owns a ReplicaSet (which owns the Pods).
-if ! oc get all -l app=hello-dcs >/dev/null 2>&1; then
-  echo "'oc get all -l app=hello-dcs' failed." >&2
-  exit 1
-fi
+# NB: we intentionally do NOT gate on `oc get all` — in a restricted namespace it
+# exits non-zero when the SA can't list some built-in type, even though the
+# ReplicaSet lists fine. Check the RS directly.
 rs=$(oc get rs -l app=hello-dcs -o name 2>/dev/null | head -1)
 if [ -n "$rs" ]; then
   echo "OK: Deployment owns a ReplicaSet which owns the Pod(s): $rs"

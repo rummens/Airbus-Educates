@@ -35,15 +35,15 @@ above it. We'll come back to that on the Tenancy page.
 
 ## What's in it
 
-Everything you create lands here unless you say otherwise. List it all:
+Everything you create lands here unless you say otherwise. List your workloads:
 
 ```terminal:execute
-command: oc get all
+command: oc get deployments,pods,services
 ```
 
 ```examiner:execute-test
 name: verify-get-all
-title: Verify oc get all runs against your namespace
+title: Verify you can list workloads in your namespace
 timeout: 10
 ```
 

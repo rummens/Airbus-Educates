@@ -35,6 +35,7 @@ import time
 import deploy_workshop as dw          # reuse resolver + deploy/teardown (same dir)
 
 HERE = pathlib.Path(__file__).resolve().parent
+DEPLOY_WAIT = 600          # CRC first-time image pull + git clone can exceed the old 300s
 GREEN, RED, DIM, RST = "\033[32m", "\033[31m", "\033[2m", "\033[0m"
 LINK_SKIP = ("example.dcs", "example.com", "localhost", ".svc", "apps-crc.testing")
 
@@ -46,7 +47,7 @@ def sh(args, **kw):
 def run_deploy_tool(name, ctx, sid, vcluster, base=None, ref=None, delete=False):
     """Invoke deploy_workshop.py for the real deploy/teardown (single source of truth)."""
     cmd = [sys.executable, str(HERE / "deploy_workshop.py"), name,
-           "--context", ctx, "--id", sid]
+           "--context", ctx, "--id", sid, "--wait", str(DEPLOY_WAIT)]
     if base:
         cmd += ["--base", base]
     if ref:

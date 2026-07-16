@@ -16,15 +16,8 @@ file: ~/exercises/pvc-file.yaml
 command: oc apply -f pvc-file.yaml
 ```
 
-DCS provisions a PV and **binds** it to your claim. The check waits for `Bound`:
-
-```examiner:execute-test
-name: verify-pvc-bound
-title: Verify the PVC is Bound
-timeout: 15
-retries: .INF
-delay: 2
-```
+The claim is created. Many storage classes only **bind** the volume once a workload
+actually uses it (a "wait for first consumer" policy), so let's give it a consumer next.
 
 ## Mount it into the app
 
@@ -35,7 +28,18 @@ file: ~/exercises/hello-dcs-with-volume.yaml
 ```
 
 ```terminal:execute
-command: envsubst < hello-dcs-with-volume.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=90s
+command: envsubst < hello-dcs-with-volume.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=120s
+```
+
+Once the Pod is scheduled, DCS provisions a PV and **binds** it to your claim. Confirm both
+the claim is Bound and the app is running with the volume mounted:
+
+```examiner:execute-test
+name: verify-pvc-bound
+title: Verify the PVC is Bound
+timeout: 15
+retries: .INF
+delay: 2
 ```
 
 ```examiner:execute-test

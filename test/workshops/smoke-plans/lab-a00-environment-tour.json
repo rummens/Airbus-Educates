@@ -1,0 +1,8 @@
+{
+  "workshop": "lab-a00-environment-tour",
+  "_note": "Environment-tour lab: only two oc identity/reachability checks run in the split terminals. No app, no setup.",
+  "steps": [
+    {"check": "verify-whoami"},
+    {"check": "verify-status"}
+  ]
+}

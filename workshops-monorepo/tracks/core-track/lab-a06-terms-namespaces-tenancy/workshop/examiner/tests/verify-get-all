@@ -1,7 +1,10 @@
 #!/bin/bash
-# Verify 'oc get all' runs against the active namespace.
-if ! oc get all >/dev/null 2>&1; then
-  echo "'oc get all' failed against '$(oc project -q 2>/dev/null)'." >&2
-  exit 1
+# Verify the learner can list their workloads in the active namespace.
+# NB: not `oc get all` — that exits non-zero in a restricted namespace when the SA
+# can't list some built-in type. List the explicit namespaced kinds instead.
+if oc get deployments,pods,services >/dev/null 2>&1; then
+  echo "OK: listed workloads in '$(oc project -q 2>/dev/null)'."
+  exit 0
 fi
-echo "OK: 'oc get all' ran against '$(oc project -q 2>/dev/null)'."
+echo "Could not list deployments/pods/services in '$(oc project -q 2>/dev/null)'." >&2
+exit 1

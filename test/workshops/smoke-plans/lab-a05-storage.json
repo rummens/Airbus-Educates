@@ -1,0 +1,18 @@
+{
+  "workshop": "lab-a05-storage",
+  "_note": "PVC -> mount -> write -> restart -> persist, then the Block PVC challenge. PVCs omit storageClassName so the cluster default class binds. Two CRC-specific realities are handled so the run is green on CRC AND faithful to DCS: (1) the default class is WaitForFirstConsumer, so the PVC binds only after the consumer Pod is deployed — deploy first, then check Bound; (2) CRC's portless session SCC is RunAsAny (no auto fsGroup), so a non-root write to /data fails — we patch a fsGroup here (real DCS restricted-v2 assigns an in-range fsGroup automatically, so the workshop manifest stays portable and carries no fsGroup).",
+  "steps": [
+    {"check": "verify-storageclass"},
+    {"run": "oc apply -f pvc-file.yaml"},
+    {"run": "envsubst < hello-dcs-with-volume.yaml | oc apply -f - && oc patch deployment/hello-dcs --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/imagePullPolicy\",\"value\":\"Always\"}]' && oc patch deployment/hello-dcs --type=merge -p '{\"spec\":{\"template\":{\"spec\":{\"securityContext\":{\"fsGroup\":1001}}}}}' && oc rollout status deploy/hello-dcs --timeout=150s"},
+    {"check": "verify-pvc-bound"},
+    {"check": "verify-volume-mounted"},
+    {"run": "oc exec deploy/hello-dcs -- sh -c 'echo persisted-marker-42 > /data/marker'"},
+    {"check": "verify-marker-written"},
+    {"run": "oc rollout restart deploy/hello-dcs && oc rollout status deploy/hello-dcs --timeout=120s"},
+    {"check": "verify-restarted"},
+    {"check": "verify-persisted"},
+    {"run": "oc apply -f pvc-block.yaml && sleep 3"},
+    {"check": "verify-block-bound"}
+  ]
+}

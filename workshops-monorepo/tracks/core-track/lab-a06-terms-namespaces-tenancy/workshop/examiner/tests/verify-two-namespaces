@@ -1,10 +1,13 @@
 #!/bin/bash
-# Verify both pre-provisioned peer namespaces exist.
+# Verify both pre-provisioned peer namespaces exist and are accessible.
+# We can't `oc get namespace <name>` (cluster-scoped get the session SA lacks), so we
+# list a namespaced resource in each — succeeds only if the namespace exists AND the
+# session's edit RoleBinding is in place.
 base=$(oc project -q 2>/dev/null)
 for s in app-a app-b; do
-  if ! oc get namespace "$base-$s" >/dev/null 2>&1; then
-    echo "Namespace '$base-$s' not found — it should have been created with the session." >&2
+  if ! oc get deployments -n "$base-$s" >/dev/null 2>&1; then
+    echo "Namespace '$base-$s' not found/accessible — it should have been created with the session." >&2
     exit 1
   fi
 done
-echo "OK: both '$base-app-a' and '$base-app-b' exist."
+echo "OK: both '$base-app-a' and '$base-app-b' exist and are accessible."

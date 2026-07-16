@@ -1,0 +1,17 @@
+{
+  "workshop": "lab-a06-terms-namespaces-tenancy",
+  "_note": "Two peer namespaces + RoleBindings are lifted from session.objects by deploy_workshop (authored_session_extras). The learner deploys the same app into both and observes isolation. app-a is then scaled to 0 to prove actions don't leak.",
+  "steps": [
+    {"check": "verify-active-namespace"},
+    {"check": "verify-get-all"},
+    {"check": "verify-two-namespaces"},
+    {"run": "envsubst < app.yaml | oc apply -n \"$(oc project -q)-app-a\" -f - && oc -n \"$(oc project -q)-app-a\" patch deployment/hello --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/imagePullPolicy\",\"value\":\"Always\"}]' && oc -n \"$(oc project -q)-app-a\" rollout status deploy/hello --timeout=150s"},
+    {"check": "verify-rollout-a"},
+    {"run": "envsubst < app.yaml | oc apply -n \"$(oc project -q)-app-b\" -f - && oc -n \"$(oc project -q)-app-b\" patch deployment/hello --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/imagePullPolicy\",\"value\":\"Always\"}]' && oc -n \"$(oc project -q)-app-b\" rollout status deploy/hello --timeout=150s"},
+    {"check": "verify-rollout-b"},
+    {"check": "verify-same-name"},
+    {"run": "oc scale deploy/hello --replicas=0 -n \"$(oc project -q)-app-a\" && sleep 3"},
+    {"check": "verify-isolation"},
+    {"check": "verify-namespace-labels"}
+  ]
+}
