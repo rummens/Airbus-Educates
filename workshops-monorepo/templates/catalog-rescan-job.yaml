@@ -1,0 +1,91 @@
+{{- if and .Values.enabled .Values.catalogRescan.enabled }}
+# ArgoCD PostSync hook: after the Workshop/Track CRs sync, POST /admin/rescan on
+# the portal so it force-refreshes its cached catalog immediately (otherwise a
+# lab add/remove/edit is only visible after the portal's catalog TTL). Pure HTTP
+# (stdlib urllib) — no cluster RBAC needed. Auth via a shared bearer token that
+# must match the portal chart's rescan.token.
+{{- if .Values.catalogRescan.token }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Chart.Name }}-rescan
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ws.labels" . | nindent 4 }}
+  annotations:
+    # Create before the Job that consumes it; clean up with the hook.
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+type: Opaque
+stringData:
+  token: {{ .Values.catalogRescan.token | quote }}
+---
+{{- end }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-catalog-rescan
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ws.labels" . | nindent 4 }}
+  annotations:
+    # Run after every sync; keep on failure for inspection, delete on success so
+    # the next sync runs a fresh one.
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 300
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        {{- include "ws.labels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      {{- with .Values.global.registry.pullSecret }}
+      imagePullSecrets:
+        - name: {{ . }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: rescan
+          image: {{ .Values.catalogRescan.image | quote }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          env:
+            - name: URL
+              value: {{ .Values.catalogRescan.portalUrl | quote }}
+            {{- if .Values.catalogRescan.token }}
+            - name: TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}-rescan
+                  key: token
+            {{- end }}
+          command:
+            - python3
+            - -c
+            - |
+              import os, sys, time, urllib.request
+              url = os.environ["URL"].rstrip("/") + "/admin/rescan"
+              hdr = {"Content-Type": "application/json"}
+              tok = os.environ.get("TOKEN", "")
+              if tok:
+                  hdr["Authorization"] = "Bearer " + tok
+              for i in range(30):
+                  try:
+                      req = urllib.request.Request(url, method="POST", headers=hdr, data=b"{}")
+                      with urllib.request.urlopen(req, timeout=10) as r:
+                          print("rescan ok:", r.status, r.read().decode())
+                          sys.exit(0)
+                  except Exception as e:            # noqa: BLE001
+                      print("attempt %d/30 failed: %s" % (i + 1, e))
+                      time.sleep(2)
+              sys.exit("rescan failed after retries (portal unreachable or auth rejected)")
+{{- end }}

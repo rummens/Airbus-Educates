@@ -157,6 +157,15 @@ admin:
   ssarVerb: delete
   ssarNamespace: ""             # empty → educates.portalCrNamespace
 
+# Machine-triggered catalog rescan: the workshops chart's ArgoCD PostSync hook
+# POSTs /admin/rescan so a Workshop/Track CR change is visible at once (instead of
+# after the catalog TTL). Auth is a shared bearer token — set the SAME value here
+# and in the workshops chart's `catalogRescan.token`. Empty = token auth off
+# (only an SSAR admin user can rescan; the Job path is disabled).
+rescan:
+  token: ""
+  existingSecret: ""            # optional: use an existing Secret (key: token) instead
+
 # Kasten K10 backup of this namespace (incl. the CNPG feedback DB). OFF by default
 # and UNTESTED on dev — needs K10 + Kanister CRDs. Policy/Blueprint render into the
 # K10 namespace; a CHECKPOINT hook quiesces the DB before the snapshot. See

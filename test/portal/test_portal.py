@@ -23,7 +23,7 @@ os.environ.setdefault("PORTAL_OAUTH_ENABLED", "false")
 os.environ["FEEDBACK_DB"] = os.path.join(tempfile.mkdtemp(), "t.db")
 
 import pytest                                    # noqa: E402
-from portal import feedback, k8sclient, educates, auth, proxy   # noqa: E402
+from portal import feedback, k8sclient, educates, auth, proxy, cache   # noqa: E402
 from portal import config as cfg                 # noqa: E402
 from portal import app as appmod                 # noqa: E402
 from portal.app import create_app                # noqa: E402
@@ -337,6 +337,37 @@ def test_admin_can_set_banner(client, monkeypatch):
     assert r.status_code == 302
     assert feedback.get_setting("banner") == "Hello from admin"
     assert b"Hello from admin" in client.get("/").data
+
+
+# --- /admin/rescan (PostSync hook trigger) ----------------------------------
+
+def test_rescan_via_token(client, monkeypatch):
+    # A non-admin caller with the right bearer token triggers a refresh.
+    monkeypatch.setattr(k8sclient, "user_can_admin", lambda tok: False)
+    monkeypatch.setattr(cfg, "RESCAN_TOKEN", "s3kr3t")
+    calls = []
+    monkeypatch.setattr(cache, "refresh_all", lambda: calls.append(1) or ["courses", "tracks"])
+    r = client.post("/admin/rescan", headers={"Authorization": "Bearer s3kr3t"})
+    assert r.status_code == 200
+    assert r.get_json()["refreshed"] == ["courses", "tracks"]
+    assert calls == [1]
+
+
+def test_rescan_bad_or_missing_token_forbidden(client, monkeypatch):
+    monkeypatch.setattr(k8sclient, "user_can_admin", lambda tok: False)
+    monkeypatch.setattr(cfg, "RESCAN_TOKEN", "s3kr3t")
+    monkeypatch.setattr(cache, "refresh_all", lambda: ["x"])   # must NOT be called
+    assert client.post("/admin/rescan", headers={"Authorization": "Bearer wrong"}).status_code == 403
+    assert client.post("/admin/rescan").status_code == 403
+
+
+def test_rescan_via_admin_user(client, monkeypatch):
+    # No token configured → only an SSAR admin user can trigger it.
+    monkeypatch.setattr(cfg, "RESCAN_TOKEN", "")
+    monkeypatch.setattr(k8sclient, "user_can_admin", lambda tok: True)
+    monkeypatch.setattr(cache, "refresh_all", lambda: ["tracks"])
+    r = client.post("/admin/rescan")
+    assert r.status_code == 200 and r.get_json()["refreshed"] == ["tracks"]
 
 
 # --- cache: TTL / last-known-good / cold default ----------------------------

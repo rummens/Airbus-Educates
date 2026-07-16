@@ -86,3 +86,18 @@ crcWorkaround:
   # Needs `oc` + bash. registry.redhat.io is already pullable on CRC (oauth-proxy
   # uses it). Override for air-gap.
   image: registry.redhat.io/openshift4/ose-cli:latest
+
+# After each sync, tell the portal app to refresh its cached catalog so a
+# Workshop/Track CR change (add/remove/edit a lab) shows up immediately instead of
+# after the portal's TTL. A PostSync hook Job POSTs /admin/rescan on the portal
+# Service. Auth is a shared bearer token — set `token` to the SAME value as the
+# portal chart's `rescan.token` (empty here + empty there = no auth, which the
+# portal only accepts if it too has no token configured).
+catalogRescan:
+  enabled: true
+  # In-cluster portal Service URL (same host as feedback.analyticsWebhookUrl).
+  portalUrl: "http://dcs-academy-portal.dcs-academy-portal.svc:8080"
+  token: ""
+  # Any image with python3 (stdlib urllib only). Reuse the portal image so there's
+  # nothing extra to mirror for air-gap. Override for a private registry.
+  image: ghcr.io/rummens/dcs-academy-portal:dev

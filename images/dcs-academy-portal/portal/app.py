@@ -7,6 +7,7 @@ blueprint last (it only claims allowlisted prefixes, else 404).
 import logging
 import os
 import re
+import secrets
 import time
 
 import markdown as md
@@ -298,6 +299,23 @@ def create_app():
             abort(403)
         _safe(lambda: feedback.set_setting("banner", request.form.get("banner", "").strip()[:500]))
         return redirect(url_for("admin"))
+
+    @app.route("/admin/rescan", methods=["POST"])
+    def admin_rescan():
+        """Force an immediate catalog refresh. Called by the workshops chart's
+        ArgoCD PostSync hook (in-cluster, hits the Service directly) so a Workshop/
+        Track CR change shows up at once instead of after the TTL tick.
+
+        Auth: a bearer token equal to PORTAL_RESCAN_TOKEN, OR an SSAR admin user
+        (so it can also be wired to an admin-UI button later). If no token is
+        configured, only the admin-user path works (the Job path is disabled)."""
+        hdr = request.headers.get("Authorization", "")
+        bearer = hdr[7:].strip() if hdr.startswith("Bearer ") else ""
+        token_ok = bool(cfg.RESCAN_TOKEN) and secrets.compare_digest(bearer, cfg.RESCAN_TOKEN)
+        if not (token_ok or _is_admin()):
+            abort(403)
+        names = cache.refresh_all()
+        return jsonify({"status": "ok", "refreshed": names}), 200
 
     @app.route("/help")
     def help_page():

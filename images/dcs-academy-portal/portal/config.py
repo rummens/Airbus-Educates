@@ -50,6 +50,11 @@ ADMIN_SSAR_RESOURCE = os.environ.get("ADMIN_SSAR_RESOURCE", "trainingportals")
 ADMIN_SSAR_VERB = os.environ.get("ADMIN_SSAR_VERB", "delete")
 ADMIN_SSAR_NAMESPACE = os.environ.get("ADMIN_SSAR_NAMESPACE", PORTAL_CR_NAMESPACE)
 
+# Shared token for the machine-triggered catalog rescan (POST /admin/rescan),
+# used by the workshops chart's ArgoCD PostSync hook. Empty = token auth off, so
+# only an SSAR admin user can trigger a rescan (the Job path is then disabled).
+RESCAN_TOKEN = os.environ.get("PORTAL_RESCAN_TOKEN", "")
+
 # --- login (portal is the OpenShift OAuth client; no oauth-proxy) -----------
 # The portal runs the OAuth2 authorization-code flow itself against the cluster's
 # OpenShift OAuth server (ServiceAccount-as-OAuthClient), so it learns the real

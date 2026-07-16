@@ -64,6 +64,14 @@ spec:
             - { name: ADMIN_SSAR_RESOURCE,           value: {{ .Values.admin.ssarResource | quote }} }
             - { name: ADMIN_SSAR_VERB,               value: {{ .Values.admin.ssarVerb | quote }} }
             - { name: ADMIN_SSAR_NAMESPACE,          value: {{ .Values.admin.ssarNamespace | default .Values.educates.portalCrNamespace | quote }} }
+            {{- if or .Values.rescan.token .Values.rescan.existingSecret }}
+            # Shared token gating POST /admin/rescan (workshops chart PostSync hook).
+            - name: PORTAL_RESCAN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.rescan.existingSecret | default (printf "%s-rescan" .Chart.Name) }}
+                  key: token
+            {{- end }}
             {{- if .Values.feedback.cnpg.enabled }}
             # CNPG writes the connection URI into <cluster>-app (key "uri").
             - name: DATABASE_URL

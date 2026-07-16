@@ -55,6 +55,20 @@ class Cached:
             return val
 
 
+def refresh_all():
+    """Force-refresh every registered cache NOW and return the names refreshed.
+
+    Used by the /admin/rescan endpoint (ArgoCD PostSync hook) so a catalog change
+    is visible immediately instead of after the next TTL tick. Cached.get(force=True)
+    keeps last-known-good on producer failure, so this never raises."""
+    names = []
+    for c in _registry:
+        c.get(force=True)
+        names.append(c.name)
+    log.info("forced refresh of %d cache(s): %s", len(names), names)
+    return names
+
+
 def start_refresher(interval):
     """Daemon thread: force-refresh every registered cache every `interval` s."""
     def loop():
