@@ -16,7 +16,15 @@ All A00–A08 now exist under `workshops-monorepo/tracks/core-track/` (static-ch
 - **A07/A08 = rough** (marked in README + workshop.yaml annotation): screenshot placeholders, console-tour approach still open.
 - Examiner-per-command honoured 1:1 everywhere except A03 page 05 (3 read-only diagnosis commands share one verify — the plan's sanctioned investigation page) and A07 (pure tour, 0 commands, knowledge-check reveals).
 
-**Next:** live-smoke-test on CRC (push to origin/main first — git source reads origin/main; portal-less); retire old-design A0x labs; the queued authoring-skill rule additions (envsubst, screenshot-fallback, DEV/PROD + cluster concepts); then Module B.
+**Next:** retire old-design A0x labs; the queued authoring-skill rule additions (envsubst, screenshot-fallback, DEV/PROD + cluster concepts); then Module B.
+
+## CRC smoke-test results (2026-07-16, commits 374572b + ac18b3a pushed)
+
+Ran all Core A labs on CRC (portal-less `test/workshops/smoke_test.py`, git source origin/main). Wrote 8 smoke-plans (`test/workshops/smoke-plans/lab-a0*.json`). **Image-independent labs GREEN:** A00 2/2 · A04 10/10 (egress XFAIL — CRC has internet) · A05 12/12 · A06 11/11 · A08 6/6 · A07 n/a (content tour). **A02 9/11, A03 11/16** — remaining fails are ONLY the **stale hello-dcs image** (ghcr still serves pre-rework nginx; greeting/config checks can't pass). A03 `deployment-configured` confirmed deploys 1/1 in 6s (manifest sound).
+
+**BLOCKER for A02/A03 green:** rebuild+push `hello-dcs` via `images/build.sh` (multiarch) — reworked GREETING/MODE image not on ghcr yet. Then re-run A02 → 11/11, A03 → 9/9.
+
+**Harness fixes (pushed):** `deploy_workshop.py` now merges authored `session.objects`/`ingresses` (A04/A06 needed it) + waits for env deletion before recreate (Pending-flake fix); `smoke_test.py` 600s wait. Examiner hardening: dropped restricted-SA-forbidden `oc get all`/cluster reads (A02/A06/A08), in-app greeting fetch (A02), rolling-update-safe verify-not-ready (A03), WaitForFirstConsumer-tolerant verify-block-bound (A05). A05 content: deploy consumer before asserting PVC Bound (cross-cluster fix). CRC runs need ArgoCD auto-sync OFF on `dcs-academy-tracks-and-workshops` during the run, re-enabled after (done).
 
 ## Where we are
 
