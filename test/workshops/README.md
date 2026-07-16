@@ -33,6 +33,26 @@ Smoke plans live in `smoke-plans/<workshop>.json` (ordered `run` setup steps +
 (`dcs-workshop-base`, `hello-dcs`) in a reachable registry — until then,
 checks that need a running app pod fail as expected.
 
+### Run a whole track/module in one go
+
+`run_track.sh` points at a folder, discovers every workshop under it, runs
+`smoke_test.py` for each **one at a time** (CRC is small — parallel runs starve
+the node), and prints a pass/fail summary. It also **pauses ArgoCD auto-sync**
+on the app that manages the Workshop CRs for the duration and **always restores
+it on exit** (even Ctrl-C) — the portal-less deploy rewrites those shared CRs, so
+selfHeal must be off while testing.
+
+```bash
+./run_track.sh workshops-monorepo/tracks/core-track                 # a whole track
+./run_track.sh workshops-monorepo/tracks/core-track/lab-a04-expose-app  # one lab
+./run_track.sh --dry-run workshops-monorepo/tracks/core-track       # list what would run, touch nothing
+```
+
+Labs with no smoke-plan (or a plan with no checks, e.g. a content-tour lab) are
+skipped and listed. Env overrides: `CTX` (oc context), `ARGO_APP`/`ARGO_NS`,
+`SMOKE_ARGS` (default `--no-links`). Note a track folder currently also contains
+the old-design labs — point at individual lab dirs for a subset.
+
 ## TLS: editor/console tab shows "temporarily down"
 
 The dashboard, editor and console are each on a **separate hostname**
