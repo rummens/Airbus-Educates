@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 300" font-family="sans-serif">
+  <rect x="0" y="0" width="780" height="300" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="390" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">How your app gets storage on DCS</text>
+
+  <!-- PVC -->
+  <rect x="40" y="70" width="160" height="90" rx="6" fill="#e8f0f7" stroke="#3b7dd8"/>
+  <text x="120" y="98" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b4a86">PVC</text>
+  <text x="120" y="118" text-anchor="middle" font-size="10" fill="#5a6b7b">"I want 1Gi,</text>
+  <text x="120" y="132" text-anchor="middle" font-size="10" fill="#5a6b7b">File, RWX"</text>
+  <text x="120" y="150" text-anchor="middle" font-size="9" fill="#8a97a4">you write this</text>
+
+  <!-- StorageClass -->
+  <rect x="300" y="70" width="160" height="90" rx="6" fill="#eef3ee" stroke="#4a9a5a"/>
+  <text x="380" y="98" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c6a3a">StorageClass</text>
+  <text x="380" y="118" text-anchor="middle" font-size="10" fill="#5a6b7b">DCS provisioner</text>
+  <text x="380" y="132" text-anchor="middle" font-size="10" fill="#5a6b7b">File / Block tiers</text>
+  <text x="380" y="150" text-anchor="middle" font-size="9" fill="#8a97a4">platform provides</text>
+
+  <!-- PV -->
+  <rect x="560" y="70" width="160" height="90" rx="6" fill="#ffffff" stroke="#8aa0b4"/>
+  <text x="640" y="98" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b2b3a">PV</text>
+  <text x="640" y="118" text-anchor="middle" font-size="10" fill="#5a6b7b">real volume,</text>
+  <text x="640" y="132" text-anchor="middle" font-size="10" fill="#5a6b7b">created + bound</text>
+  <text x="640" y="150" text-anchor="middle" font-size="9" fill="#8a97a4">provisioned for you</text>
+
+  <g stroke="#5a6b7b" stroke-width="2" fill="#5a6b7b">
+    <line x1="200" y1="115" x2="298" y2="115"/><polygon points="298,115 290,111 290,119"/>
+    <line x1="460" y1="115" x2="558" y2="115"/><polygon points="558,115 550,111 550,119"/>
+  </g>
+  <text x="250" y="105" text-anchor="middle" font-size="9" fill="#8a97a4">matches a class</text>
+  <text x="510" y="105" text-anchor="middle" font-size="9" fill="#8a97a4">dynamically provisions</text>
+
+  <!-- pod mounts PV -->
+  <rect x="500" y="210" width="160" height="56" rx="6" fill="#ffffff" stroke="#8aa0b4"/>
+  <text x="580" y="234" text-anchor="middle" font-size="12" fill="#1b2b3a">Pod</text>
+  <text x="580" y="252" text-anchor="middle" font-size="9" fill="#5a6b7b">mounts PV at /data</text>
+  <g stroke="#5a6b7b" stroke-width="2" fill="#5a6b7b">
+    <line x1="640" y1="160" x2="620" y2="208"/><polygon points="620,208 616,199 625,201"/>
+  </g>
+
+  <text x="300" y="240" text-anchor="middle" font-size="11" fill="#5a6b7b">You declare a PVC; DCS binds it to a PV.</text>
+  <text x="300" y="258" text-anchor="middle" font-size="11" fill="#5a6b7b">The Pod mounts the PV — data outlives the Pod.</text>
+</svg>

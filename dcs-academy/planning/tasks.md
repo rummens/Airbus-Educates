@@ -76,3 +76,68 @@ Task tracking for the DCS Academy. Priorities: **P1** (blocker), **P2** (importa
 ## Modules D / E
 
 - [ ] **P3** Plan after A + B + C are implemented and the format is proven.
+
+---
+
+# Restructure (2026-07-16): Core + Developer rework
+
+Planning docs (`course-brief.md`, `course-topics.md`, `course-module-a.md`, `course-module-b.md`) rewritten to the new target design: lean quick-win Core, build/integration Developer track. The **built workshops still reflect the old design** — the work below closes the gap. See the old→new mapping tables in the module files.
+
+> **Deploy impact (read before renaming):** renaming workshop directories changes `metadata.name` in every `resources/workshop.yaml`, the Track CRs (`tracks/*/track.yaml`), TrainingPortal workshop references, and session URLs. Existing deployments break on rename. Batch the renames, update all cross-references, and re-sync ArgoCD deliberately. `git mv` to preserve history.
+
+## Module A — Core / Fundamentals restructure
+
+- [x] **P1** A01: **built** (2026-07-16). Trimmed console tour → A08 (console app disabled, forward-pointer note added); added `02-dcs-clusters` (Sandbox/PROD cluster model), `03-containers-and-images`, `04-why-kubernetes-not-just-docker`; renamed session page → `05-your-session`; 4-Q knowledge check; 20m. Static-checked only — **not yet live-smoke-tested** on a cluster.
+- [x] **P1** **ALL Core A labs BUILT (2026-07-16)** in `workshops-monorepo/tracks/core-track/`: A00 env-tour, A02 deploy-first-app, A03 configure-troubleshoot, A04 expose-app, A05 storage, A06 terms-namespaces-tenancy, A07 itsm-console *(rough)*, A08 openshift-console *(rough)* — plus A01 (earlier). hello-dcs image reworked (GREETING env + MODE=CLI/UI + /healthz, non-root UBI9-python multiarch, verified locally). `helm template` clean; examiner-per-command 1:1 (except A03 investigation page + A07 pure-tour). Static-checked only — **not yet live-smoke-tested** (no cluster in authoring env; push to origin/main then CRC portal-less). Old-design A0x labs still coexist → retire per restructure section below. See NEXT-SESSION.md for per-lab decisions/deviations.
+- [ ] **P1** A02: build the quick-win lab — **merge old A02 (K8s essentials) + old B01 (deploy first app)** into `lab-a02-deploy-first-app`. Hybrid style: imperative (`oc create deployment`/`set env`/`expose` + curl + edit env + redeploy) then reveal the generated YAML. Preserve the validated old-A02 examiner coverage where it still applies.
+- [ ] **P1** A03: new `lab-a03-configure-troubleshoot` — **fold old B02 (config/secrets) + old B04 (debugging/logs)**: ConfigMap/Secret rollout, then a pre-seeded fault the learner diagnoses (logs/events/describe) and fixes.
+- [ ] **P1** A04: `lab-a04-expose-app` from old A06 — **expose properly**: real Route in a PROD-type namespace (DCS DNS/LB, reachable outside the session) **and** surface the app as a **new session dashboard tab**. Keep the routes Role+RoleBinding fix from old A06. Add the "Routes need PROD — see Developer B06" hook.
+- [ ] **P1** A05: `lab-a05-storage` from old A07 (+ absorb old B05 stateful) — PVC, File vs Block, persistence across restart. **Author supplied the storage demo source: `workshop-plans/Lightning Talk Demo_ OpenShift Storage 101 v2 .docx`** — read it and fold into the A05 plan's TODO slot *before* building.
+- [ ] **P1** A06: `lab-a06-terms-namespaces-tenancy` — **vocabulary only** from old A03 + A05 (Namespace/Tenant/DEV-PROD terms + what makes a namespace active). Deep model → B05/B06.
+- [ ] **P2** A07: `lab-a07-itsm-console` — new; consolidate the ITSM self-service material (quota/mirroring/repos/S3/exceptions = ticket vs self-service). Likely screenshot-driven (air-gapped); spike embeddability.
+- [ ] **P2** A08: `lab-a08-openshift-console` — the console tour split out of old A01, with `oc`↔console parity against the app deployed in A02 / exposed in A04. Deliver per [educates-openshift-console-limitation].
+- [ ] **P2** Retire/redirect old built Core workshops no longer in Core: old A03 (→ B06), A04 (→ B04), A05 (→ B05), A08 (→ B05), A09 (→ B08). `git mv` + rewrite, don't delete blindly.
+- [ ] **P2** Rewrite the per-workshop plans in `workshop-plans/` to match the new A01–A08 (currently `lab-a01…a09` reflect the old design).
+- [ ] **P3** Confirm Core final count = 8 and the numbering (A01–A08) before renaming, to avoid a second rename pass.
+
+## Module B — Developer restructure
+
+- [ ] **P1** B01: new `lab-b01-docker-to-k8s` (Intermediate) — compose/`docker run` → Deployment/Service/ConfigMap; what doesn't translate on DCS (SCC/non-root, Harbor, no `latest`).
+- [ ] **P1** B02: new `lab-b02-image-buildconfigs` — git as build source; BuildConfig (S2I/Dockerfile) → image in Harbor → deploy → rebuild.
+- [ ] **P1** B03: `lab-b03-dev-spaces` from old B06 — git as in-cluster IDE (devfile); Harbor-mirrored UDI.
+- [ ] **P1** B04: `lab-b04-harbor-scanning` — old A04 (Harbor) **+ all image-scanning merged here**. Read the scan, pass the gate, push the B02 image.
+- [ ] **P1** B05: `lab-b05-rbac-tenancy` — consolidate old A05 (access/tenancy) + old A08 (RBAC deep dive).
+- [ ] **P1** B06: **new** `lab-b06-dev-prod-namespaces` (the missing lab) — DEV vs PROD by policy posture: PROD = harsher Kyverno + **can** create Routes; DEV = looser + **cannot** create Routes; promotion. Uses **vcluster** (deep model from old A03). Kyverno required to demo enforcement (screenshot fallback).
+- [ ] **P2** B07: `lab-b07-scaling-health` from old B03.
+- [ ] **P2** B08: `lab-b08-operators` from old A09 (Advanced) — keep as Module F prerequisite.
+- [ ] **P2** Write/rewrite per-workshop plans for B01–B08 (B01/B02/B06 are new; the rest are moves).
+- [ ] **P2** Update the sample-app note: `hello-dcs` still carried; build labs (B02/B03) also use the learner's own / a provided git repo — confirm a Harbor-mirrorable buildable source repo exists.
+- [ ] **P3** Update Module F prereq references: A09 → **B08** in `course-module-f.md` and `course-brief.md` (brief done).
+- [ ] **P1** B02/B04 need a **session-scoped, push-capable Harbor project + robot account** (B02 builds→pushes; B04 pushes the built image). Riskiest new provisioning dependency — B04 degrades to inspect-only, but **B02 has no clean fallback** for build-and-push. Confirm before authoring.
+- [ ] **P2** B02 needs an **air-gapped-reachable git build source** + S2I builder image (mirrored GitLab vs an in-cluster seeded git repo). Unresolved.
+- [ ] **P2** Confirm the **hello-dcs env var name** the sample reads for the A02 "customise with `oc set env`" step (plans assumed a `GREETING`-style var). Drives A02 + A03 config steps.
+- [ ] **P2** Produce screenshot assets: **A07** (ITSM console request flow) + **A08** (OpenShift console Route/PVC/Topology views) — both screenshot-driven since neither embeds cleanly in an air-gapped session.
+- [ ] **P3** Confirm DCS docs paths used across the new plans resolve on the real portal (`/concepts/*`, `/services/*`, `/getting-started/requests`).
+- [x] **P3** 14 old per-workshop plans **archived** to `workshop-plans/_superseded-old-design/` (git mv, history preserved) with a README explaining the supersession — kept as refactor reference; delete once the built workshops are migrated.
+
+## Follow-ups from 2026-07-16 review (queued — details not yet authored, author still reviewing)
+
+- [x] **P1** **Lab A00 — Workshop environment tour** — **PLAN + BUILT** (2026-07-16) in `workshops-monorepo/tracks/core-track/lab-a00-environment-tour/` (7 pages: layout+SVG, split terminal w/ 2 examiner-checked `oc` cmds, editor, k8s-Dashboard Console tab, feedback, summary+3Q). order `5` (before A01), lifecycle `dev`, console enabled (+token), vcluster false. helm renders clean; static-checked only (no live cluster in authoring env). (NEW, ~5m→10m, first in Core): tour the *workshop session UI* — the split terminals, the **Kubernetes Dashboard console tab (NOT the OpenShift web console)**, the VS Code editor, and the feedback mechanism. Reference `docs/dcs-academy/environment-guide.md` + `docs/dcs-academy/img/dashboard-layout.svg`. **Number it `A00`** (not a renumber of A01–A08) to avoid a second rename pass. Distinct from A08 (which tours the real OpenShift web console) — A00 is the session chrome + k8s Dashboard.
+- [ ] **P1** **Rework the `hello-dcs` sample image** (`images/hello-dcs/`) to serve the new Core arc:
+  - Read customisation from **env vars** so A02's `oc set env` step visibly changes the response (confirms the `GREETING`-style var name and wires it end to end).
+  - Add a **`MODE` flag: CLI vs UI**. **CLI** = plain-text response (basic, unformatted) for the `curl` steps in A02. **UI** = fancier HTML for when the app is exposed via a Route (A04), and in UI mode **print the app's own Route host/URL into the rendered page** so learners see the DCS DNS/Route format live.
+  - Keep non-root / Harbor-mirrorable / multiarch. Update the A02/A03/A04 plans to reference the flag once the image is reworked.
+- [ ] **P2** **Promote general rules into the authoring skill** (proposed — confirm before editing `airbus-educates-workshop-authoring-skill/references/`):
+  - `openshift-reference.md` / `air-gapped-images-reference.md`: mandate `envsubst < f.yaml | oc apply -f -` for any manifest carrying a `${VAR}` (registry/host) — this is the recurring ImagePullBackOff bug, a house correctness rule, not course-specific.
+  - A delivery note (dashboard/console references): when a component can't embed in an air-gapped session (OpenShift console, ITSM console), deliver as an annotated screenshot-driven tour with a knowledge-check checkpoint. (Ties to [educates-openshift-console-limitation].)
+  - `dcs-concepts-reference.md`: record the **DEV/PROD Route-capability fact** (PROD = Kyverno-enforced + can create Routes; DEV = looser + cannot) as a first-class DCS concept.
+  - `dcs-concepts-reference.md`: add the **DCS cluster model** (Sandbox vs PROD — identical except feature-rollout timing DEV/QA→Sandbox→PROD monthly, Sandbox 1 month ahead, + maintenance-notice/SLA) as a new concept with a doc path. A01 currently links `{{< param dcs_docs_base_url >}}/concepts/clusters` (assumed); the existing ref lists shared-vs-dedicated at `/clusters/types` — reconcile the path.
+  - **Keep course-pedagogy** (quick-win-first, theory-folded-into-labs) in `course-brief.md`, not the authoring skill — it's a course design choice; optionally cross-reference it as an available style in `content-depth-reference.md`.
+
+## Security track scanning overlap
+
+- [ ] **P2** Per the 2026-07-16 decision, **all image-scanning teaching consolidates in Developer B04**. Built Security workshops **C01 (image-scanning)** and **C04 (supply-chain)** now overlap. Reconcile when the Security track is next revised: keep C's **governance/policy/provenance** angle (cosign trust, data classification, supply-chain), move the developer-facing "read the scan / pass the gate" flow to B04, and remove the duplication. Do **not** edit C now — out of scope for this rework.
+
+## Known pre-existing bug (carry forward)
+
+- [ ] **P1** `${DCS_REGISTRY}` manifests applied with plain `oc apply` (no `envsubst`) in old A04/A06/A09 → real learners hit ImagePullBackOff (CRC smoke masked it). Correct pattern: `envsubst < f.yaml | oc apply -f -` (as in validated A02). Fix as these labs are refactored/moved (A06→A04, A04→B04, A09→B08).

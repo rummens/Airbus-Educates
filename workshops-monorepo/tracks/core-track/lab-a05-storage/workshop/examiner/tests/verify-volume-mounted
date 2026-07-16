@@ -1,0 +1,13 @@
+#!/bin/bash
+# Verify the app is running with the /data volume mounted.
+avail=$(oc get deploy hello-dcs -o jsonpath='{.status.availableReplicas}' 2>/dev/null)
+if [ "${avail:-0}" -lt 1 ] 2>/dev/null; then
+  echo "hello-dcs not ready yet (available=${avail:-0})." >&2
+  exit 1
+fi
+if oc exec deploy/hello-dcs -- sh -c 'test -d /data' 2>/dev/null; then
+  echo "OK: app is running with /data mounted."
+  exit 0
+fi
+echo "/data is not present in the container — is the volume mounted?" >&2
+exit 1

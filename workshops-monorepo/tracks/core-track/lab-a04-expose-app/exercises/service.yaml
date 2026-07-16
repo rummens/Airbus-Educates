@@ -1,0 +1,15 @@
+# A stable in-cluster address for the app. The selector matches the Deployment's
+# Pod labels (app: hello-dcs) — the same labels/selectors idea from A02. Pods come
+# and go; this Service name and its ClusterIP stay put and load-balance to them.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  selector:
+    app: hello-dcs
+  ports:
+  - port: 8080
+    targetPort: 8080

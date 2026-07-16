@@ -1,0 +1,8 @@
+#!/bin/bash
+# Verify the pre-provisioned NetworkPolicy is present.
+if oc get networkpolicy allow-hello-dcs-ingress >/dev/null 2>&1; then
+  echo "OK: NetworkPolicy 'allow-hello-dcs-ingress' is present to inspect."
+  exit 0
+fi
+echo "NetworkPolicy 'allow-hello-dcs-ingress' not found." >&2
+exit 1

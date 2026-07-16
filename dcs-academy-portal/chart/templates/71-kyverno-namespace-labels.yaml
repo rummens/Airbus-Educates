@@ -1,0 +1,48 @@
+# Inject operator-defined labels onto the session namespaces Educates creates
+# per session. Educates stamps training.educates.dev/{session,environment,
+# workshop,portal}.name on those namespaces at creation; we match session.name
+# (present on every session namespace) and mutate in the labels from
+# .Values.sessionNamespaceLabels. Version-independent (no reliance on an Educates
+# namespace-label field that moves between releases). Kyverno is already a
+# dependency (see 70-kyverno-workshop-exceptions.yaml).
+{{- if and .Values.enabled .Values.sessionNamespaceLabels }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: label-educates-session-namespaces
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    policies.kyverno.io/title: Label Educates Session Namespaces
+    policies.kyverno.io/category: Educates Academy
+    policies.kyverno.io/severity: low
+    policies.kyverno.io/description: >-
+      Adds operator-defined labels to the per-session namespaces Educates creates,
+      matched by the training.educates.dev/session.name label.
+spec:
+  background: false
+  rules:
+    - name: inject-session-namespace-labels
+      match:
+        any:
+          - resources:
+              kinds:
+                - Namespace
+              selector:
+                matchExpressions:
+                  - key: training.educates.dev/session.name
+                    operator: Exists
+      preconditions:
+        any:
+          - key: "{{ "{{" }} request.operation {{ "}}" }}"
+            operator: AnyIn
+            value: ["CREATE", "UPDATE"]
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            labels:
+              {{- range $k, $v := .Values.sessionNamespaceLabels }}
+              {{ $k | quote }}: {{ $v | quote }}
+              {{- end }}
+{{- end }}

@@ -1,0 +1,11 @@
+# Educates workshop config. `params` is a LIST of {name, value} entries
+# (NOT a Hugo-style map). The param trio is mandatory; values are placeholders.
+params:
+- name: product_name
+  value: "Digital Container Service (DCS)"
+- name: product_short
+  value: "DCS"
+- name: dcs_registry
+  value: "harbor.example.dcs/dcs-academy"
+- name: dcs_docs_base_url
+  value: "https://docs.example.dcs"

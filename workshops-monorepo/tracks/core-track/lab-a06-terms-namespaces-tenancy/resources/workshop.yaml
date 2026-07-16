@@ -1,0 +1,119 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-a06-terms-namespaces-tenancy
+  # --- DCS portal catalog metadata (read off metadata, NOT spec) ----
+  labels:
+    academy.dcs/track: core
+    academy.dcs/order: "60"
+    # No Route/Ingress created here → a plain dev namespace is fine.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: "Terms — Namespaces & Tenancy"
+  description: Name the DCS terms you keep hearing — Namespace, Tenant, and the DEV/PROD namespace types — and see namespace isolation for real by deploying the same app into two namespaces at once.
+  duration: 30m
+  difficulty: beginner
+  labels:
+    - name: module
+      value: "A-Foundations"
+  publish:
+    image: "$(image_repository)/lab-a06-terms-namespaces-tenancy-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a06-terms-namespaces-tenancy/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a06-terms-namespaces-tenancy/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a06-terms-namespaces-tenancy/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/core-track/lab-a06-terms-namespaces-tenancy"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-a06-terms-namespaces-tenancy-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY: single terminal source for the sample-image registry (Plane 3).
+    # Keep in sync with dcs_registry in workshop/config.yaml. Manifests carrying
+    # ${DCS_REGISTRY} are applied via `envsubst < f.yaml | oc apply -f -`.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    # Two extra peer namespaces, pre-provisioned per session so the learner can
+    # deploy the SAME app into both and see isolation. Created by the Educates
+    # session controller (NOT the learner SA — no namespace-create right needed),
+    # cluster-scoped so the name carries $(session_name) uniqueness via the session
+    # namespace prefix, and garbage-collected with the session (owner refs).
+    # Each RoleBinding grants the session's service accounts `edit` in that
+    # namespace so the learner's terminal can `oc apply -n <ns>`.
+    objects:
+    - apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: $(session_namespace)-app-a
+        labels:
+          dcs.airbus/namespace-type: dev
+          app.kubernetes.io/part-of: dcs-academy-a06
+    - apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: $(session_namespace)-app-b
+        labels:
+          dcs.airbus/namespace-type: dev
+          app.kubernetes.io/part-of: dcs-academy-a06
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: session-edit
+        namespace: $(session_namespace)-app-a
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: edit
+      subjects:
+      - apiGroup: rbac.authorization.k8s.io
+        kind: Group
+        name: system:serviceaccounts:$(session_namespace)
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: session-edit
+        namespace: $(session_namespace)-app-b
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: edit
+      subjects:
+      - apiGroup: rbac.authorization.k8s.io
+        kind: Group
+        name: system:serviceaccounts:$(session_namespace)
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      examiner:
+        enabled: true
+      # Two peer namespaces are enough to show isolation; a per-session throwaway
+      # cluster is reserved for the DEV/PROD *policy* demo (Developer B06).
+      vcluster:
+        enabled: false

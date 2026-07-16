@@ -1,0 +1,6 @@
+#!/bin/bash
+avail=$(oc get deploy hello-dcs -o jsonpath='{.status.availableReplicas}' 2>/dev/null)
+if [ "${avail:-0}" -ge 1 ] 2>/dev/null; then
+  echo "OK: hello-dcs has ${avail} ready replica(s)."; exit 0
+fi
+echo "hello-dcs not ready yet (availableReplicas=${avail:-0})." >&2; exit 1

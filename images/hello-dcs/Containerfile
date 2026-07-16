@@ -1,16 +1,23 @@
 # DCS Academy sample application: a tiny "Hello DCS" HTTP server on :8080.
 #
-# Built on Red Hat UBI9 nginx — a hardened, Red Hat-supported base that runs
-# non-root and tolerates OpenShift's arbitrary assigned UID out of the box,
-# so it deploys cleanly under the restricted security policy.
-FROM registry.access.redhat.com/ubi9/nginx-124:latest
+# Built on Red Hat UBI9 Python — a hardened, Red Hat-supported, multiarch base
+# that runs non-root (UID 1001) and tolerates OpenShift's arbitrary assigned
+# UID out of the box, so it deploys cleanly under the restricted security
+# policy. The app is pure Python standard library — no pip install, no deps.
+FROM registry.access.redhat.com/ubi9/python-311:latest
 
 LABEL org.opencontainers.image.source="https://github.com/rummens/Airbus-Educates" \
-      org.opencontainers.image.description="DCS Academy sample app (hello-dcs)"
+      org.opencontainers.image.description="DCS Academy sample app (hello-dcs): env-driven greeting, CLI/UI modes"
 
-# The UBI9 nginx image serves /opt/app-root/src on port 8080 by default.
-COPY index.html /opt/app-root/src/index.html
+# Customisation contract (see server.py). Defaults live here so the image is
+# useful with no env set; workshops override GREETING / MODE via `oc set env`.
+ENV GREETING="Hello from the Digital Container Service" \
+    MODE="CLI" \
+    PORT="8080" \
+    VERSION="1.0"
 
-# Emit startup output to stdout so `oc logs` shows the app starting (the base
-# nginx image is otherwise silent on stdout — needed for the logging exercise).
-CMD ["sh", "-c", "echo \"[hello-dcs] starting; serving Hello DCS on :8080\"; exec nginx -g \"daemon off;\""]
+COPY server.py /opt/app-root/src/server.py
+
+EXPOSE 8080
+USER 1001
+CMD ["python3", "/opt/app-root/src/server.py"]

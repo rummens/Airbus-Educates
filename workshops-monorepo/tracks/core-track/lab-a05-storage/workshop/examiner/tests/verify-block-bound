@@ -1,0 +1,9 @@
+#!/bin/bash
+# Verify the Block (RWO) PVC is Bound.
+phase=$(oc get pvc hello-dcs-block -o jsonpath='{.status.phase}' 2>/dev/null)
+if [ "$phase" = "Bound" ]; then
+  echo "OK: Block PVC hello-dcs-block is Bound."
+  exit 0
+fi
+echo "Block PVC hello-dcs-block is '${phase:-not found}', not Bound yet." >&2
+exit 1

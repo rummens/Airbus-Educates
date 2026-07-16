@@ -1,0 +1,9 @@
+#!/bin/bash
+# Verify the app serves the updated greeting.
+body=$(curl -s --max-time 5 localhost:8080 2>/dev/null)
+if echo "$body" | grep -q "Updated without a rebuild"; then
+  echo "OK: the app served the updated greeting from the new Pod."
+  exit 0
+fi
+echo "Response did not contain the updated greeting. Got: ${body:-<empty>}" >&2
+exit 1

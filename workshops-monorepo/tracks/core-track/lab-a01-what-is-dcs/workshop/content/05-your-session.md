@@ -1,5 +1,5 @@
 ---
-title: Your Environment
+title: Your Session
 ---
 
 Time to get hands-on. On the right you have a **terminal** already connected to
@@ -7,6 +7,10 @@ Time to get hands-on. On the right you have a **terminal** already connected to
 academy is run with [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html),
 the OpenShift command line tool. Click the command blocks below to run them — you never
 have to type them by hand.
+
+Your session also has an **editor** tab for viewing files and manifests, and the
+terminal is **split** into an upper pane (`execute-1`) and a lower pane (`execute-2`) —
+worth knowing now, because the next workshop uses both.
 
 ## Who Am I?
 
@@ -71,13 +75,8 @@ title: Verify oc status runs against your project
 timeout: 10
 ```
 
-## The Web Console
-
-{{< param product_short >}} also has a visual **web console**. Open it to see the same
-project in a graphical view:
-
-```dashboard:open-dashboard
-name: Console
-```
-
-Have a look around, then return to the terminal tab when you're ready.
+{{< note >}}
+Prefer a visual view? {{< param product_short >}} has a web console too — you'll get a
+full guided tour of it in **A08: The OpenShift Console**. For now, the terminal is all
+you need.
+{{< /note >}}

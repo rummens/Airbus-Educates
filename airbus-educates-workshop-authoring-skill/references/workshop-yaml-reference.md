@@ -705,6 +705,28 @@ Old Educates documentation incorrectly showed labels as a dictionary (key-value 
 > `academy.dcs/order`) — a different section and format (a normal k8s label map).
 > See [dcs-catalog-metadata-reference.md](dcs-catalog-metadata-reference.md).
 
+### DCS lifecycle label (`metadata.labels."dcs.airbus.com/lifecycle"`)
+
+Every DCS Academy workshop must set a lifecycle label on `metadata.labels`. The
+rule is simple: **`prod` if the workshop exposes something — creates (or has the
+learner create) a `Route` or `Ingress` — otherwise `dev`.**
+
+```yaml
+# Path: metadata
+metadata:
+  name: lab-a05-expose-a-service
+  labels:
+    academy.dcs/track: core
+    dcs.airbus.com/lifecycle: prod    # this lab creates a Route → prod
+```
+
+The platform propagates this label from the Workshop CR onto every session
+namespace, and the cluster's dev/prod policy set keys off it — a `prod` namespace
+gets the stricter (Kyverno/PROD) enforcement a namespace hosting a Route needs,
+`dev` does not. This mirrors the DCS model: **a Route needs a PROD namespace.**
+When the lab exposes nothing externally, use `dev`. See
+[dcs-catalog-metadata-reference.md](dcs-catalog-metadata-reference.md#lifecycle-label-dcsairbuscomlifecycle--dev-vs-prod).
+
 ## Session Ingresses
 
 Session ingresses use the workshop session proxy to expose an HTTP service for browser access within the workshop. They are configured under `spec.session.ingresses`.
@@ -800,3 +822,4 @@ When generating a workshop.yaml, determine:
 7. **Does it need cluster-admin access?** → Enable vcluster. *(DCS Academy: state `vcluster.enabled` explicitly either way; a `true` lab also needs the `educates-privileged-scc` RoleBinding + `budget: large` — see [dcs-catalog-metadata-reference.md](dcs-catalog-metadata-reference.md).)*
 8. **Does it need a local Git repository?** → Enable git (e.g., for CI/CD pipeline workshops)
 9. **Does it include a presentation?** → Enable slides and add content to `workshop/slides/`
+10. **Does it expose a service — create a `Route` or `Ingress`?** → set `metadata.labels."dcs.airbus.com/lifecycle": prod`; otherwise `dev`. *(DCS Academy: drives the session namespace's dev/prod policy — a Route needs a `prod` namespace. See [dcs-catalog-metadata-reference.md](dcs-catalog-metadata-reference.md).)*

@@ -1,0 +1,51 @@
+# The configured app with ONE seeded fault: the envFrom below references a
+# ConfigMap named "hello-dcs-conf" — which does not exist (the real one is
+# "hello-dcs-config"). The container therefore fails to start with
+# CreateContainerConfigError. The volume further down references the CORRECT
+# name, so exactly one line needs fixing.
+# Apply with: envsubst < broken-deployment.yaml | oc apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-dcs
+  template:
+    metadata:
+      labels:
+        app: hello-dcs
+    spec:
+      containers:
+      - name: hello-dcs
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        envFrom:
+        - configMapRef:
+            name: hello-dcs-conf
+        env:
+        - name: API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: hello-dcs-secret
+              key: API_TOKEN
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: config
+          mountPath: /etc/hello-dcs
+          readOnly: true
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
+      volumes:
+      - name: config
+        configMap:
+          name: hello-dcs-config

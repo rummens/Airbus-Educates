@@ -1,0 +1,9 @@
+#!/bin/bash
+# Verify the app is currently broken: no available replicas.
+avail=$(oc get deploy hello-dcs -o jsonpath='{.status.availableReplicas}' 2>/dev/null)
+if [ "${avail:-0}" -lt 1 ] 2>/dev/null; then
+  echo "OK: the app is currently not ready (available=${avail:-0}) — the fault is live."
+  exit 0
+fi
+echo "Expected the app to be broken, but it has ${avail} available replica(s). Did the broken manifest apply?" >&2
+exit 1

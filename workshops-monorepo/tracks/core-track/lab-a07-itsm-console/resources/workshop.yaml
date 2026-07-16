@@ -1,0 +1,63 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-a07-itsm-console
+  labels:
+    academy.dcs/track: core
+    academy.dcs/order: "70"
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    # ROUGH DRAFT (2026-07-16): screenshot-driven tour; ITSM-console embeddability
+    # spike pending. Screenshots are placeholders. Content complete enough to review.
+spec:
+  title: "The ITSM Console — Self-Service on DCS"
+  description: Learn where DCS self-service ends and requests begin — which actions you do yourself with oc and which need an ITSM ticket — then tour the ITSM console and walk one request end to end.
+  duration: 20m
+  difficulty: beginner
+  labels:
+    - name: module
+      value: "A-Foundations"
+  publish:
+    image: "$(image_repository)/lab-a07-itsm-console-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a07-itsm-console/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a07-itsm-console/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a07-itsm-console/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/core-track/lab-a07-itsm-console"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-a07-itsm-console-files:$(workshop_version)"
+    {{- end }}
+  session:
+    namespaces:
+      budget: small
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      examiner:
+        enabled: true
+      # Tour + knowledge-check lab; nothing cluster-scoped.
+      vcluster:
+        enabled: false

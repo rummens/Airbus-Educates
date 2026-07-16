@@ -16,6 +16,7 @@ Educates, keeping the oauth_handshake host-consistent.
 import logging
 import threading
 import time
+import urllib.parse
 
 import requests
 
@@ -173,9 +174,21 @@ def user_sessions(user):
     if not user:
         return []
     base, s = _session()
-    r = s.get(f"{base}/workshops/user/{user}/sessions/", timeout=10)
+    # Encode the user for the path segment: an SSO username can be an email
+    # (firstName.lastName@domain.com) — the '@' MUST be %40 in a path, or the
+    # Educates route can 404.
+    u = urllib.parse.quote(user, safe="")
+    url = f"{base}/workshops/user/{u}/sessions/"
+    r = s.get(url, timeout=10)
+    if r.status_code != 200:
+        # 403 here usually means the robot isn't in Educates' 'robots' group;
+        # 404 an unknown/mismatched user. Log the body so PROD tells us which.
+        log.warning("USER-SESSIONS user=%r url=%s -> %s body=%.300r",
+                    user, url, r.status_code, r.text)
     r.raise_for_status()
-    return r.json().get("sessions", []) or []
+    data = r.json().get("sessions", []) or []
+    log.info("USER-SESSIONS user=%r -> %d session(s)", user, len(data))
+    return data
 
 
 def terminate_session(name):

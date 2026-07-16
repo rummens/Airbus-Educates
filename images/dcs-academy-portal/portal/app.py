@@ -18,6 +18,8 @@ from . import config as cfg
 from . import k8sclient, educates, feedback, metrics, proxy, auth, cache
 from .icons import ICONS, DIFFICULTY_ICON, resolve_icon
 
+_log = logging.getLogger("portal")
+
 STEPS = ["Reserving session", "Starting virtual cluster", "Starting workshop pod",
          "Loading content", "Ready"]
 
@@ -65,7 +67,10 @@ def create_app():
     # Signed session cookie (login identity + token). A stable secret from a Secret
     # keeps sessions valid across restarts/replicas; fall back to ephemeral for dev.
     app.secret_key = cfg.SESSION_SECRET or os.urandom(32)
-    app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax",
+    # SameSite=None (default) so the cookie rides the cross-origin oauth_handshake
+    # from the embedded Console/Editor session subdomains; requires Secure.
+    app.config.update(SESSION_COOKIE_HTTPONLY=True,
+                      SESSION_COOKIE_SAMESITE=cfg.SESSION_COOKIE_SAMESITE,
                       SESSION_COOKIE_SECURE=True)
     app.register_blueprint(auth.bp)
 
@@ -524,22 +529,35 @@ def _usage():
 def _my_sessions(user):
     """The user's own active sessions → [{name, title, phase, url}].
 
-    Source of truth is the Educates portal DB (educates.user_sessions) — the CR only
-    carries the owner while Allocated, so filtering CRs by status.educates.user misses
-    real sessions. We take the authoritative name+workshop from the REST call and enrich
-    url/phase from the CR (which does carry them for a live session)."""
+    Two sources, unioned so one failing doesn't blank the page:
+      * Educates portal DB (educates.user_sessions REST) — authoritative, includes
+        WAITING/spare sessions, but depends on the robot being in the 'robots' group;
+      * WorkshopSession CRs where status.educates.user == user — an ALLOCATED session
+        (the running ones the user cares about here) carries its owner, and we already
+        have list RBAC. This is the resilient fallback when the REST call 403s/empties.
+    """
     if not user:
         return []
     mine = _safe(lambda: educates.user_sessions(user)) or []
-    if not mine:
-        return []
     courses = {c["name"]: c for c in (_safe(k8sclient.list_courses) or [])}
     crs = {c["metadata"]["name"]: c for c in (_safe(k8sclient.list_sessions) or [])}
+
+    rest_ws = {m.get("name", ""): m.get("workshop", "") for m in mine if m.get("name")}
+    names = set(rest_ws)
+    cr_owned = 0
+    for name, cr in crs.items():
+        stt = (cr.get("status", {}) or {}).get("educates", {}) or {}
+        if stt.get("user") == user:
+            names.add(name)
+            cr_owned += 1
+    _log.info("MY-SESSIONS user=%r rest=%d cr-owned=%d total=%d",
+              user, len(rest_ws), cr_owned, len(names))
+
     out = []
-    for m in mine:
-        name = m.get("name", "")
-        wsname = m.get("workshop", "")
-        stt = ((crs.get(name) or {}).get("status", {}) or {}).get("educates", {}) or {}
+    for name in names:
+        cr = crs.get(name) or {}
+        stt = (cr.get("status", {}) or {}).get("educates", {}) or {}
+        wsname = rest_ws.get(name) or (cr.get("spec", {}) or {}).get("workshop", {}).get("name", "")
         out.append({
             "name": name,
             "workshop": wsname,

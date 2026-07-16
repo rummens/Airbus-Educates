@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 260" font-family="sans-serif">
+  <rect x="0" y="0" width="820" height="260" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="410" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">How outside traffic reaches your app on DCS</text>
+
+  <!-- external user -->
+  <rect x="24" y="96" width="120" height="60" rx="6" fill="#ffffff" stroke="#8aa0b4"/>
+  <text x="84" y="122" text-anchor="middle" font-size="12" fill="#1b2b3a">Browser</text>
+  <text x="84" y="140" text-anchor="middle" font-size="10" fill="#5a6b7b">(outside DCS)</text>
+
+  <!-- DNS + LB -->
+  <rect x="180" y="86" width="150" height="80" rx="6" fill="#eef3ee" stroke="#4a9a5a"/>
+  <text x="255" y="112" text-anchor="middle" font-size="12" fill="#2c6a3a">DCS-managed DNS</text>
+  <text x="255" y="132" text-anchor="middle" font-size="12" fill="#2c6a3a">+ External LB</text>
+  <text x="255" y="150" text-anchor="middle" font-size="9" fill="#5a6b7b">*.apps domain, TLS</text>
+
+  <!-- Route -->
+  <rect x="366" y="96" width="120" height="60" rx="6" fill="#e8f0f7" stroke="#3b7dd8"/>
+  <text x="426" y="122" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b4a86">Route</text>
+  <text x="426" y="140" text-anchor="middle" font-size="9" fill="#5a6b7b">(PROD namespace)</text>
+
+  <!-- Service -->
+  <rect x="522" y="96" width="120" height="60" rx="6" fill="#e8f0f7" stroke="#3b7dd8"/>
+  <text x="582" y="122" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b4a86">Service</text>
+  <text x="582" y="140" text-anchor="middle" font-size="9" fill="#5a6b7b">stable ClusterIP</text>
+
+  <!-- Pods -->
+  <rect x="678" y="86" width="118" height="36" rx="6" fill="#ffffff" stroke="#8aa0b4"/>
+  <text x="737" y="109" text-anchor="middle" font-size="11" fill="#1b2b3a">Pod</text>
+  <rect x="678" y="130" width="118" height="36" rx="6" fill="#ffffff" stroke="#8aa0b4"/>
+  <text x="737" y="153" text-anchor="middle" font-size="11" fill="#1b2b3a">Pod</text>
+
+  <!-- arrows -->
+  <g stroke="#5a6b7b" stroke-width="2" fill="#5a6b7b">
+    <line x1="144" y1="126" x2="178" y2="126"/><polygon points="178,126 170,122 170,130"/>
+    <line x1="330" y1="126" x2="364" y2="126"/><polygon points="364,126 356,122 356,130"/>
+    <line x1="486" y1="126" x2="520" y2="126"/><polygon points="520,126 512,122 512,130"/>
+    <line x1="642" y1="126" x2="676" y2="126"/><polygon points="676,126 668,122 668,130"/>
+  </g>
+
+  <text x="410" y="210" text-anchor="middle" font-size="11" fill="#5a6b7b">The Service load-balances across matching Pods by label. The Route publishes the Service on DCS DNS.</text>
+  <text x="410" y="230" text-anchor="middle" font-size="11" fill="#5a6b7b">Inside the cluster you reach the Service directly; from outside, the Route is the front door.</text>
+</svg>

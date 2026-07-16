@@ -82,6 +82,14 @@ OAUTH_TLS_VERIFY = _b("PORTAL_OAUTH_TLS_VERIFY", True)
 # Flask session cookie signing key. Set from a Secret so sessions survive restarts
 # and pod replicas agree; empty = ephemeral random (dev only).
 SESSION_SECRET = os.environ.get("PORTAL_SESSION_SECRET", "")
+# SameSite for the portal session cookie. MUST be "None" for the embedded Console/
+# Editor tabs to work: those are separate cross-origin session subdomains
+# (console-<session>/editor-<session>) whose iframes do an Educates oauth_handshake
+# back to the portal — with "Lax" the portal cookie isn't sent in that third-party
+# context, the portal 302s to OpenShift OAuth inside the iframe, and the OAuth page
+# (X-Frame-Options: DENY) refuses to frame → "page unavailable". "None" needs Secure
+# (set below). Set "Lax" only on a deploy that doesn't embed the console/editor.
+SESSION_COOKIE_SAMESITE = os.environ.get("PORTAL_SESSION_COOKIE_SAMESITE", "None")
 # Local/dev identity fallback: when OAuth is off there is no logged-in user, so
 # progress/trophies have no one to bind to. Set PORTAL_DEV_USER to a fixed name
 # to exercise per-user features locally. Unset in prod (OAuth provides identity).

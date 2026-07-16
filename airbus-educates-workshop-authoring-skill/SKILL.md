@@ -174,6 +174,7 @@ The custom portal reads extra fields off `metadata` — not `spec`. Set on every
 Academy workshop:
 - `metadata.labels."academy.dcs/track"` = the owning track's `id` (else the lab is hidden)
 - `metadata.labels."academy.dcs/order"` = sort within the track (string, low first)
+- `metadata.labels."dcs.airbus.com/lifecycle"` = `prod` if the lab exposes something (creates a `Route` or `Ingress`), else `dev`. The platform propagates this label onto the session namespace so the right dev/prod policies apply — a Route needs a `prod` (Kyverno-enforced) namespace. When unsure, `dev`.
 - `metadata.annotations` argocd `sync-wave: "5"` + `SkipDryRunOnMissingResource=true`
 - vcluster: state `spec.session.applications.vcluster.enabled` explicitly; if `true`, also add the `educates-privileged-scc` RoleBinding in `spec.session.objects` and `namespaces.budget: large`, or CoreDNS crashloops on OpenShift.
 
@@ -404,6 +405,7 @@ After generating `resources/workshop.yaml`, verify the following critical items:
 - [ ] `spec.session.applications.examiner.enabled: true` (every command is verified — see [references/assessment-reference.md](references/assessment-reference.md))
 - [ ] Security policy left `restricted` unless a stated reason requires `baseline` (see [references/openshift-reference.md](references/openshift-reference.md))
 - [ ] Run location chosen deliberately: vcluster (default) vs OpenShift namespace (operator/real-cluster access), with the reason recorded; if vcluster, `budget: large` + the `educates-privileged-scc` RoleBinding on the `-vc` namespace are present
+- [ ] `metadata.labels."dcs.airbus.com/lifecycle"` set: `prod` if the lab creates a `Route`/`Ingress` (exposes a service externally), else `dev` — propagated to the session namespace to drive dev/prod policy; a Route needs a `prod` namespace (see [references/dcs-catalog-metadata-reference.md](references/dcs-catalog-metadata-reference.md))
 
 ### 11. Verify Workshop Instructions
 

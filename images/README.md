@@ -5,7 +5,7 @@ Container images for the academy, pushed to `ghcr.io/rummens/*`.
 | Image | Base | Purpose |
 |---|---|---|
 | `dcs-workshop-base:develop` | `educates-base-environment` (Fedora, pinned digest) + `oc` | Workshop **session** image for the basic courses. |
-| `hello-dcs:dev` / `samples/hello-dcs:1.0` | Red Hat **UBI9 nginx** (hardened, non-root, arbitrary-UID) | Sample **application** deployed by the workshops. |
+| `hello-dcs:dev` / `samples/hello-dcs:1.0` | Red Hat **UBI9 Python** (hardened, non-root, arbitrary-UID, multiarch) | Sample **application** deployed by the workshops. Dependency-free stdlib HTTP server on `:8080`. Env-driven: `GREETING` (headline, changeable live with `oc set env`), `MODE=CLI\|UI` (CLI = plain text for `curl`; UI = styled HTML that prints the app's own external Route URL from the request Host header), `PORT`, `VERSION`. `/healthz` for probes. |
 | `dcs-academy-portal:dev` | Python slim | The custom academy portal (UI + BFF + reverse-proxy). |
 | `educates-mirror:dev` | Red Hat **UBI9-minimal** + `imgpkg` | Air-gap helper: relocates the Educates installer imgpkg bundle into a private registry. Run by the platform chart's `bundleMirror` Job, or standalone. No container engine/virtualization needed. |
 

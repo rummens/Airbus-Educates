@@ -1,0 +1,8 @@
+#!/bin/bash
+# Verify an active project/namespace is set.
+p=$(oc project -q 2>/dev/null)
+if [ -z "$p" ]; then
+  echo "No active namespace: 'oc project -q' returned nothing." >&2
+  exit 1
+fi
+echo "OK: active namespace is '$p'."

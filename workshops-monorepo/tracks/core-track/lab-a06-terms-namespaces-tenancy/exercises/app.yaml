@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Fixed name on purpose: the point of the demo is that this same name lives
+  # independently in each namespace, with no clash. No namespace is baked in —
+  # it is supplied on the command line with `-n <namespace>`.
+  name: hello
+  labels:
+    app: hello
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      containers:
+      - name: hello
+        # Pulled from the DCS Harbor registry via the DCS_REGISTRY env var
+        # (apply with: envsubst < app.yaml | oc apply -n <ns> -f -).
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        env:
+        - name: MODE
+          value: "CLI"
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi

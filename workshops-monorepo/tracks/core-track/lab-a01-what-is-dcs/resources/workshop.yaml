@@ -66,8 +66,6 @@ spec:
         layout: split
       editor:
         enabled: true
-      console:
-        enabled: true
       examiner:
         enabled: true
       # vcluster decision (house standard: always record it explicitly). This lab

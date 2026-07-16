@@ -1,0 +1,6 @@
+#!/bin/bash
+# Verify the Config CLI view runs (ConfigMaps/Secrets) — parity call-out.
+if oc get configmap >/dev/null 2>&1 && oc get secret >/dev/null 2>&1; then
+  echo "OK: 'oc get configmap,secret' ran — the CLI twin of the console Config view."; exit 0
+fi
+echo "'oc get configmap,secret' failed to run." >&2; exit 1

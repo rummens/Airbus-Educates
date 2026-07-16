@@ -55,10 +55,46 @@ metadata:
   labels:
     academy.dcs/track: core        # MUST equal a track's `id` (else the lab is hidden)
     academy.dcs/order: "10"        # sort within the track — STRING, low = first
+    dcs.airbus.com/lifecycle: dev  # dev | prod — see "Lifecycle label" below
 ```
 
 > A workshop whose `academy.dcs/track` matches no Track is **not rendered** — the
 > portal only shows labs in a declared track.
+
+### Lifecycle label (`dcs.airbus.com/lifecycle`) — dev vs prod
+
+Every workshop MUST carry `metadata.labels."dcs.airbus.com/lifecycle"`. The value
+follows one rule:
+
+- **`prod`** — the workshop **exposes something** — i.e. it creates (or has the
+  learner create) a **`Route` or `Ingress`** to reach a service from outside the
+  cluster.
+- **`dev`** — everything else (no externally-exposed Route/Ingress).
+
+```yaml
+metadata:
+  labels:
+    dcs.airbus.com/lifecycle: prod   # this lab creates a Route/Ingress
+```
+
+**Why it matters — it propagates to the session namespace.** The platform copies
+this label from the Workshop CR onto **every session namespace** Educates creates
+for the lab (via a Kyverno policy keyed on `training.educates.dev/workshop.name`).
+The cluster's dev/prod policy set then keys off the namespace label — a `prod`
+namespace gets the stricter enforcement (Kyverno/PROD policies) that a namespace
+hosting a Route requires, a `dev` namespace does not. Get the label wrong and a
+lab that exposes a Route lands in a `dev` namespace where the exposure policy
+isn't applied (or a plain lab is needlessly forced into `prod` enforcement).
+
+This matches the DCS model: **a Route needs a PROD namespace**, and PROD
+namespaces enforce Kyverno while DEV ones don't. When in doubt (no Route/Ingress),
+use `dev`. Set it to `prod` the moment the lab teaches or performs external
+exposure.
+
+> Note: Educates' own session-proxy ingresses (`spec.session.ingresses`, the
+> `app-$(session_hostname)` form) are platform-managed and are **not** what this
+> label is about — it tracks whether the *workshop content* stands up a real
+> `Route`/`Ingress` object in the session namespace.
 
 ### Recommended annotations (`metadata.annotations`)
 

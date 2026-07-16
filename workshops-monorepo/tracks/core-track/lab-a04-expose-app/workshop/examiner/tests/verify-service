@@ -1,0 +1,13 @@
+#!/bin/bash
+# Verify the Service exists and has at least one endpoint address.
+if ! oc get service hello-dcs >/dev/null 2>&1; then
+  echo "Service 'hello-dcs' not found — did 'oc apply -f service.yaml' run?" >&2
+  exit 1
+fi
+ip=$(oc get endpoints hello-dcs -o jsonpath='{.subsets[0].addresses[0].ip}' 2>/dev/null)
+if [ -n "$ip" ]; then
+  echo "OK: Service hello-dcs has an endpoint ($ip)."
+  exit 0
+fi
+echo "Service has no endpoints yet — is a Pod running and matching the selector?" >&2
+exit 1

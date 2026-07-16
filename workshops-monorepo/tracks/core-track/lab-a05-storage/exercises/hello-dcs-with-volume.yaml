@@ -1,0 +1,38 @@
+# hello-dcs with the File PVC mounted at /data. Data written under /data lives on
+# the PersistentVolume, not the container filesystem — so it survives pod restarts.
+# Apply with: envsubst < hello-dcs-with-volume.yaml | oc apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-dcs
+  template:
+    metadata:
+      labels:
+        app: hello-dcs
+    spec:
+      containers:
+      - name: hello-dcs
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: hello-dcs-data

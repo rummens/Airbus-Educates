@@ -1,0 +1,14 @@
+#!/bin/bash
+# Verify the app recovered (ready) and still serves its configured value.
+avail=$(oc get deploy hello-dcs -o jsonpath='{.status.availableReplicas}' 2>/dev/null)
+if [ "${avail:-0}" -lt 1 ] 2>/dev/null; then
+  echo "App not ready yet (available=${avail:-0})." >&2
+  exit 1
+fi
+body=$(oc exec deploy/hello-dcs -- python3 -c "import urllib.request;print(urllib.request.urlopen('http://localhost:8080',timeout=5).read().decode())" 2>/dev/null)
+if echo "$body" | grep -q "Reconfigured without a redeploy"; then
+  echo "OK: app recovered and serves its configuration."
+  exit 0
+fi
+echo "App is ready but not serving the expected value. Got: ${body:-<empty>}" >&2
+exit 1

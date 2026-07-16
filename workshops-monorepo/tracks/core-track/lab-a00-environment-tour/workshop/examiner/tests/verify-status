@@ -1,0 +1,7 @@
+#!/bin/bash
+# Verify 'oc status' runs against the current project.
+if ! oc status >/dev/null 2>&1; then
+  echo "'oc status' failed against project '$(oc project -q 2>/dev/null)'. Make sure a project is selected." >&2
+  exit 1
+fi
+echo "OK: 'oc status' ran against project '$(oc project -q 2>/dev/null)'."

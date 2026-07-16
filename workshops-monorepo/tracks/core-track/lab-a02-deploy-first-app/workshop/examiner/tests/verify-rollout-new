@@ -1,0 +1,15 @@
+#!/bin/bash
+# Verify the updated greeting is set AND the rollout is complete.
+val=$(oc set env deploy/hello-dcs --list 2>/dev/null | grep '^GREETING=')
+if [ "$val" != "GREETING=Updated without a rebuild" ]; then
+  echo "Deployment GREETING not updated yet (got: ${val:-unset})." >&2
+  exit 1
+fi
+avail=$(oc get deploy hello-dcs -o jsonpath='{.status.availableReplicas}' 2>/dev/null)
+gen=$(oc get deploy hello-dcs -o jsonpath='{.status.observedGeneration}' 2>/dev/null)
+if [ "${avail:-0}" -ge 1 ] 2>/dev/null; then
+  echo "OK: new greeting rolled out (available=${avail}, observedGeneration=${gen})."
+  exit 0
+fi
+echo "Rollout not complete yet (availableReplicas=${avail:-0})." >&2
+exit 1

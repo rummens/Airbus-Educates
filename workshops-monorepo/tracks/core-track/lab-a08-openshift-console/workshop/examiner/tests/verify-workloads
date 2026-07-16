@@ -1,0 +1,6 @@
+#!/bin/bash
+# Verify the Deployment is listed from the CLI (mirrors the console Workloads view).
+if oc get deploy hello-dcs >/dev/null 2>&1; then
+  echo "OK: the hello-dcs Deployment is listed — same object the console shows in Workloads."; exit 0
+fi
+echo "Deployment hello-dcs not found." >&2; exit 1

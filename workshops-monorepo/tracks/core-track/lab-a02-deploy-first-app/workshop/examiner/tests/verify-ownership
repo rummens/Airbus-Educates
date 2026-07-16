@@ -1,0 +1,13 @@
+#!/bin/bash
+# Verify the Deployment owns a ReplicaSet (which owns the Pods).
+if ! oc get all -l app=hello-dcs >/dev/null 2>&1; then
+  echo "'oc get all -l app=hello-dcs' failed." >&2
+  exit 1
+fi
+rs=$(oc get rs -l app=hello-dcs -o name 2>/dev/null | head -1)
+if [ -n "$rs" ]; then
+  echo "OK: Deployment owns a ReplicaSet which owns the Pod(s): $rs"
+  exit 0
+fi
+echo "No ReplicaSet found for app=hello-dcs — the Deployment should have created one." >&2
+exit 1

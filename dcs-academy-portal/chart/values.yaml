@@ -184,3 +184,26 @@ serviceMonitor:
   enabled: true
 
 enableKyvernoException: false
+
+# Labels to inject onto the session namespaces Educates creates per session
+# (dcst-*). Educates has no stable per-version field for this, so we mutate with
+# Kyverno (already required above): a ClusterPolicy adds these labels to any
+# Namespace carrying training.educates.dev/session.name. Empty = policy not shipped.
+# Example:
+#   sessionNamespaceLabels:
+#     cost-center: "dcs-academy"
+#     network-policy-zone: "training"
+sessionNamespaceLabels: {}
+
+# Per-workshop namespace label, driven by the workshop.yaml itself (so different
+# labs mark their session namespaces dev vs prod → the right policies apply).
+# How: the author sets `sourceLabel` on the Workshop CR metadata.labels (e.g.
+# academy.dcs/environment: prod). A Kyverno policy looks up the Workshop named by
+# training.educates.dev/workshop.name (which Educates stamps on every session
+# namespace), reads that label, and writes `targetLabel` onto the namespace —
+# falling back to `default` when the workshop doesn't set it. Needs Kyverno.
+workshopEnvLabel:
+  enabled: false
+  sourceLabel: "dcs.airbus.com/lifecycle"  # read from the Workshop CR
+  targetLabel: "dcs.airbus.com/lifecycle"  # written onto the session namespace (same key)
+  default: "dev"                           # workshops that expose a Route/Ingress set "prod"

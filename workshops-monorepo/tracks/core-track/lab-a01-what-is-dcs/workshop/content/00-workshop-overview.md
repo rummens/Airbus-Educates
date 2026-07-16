@@ -12,7 +12,7 @@ or Kubernetes knowledge**.
 {{< note >}}
 **First time in one of these labs?** Take two minutes to read the
 [DCS Academy environment guide]({{< param dcs_docs_base_url >}}/academy/environment-guide) —
-it explains the terminal, editor, console, slides and the clickable actions you'll use here.
+it explains the terminal, editor and the clickable actions you'll use here.
 {{< /note >}}
 
 ## What You'll Learn
@@ -20,8 +20,10 @@ it explains the terminal, editor, console, slides and the clickable actions you'
 By the end of this workshop you will be able to:
 
 - Explain what {{< param product_short >}} is and where it fits.
+- Describe the {{< param product_short >}} **cluster model** — Sandbox and PROD — and the one thing that separates them.
 - Describe containers and images at a high level.
-- Navigate your session environment (terminal, editor, console).
+- Say why Kubernetes beats plain Docker for running applications.
+- Navigate your session environment (terminal and editor).
 - Run your first [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html) commands and confirm your access.
 
 ## Prerequisites
@@ -31,8 +33,8 @@ enough — we introduce everything you need.
 
 ## Your Environment
 
-This session is a browser-based environment with an embedded **terminal**, a **code
-editor**, and the OpenShift **web console**. You already have access to your own
+This session is a browser-based environment with an embedded **terminal** and a **code
+editor**. You already have access to your own
 {{< param product_short >}} project, scoped just to you. All commands are run with
 `oc` in the terminal — no installation or login required.
 
@@ -40,13 +42,3 @@ editor**, and the OpenShift **web console**. You already have access to your own
 
 - **Estimated time:** 20 minutes
 - **Difficulty:** Beginner
-
-## Leaving the workshop
-
-Want to switch labs or come back later? This opens the **{{< param product_name >}}**
-portal in a **new browser tab** — your session here keeps running.
-
-```dashboard:open-url
-url: "https://academy.{{< param ingress_domain >}}/"
-title: Open the DCS Academy portal
-```

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hello-dcs-block
+spec:
+  # Block storage is ReadWriteOnce — a single writer, lower latency.
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  # On DCS you would pin the Block class here:
+  #   storageClassName: {{DCS_SC_BLOCK}}

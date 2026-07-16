@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-dcs-config
+data:
+  # The app reads GREETING and MODE from its environment. Change these and roll
+  # out — no image rebuild. This is configuration living outside the image.
+  GREETING: "Configured by a ConfigMap"
+  MODE: "CLI"

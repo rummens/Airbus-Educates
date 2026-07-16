@@ -26,7 +26,7 @@ Foundations assumes no prior container knowledge and brings everyone to a shared
 - **Docs portal** (`dcs_docs_base_url`): placeholder `https://docs.example.dcs` until confirmed
 - **Base images:** `dcs-workshop-base`, `dcs-tools`
 
-**Platform vocabulary** (from customer docs — use consistently): Namespace as a Service (NaaS); DEV/PROD namespace lifecycle; Namespace→Project→Tenant; shared vs dedicated managed clusters; Harbor catalogs (DCS / Allowed External / Proxy-Cached); robot accounts; image mirroring and quota increases via ITSM requests; Network Policies for isolation. Detailed definitions live in the authoring skill's DCS concepts reference.
+**Platform vocabulary** (from customer docs — use consistently): Namespace as a Service (NaaS); DEV/PROD namespace lifecycle; Namespace(Project)→Tenant; shared vs dedicated managed clusters; Harbor catalogs (DCS / Allowed External / Proxy-Cached); robot accounts; image mirroring and quota increases via ITSM requests; Network Policies for isolation. Detailed definitions live in the authoring skill's DCS concepts reference.
 
 ## Delivery Platform
 
@@ -36,8 +36,8 @@ Delivered on the Educates training platform, targeting **OpenShift**. Each works
 
 | Module | Theme | Type |
 |---|---|---|
-| **A — Foundations** | Kubernetes essentials + DCS essentials (namespace types, Harbor, tenancy, networking) | Core (everyone) |
-| **B — Developer** | Deploy, configure, scale, debug apps on DCS | Elective track |
+| **A — Core / Fundamentals** | Quick-win happy path: what is DCS → deploy your first app → configure & fix → expose (real Route) → storage → terms + console tours. Theory folded into labs. | Core (everyone) |
+| **B — Developer** | Build & platform integration: Docker→K8s, BuildConfigs, Dev Spaces, Harbor + scanning, RBAC/tenancy, DEV/PROD policies, scaling, operators. | Elective track |
 | **C — Security & Compliance** | Scanning, pod security, secrets, supply chain, data-residency | Elective track |
 | **D — Architect / Onboarding** | Service catalog, tenancy design, reference architectures | Elective track |
 | **E — Observability** | Metrics, logs, alerts for tenant apps | Elective (cross-track) |
@@ -47,12 +47,15 @@ Delivered on the Educates training platform, targeting **OpenShift**. Each works
 
 Core/elective:
 
-- **Core** = Module A (Foundations). Sequential; every learner completes it first. It establishes the shared baseline and the DCS-specific concepts all tracks rely on.
-- **Electives** = Modules B, C, D, E, F. Each branches off Foundations. Within a track, workshops are sequential (they share a per-track sample app). Across tracks they are independent — a learner can take Developer without Security. Observability (E) has an additional prerequisite: a deployed application (from Developer B01, or equivalent). Operators (F) has an additional prerequisite: A09 (the operator concept); its workshops are independent per service.
+- **Core** = Module A (Core / Fundamentals). Sequential; every learner completes it first. It gets the learner to a running, exposed, persistent app fast (A01–A05) and establishes the DCS vocabulary + console orientation (A06–A08). Concepts are taught inline in the labs, not as standalone theory.
+- **Electives** = Modules B, C, D, E, F. Each branches off Core. Within a track, workshops are sequential (they share a per-track sample app). Across tracks they are independent — a learner can take Developer without Security. Observability (E) has an additional prerequisite: a deployed application (from Core A02, or equivalent). Operators (F) has an additional prerequisite: **Developer B08** (the operator concept, formerly Core A09); its workshops are independent per service.
 - Every workshop states its prerequisites explicitly.
 
 ## Design Principles
 
+- **Quick win first (Core).** Core is optimised to get a learner's own app running on DCS as fast as possible (A02, the quick win), then layer concepts onto that working app. Orientation/vocabulary comes after the hands-on win, not before.
+- **Theory folded into labs.** Concepts are explained inline, in the step that needs them, with an examiner check per command and a knowledge check per workshop — not as separate concept-only pages or standalone theory workshops. (This refines, not replaces, the "one concept, taught with depth" house standard: depth stays; the delivery is woven into the doing.)
+- **Core teaches terms, tracks teach mechanisms.** DCS depth (Harbor internals, RBAC, DEV/PROD policy enforcement, operators) lives in the Developer track; Core teaches the vocabulary and the happy path.
 - **Fully guided experience.** All code interaction — viewing, running, modifying — is driven through Educates clickable actions. Learners click, they do not type commands or edit files by hand.
 - **Per-track sample app.** Each track carries one evolving sample application, reused across its workshops for continuity.
 - **Realistic multi-namespace.** Where the prod/dev namespace model must be tangible, workshops use a virtual cluster so learners see both namespace types.

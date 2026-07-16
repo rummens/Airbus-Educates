@@ -1,0 +1,71 @@
+# Propagate a per-workshop environment label onto the session namespaces Educates
+# creates. The author sets .Values.workshopEnvLabel.sourceLabel on the Workshop CR
+# (metadata.labels, e.g. academy.dcs/environment: prod). Educates stamps
+# training.educates.dev/workshop.name on every session namespace; this Kyverno
+# policy reads that, GETs the Workshop CR, pulls the source label (default when
+# absent), and writes it onto the namespace as targetLabel — so a lab marks its
+# own namespaces dev/prod and the matching policies apply. Version-independent
+# (doesn't rely on an Educates namespace-label field).
+{{- if and .Values.enabled .Values.workshopEnvLabel.enabled }}
+{{- $op := "{{ request.operation }}" }}
+{{- $wsName := `{{ request.object.metadata.labels."training.educates.dev/workshop.name" }}` }}
+# Kyverno reads Workshop CRs via apiCall — grant it (aggregated into Kyverno's
+# admission + background controllers so no controller-name coupling).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Chart.Name }}-kyverno-read-workshops
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+    rbac.kyverno.io/aggregate-to-admission-controller: "true"
+    rbac.kyverno.io/aggregate-to-background-controller: "true"
+rules:
+  - apiGroups: ["training.educates.dev"]
+    resources: ["workshops"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: propagate-workshop-env-label
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    policies.kyverno.io/title: Propagate Workshop Environment Label
+    policies.kyverno.io/category: Educates Academy
+    policies.kyverno.io/severity: low
+    policies.kyverno.io/description: >-
+      Copies the {{ .Values.workshopEnvLabel.sourceLabel }} label from each
+      Workshop CR onto its session namespaces as
+      {{ .Values.workshopEnvLabel.targetLabel }} (default
+      {{ .Values.workshopEnvLabel.default }}).
+spec:
+  background: false
+  rules:
+    - name: copy-env-from-workshop
+      match:
+        any:
+          - resources:
+              kinds:
+                - Namespace
+              selector:
+                matchExpressions:
+                  - key: training.educates.dev/workshop.name
+                    operator: Exists
+      preconditions:
+        any:
+          - key: {{ $op | quote }}
+            operator: AnyIn
+            value: ["CREATE", "UPDATE"]
+      context:
+        - name: workshopEnv
+          apiCall:
+            urlPath: '/apis/training.educates.dev/v1beta1/workshops/{{ $wsName }}'
+            jmesPath: 'metadata.labels."{{ .Values.workshopEnvLabel.sourceLabel }}" || ''{{ .Values.workshopEnvLabel.default }}'''
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            labels:
+              {{ .Values.workshopEnvLabel.targetLabel | quote }}: "{{ `{{ workshopEnv }}` }}"
+{{- end }}

@@ -1,0 +1,10 @@
+#!/bin/bash
+# Verify both pre-provisioned peer namespaces exist.
+base=$(oc project -q 2>/dev/null)
+for s in app-a app-b; do
+  if ! oc get namespace "$base-$s" >/dev/null 2>&1; then
+    echo "Namespace '$base-$s' not found — it should have been created with the session." >&2
+    exit 1
+  fi
+done
+echo "OK: both '$base-app-a' and '$base-app-b' exist."

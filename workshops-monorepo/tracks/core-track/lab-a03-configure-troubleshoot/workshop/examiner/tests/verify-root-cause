@@ -1,0 +1,10 @@
+#!/bin/bash
+# Verify the missing-ConfigMap signal is discoverable in the cluster.
+# Look across pod status, describe, and events for the bad name + "not found".
+if oc get events 2>/dev/null | grep -q 'hello-dcs-conf' \
+   || oc describe pod -l app=hello-dcs 2>/dev/null | grep -qi 'hello-dcs-conf'; then
+  echo "OK: the cluster reports the missing ConfigMap 'hello-dcs-conf' — that's the root cause."
+  exit 0
+fi
+echo "Could not find the 'hello-dcs-conf not found' signal yet — run describe/events again in a moment." >&2
+exit 1

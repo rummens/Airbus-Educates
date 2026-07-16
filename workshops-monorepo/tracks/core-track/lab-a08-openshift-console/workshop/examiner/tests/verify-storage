@@ -1,0 +1,6 @@
+#!/bin/bash
+# Verify the Storage CLI view runs (PVCs) — parity call-out.
+if oc get pvc >/dev/null 2>&1; then
+  echo "OK: 'oc get pvc' ran — the CLI twin of the console Storage view."; exit 0
+fi
+echo "'oc get pvc' failed to run." >&2; exit 1

@@ -3,16 +3,19 @@ title: Summary
 ---
 
 You're oriented on **{{< param product_name >}}**. You now know what the platform is,
-how containers differ from virtual machines, and how to work in your environment with
-`oc`.
+how it's delivered as Sandbox and PROD clusters, how containers differ from virtual
+machines, why Kubernetes beats plain Docker, and how to work in your session with `oc`.
 
 ## What You Did
 
 - Learned what {{< param product_short >}} is: an on-prem, air-gapped, OpenShift-based
   Namespace as a Service platform.
+- Saw the {{< param product_short >}} cluster model — Sandbox and PROD — and that the
+  only difference is feature-rollout timing and maintenance notice/SLA.
 - Saw how containers and images relate.
+- Learned why Kubernetes adds scheduling, self-healing, scaling, and declarative
+  desired-state over plain Docker.
 - Confirmed your identity, cluster access, and project with `oc`.
-- Explored the web console.
 
 ## Check Your Understanding
 
@@ -24,21 +27,33 @@ workloads. All images are provided from within the platform (the Harbor registry
 can't pull from public registries.
 {{< /note >}}
 
-2. What is the difference between a container **image** and a **container**?
+2. What is the **one real difference** between the Sandbox and PROD clusters?
 
 {{< note >}}
-**Answer:** The image is the blueprint (a packaged, read-only template); the container
-is a running instance of that image.
+**Answer:** Feature-rollout timing and maintenance notice/SLA. New platform features
+reach Sandbox first and PROD about a month later; Sandbox announces maintenance
+shorter-term (slightly lower SLA), PROD with longer notice (higher SLA). Otherwise the
+two clusters are identical — same platform, same capabilities.
 {{< /note >}}
 
-3. Which command shows the project you are currently working in?
+3. What is the difference between a container **image** and a **container**?
 
 {{< note >}}
-**Answer:** `oc project -q`. Your project name is also in `$SESSION_NAMESPACE`.
+**Answer:** The image is the blueprint (a packaged, read-only built artifact); the
+container is a running instance of that image.
+{{< /note >}}
+
+4. Name **one thing Kubernetes gives you that plain Docker doesn't**.
+
+{{< note >}}
+**Answer:** Any of: scheduling (the platform picks where a workload runs), self-healing
+(crashed containers are restarted/rescheduled automatically), scaling (ask for N replicas
+up or down), or declarative desired-state (you describe the target and the platform
+continuously reconciles to it, versus a one-shot `docker run`).
 {{< /note >}}
 
 ## Next Steps
 
-Continue with **Kubernetes Essentials on DCS**, where you'll deploy your first
-application and expose it — using the [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
+Continue with **Deploy Your First App**, where you'll get an application running on
+{{< param product_short >}} in minutes — using the [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
 skills you just practised.
