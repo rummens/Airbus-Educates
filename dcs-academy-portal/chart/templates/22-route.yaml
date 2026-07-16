@@ -13,10 +13,6 @@ metadata:
   annotations:
     # Session start (esp. with vcluster) can exceed the router's 30s default → 504.
     haproxy.router.openshift.io/timeout: {{ .Values.auth.routeTimeout | quote }}
-    # route.openshift.io is an aggregated API (no CRD, no OpenAPI schema) — ArgoCD's
-    # ServerSideApply structured-merge-diff can't resolve its parseableType. Opt this
-    # resource out of SSA; falls back to normal diff for Route only.
-    argocd.argoproj.io/sync-options: ServerSideApply=false
 spec:
   host: {{ include "portal.authHostname" . }}
   to:
