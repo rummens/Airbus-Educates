@@ -18,6 +18,7 @@
 #   SMOKE_ARGS="--no-links"                          extra args passed to smoke_test.py
 # Flags:
 #   --dry-run    show what would run (resolve labs + actions), touch nothing
+#   --no-argo    don't pause/restore ArgoCD (use if you manage sync yourself)
 set -uo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -27,11 +28,12 @@ ARGO_NS="${ARGO_NS:-openshift-gitops}"
 SMOKE_ARGS="${SMOKE_ARGS:---no-links}"
 GREEN=$'\033[32m'; RED=$'\033[31m'; DIM=$'\033[2m'; RST=$'\033[0m'
 
-DRY=0; folders=()
+DRY=0; NO_ARGO=0; folders=()
 for a in "$@"; do
   case "$a" in
     --dry-run) DRY=1 ;;
-    -h|--help) sed -n '2,25p' "$0"; exit 0 ;;
+    --no-argo) NO_ARGO=1 ;;
+    -h|--help) sed -n '2,27p' "$0"; exit 0 ;;
     *) folders+=("$a") ;;
   esac
 done
@@ -72,37 +74,45 @@ if [ "$DRY" = 1 ]; then echo "${DIM}(dry-run — nothing executed)${RST}"; exit 
 [ ${#run[@]} -gt 0 ] || { echo "nothing to run."; exit 0; }
 
 # --- ArgoCD pause with guaranteed restore ---
-PREV_AUTO="$(oc --context "$CTX" -n "$ARGO_NS" get application "$ARGO_APP" \
-             -o jsonpath='{.spec.syncPolicy.automated}' 2>/dev/null)"
+# selfHeal would revert the Workshop CRs that the portal-less deploy rewrites, so we
+# pause auto-sync for the run. We ALWAYS re-enable it on exit (prune+selfHeal is the
+# GitOps steady state for this cluster) — this also self-heals a prior run that was
+# killed before its restore could fire. Pass --no-argo to leave ArgoCD untouched.
 restore_argo() {
-  [ -n "$PREV_AUTO" ] || return 0
-  echo; echo ">> restoring ArgoCD auto-sync on $ARGO_APP"
+  echo; echo ">> restoring ArgoCD auto-sync (prune+selfHeal) on $ARGO_APP"
   oc --context "$CTX" -n "$ARGO_NS" patch application "$ARGO_APP" --type=merge \
-     -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}' >/dev/null 2>&1
+     -p '{"spec":{"syncPolicy":{"automated":{"prune":true,"selfHeal":true}}}}' >/dev/null 2>&1 \
+     || echo "   ${RED}!! could not re-enable auto-sync — do it manually${RST}"
 }
-if [ -n "$PREV_AUTO" ]; then
-  echo ">> pausing ArgoCD auto-sync on $ARGO_APP"
-  oc --context "$CTX" -n "$ARGO_NS" patch application "$ARGO_APP" --type=merge \
-     -p '{"spec":{"syncPolicy":{"automated":null}}}' >/dev/null 2>&1
-  trap restore_argo EXIT INT TERM
+if [ "$NO_ARGO" = 1 ]; then
+  echo ">> --no-argo: leaving ArgoCD sync policy untouched"
 else
-  echo ">> ArgoCD auto-sync already off (leaving as-is)"
+  echo ">> pausing ArgoCD auto-sync on $ARGO_APP for the run"
+  oc --context "$CTX" -n "$ARGO_NS" patch application "$ARGO_APP" --type=merge \
+     -p '{"spec":{"syncPolicy":{"automated":null}}}' >/dev/null 2>&1 \
+     || echo "   ${DIM}(could not pause — continuing; selfHeal may fight the deploy)${RST}"
+  trap restore_argo EXIT INT TERM
 fi
 
 # --- run each lab sequentially, collect results ---
-results=(); fails=0
+total=${#run[@]}; k=0; results=(); fails=0
 for name in "${run[@]}"; do
-  echo; echo "================ $name ================"
+  k=$((k+1)); SECONDS=0
+  echo
+  echo "================ [$k/$total] $name ================"
+  echo "${DIM}$(date '+%H:%M:%S') starting…${RST}"
   tmp="$(mktemp)"
   "$HERE/smoke_test.py" "$name" --context "$CTX" $SMOKE_ARGS 2>&1 | tee "$tmp"
   rc="${PIPESTATUS[0]}"
   summ="$(grep -oE '[0-9]+ passed, [0-9]+ failed[^;]*' "$tmp" | tail -1)"
+  el="${SECONDS}s"
+  echo "${DIM}$(date '+%H:%M:%S') $name done in ${el}${RST}"
   if grep -q 'deploy failed' "$tmp"; then
-    results+=("${RED}FAIL${RST}  $name  (deploy failed)"); fails=$((fails+1))
+    results+=("${RED}FAIL${RST}  $name  (deploy failed, ${el})"); fails=$((fails+1))
   elif [ "$rc" -eq 0 ]; then
-    results+=("${GREEN}OK  ${RST}  $name  (${summ:-ok})")
+    results+=("${GREEN}OK  ${RST}  $name  (${summ:-ok}, ${el})")
   else
-    results+=("${RED}FAIL${RST}  $name  (${summ:-see log})"); fails=$((fails+1))
+    results+=("${RED}FAIL${RST}  $name  (${summ:-see log}, ${el})"); fails=$((fails+1))
   fi
   rm -f "$tmp"
 done

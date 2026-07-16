@@ -87,6 +87,23 @@ def pod_exec(ctx, ns, pod, script, timeout):
                                            f"step timed out after {timeout}s (interactive/watch command?)")
 
 
+def dump_deploy_diagnostics(ctx, ns, session):
+    """When a session never reaches Running, print why: CR status, pods, events."""
+    def show(title, args):
+        r = sh(["oc", "--context", ctx] + args)
+        out = (r.stdout or r.stderr).strip()
+        print(f"  {DIM}$ oc {' '.join(args)}{RST}")
+        for l in (out.splitlines() or ["(no output)"])[:25]:
+            print(f"    {DIM}{l}{RST}")
+    show("session", ["get", "workshopsession", session,
+                     "-o", "jsonpath={.status.educates.phase}{\"  \"}{.status.educates.message}{\"\\n\"}"])
+    show("pods", ["-n", ns, "get", "pods", "-o", "wide"])
+    show("events", ["-n", ns, "get", "events", "--sort-by=.lastTimestamp"])
+    print(f"  {DIM}tip: a session stuck Pending is usually a not-yet-cleared previous env "
+          f"(`./deploy_workshop.py {session.rsplit('-', 1)[0]} --delete` then retry) or a stale "
+          f"CRC Multus token (see README).{RST}")
+
+
 def check_links(content_dir):
     """External http(s) links in the workshop markdown → verify each is reachable."""
     urls = set()
@@ -117,6 +134,11 @@ def check_links(content_dir):
     return bad
 
 
+def _short(s, n=90):
+    s = " ".join(s.split())
+    return s if len(s) <= n else s[:n - 1] + "…"
+
+
 def run_plan(ctx, ns, pod, steps, tests_dir, workdir, oc_shim, timeout):
     """Execute the smoke plan in the pod. Returns (passed, failed)."""
     prefix = ""
@@ -127,15 +149,21 @@ def run_plan(ctx, ns, pod, steps, tests_dir, workdir, oc_shim, timeout):
         prefix = 'export PATH=$HOME/bin:$PATH; '
         print(f"{DIM}oc->kubectl shim installed{RST}")
 
+    total = len(steps)
     passed = failed = 0
     for i, step in enumerate(steps, 1):
         if "run" in step:
-            r = pod_exec(ctx, ns, pod, f'{prefix}cd {workdir}; {step["run"]}', timeout)
-            label = f"run: {step['run']}"
+            cmd, label = f'{prefix}cd {workdir}; {step["run"]}', f"run:   {step['run']}"
         else:
             argstr = " ".join(f"'{a}'" for a in step.get("args", []))
-            r = pod_exec(ctx, ns, pod, f'{prefix}{tests_dir}/{step["check"]} {argstr}', timeout)
+            cmd = f'{prefix}{tests_dir}/{step["check"]} {argstr}'
             label = f"check: {step['check']} {' '.join(step.get('args', []))}".rstrip()
+        # Heartbeat BEFORE running — some steps (rollout status, polling checks with
+        # retries: .INF) take a while; this line tells the user which one is in flight.
+        print(f"  [{i:>2}/{total}] {DIM}… {_short(label)}{RST}", flush=True)
+        t0 = time.time()
+        r = pod_exec(ctx, ns, pod, cmd, timeout)
+        dt = time.time() - t0
         # `expect_fail` steps invert the verdict: they only pass on the real DCS platform
         # (e.g. Kyverno-enforced PROD deploys) and are EXPECTED to fail on CRC. Encoding it
         # keeps the run green here while still catching a regression (an unexpected PASS).
@@ -145,14 +173,20 @@ def run_plan(ctx, ns, pod, steps, tests_dir, workdir, oc_shim, timeout):
         passed, failed = (passed + 1, failed) if ok else (passed, failed + 1)
         tag = "XFAIL" if (want_fail and ok) else ("XPASS" if want_fail else ("PASS" if ok else "FAIL"))
         colour = GREEN if ok else RED
-        print(f"  [{i:>2}] {colour}{tag:<5}{RST}  {label}")
+        print(f"  [{i:>2}/{total}] {colour}{tag:<5}{RST}  {label}  {DIM}({dt:.0f}s){RST}")
         if not ok:
-            diag = (r.stderr.strip() or r.stdout.strip()).splitlines()
-            hint = " (expected to FAIL on CRC but PASSED — platform regression?)" if want_fail else ""
-            if diag:
-                print(f"        {DIM}{diag[-1]}{hint}{RST}")
-            elif hint:
-                print(f"        {DIM}{hint.strip()}{RST}")
+            # Show the FULL failure output (indented) so the reason is obvious without
+            # re-running by hand: exit code, then stdout and stderr tails.
+            print(f"        {RED}└─ exit {r.returncode}{RST}"
+                  + (f"  {DIM}(expected FAIL on CRC but it PASSED — platform regression?){RST}"
+                     if want_fail else ""))
+            for stream, text in (("stdout", r.stdout), ("stderr", r.stderr)):
+                lines = [l for l in text.splitlines() if l.strip()]
+                if not lines:
+                    continue
+                print(f"        {DIM}{stream}:{RST}")
+                for l in lines[-15:]:
+                    print(f"          {DIM}{l}{RST}")
     return passed, failed
 
 
@@ -194,21 +228,33 @@ def main():
     steps = plan.get("steps", [])
     vcluster = bool(plan.get("vcluster", False))
 
+    print(f"{DIM}workshop {name}  ·  ns {ns}  ·  {len(steps)} plan step(s)  ·  "
+          f"vcluster={vcluster}  ·  ref {args.ref}{RST}")
+
     # 1. deploy
     if not args.no_deploy:
-        print(f"=== deploying {name} (vcluster={vcluster}) ===")
+        print(f"\n=== [1/4] deploy {name} ===  {DIM}(first-time image pull + git clone can take "
+              f"several minutes){RST}")
         if not run_deploy_tool(name, args.context, args.id, vcluster, args.base, args.ref):
+            print(f"\n{RED}deploy failed{RST} — session did not reach Running. Diagnostics:")
+            dump_deploy_diagnostics(args.context, ns, f"{name}-{args.id}")
             sys.exit("deploy failed")
+    else:
+        print(f"\n=== [1/4] deploy skipped (--no-deploy) ===")
 
     # 2. find the live session pod
+    print(f"\n=== [2/4] wait for the session pod (Running) ===")
     pod = wait_for_pod(args.context, ns, f"{name}-{args.id}", args.deploy_timeout)
     if not pod:
+        print(f"\n{RED}no Running session pod for {name}-{args.id} in ns {ns}{RST} — diagnostics:")
+        dump_deploy_diagnostics(args.context, ns, f"{name}-{args.id}")
         if not args.keep:
             run_deploy_tool(name, args.context, args.id, vcluster, args.base, args.ref, delete=True)
         sys.exit(f"no Running session pod for {name}-{args.id} in ns {ns}")
-    print(f"session pod: {ns}/{pod}\n")
+    print(f"session pod: {GREEN}{ns}/{pod}{RST}")
 
     # 3. run graders
+    print(f"\n=== [3/4] run graders ({len(steps)} steps) ===")
     passed, failed = run_plan(args.context, ns, pod, steps, args.tests_dir,
                               args.workdir, args.oc_shim, args.timeout)
 
@@ -223,7 +269,7 @@ def main():
 
     # 5. teardown
     if not args.keep:
-        print(f"\n=== tearing down {name} ===")
+        print(f"\n=== [4/4] tear down {name} ===")
         run_deploy_tool(name, args.context, args.id, vcluster, args.base, args.ref, delete=True)
     else:
         print(f"\n(kept {name} running; remove with ./deploy_workshop.py {name} --delete)")
