@@ -51,7 +51,7 @@ labels: {}
 params:
   productName: "Digital Container Service (DCS)"
   productShort: "DCS"
-  dcsRegistry: "harbor.example.dcs/dcs-academy"
+  dcsRegistry: "ghcr.io/rummens"
   dcsDocsBaseUrl: "https://docs.example.dcs"
 
 # The one Educates TrainingPortal that hosts the whole catalog. Its name +
