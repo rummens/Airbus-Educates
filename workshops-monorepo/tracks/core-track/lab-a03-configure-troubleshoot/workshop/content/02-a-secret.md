@@ -25,15 +25,28 @@ command: oc apply -f secret.yaml
 
 ```examiner:execute-test
 name: verify-secret
-title: Verify the Secret exists and is referenced by the Deployment
+title: Verify the Secret exists
 timeout: 10
 ```
 
+## Wire it into the app
+
+The Secret exists, but the app isn't using it yet. Inject its keys as environment
+variables with `oc set env --from` — this adds an `API_TOKEN` env var backed by the
+Secret, and rolls out a new Pod:
+
+```terminal:execute
+command: oc set env deploy/hello-dcs --from=secret/hello-dcs-secret && oc rollout status deploy/hello-dcs --timeout=120s
+```
+
+{{< note >}}
+Order matters: you create the Secret **first**, then reference it. A workload that
+references a Secret (or ConfigMap) that doesn't exist yet won't start.
+{{< /note >}}
+
 ## Confirm injection — without leaking the value
 
-The Deployment you applied already references this Secret via `secretKeyRef`, injecting it
-as the `API_TOKEN` env var. Confirm the variable **exists** in the container without
-printing what it holds:
+Confirm the `API_TOKEN` variable **exists** in the container without printing what it holds:
 
 ```terminal:execute
 command: oc exec deploy/hello-dcs -- printenv | grep -o '^API_TOKEN='

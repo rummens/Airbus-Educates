@@ -26,12 +26,6 @@ spec:
         envFrom:
         - configMapRef:
             name: hello-dcs-conf
-        env:
-        - name: API_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: hello-dcs-secret
-              key: API_TOKEN
         ports:
         - containerPort: 8080
         volumeMounts:

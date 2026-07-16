@@ -1,7 +1,8 @@
-# The A02 app, now declarative and wired to external configuration:
+# The A02 app, now declarative and wired to the ConfigMap:
 #   - envFrom: every key in the ConfigMap becomes an environment variable.
-#   - env.valueFrom.secretKeyRef: one Secret key injected as an env var.
 #   - a volume: the ConfigMap also mounted as files under /etc/hello-dcs.
+# The Secret is added later (page 02) with `oc set env --from=secret`, AFTER the
+# Secret exists — a workload can't start while it references a missing Secret.
 # Apply with: envsubst < deployment-configured.yaml | oc apply -f -
 apiVersion: apps/v1
 kind: Deployment
@@ -25,12 +26,6 @@ spec:
         envFrom:
         - configMapRef:
             name: hello-dcs-config
-        env:
-        - name: API_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: hello-dcs-secret
-              key: API_TOKEN
         ports:
         - containerPort: 8080
         volumeMounts:
