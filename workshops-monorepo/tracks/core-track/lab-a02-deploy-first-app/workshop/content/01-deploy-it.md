@@ -29,5 +29,24 @@ retries: .INF
 delay: 2
 ```
 
+## See it running
+
+Don't take the green check's word for it — look at what's actually running:
+
+```terminal:execute
+command: oc get deployment,pods -l app=hello-dcs
+```
+
+You'll see the Deployment reporting `1/1` READY and one Pod in `Running` — your app, live
+on {{< param product_short >}}.
+
+```examiner:execute-test
+name: verify-ready
+title: Verify hello-dcs is running (1 ready replica)
+timeout: 10
+retries: .INF
+delay: 2
+```
+
 That's your app running on {{< param product_short >}} — from an image, to a scheduled,
 self-healing workload, with a single command. Next, make it yours.

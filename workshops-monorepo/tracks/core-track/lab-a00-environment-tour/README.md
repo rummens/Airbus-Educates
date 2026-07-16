@@ -10,7 +10,7 @@ familiar.
 
 - **Track:** Core / Fundamentals · Lab 0
 - **Audience:** Beginner — no container, Kubernetes, or DCS experience needed
-- **Duration:** ~10 min
+- **Duration:** ~5 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
 - **Prerequisites:** A DCS login. Nothing else.
 

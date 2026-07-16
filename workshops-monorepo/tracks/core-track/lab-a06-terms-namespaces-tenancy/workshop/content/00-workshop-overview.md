@@ -39,5 +39,5 @@ the isolation demo. All commands run with `oc`.
 
 ## Time and Difficulty
 
-- **Estimated time:** 30 minutes
+- **Estimated time:** 20 minutes
 - **Difficulty:** Beginner

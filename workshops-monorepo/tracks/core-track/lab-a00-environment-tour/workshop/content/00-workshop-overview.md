@@ -40,5 +40,5 @@ project scoped just to you.
 
 ## Time and Difficulty
 
-- **Estimated time:** 10 minutes
+- **Estimated time:** 5 minutes
 - **Difficulty:** Beginner

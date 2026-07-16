@@ -10,7 +10,7 @@ by: observe → hypothesise → fix → verify, using logs, events and `describe
 
 - **Track:** Core / Fundamentals · Lab 3
 - **Audience:** Intermediate — you've done A02
-- **Duration:** ~30 min
+- **Duration:** ~20 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
 - **Prerequisites:** A02 (Deploy Your First App).
 

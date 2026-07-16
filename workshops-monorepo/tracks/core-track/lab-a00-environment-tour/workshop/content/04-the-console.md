@@ -21,10 +21,13 @@ It's **empty** right now — you haven't deployed anything yet. That's expected:
 note that the tab exists and shows *your* namespace.
 
 {{< note >}}
-**This is not the OpenShift web console.** The Console tab is the generic Kubernetes
-Dashboard, embedded read-mostly for a quick visual check. {{< param product_short >}} also
-has the full **OpenShift web console**, which is a richer, separate tool — you get a
-guided tour of it later in **A08: The OpenShift Console**.
+**This is not the OpenShift web console — and here's why.** The full OpenShift console
+refuses to be embedded in another page (it sends a `frame-ancestors: 'none'` header, so a
+browser won't render it inside this dashboard's tab), and it wouldn't share your session
+login anyway. So the in-session Console tab is the generic **Kubernetes Dashboard**, which
+*does* embed and runs as your session account — enough for a quick visual check.
+{{< param product_short >}}'s richer **OpenShift web console** is a separate tool you open
+in its own browser tab; you get a guided tour of it in **A08: The OpenShift Console**.
 {{< /note >}}
 
 When you've had a look, switch back to the terminal:

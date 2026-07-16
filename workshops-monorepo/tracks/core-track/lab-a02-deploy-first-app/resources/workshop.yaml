@@ -13,7 +13,7 @@ metadata:
 spec:
   title: "Deploy Your First App"
   description: Get your own app running on DCS fast — create a Deployment from a Harbor image, customise it, reach it, change it and watch it roll out — then peek at the YAML behind it to see how Kubernetes really works.
-  duration: 30m
+  duration: 20m
   difficulty: beginner
   labels:
     - name: module

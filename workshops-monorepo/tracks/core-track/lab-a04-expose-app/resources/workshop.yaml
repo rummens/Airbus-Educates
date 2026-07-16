@@ -15,7 +15,7 @@ metadata:
 spec:
   title: "Expose Your App"
   description: Give your app a stable in-cluster address with a Service, then expose it for real with a Route on DCS-managed DNS — reachable outside the session — and surface it as a new dashboard tab inside the session too.
-  duration: 30m
+  duration: 20m
   difficulty: intermediate
   labels:
     - name: module

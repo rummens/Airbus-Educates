@@ -10,7 +10,7 @@ last so the YAML makes sense once you've earned it.
 
 - **Track:** Core / Fundamentals · Lab 2
 - **Audience:** Beginner — you've done A01
-- **Duration:** ~30 min
+- **Duration:** ~20 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
 - **Prerequisites:** A01 (What is DCS?).
 

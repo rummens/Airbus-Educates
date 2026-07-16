@@ -22,7 +22,7 @@ metadata:
 spec:
   title: What is DCS?
   description: Get oriented on the Digital Container Service — what it is, how containers and images fit, and how to work in the DCS environment with oc.
-  duration: 20m
+  duration: 15m
   difficulty: beginner
   # spec.labels are Educates-native (searchable in Educates' own UI). Catalog
   # grouping/order live in the academy.dcs/* metadata labels above — keep only

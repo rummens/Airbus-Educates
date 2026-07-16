@@ -14,7 +14,7 @@ metadata:
 spec:
   title: "Terms — Namespaces & Tenancy"
   description: Name the DCS terms you keep hearing — Namespace, Tenant, and the DEV/PROD namespace types — and see namespace isolation for real by deploying the same app into two namespaces at once.
-  duration: 30m
+  duration: 20m
   difficulty: beginner
   labels:
     - name: module

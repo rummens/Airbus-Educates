@@ -14,7 +14,7 @@ metadata:
 spec:
   title: "The ITSM Console — Self-Service on DCS"
   description: Learn where DCS self-service ends and requests begin — which actions you do yourself with oc and which need an ITSM ticket — then tour the ITSM console and walk one request end to end.
-  duration: 20m
+  duration: 10m
   difficulty: beginner
   labels:
     - name: module

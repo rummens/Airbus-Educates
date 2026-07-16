@@ -31,5 +31,5 @@ Requests are documented in the
 
 ## Time and Difficulty
 
-- **Estimated time:** 20 minutes
+- **Estimated time:** 10 minutes
 - **Difficulty:** Beginner

@@ -10,7 +10,7 @@ container or Kubernetes knowledge — every term you need is introduced here.
 
 - **Track:** Core / Fundamentals · Lab 1
 - **Audience:** Beginner — no container or Kubernetes experience needed
-- **Duration:** ~20 min
+- **Duration:** ~15 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
 - **Prerequisites:** A DCS login and basic comfort with a Linux command line.
 

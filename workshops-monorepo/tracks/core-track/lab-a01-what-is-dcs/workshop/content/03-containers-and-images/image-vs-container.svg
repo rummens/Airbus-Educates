@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="300" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">One image → many running containers</text>
+
+  <!-- image (blueprint) -->
+  <rect x="40" y="90" width="200" height="120" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="140" y="120" text-anchor="middle" font-size="15" font-weight="bold" fill="#1b4a86">Image</text>
+  <text x="140" y="145" text-anchor="middle" font-size="11" fill="#5a6b7b">built artifact</text>
+  <text x="140" y="162" text-anchor="middle" font-size="11" fill="#5a6b7b">read-only template</text>
+  <text x="140" y="188" text-anchor="middle" font-size="11" fill="#8a97a4">the blueprint</text>
+
+  <!-- arrows -->
+  <g stroke="#5a6b7b" stroke-width="2" fill="#5a6b7b">
+    <line x1="240" y1="120" x2="470" y2="95"/><polygon points="470,95 461,95 466,103"/>
+    <line x1="240" y1="150" x2="470" y2="150"/><polygon points="470,150 462,146 462,154"/>
+    <line x1="240" y1="180" x2="470" y2="205"/><polygon points="470,205 461,197 466,205"/>
+  </g>
+  <text x="355" y="135" text-anchor="middle" font-size="10" fill="#8a97a4">run</text>
+
+  <!-- containers (instances) -->
+  <g>
+    <rect x="475" y="70" width="200" height="50" rx="6" fill="#eef3ee" stroke="#4a9a5a"/>
+    <text x="575" y="100" text-anchor="middle" font-size="12" fill="#2c6a3a">Container (running)</text>
+    <rect x="475" y="125" width="200" height="50" rx="6" fill="#eef3ee" stroke="#4a9a5a"/>
+    <text x="575" y="155" text-anchor="middle" font-size="12" fill="#2c6a3a">Container (running)</text>
+    <rect x="475" y="180" width="200" height="50" rx="6" fill="#eef3ee" stroke="#4a9a5a"/>
+    <text x="575" y="210" text-anchor="middle" font-size="12" fill="#2c6a3a">Container (running)</text>
+  </g>
+
+  <text x="380" y="270" text-anchor="middle" font-size="11" fill="#5a6b7b">You build the image once; the platform starts as many identical containers from it as you need.</text>
+</svg>

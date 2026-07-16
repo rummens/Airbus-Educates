@@ -27,6 +27,8 @@ Two words that are easy to mix up:
 
 You build an image once, then run it as a container wherever you need it.
 
+![One image, many running containers](image-vs-container.svg)
+
 ## Where DCS images come from
 
 Because {{< param product_short >}} is air-gapped, images don't come from the public

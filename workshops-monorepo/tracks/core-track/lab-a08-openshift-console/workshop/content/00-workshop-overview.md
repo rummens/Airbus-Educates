@@ -33,5 +33,5 @@ By the end of this workshop you will be able to:
 
 ## Time and Difficulty
 
-- **Estimated time:** 25 minutes
+- **Estimated time:** 15 minutes
 - **Difficulty:** Beginner

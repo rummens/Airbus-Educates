@@ -20,7 +20,7 @@ metadata:
 spec:
   title: Your Workshop Environment
   description: A quick tour of the DCS Academy lab environment — the split terminals, the code editor, the Kubernetes Dashboard console tab, and the feedback form — so the tools never get in the way of the learning.
-  duration: 10m
+  duration: 5m
   difficulty: beginner
   labels:
     - name: module

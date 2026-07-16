@@ -16,7 +16,7 @@ metadata:
 spec:
   title: "The OpenShift Console — A Guided Tour"
   description: Everything you did with oc has a UI. Tour the OpenShift web console — Workloads, Networking, Storage, Config — mapped one-to-one to the commands you already know, and learn when the console is the faster tool.
-  duration: 25m
+  duration: 15m
   difficulty: beginner
   labels:
     - name: module

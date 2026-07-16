@@ -29,6 +29,19 @@ the instructions and they run for you. There are three kinds you'll meet most:
 
 You'll try all three over the next few pages.
 
+## The evaluator (Verify checks)
+
+Those green **Verify** boxes are the lab's *evaluator*. Each one runs a small script that
+inspects the cluster — is the pod actually running? did the Service answer? — and turns
+green only when the previous step truly succeeded. They exist for two reasons:
+
+- **You get instant, honest feedback** that a step worked, instead of guessing.
+- **They gate progress on purpose** — if a check is red, something's off; fix it before
+  moving on rather than piling the next step on a broken one.
+
+If a check is red, re-read the expected output of the step above, make sure the right tab
+is visible, and click the step (then the check) again — they're safe to re-run.
+
 {{< note >}}
 **Two habits worth forming now:**
 - **Watch which tab is visible.** Running a command switches you to the Terminal tab; if a

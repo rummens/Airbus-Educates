@@ -16,24 +16,24 @@ Here are the four wins that matter most.
 You say *"run this,"* and the platform decides **where** it runs, picking a machine with
 room to spare. You never hand-place a workload on a specific server.
 
-*VM-world analogy:* instead of you walking to a rack and choosing which physical host
-gets the new VM, a dispatcher finds a free spot for you.
+*With plain Docker:* you SSH to a chosen host and run `docker run` there yourself —
+nothing finds a machine with room or balances across hosts.
 
 ## Self-healing
 
 If a container crashes, the platform **restarts or reschedules it automatically** —
 usually before anyone notices. Losing a machine just means your work is moved elsewhere.
 
-*VM-world analogy:* like having an operator who is always watching, and reboots or
-re-hosts a failed VM the instant it goes down — without a support ticket.
+*With plain Docker:* a crashed container stays down until someone runs `docker run`
+again. `--restart` helps on one host, but if that host dies, so does your app.
 
 ## Scaling
 
 Need more copies to handle load? You **ask for N replicas**, up or down, and the
 platform makes it so. No cloning VMs by hand, no manual redeploy.
 
-*VM-world analogy:* instead of provisioning five more VMs one by one, you say "make it
-five" and they appear (and disappear again when you say "make it two").
+*With plain Docker:* more copies means running `docker run` by hand N times and wiring
+up your own load balancer in front of them.
 
 ## Declarative desired-state
 
@@ -43,9 +43,8 @@ Contrast that with running `docker run` by hand: that's **imperative**, a one-ti
 command with no memory. If the container dies, nothing brings it back. Declarative means
 the desired state is written down, and the platform keeps making it true.
 
-*VM-world analogy:* instead of a runbook of steps someone has to execute (and re-execute
-after every failure), you file the target configuration once and the system keeps the
-estate matching it.
+*With plain Docker:* `docker run` is fire-and-forget — there is no record of what
+*should* be running, so nothing notices or repairs drift when reality changes.
 
 ## Next
 

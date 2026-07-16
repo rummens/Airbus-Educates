@@ -13,7 +13,7 @@ metadata:
 spec:
   title: "Storage"
   description: Give your app storage that survives a restart — request a PVC from a DCS storage class, mount it, write data, restart, and prove the data persists — and learn when to pick File vs Block and how S3 is requested.
-  duration: 30m
+  duration: 20m
   difficulty: intermediate
   labels:
     - name: module

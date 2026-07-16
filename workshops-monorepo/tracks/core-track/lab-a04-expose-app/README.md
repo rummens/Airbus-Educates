@@ -11,7 +11,7 @@ namespace.
 
 - **Track:** Core / Fundamentals · Lab 4
 - **Audience:** Intermediate — you've done A02 (A03 helpful)
-- **Duration:** ~30 min
+- **Duration:** ~20 min
 - **Format:** Hands-on, guided — split terminal, runs in your own (PROD-type) OpenShift session namespace
 - **Prerequisites:** A02 (Deploy Your First App).
 

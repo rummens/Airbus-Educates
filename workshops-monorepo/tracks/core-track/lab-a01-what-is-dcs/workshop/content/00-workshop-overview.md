@@ -40,5 +40,5 @@ editor**. You already have access to your own
 
 ## Time and Difficulty
 
-- **Estimated time:** 20 minutes
+- **Estimated time:** 15 minutes
 - **Difficulty:** Beginner

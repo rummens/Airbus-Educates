@@ -12,7 +12,7 @@ bucket, and walks one request — a quota increase — from form to provisioned 
 
 - **Track:** Core / Fundamentals · Lab 7
 - **Audience:** Beginner — you've done A01
-- **Duration:** ~20 min
+- **Duration:** ~10 min
 - **Format:** Guided tour + knowledge check (screenshot-driven)
 - **Prerequisites:** A01 (What is DCS?).
 

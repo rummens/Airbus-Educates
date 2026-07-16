@@ -14,7 +14,7 @@ move fluently between the two and know when each is the faster tool.
 
 - **Track:** Core / Fundamentals · Lab 8
 - **Audience:** Beginner — you've done A02 (A03–A05 helpful)
-- **Duration:** ~25 min
+- **Duration:** ~15 min
 - **Format:** Guided tour + `oc`-parity checks (part screenshot-driven)
 - **Prerequisites:** A02 (Deploy Your First App).
 
