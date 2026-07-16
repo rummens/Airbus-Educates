@@ -20,7 +20,10 @@ rules:
   # secrets-manager watches SecretCopiers, SecretExporters, SecretInjectors, SecretImporters
   - apiGroups: ["secrets.educates.dev"]
     resources: ["secretcopiers", "secretexporters", "secretinjectors", "secretimporters"]
-    verbs: ["get", "list", "watch", "create", "update", "delete"]
+    verbs: ["get", "list", "watch", "create", "update", "delete", "patch"]
+  - apiGroups: ["secrets.educates.dev"]
+    resources: ["secretcopiers/finalizers", "secretexporters/finalizers", "secretinjectors/finalizers", "secretimporters/finalizers"]
+    verbs: ["update", "patch"]
   # need to enumerate namespaces to scope secret-copier operations
   - apiGroups: [""]
     resources: ["namespaces"]
@@ -33,6 +36,11 @@ rules:
   - apiGroups: [""]
     resources: ["secrets", "configmaps"]
     verbs: ["get", "list", "watch", "create", "update", "delete", "patch"]
+  # need finalizers to set ownerReferences with blockOwnerDeletion on copied secrets
+  # (ownerRefs may point back to SecretCopier CRs, which are themselves owned by Namespaces)
+  - apiGroups: [""]
+    resources: ["secrets/finalizers", "configmaps/finalizers", "services/finalizers", "namespaces/finalizers"]
+    verbs: ["update", "patch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
