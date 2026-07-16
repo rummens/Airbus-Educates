@@ -16,6 +16,7 @@
 #   ARGO_APP=dcs-academy-tracks-and-workshops       ArgoCD app managing the Workshop CRs
 #   ARGO_NS=openshift-gitops                        its namespace
 #   SMOKE_ARGS="--no-links"                          extra args passed to smoke_test.py
+#   LOG_DIR=<path>                                   where per-lab logs go (default ./.logs/<ts>)
 # Flags:
 #   --dry-run    show what would run (resolve labs + actions), touch nothing
 #   --no-argo    don't pause/restore ArgoCD (use if you manage sync yourself)
@@ -66,12 +67,15 @@ for name in "${labs[@]}"; do
   if [ "$steps" = "0" ]; then skip+=("$name  (plan has no checks)"); else run+=("$name"); fi
 done
 
+LOGDIR="${LOG_DIR:-$HERE/.logs/$(date +%Y%m%d-%H%M%S)}"
 echo "context : $CTX"
 echo "argo app: $ARGO_APP (ns $ARGO_NS)"
+echo "logs    : $LOGDIR/<lab>.log  (full per-lab output, kept)"
 echo "to run  : ${run[*]:-<none>}"
 [ ${#skip[@]} -gt 0 ] && printf 'skipping: %s\n' "${skip[@]}"
 if [ "$DRY" = 1 ]; then echo "${DIM}(dry-run — nothing executed)${RST}"; exit 0; fi
 [ ${#run[@]} -gt 0 ] || { echo "nothing to run."; exit 0; }
+mkdir -p "$LOGDIR"
 
 # --- ArgoCD pause with guaranteed restore ---
 # selfHeal would revert the Workshop CRs that the portal-less deploy rewrites, so we
@@ -100,21 +104,20 @@ for name in "${run[@]}"; do
   k=$((k+1)); SECONDS=0
   echo
   echo "================ [$k/$total] $name ================"
-  echo "${DIM}$(date '+%H:%M:%S') starting…${RST}"
-  tmp="$(mktemp)"
-  "$HERE/smoke_test.py" "$name" --context "$CTX" $SMOKE_ARGS 2>&1 | tee "$tmp"
+  echo "${DIM}$(date '+%H:%M:%S') starting…  (log: $LOGDIR/$name.log)${RST}"
+  log="$LOGDIR/$name.log"
+  "$HERE/smoke_test.py" "$name" --context "$CTX" $SMOKE_ARGS 2>&1 | tee "$log"
   rc="${PIPESTATUS[0]}"
-  summ="$(grep -oE '[0-9]+ passed, [0-9]+ failed[^;]*' "$tmp" | tail -1)"
+  summ="$(grep -oE '[0-9]+ passed, [0-9]+ failed[^;]*' "$log" | tail -1)"
   el="${SECONDS}s"
-  echo "${DIM}$(date '+%H:%M:%S') $name done in ${el}${RST}"
-  if grep -q 'deploy failed' "$tmp"; then
+  echo "${DIM}$(date '+%H:%M:%S') $name done in ${el}  ·  log: $log${RST}"
+  if grep -q 'deploy failed' "$log"; then
     results+=("${RED}FAIL${RST}  $name  (deploy failed, ${el})"); fails=$((fails+1))
   elif [ "$rc" -eq 0 ]; then
     results+=("${GREEN}OK  ${RST}  $name  (${summ:-ok}, ${el})")
   else
     results+=("${RED}FAIL${RST}  $name  (${summ:-see log}, ${el})"); fails=$((fails+1))
   fi
-  rm -f "$tmp"
 done
 
 echo; echo "==================== SUMMARY ===================="
@@ -122,4 +125,5 @@ printf '%s\n' "${results[@]}"
 [ ${#skip[@]} -gt 0 ] && printf '%bSKIP%b  %s\n' "$DIM" "$RST" "${skip[@]}"
 echo "-------------------------------------------------"
 echo "$(( ${#run[@]} - fails ))/${#run[@]} labs green"
+echo "logs: $LOGDIR"
 exit "$fails"
