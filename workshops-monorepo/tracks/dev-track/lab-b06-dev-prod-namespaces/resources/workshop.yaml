@@ -33,7 +33,7 @@ metadata:
 spec:
   title: "DEV vs PROD Namespaces & Policies"
   description: The two DCS namespace types differ by policy posture. See a DEV and a PROD namespace side by side, watch a Route get blocked in DEV and succeed in PROD, inspect the Kyverno policy PROD enforces, and understand why you promote instead of editing PROD in place.
-  duration: 40m
+  duration: 20m
   difficulty: intermediate
   labels:
     - name: module

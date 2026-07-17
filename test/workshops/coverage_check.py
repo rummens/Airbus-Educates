@@ -256,6 +256,10 @@ def main():
     if any_fail:
         print(f"\n{RED}COVERAGE GAP{RST}: at least one workshop has commands with no smoke test — "
               f"a broken command in that workshop would ship undetected.")
+        print(f"{DIM}  fix: add a plan step (or an \"exclude\" with a reason) to smoke-plans/<lab>.json. "
+              f"For a planless/new workshop, bootstrap one:\n"
+              f"    {sys.argv[0]} <lab> --scaffold > smoke-plans/<lab>.json   "
+              f"(then tune the run steps){RST}")
     else:
         print(f"\n{GREEN}all plans cover their workshop content.{RST}")
     sys.exit(1 if any_fail else 0)

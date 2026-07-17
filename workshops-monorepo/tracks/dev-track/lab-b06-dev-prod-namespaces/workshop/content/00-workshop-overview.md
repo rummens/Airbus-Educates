@@ -21,7 +21,7 @@ By the end of this workshop you will be able to:
 - Distinguish DCS's **DEV** and **PROD** namespace types by their **policy posture**, not just their names.
 - Explain the two concrete differences: PROD enforces harsher policies ([Kyverno](https://kyverno.io/docs/)) **and** can host a Route; DEV has looser policies **but** cannot host a Route.
 - Deploy a workload to DEV, watch a Route get rejected there, then create the same Route successfully in PROD.
-- Read a Kyverno [`ClusterPolicy`](https://kyverno.io/docs/policy-types/cluster-policy/) that PROD enforces and explain what it checks.
+- Read a Kyverno [`ClusterPolicy`](https://kyverno.io/docs/policy-types/cluster-policy/overview/) that PROD enforces and explain what it checks.
 - Describe **promotion** — moving a workload from DEV to PROD instead of editing PROD in place — and the trade-off the split buys you.
 
 ## Prerequisites
@@ -36,14 +36,14 @@ is assumed throughout.
 
 ## Your Environment
 
-This session gives you a split **terminal**, an **editor**, and a **web console** to
+This session gives you a **terminal**, an **editor**, and a **web console** to
 browse what you create — and, unlike most labs so far, two full namespaces of your own to
 create and compare, with cluster-admin rights over both. Commands are run with `oc`
 exactly as in earlier labs; nothing about how you invoke them changes here.
 
 ## Time and Difficulty
 
-- **Estimated time:** 40 minutes
+- **Estimated time:** 20 minutes
 - **Difficulty:** Intermediate
 
 ## Further Reading

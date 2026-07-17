@@ -20,7 +20,7 @@ variables:
 
 portal-tests:
   stage: test
-  image: python:3.13-slim
+  image: ghcr.io/rummens/dcs-ci:dev     # python + git + curl baked (images/dcs-ci)
   rules:
     - changes:
         - images/dcs-academy-portal/**/*
@@ -34,17 +34,16 @@ portal-tests:
 
 workshop-static:
   stage: test
-  image: python:3.13-slim
+  image: ghcr.io/rummens/dcs-ci:dev     # python + git + curl baked (images/dcs-ci)
   rules:
     - changes:
         - workshops-monorepo/**/*
         - test/workshops/**/*
         - test/ci/**/*
-  before_script:
-    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git curl >/dev/null
   script:
     # coverage: every workshop command has a smoke test (or an explicit exclude);
-    # links: every workshop description link resolves (200 / reachable).
+    # links: every workshop description link resolves (200 / reachable);
+    # labels: each lab's dev/prod lifecycle label matches its Route usage.
     - bash test/ci/run-workshops.sh
 
 # ---------- CLUSTER TIER (needs a crc runner; does not block merges) ----------

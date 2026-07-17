@@ -13,7 +13,7 @@ metadata:
 spec:
   title: "RBAC, Tenancy & Namespaces"
   description: Go past the terms from Core — see the mechanism. The Tenant → Namespaces model in depth, the RBAC objects behind "can I?", tracing subject → binding → role → rule, and proving least privilege by creating a Role + RoleBinding of your own.
-  duration: 45m
+  duration: 25m
   difficulty: intermediate
   labels:
     - name: module

@@ -39,4 +39,4 @@ you create a Route.
 ## Time and Difficulty
 
 - **Estimated time:** 20 minutes
-- **Difficulty:** Intermediate
+- **Difficulty:** Beginner

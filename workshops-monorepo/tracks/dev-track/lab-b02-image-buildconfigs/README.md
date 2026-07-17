@@ -12,7 +12,7 @@ would after a real commit.
 
 - **Track:** Developer — Build on DCS · Lab 2
 - **Audience:** Intermediate — comfortable with Deployments and `oc apply`
-- **Duration:** ~45 min
+- **Duration:** ~30 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
 - **Prerequisites:** lab-b01-docker-to-k8s; lab-a02-deploy-first-app — comfortable with `oc apply` and reading a Deployment manifest
 

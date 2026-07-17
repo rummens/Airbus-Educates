@@ -39,12 +39,8 @@ budget stops being an abstract reading exercise and starts rejecting things.
 
 A browser-based session with a split **terminal**, an **editor**, and a **console** tab so
 you can watch replica counts and events land as you scale and apply manifests. The
-`hello-dcs` app is already running — one replica, no probes, no explicit resources — take a
-look at the manifest you'll grow it into:
-
-```editor:open-file
-file: ~/exercises/deployment-probes.yaml
-```
+`hello-dcs` app is already running — one replica, no probes, no explicit resources — and
+you'll open the manifest you grow it into during the exercises.
 
 All commands run with `oc` against your own session namespace, which carries a `medium`
 resource budget — deliberately sized so you can hit it on purpose before you learn to fit
@@ -52,7 +48,7 @@ inside it.
 
 ## Time and Difficulty
 
-- **Estimated time:** 35 minutes
+- **Estimated time:** 28 minutes
 - **Difficulty:** Intermediate
 
 ## Further Reading

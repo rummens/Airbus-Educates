@@ -29,6 +29,12 @@ Requests are documented in the
   a PROD namespace) and A05 (S3 comes via a ticket) — this lab names the mechanism behind
   those asides.
 
+## Your Environment
+
+A browser-based session with a **terminal** for the closing knowledge check. The ITSM
+console itself lives outside the lab environment, so this lab walks it through annotated
+screenshots rather than a live embed — no cluster actions are required.
+
 ## Time and Difficulty
 
 - **Estimated time:** 10 minutes

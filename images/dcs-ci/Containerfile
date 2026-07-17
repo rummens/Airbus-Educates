@@ -1,0 +1,23 @@
+# DCS Academy CI base image for the FAST tier (.gitlab-ci.yml stage `test`).
+#
+# What the no-cluster jobs actually need on top of python: `git` (changed.py
+# diffs against the base ref; run-workshops.sh does `git rev-parse`) and `curl`
+# (link_check external HEAD probes). Baking them here removes the per-job
+# `apt-get update && install` from portal-tests + workshop-static — faster, and
+# it still works when the runner has no outbound apt mirror.
+#
+# NOT for the cluster tier (stage `e2e`): those jobs run on the `crc`-tagged
+# runner, which owns `oc` and a kubeconfig — no image pin, nothing to bake here.
+#
+# Deliberately does NOT pip-install the portal requirements: they change with the
+# portal and are installed per-job (pip install -r ...) so this image stays stable.
+FROM python:3.13-slim
+
+LABEL org.opencontainers.image.source="https://github.com/rummens/Airbus-Educates" \
+      org.opencontainers.image.description="DCS Academy CI base (python + git + curl) for the no-cluster test tier"
+
+RUN set -eux; \
+    apt-get update -qq; \
+    apt-get install -y -qq --no-install-recommends git curl ca-certificates; \
+    rm -rf /var/lib/apt/lists/*; \
+    git --version; curl --version | head -1

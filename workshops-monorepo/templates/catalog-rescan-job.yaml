@@ -21,6 +21,22 @@ stringData:
   token: {{ .Values.catalogRescan.token | quote }}
 ---
 {{- end }}
+{{- if and .Values.catalogRescan.trustedCA.enabled (not .Values.catalogRescan.trustedCA.existingConfigMap) }}
+# Empty ConfigMap the OpenShift cluster-network-operator fills with the merged trust
+# bundle (system CAs + cluster-wide additionalTrustedCA/proxy CAs) under key
+# ca-bundle.crt. Mounted into the rescan Job so its HTTPS POST to the portal verifies.
+# NOT a sync hook: it must persist so the operator injects the bundle once and keeps it
+# populated (a hook ConfigMap deleted each sync would race the async injection).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-rescan-trusted-ca
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ws.labels" . | nindent 4 }}
+    config.openshift.io/inject-trusted-cabundle: "true"
+---
+{{- end }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -68,24 +84,49 @@ spec:
                   name: {{ .Chart.Name }}-rescan
                   key: token
             {{- end }}
+            {{- if .Values.catalogRescan.trustedCA.enabled }}
+            - name: CA_BUNDLE
+              value: /etc/pki/rescan-ca/ca-bundle.crt
+            {{- end }}
+          {{- if .Values.catalogRescan.trustedCA.enabled }}
+          volumeMounts:
+            - name: trusted-ca
+              mountPath: /etc/pki/rescan-ca
+              readOnly: true
+          {{- end }}
           command:
             - python3
             - -c
             - |
-              import os, sys, time, urllib.request
+              import os, ssl, sys, time, urllib.request
               url = os.environ["URL"].rstrip("/") + "/admin/rescan"
               hdr = {"Content-Type": "application/json"}
               tok = os.environ.get("TOKEN", "")
               if tok:
                   hdr["Authorization"] = "Bearer " + tok
+              # Verify the portal's TLS cert against the mounted cluster CA bundle when
+              # present (the operator may not have injected it on the very first sync;
+              # the retry loop then picks it up once the file appears).
+              ca = os.environ.get("CA_BUNDLE", "")
+              ctx = ssl.create_default_context(cafile=ca) if ca and os.path.exists(ca) else None
               for i in range(30):
                   try:
                       req = urllib.request.Request(url, method="POST", headers=hdr, data=b"{}")
-                      with urllib.request.urlopen(req, timeout=10) as r:
+                      with urllib.request.urlopen(req, timeout=10, context=ctx) as r:
                           print("rescan ok:", r.status, r.read().decode())
                           sys.exit(0)
                   except Exception as e:            # noqa: BLE001
                       print("attempt %d/30 failed: %s" % (i + 1, e))
                       time.sleep(2)
-              sys.exit("rescan failed after retries (portal unreachable or auth rejected)")
+              sys.exit("rescan failed after retries (portal unreachable, TLS untrusted, or auth rejected)")
+      {{- if .Values.catalogRescan.trustedCA.enabled }}
+      volumes:
+        - name: trusted-ca
+          configMap:
+            name: {{ .Values.catalogRescan.trustedCA.existingConfigMap | default (printf "%s-rescan-trusted-ca" .Chart.Name) }}
+            optional: true
+            items:
+              - key: ca-bundle.crt
+                path: ca-bundle.crt
+      {{- end }}
 {{- end }}

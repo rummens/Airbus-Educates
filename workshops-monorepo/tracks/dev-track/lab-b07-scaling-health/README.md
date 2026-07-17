@@ -11,7 +11,7 @@ actually guarantees.
 
 - **Track:** Developer — Build on DCS · Lab 7
 - **Audience:** Intermediate — comfortable with `oc scale` and Deployments from the Core track
-- **Duration:** ~35 min
+- **Duration:** ~28 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
 - **Prerequisites:** lab-a02-deploy-first-app; lab-a03-configure-troubleshoot — comfortable with Deployments, rollouts, and basic `oc` usage
 

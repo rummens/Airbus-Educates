@@ -1,0 +1,21 @@
+{
+  "workshop": "lab-b01-docker-to-k8s",
+  "_note": "Migrates the hello-dcs docker-compose service onto Deployment+Service+ConfigMap. Page 02 is an interactive editor edit (REPLACE_WITH_HARBOR_IMAGE -> ${DCS_REGISTRY}/samples/hello-dcs:1.0); reproduced headless with a single-quoted sed that leaves the literal ${DCS_REGISTRY} in the file so the following envsubst can expand it. Rollout waits added after the initial apply and after 'oc set env' so verify-greeting-configured sees the new Pod. Page 05 (what-doesn't-translate) is read-only prose + knowledge-check notes with no examiner tests, so nothing to exclude — all 5 checks run and pass on CRC (no admission-rejection lesson here).",
+  "steps": [
+    {"run": "sed -i 's|REPLACE_WITH_HARBOR_IMAGE|${DCS_REGISTRY}/samples/hello-dcs:1.0|' deployment.yaml && envsubst < deployment.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=150s"},
+    {"check": "verify-deployment-ready"},
+    {"run": "oc get deployment,pods -l app=hello-dcs"},
+    {"run": "oc apply -f service.yaml"},
+    {"check": "verify-service"},
+    {"run": "curl -s -o /dev/null -w 'HTTP %{http_code}\\n' \"http://hello-dcs.$(oc project -q).svc:8080\""},
+    {"check": "verify-service-dns"},
+    {"run": "oc exec deploy/hello-dcs -- sh -c 'if [ -n \"$GREETING\" ]; then echo \"GREETING is set: $GREETING\"; else echo \"GREETING NOT set — app is using its built-in default\"; fi'"},
+    {"run": "oc apply -f configmap.yaml"},
+    {"check": "verify-configmap"},
+    {"run": "oc set env deploy/hello-dcs --from=configmap/hello-dcs-config && oc rollout status deploy/hello-dcs --timeout=120s"},
+    {"check": "verify-greeting-configured"},
+    {"run": "curl -s \"http://hello-dcs.$(oc project -q).svc:8080\""},
+    {"check": "verify-greeting-configured"}
+  ],
+  "exclude": []
+}

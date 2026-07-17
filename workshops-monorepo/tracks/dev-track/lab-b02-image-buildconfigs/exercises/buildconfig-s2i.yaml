@@ -24,7 +24,7 @@ spec:
       # DCS — never pulled from an external registry.
       from:
         kind: DockerImage
-        name: ${DCS_REGISTRY}/s2i-builders/python-311:latest
+        name: ${DCS_REGISTRY}/s2i-builders/python-311:1
   output:
     to:
       kind: ImageStreamTag

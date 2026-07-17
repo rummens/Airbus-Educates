@@ -14,7 +14,7 @@ metadata:
 spec:
   title: "Cloud Development with OpenShift Dev Spaces"
   description: Develop on DCS, not just deploy to it — read a devfile, launch an in-cluster browser IDE, change the sample app and run it inside the cluster, all from Harbor-mirrored images on an air-gapped platform.
-  duration: 40m
+  duration: 18m
   difficulty: intermediate
   labels:
     - name: module

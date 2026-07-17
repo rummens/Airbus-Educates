@@ -13,7 +13,7 @@ metadata:
 spec:
   title: "From Docker to Kubernetes on DCS"
   description: Map a Docker / docker-compose mental model onto Kubernetes objects — turn a docker run / compose example into an equivalent Deployment + Service + ConfigMap, deploy it, and reconcile what does not translate on an air-gapped, non-root DCS.
-  duration: 40m
+  duration: 25m
   difficulty: intermediate
   labels:
     - name: module

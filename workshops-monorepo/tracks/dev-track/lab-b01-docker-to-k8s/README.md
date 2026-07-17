@@ -11,7 +11,7 @@ a `latest`-tagged Docker Hub image — and explains exactly why DCS rejects each
 
 - **Track:** Developer — Build on DCS · Lab 1
 - **Audience:** Intermediate — comfortable with Docker/docker-compose; done the Core track (especially A02, A03)
-- **Duration:** ~40 min
+- **Duration:** ~25 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
 - **Prerequisites:** lab-a02-deploy-first-app; lab-a03-configure-troubleshoot — comfortable with `docker run` / `docker-compose.yml`
 

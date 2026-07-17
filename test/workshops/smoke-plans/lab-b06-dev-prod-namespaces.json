@@ -1,0 +1,26 @@
+{
+  "workshop": "lab-b06-dev-prod-namespaces",
+  "_note": "Kyverno controller does NOT enforce on CRC (no admission webhook), so the two admission-REJECTION checks (verify-dev-route-blocked, verify-prod-workload-blocked) cannot reproduce here: the Route/Deployment get admitted instead of denied, so the check's normal verdict is FAIL and we invert it with expect_fail (it only truly passes on a real DCS with Kyverno enforcing). The object-present / positive checks all run for real on CRC. The ClusterPolicy applies as a plain object create (CRDs present, controller absent), so verify-kyverno-policy-present and verify-clusterpolicy-rules read the object as authored.",
+  "steps": [
+    {"run": "oc apply -f dev-namespace.yaml"},
+    {"run": "oc apply -f prod-namespace.yaml"},
+    {"check": "verify-namespaces-created", "args": []},
+    {"run": "oc get namespaces dev prod --show-labels"},
+    {"run": "oc apply -f kyverno-policy.yaml"},
+    {"check": "verify-kyverno-policy-present", "args": []},
+    {"run": "envsubst < hello-dcs.yaml | oc apply -n dev -f - && oc rollout status deployment/hello-dcs -n dev --timeout=120s"},
+    {"check": "verify-dev-workload-ready", "args": []},
+    {"run": "oc get deployment,pods -n dev -l app=hello-dcs"},
+    {"run": "oc apply -n dev -f hello-dcs-route.yaml"},
+    {"check": "verify-dev-route-blocked", "args": [], "expect_fail": true},
+    {"run": "envsubst < hello-dcs.yaml | oc apply -n prod -f - && oc rollout status deployment/hello-dcs -n prod --timeout=120s"},
+    {"check": "verify-prod-workload-blocked", "args": [], "expect_fail": true},
+    {"run": "oc get deployment,pods -n prod -l app=hello-dcs"},
+    {"run": "oc apply -n prod -f hello-dcs-route.yaml"},
+    {"check": "verify-prod-route-created", "args": []},
+    {"run": "oc get route hello-dcs -n prod -o jsonpath='{.spec.host}{\"\\n\"}'"},
+    {"run": "oc get clusterpolicy"},
+    {"run": "oc describe clusterpolicy dcs-namespace-type-policy"},
+    {"check": "verify-clusterpolicy-rules", "args": []}
+  ]
+}

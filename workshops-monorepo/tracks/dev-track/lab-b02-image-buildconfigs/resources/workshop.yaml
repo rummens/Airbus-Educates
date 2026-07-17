@@ -14,7 +14,7 @@ metadata:
 spec:
   title: "Building Images with BuildConfigs"
   description: Get your own code into an image without a local Docker — point a BuildConfig at a git repo, build the image on-cluster (S2I or Dockerfile), push it to Harbor, deploy it, and trigger a rebuild on change.
-  duration: 45m
+  duration: 30m
   difficulty: intermediate
   labels:
     - name: module

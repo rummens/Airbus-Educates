@@ -13,8 +13,8 @@ an explicit line between the Educates editor, Dev Spaces, a BuildConfig, and
 
 - **Track:** Developer — Build on DCS · Lab 3
 - **Audience:** Intermediate — done "From Docker to Kubernetes on DCS"
-- **Duration:** ~40 min
-- **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
+- **Duration:** ~18 min
+- **Format:** Hands-on, guided — terminal, runs in your own OpenShift session namespace
 - **Prerequisites:** lab-b01-docker-to-k8s; comfortable with `oc apply`-style deployment and basic git
 
 ## By the end of this lab you'll be able to

@@ -32,13 +32,9 @@ By the end of this workshop you will be able to:
 
 A browser-based session with a split **terminal** and an **editor**. The exercise files —
 a ConfigMap, a Secret, and two Deployment manifests (one working, one broken) — are in
-`~/exercises`. Take a first look at the config:
-
-```editor:open-file
-file: ~/exercises/configmap.yaml
-```
+`~/exercises`; you'll open the ConfigMap in the first exercise.
 
 ## Time and Difficulty
 
 - **Estimated time:** 20 minutes
-- **Difficulty:** Intermediate
+- **Difficulty:** Beginner

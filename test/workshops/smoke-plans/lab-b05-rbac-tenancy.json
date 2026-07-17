@@ -1,0 +1,53 @@
+{
+  "workshop": "lab-b05-rbac-tenancy",
+  "_note": "In-namespace RBAC lab, vcluster disabled (plain OpenShift session ns). All --as impersonation checks (before/after/delete) evaluate viewer-bot's OWN scoped permissions, not the caller's, so they behave identically on CRC and real DCS -- kept as exercises. The one denial that checks the SESSION SA's own rights, verify-can-i-get-pods-kube-system-no, is expect_fail: the portless CRC session SA has cluster-admin-ish rights and CAN read kube-system (returns 'yes'), so the 'no' isolation assertion only holds on real DCS where the tenant SA is namespace-scoped. sleep 3 after the RoleBinding apply covers RBAC propagation before the 'after' check (the content examiner's retries/.INF is not honored when the grader script is run directly).",
+  "steps": [
+    {"run": "oc project"},
+    {"check": "verify-project-reported", "args": []},
+
+    {"run": "oc get namespace $(oc project -q) -o jsonpath='{.metadata.labels}'"},
+    {"check": "verify-namespace-labels", "args": []},
+
+    {"run": "oc auth can-i --list"},
+    {"check": "verify-can-i-list", "args": []},
+
+    {"run": "oc auth can-i create deployments"},
+    {"check": "verify-can-i-create-deployments-yes", "args": []},
+
+    {"run": "oc auth can-i get pods -n kube-system"},
+    {"check": "verify-can-i-get-pods-kube-system-no", "args": [], "expect_fail": true},
+
+    {"run": "oc describe clusterrole view"},
+    {"check": "verify-clusterrole-view", "args": []},
+
+    {"run": "oc get rolebindings -o wide"},
+    {"check": "verify-rolebindings-listed", "args": []},
+
+    {"run": "oc describe rolebinding $(oc get rolebindings -o jsonpath='{.items[0].metadata.name}')"},
+    {"check": "verify-rolebinding-described", "args": []},
+
+    {"run": "oc apply -f serviceaccount-viewer.yaml"},
+    {"check": "verify-serviceaccount-created", "args": []},
+
+    {"run": "oc auth can-i get pods --as=system:serviceaccount:$SESSION_NAMESPACE:viewer-bot"},
+    {"check": "verify-can-i-get-pods-as-before", "args": []},
+
+    {"run": "oc apply -f role-viewer.yaml"},
+    {"check": "verify-role-viewer-created", "args": []},
+
+    {"run": "envsubst < rolebinding-viewer.yaml | oc apply -f - && sleep 3"},
+    {"check": "verify-rolebinding-viewer-created", "args": []},
+
+    {"run": "oc auth can-i get pods --as=system:serviceaccount:$SESSION_NAMESPACE:viewer-bot"},
+    {"check": "verify-can-i-get-pods-as-after", "args": []},
+
+    {"run": "oc auth can-i delete pods --as=system:serviceaccount:$SESSION_NAMESPACE:viewer-bot"},
+    {"check": "verify-can-i-delete-pods-as-no", "args": []},
+
+    {"run": "oc describe quota"},
+    {"check": "verify-quota-present", "args": []},
+
+    {"run": "oc describe limitrange"},
+    {"check": "verify-limitrange-present", "args": []}
+  ]
+}

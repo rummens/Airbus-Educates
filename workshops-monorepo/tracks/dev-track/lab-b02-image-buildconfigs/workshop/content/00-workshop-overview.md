@@ -39,15 +39,12 @@ those manifests reference.
 
 A browser-based session with a split **terminal**, an **editor**, and a **console** tab
 so you can watch the Build Pod and the resulting Deployment/Pod land as each step
-completes. All commands run with `oc`. Take a first look at the BuildConfig you'll run:
-
-```editor:open-file
-file: ~/exercises/buildconfig-s2i.yaml
-```
+completes. All commands run with `oc`. You'll open the BuildConfig you'll run in the
+first exercise.
 
 ## Time and Difficulty
 
-- **Estimated time:** 45 minutes
+- **Estimated time:** 30 minutes
 - **Difficulty:** Intermediate
 
 ## Further Reading

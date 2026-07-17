@@ -8,7 +8,7 @@ DEV namespace and see what it does — and does not — check.
 
 ## Apply the policy
 
-`kyverno-policy.yaml` is a [`ClusterPolicy`](https://kyverno.io/docs/policy-types/cluster-policy/) —
+`kyverno-policy.yaml` is a [`ClusterPolicy`](https://kyverno.io/docs/policy-types/cluster-policy/overview/) —
 cluster-scoped, so it applies to every namespace at once, not just one:
 
 ```editor:open-file
@@ -25,6 +25,15 @@ namespace, not anything on the workload itself:
 ```terminal:execute
 command: oc apply -f kyverno-policy.yaml
 ```
+
+{{< note >}}
+**On real {{< param product_short >}} you would never run this command.** ClusterPolicies
+are cluster-scoped, and — as B05 showed — tenants never create cluster-scoped objects. On
+the live platform this policy is pre-applied by the platform team and PROD's enforcement is
+simply *there*. You apply it here only because this practice session grants you cluster-admin
+so you can watch the rule take effect end-to-end; the aim is to understand what PROD enforces,
+not to author the policy yourself.
+{{< /note >}}
 
 ```examiner:execute-test
 name: verify-kyverno-policy-present

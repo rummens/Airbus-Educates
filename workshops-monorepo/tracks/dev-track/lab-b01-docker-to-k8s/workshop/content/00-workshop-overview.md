@@ -48,7 +48,7 @@ you apply each manifest. All commands run with `oc`.
 
 ## Time and Difficulty
 
-- **Estimated time:** 40 minutes
+- **Estimated time:** 25 minutes
 - **Difficulty:** Intermediate
 
 ## Further Reading

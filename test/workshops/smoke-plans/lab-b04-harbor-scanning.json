@@ -1,0 +1,23 @@
+{
+  "workshop": "lab-b04-harbor-scanning",
+  "_note": "Scan reports are static fixtures (jq), so every report check is deterministic + air-gap-safe. skopeo checks hit the concrete CRC registry ghcr.io/rummens (samples/hello-dcs:1.0 exists there, public+multiarch); check args are hardcoded to ghcr.io/rummens because the runner single-quotes args (so ${DCS_REGISTRY} would NOT expand there), while run steps use ${DCS_REGISTRY} which the shell does expand. The push step (skopeo copy, page 3) is a narrated workshop:copy block with no examiner check — Harbor is pull-only, so it is never run. deploy-flagged.yaml (page 5) is narrated/observe (no live scanner on CRC) and has no examiner check — never applied. Relies on jq, skopeo, and envsubst existing in the session/examiner image (they do — dcs-workshop-base). Nothing excluded: all 8 content checks run on CRC.",
+  "steps": [
+    {"run": "skopeo inspect docker://${DCS_REGISTRY}/samples/hello-dcs:1.0"},
+    {"check": "verify-catalog-inspect", "args": ["ghcr.io/rummens/samples/hello-dcs:1.0"]},
+    {"run": "envsubst < pod-from-catalog.yaml | oc apply -f -"},
+    {"check": "verify-catalog-pod-running", "args": []},
+    {"run": "oc get pod catalog-pull"},
+    {"run": "skopeo list-tags docker://${DCS_REGISTRY}/samples/hello-dcs"},
+    {"check": "verify-samples-tags", "args": ["ghcr.io/rummens/samples/hello-dcs", "1.0"]},
+    {"run": "jq '.summary.severityCount' scan-report.json"},
+    {"check": "verify-report-summary", "args": ["scan-report.json"]},
+    {"run": "jq -r '.vulnerabilities[] | \"\\(.severity)\\t\\(.id)\\t\\(.package)\"' scan-report.json"},
+    {"check": "verify-report-cves", "args": ["scan-report.json"]},
+    {"run": "jq '[.vulnerabilities[] | select(.severity == \"Critical\")] | length' scan-report-flagged.json"},
+    {"check": "verify-flagged-criticals", "args": ["scan-report-flagged.json"]},
+    {"run": "skopeo inspect docker://${DCS_REGISTRY}/samples/hello-dcs:1.0"},
+    {"check": "verify-clean-image", "args": ["ghcr.io/rummens/samples/hello-dcs:1.0"]},
+    {"run": "jq '.summary.severityCount.Critical // 0' scan-report.json"},
+    {"check": "verify-no-criticals", "args": ["scan-report.json"]}
+  ]
+}

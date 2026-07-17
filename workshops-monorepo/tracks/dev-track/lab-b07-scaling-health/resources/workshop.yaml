@@ -13,7 +13,7 @@ metadata:
 spec:
   title: "Scaling, Health & Resources"
   description: Make the sample app resilient and quota-friendly — scale it, hit the namespace budget and right-size, add liveness/readiness probes, then kill a Pod and watch it self-heal.
-  duration: 35m
+  duration: 28m
   difficulty: intermediate
   labels:
     - name: module

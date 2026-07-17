@@ -13,9 +13,10 @@ Three layers, matched to what breaks: **portal code**, **user flow**, **workshop
 | **2. User flow** | real session (namespace + vcluster) comes up, URL 200, basic commands run | `test/workshops/flow_test.py` | yes | no |
 | **3a. Coverage** | every workshop command has a smoke test (or explicit exclude) | `test/workshops/coverage_check.py` | no | yes |
 | **3b. Links** | every content link resolves 200 / target exists | `test/workshops/link_check.py` | no | yes |
+| **3d. Labels** | each lab's dev/prod lifecycle label matches its Route usage | `test/workshops/label_check.py` | no | yes |
 | **3c. Smoke** | examiner graders pass end-to-end on a live cluster | `test/workshops/smoke_test.py` | yes | no |
 
-Fast lanes (1, 3a, 3b) need no cluster and gate merges. Cluster lanes (2, 3c) run
+Fast lanes (1, 3a, 3b, 3d) need no cluster and gate merges. Cluster lanes (2, 3c) run
 manual-on-MR / automatic-on-schedule and report without blocking (cluster flakiness ≠ code bug).
 
 ---

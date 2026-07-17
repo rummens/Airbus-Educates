@@ -53,7 +53,7 @@ is what this workshop teaches.
 
 ## Your Environment
 
-A split **terminal** and an **editor**, in your own {{< param product_short >}} session
+A **terminal** and an **editor**, in your own {{< param product_short >}} session
 namespace. No per-session virtual cluster is needed here — every exercise talks to Harbor
 directly or reads a local fixture, with nothing cluster-scoped to create. Your session
 carries a read-only Harbor **robot account**, and `skopeo` and `jq` are already installed
@@ -62,7 +62,7 @@ on the workshop image (no install step needed). Commands are run with `skopeo`, 
 
 ## Time and Difficulty
 
-- **Estimated time:** 40 minutes
+- **Estimated time:** 25 minutes
 - **Difficulty:** Intermediate
 
 ## Further Reading

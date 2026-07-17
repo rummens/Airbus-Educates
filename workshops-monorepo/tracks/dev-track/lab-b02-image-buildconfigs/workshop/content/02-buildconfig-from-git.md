@@ -39,7 +39,7 @@ text: |2
         # DCS — never pulled from an external registry.
         from:
           kind: DockerImage
-          name: ${DCS_REGISTRY}/s2i-builders/python-311:latest
+          name: ${DCS_REGISTRY}/s2i-builders/python-311:1
 ```
 
 `type: Source` selects the S2I strategy from the last page. `sourceStrategy.from` names the
@@ -61,6 +61,12 @@ text: |2
 `output.to` is where the finished image goes: a tag (`latest-built`) on the
 `hello-dcs-built` ImageStream you'll apply next. That ImageStream is what actually holds
 the pointer to the pushed image in Harbor.
+
+Note the two tags play different roles. The **builder** input is pinned (`python-311:1`) —
+you never want a build's toolchain shifting under you, the same "no floating `:latest`"
+rule you met in B01. The **output** tag `latest-built` is a moving pointer *you* own: each
+successful build overwrites it so "the latest thing I built" always resolves, while the
+immutable, promotable identity of a specific build is its digest.
 
 ## Apply the BuildConfig and its ImageStream
 

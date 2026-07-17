@@ -11,8 +11,8 @@ actually gets requested on DCS.
 
 - **Track:** Developer — Build on DCS · Lab 5
 - **Audience:** Intermediate — you've completed the Core track (Core A06 gave the vocabulary)
-- **Duration:** ~45 min
-- **Format:** Hands-on, guided — split terminal, editor, and console, runs in your own OpenShift session namespace
+- **Duration:** ~25 min
+- **Format:** Hands-on, guided — terminal, editor, and console, runs in your own OpenShift session namespace
 - **Prerequisites:** lab-a06-terms-namespaces-tenancy; comfortable with basic `oc` usage and namespaces
 
 ## By the end of this lab you'll be able to

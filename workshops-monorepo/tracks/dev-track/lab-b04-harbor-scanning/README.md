@@ -11,8 +11,8 @@ and quota increases happen through ITSM rather than an admin request.
 
 - **Track:** Developer — Build on DCS · Lab 4
 - **Audience:** Intermediate — comfortable with `oc`, container images, and the basics of a CVE
-- **Duration:** ~40 min
-- **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
+- **Duration:** ~25 min
+- **Format:** Hands-on, guided — terminal, runs in your OpenShift session namespace
 - **Prerequisites:** lab-b02-image-buildconfigs; comfortable with the Linux CLI.
 
 ## By the end of this lab you'll be able to

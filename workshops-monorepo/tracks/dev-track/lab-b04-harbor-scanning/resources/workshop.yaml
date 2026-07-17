@@ -14,7 +14,7 @@ metadata:
 spec:
   title: "Harbor & Image Scanning"
   description: Where your images live and what guards them — navigate DCS Harbor catalogs and robot accounts, pull/inspect with skopeo, confirm the image you built in B02 landed, read a vulnerability/compliance scan report and understand the scan gate, remediate a finding, and know how mirroring/quota happen via ITSM.
-  duration: 40m
+  duration: 25m
   difficulty: intermediate
   labels:
     - name: module

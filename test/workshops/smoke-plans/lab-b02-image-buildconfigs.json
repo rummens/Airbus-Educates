@@ -1,0 +1,16 @@
+{
+  "workshop": "lab-b02-image-buildconfigs",
+  "_note": "Air-gap/CRC reality: this lab's core loop (S2I on-cluster build -> Harbor push -> deploy built image -> rebuild) CANNOT run on CRC. The S2I builder image ${DCS_REGISTRY}/s2i-builders/python-311:1 and the ${BUILD_SOURCE_REPO} git mirror do not exist on CRC, and there is no push-capable session Harbor project, so `oc start-build` never Completes and nothing lands in the ImageStreamTag. The only step reproducible on CRC is applying the BuildConfig + ImageStream manifests and confirming both objects exist (verify-buildconfig-imagestream) -- this is independent of the build. Every check downstream of a completed Build is excluded and validated only on real DCS. Note: verify-build-complete / verify-second-build use jq (needs jq in the examiner image), but both are excluded here.",
+  "steps": [
+    {"run": "envsubst < buildconfig-s2i.yaml | oc apply -f -"},
+    {"run": "oc apply -f imagestream.yaml"},
+    {"check": "verify-buildconfig-imagestream"}
+  ],
+  "exclude": [
+    {"check": "verify-build-complete", "reason": "on-cluster S2I build not reproducible on CRC; builder image s2i-builders/python-311:1 + BUILD_SOURCE_REPO git mirror absent, no push-capable Harbor project -- build never reaches Complete. Validated only on real DCS."},
+    {"check": "verify-istag-populated", "reason": "depends on a completed build pushing an image into the session Harbor project; no build + no push on CRC, so the ImageStreamTag stays empty. Validated only on real DCS."},
+    {"check": "verify-deployed-ready", "reason": "Deployment references ${DCS_REGISTRY}/${SESSION_NAMESPACE}/hello-dcs-built:latest-built, an image only produced by the on-cluster build; it never exists on CRC, so the Pod cannot pull/become ready. Validated only on real DCS."},
+    {"check": "verify-app-responds", "reason": "requires the built app Pod running behind a port-forward; the built image never exists on CRC so the Deployment never comes up. Validated only on real DCS."},
+    {"check": "verify-second-build", "reason": "requires two completed builds of hello-dcs-s2i; the build cannot run at all on CRC (builder image + BUILD_SOURCE_REPO mirror absent). Validated only on real DCS."}
+  ]
+}

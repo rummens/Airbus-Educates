@@ -38,14 +38,14 @@ require you to have completed it first.
 
 ## Your Environment
 
-A browser-based session with a split **terminal**, an **editor**, and a
+A browser-based session with a **terminal**, an **editor**, and a
 Kubernetes/OpenShift **console**, pointed at your own namespace. All commands run
 with `oc`. Partway through the workshop a **Dev Spaces** tab is added to your
 dashboard, pointing at the platform's Dev Spaces instance.
 
 ## Time and Difficulty
 
-- **Estimated time:** 40 minutes
+- **Estimated time:** 18 minutes
 - **Difficulty:** Intermediate
 
 ## Further Reading

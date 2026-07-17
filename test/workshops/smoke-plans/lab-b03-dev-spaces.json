@@ -1,0 +1,12 @@
+{
+  "workshop": "lab-b03-dev-spaces",
+  "_note": "Static-only lab: no deploys. verify-devfile greps the static ~/exercises/devfile.yaml (runs anywhere). verify-checluster does `exit 0` in both branches, so it passes on CRC even though the CheCluster CRD / Dev Spaces operator is not installed — exercised as-is, not excluded. `oc get checluster -A` errors on CRC (no CRD); that mirrors the content and the check tolerates it. No excludes.",
+  "steps": [
+    {"run": "grep 'image:' ~/exercises/devfile.yaml"},
+    {"check": "verify-devfile", "args": []},
+    {"run": "envsubst < ~/exercises/devfile.yaml | grep 'image:'"},
+    {"check": "verify-devfile", "args": []},
+    {"run": "oc get checluster -A || true"},
+    {"check": "verify-checluster", "args": []}
+  ]
+}

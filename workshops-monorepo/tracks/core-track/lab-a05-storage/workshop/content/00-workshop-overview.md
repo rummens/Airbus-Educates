@@ -39,4 +39,4 @@ manifests are in `~/exercises`.
 ## Time and Difficulty
 
 - **Estimated time:** 20 minutes
-- **Difficulty:** Intermediate
+- **Difficulty:** Beginner

@@ -23,6 +23,12 @@ of a tiny app fit comfortably instead of exactly maxing out — or blowing past 
 
 ## Apply the right-sized version
 
+Open the manifest and take a look:
+
+```editor:open-file
+file: ~/exercises/deployment-probes.yaml
+```
+
 `deployment-probes.yaml` sets `50m`/`64Mi` requests and `100m`/`128Mi` limits per
 container — far below the `medium` budget's defaults, let alone its ceiling. It also adds
 the liveness and readiness probes you'll look at on the next page; ignore those for now.

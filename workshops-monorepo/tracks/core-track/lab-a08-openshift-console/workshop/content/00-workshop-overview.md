@@ -31,6 +31,12 @@ By the end of this workshop you will be able to:
 - **A02 — Deploy Your First App** (A03–A05 helpful). This lab *locates* the objects you
   already know in the UI; it doesn't re-explain them.
 
+## Your Environment
+
+A browser-based session with a **console** tab (the OpenShift web console) alongside a
+**terminal**, so you can put each UI view next to its `oc` equivalent as you go. The
+`hello-dcs` objects from earlier labs are what you'll locate in the console.
+
 ## Time and Difficulty
 
 - **Estimated time:** 15 minutes

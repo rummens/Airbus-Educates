@@ -12,7 +12,7 @@ you own the instance it manages.
 
 - **Track:** Developer · Lab 8 of 8 (capstone)
 - **Audience:** Advanced — you've completed the Developer track through RBAC & Tenancy
-- **Duration:** ~40 min
+- **Duration:** ~28 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
 - **Prerequisites:** lab-b05-rbac-tenancy; comfortable reading Kubernetes YAML and `oc get`/`describe` output
 

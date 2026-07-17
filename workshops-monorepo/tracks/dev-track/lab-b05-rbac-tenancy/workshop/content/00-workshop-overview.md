@@ -34,7 +34,7 @@ No prior RBAC knowledge is required — that's what this lab teaches.
 
 ## Your Environment
 
-This session provides a browser-based environment with a split **terminal**, an **editor**
+This session provides a browser-based environment with a **terminal**, an **editor**
 for viewing and editing the Role/RoleBinding manifests, and the **web console** for viewing
 roles, bindings and quota visually. You have OpenShift access scoped to your own session
 namespace — every object you create here (ServiceAccount, Role, RoleBinding) lives inside
@@ -42,7 +42,7 @@ it. Commands are run with `oc`.
 
 ## Time and Difficulty
 
-- **Estimated time:** 45 minutes
+- **Estimated time:** 25 minutes
 - **Difficulty:** Intermediate
 
 ## Further Reading

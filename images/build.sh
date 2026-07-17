@@ -30,4 +30,5 @@ build_push dcs-workshop-base dcs-workshop-base:develop
 build_push hello-dcs hello-dcs:dev samples/hello-dcs:1.0
 build_push dcs-academy-portal dcs-academy-portal:dev
 build_push educates-mirror educates-mirror:dev
-echo "done -> $REG/{dcs-workshop-base:develop, hello-dcs:dev, samples/hello-dcs:1.0, dcs-academy-portal:dev, educates-mirror:dev}"
+build_push dcs-ci dcs-ci:dev
+echo "done -> $REG/{dcs-workshop-base:develop, hello-dcs:dev, samples/hello-dcs:1.0, dcs-academy-portal:dev, educates-mirror:dev, dcs-ci:dev}"

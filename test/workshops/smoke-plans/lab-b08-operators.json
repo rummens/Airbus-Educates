@@ -1,0 +1,22 @@
+{
+  "workshop": "lab-b08-operators",
+  "_note": "Operator lab. DOMAIN: the platform owns the CloudNativePG operator; the tenant only inspects its CRDs and creates a namespaced Cluster CR. That operator is NOT installed on CRC, so every content check is expect_fail: true (inverted — they pass only on real DCS, and are EXPECTED to fail here): verify-crds-present/verify-api-resource-present look for postgresql.cnpg.io CRDs/api-resources that don't exist on CRC; verify-cr-created/verify-pod-scheduled/verify-cr-healthy need the CRD present so the CR can be applied and reconciled, which it can't be. No excludes — every check maps to an expect_fail check step. Run steps are made non-fatal with `|| true` (apply + the CR gets fail with no CRD; the greps exit 1 with no match). The content's `watch oc get pods` (interactive, + terminal:interrupt) is replayed as a non-blocking `oc get pods` snapshot so it can't hang to the step timeout. sample-cr.yaml keeps its hardcoded postgresql:16 tag and ${DCS_REGISTRY}, replayed via envsubst as content has it.",
+  "steps": [
+    {"run": "oc get crds | grep cnpg || true"},
+    {"check": "verify-crds-present", "args": [], "expect_fail": true},
+    {"run": "oc api-resources | grep -i postgresql || true"},
+    {"check": "verify-api-resource-present", "args": [], "expect_fail": true},
+    {"run": "envsubst < sample-cr.yaml | oc apply -f - || true"},
+    {"check": "verify-cr-created", "args": [], "expect_fail": true},
+    {"run": "oc get cluster.postgresql.cnpg.io sample-db || true"},
+    {"check": "verify-cr-created", "args": [], "expect_fail": true},
+    {"run": "oc get pods -l cnpg.io/cluster=sample-db || true"},
+    {"check": "verify-pod-scheduled", "args": [], "expect_fail": true},
+    {"run": "oc get cluster.postgresql.cnpg.io sample-db || true"},
+    {"check": "verify-cr-healthy", "args": [], "expect_fail": true},
+    {"run": "oc get cluster.postgresql.cnpg.io sample-db -o jsonpath='{.status.phase}' || true"},
+    {"check": "verify-cr-healthy", "args": [], "expect_fail": true},
+    {"run": "oc get cluster.postgresql.cnpg.io sample-db || true"},
+    {"check": "verify-cr-healthy", "args": [], "expect_fail": true}
+  ]
+}

@@ -112,3 +112,12 @@ catalogRescan:
   # Any image with python3 (stdlib urllib only). Reuse the portal image so there's
   # nothing extra to mirror for air-gap. Override for a private registry.
   image: ghcr.io/rummens/dcs-academy-portal:dev
+  # Mount the cluster's trusted CA bundle so the job trusts the portal endpoint's TLS
+  # cert (signed by the cluster/router CA, not a public one) — without it the POST
+  # fails with an SSL cert-verification error. On OpenShift the cluster-network-operator
+  # injects the merged bundle (system + additionalTrustedCA/proxy CAs) under
+  # `ca-bundle.crt` into a ConfigMap labelled config.openshift.io/inject-trusted-cabundle.
+  # Set existingConfigMap to reuse one that already holds ca-bundle.crt instead.
+  trustedCA:
+    enabled: true
+    existingConfigMap: ""

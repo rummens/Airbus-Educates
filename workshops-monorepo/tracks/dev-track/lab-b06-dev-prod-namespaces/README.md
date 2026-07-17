@@ -13,9 +13,9 @@ from DEV to PROD rather than edit PROD in place.
 
 - **Track:** Developer — Build on DCS · Lab 6
 - **Audience:** Intermediate — comfortable deploying and troubleshooting an app on DCS
-- **Duration:** ~40 min
-- **Format:** Hands-on, guided — split terminal, runs in a per-session virtual cluster giving you two real namespaces to compare
-- **Prerequisites:** lab-b05-rbac-tenancy-namespaces; comfortable with `oc apply`, Deployments, Services and Routes (Core track)
+- **Duration:** ~20 min
+- **Format:** Hands-on, guided — terminal, runs in a per-session virtual cluster giving you two real namespaces to compare
+- **Prerequisites:** lab-b05-rbac-tenancy; comfortable with `oc apply`, Deployments, Services and Routes (Core track)
 
 ## By the end of this lab you'll be able to
 
@@ -34,7 +34,7 @@ promotion model it implies.
 
 ## Before you start
 
-This lab assumes you've done lab-b05-rbac-tenancy-namespaces (or already know the
+This lab assumes you've done lab-b05-rbac-tenancy (or already know the
 Tenant → Namespace model and basic RBAC) and lab-a04-expose-app (Services and Routes). If
 a Route or a `Deployment` manifest is unfamiliar, do those first — this lab builds on them
 rather than re-teaching them.
