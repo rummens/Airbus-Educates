@@ -1,0 +1,96 @@
+{{- if and .Values.enabled .Values.sessionReaper.enabled }}
+# Reap orphaned WorkshopSession CRs (see portal/reap.py). A workshop rollout
+# (updates.workshop: true) deletes the old WorkshopEnvironment and orphans its
+# sessions; a training-portal restart wipes its ephemeral DB (session records +
+# per-session OAuth2 clients) and leaks the CRs/pods. Re-opening such a session
+# gives "invalid_request Invalid client_id". This CronJob deletes the orphaned
+# WorkshopSession CRs (operator then GCs the namespace) — env-gone immediately,
+# long-Allocated sessions past a backstop. Own least-privilege SA (the app SA is
+# read-only; only the reaper may delete).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Chart.Name }}-reaper
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Chart.Name }}-reaper
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["training.educates.dev"]
+    resources: ["workshopsessions"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: ["training.educates.dev"]
+    resources: ["workshopenvironments"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Chart.Name }}-reaper
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Chart.Name }}-reaper
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}-reaper
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Chart.Name }}-session-reaper
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.sessionReaper.schedule | quote }}
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 120
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 300
+      ttlSecondsAfterFinished: 600
+      template:
+        metadata:
+          labels:
+            {{- include "portal.labels" . | nindent 12 }}
+        spec:
+          serviceAccountName: {{ .Chart.Name }}-reaper
+          restartPolicy: Never
+          {{- with .Values.global.registry.pullSecret }}
+          imagePullSecrets:
+            - name: {{ . }}
+          {{- end }}
+          securityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: reaper
+              image: {{ include "portal.image" . | quote }}
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+              command: ["python3", "-m", "portal.reap"]
+              env:
+                - { name: EDUCATES_PORTAL_NAME,        value: {{ .Values.educates.portalName | quote }} }
+                - { name: REAPER_DRY_RUN,              value: {{ .Values.sessionReaper.dryRun | quote }} }
+                - { name: REAPER_GRACE_SECONDS,        value: {{ .Values.sessionReaper.graceSeconds | quote }} }
+                - { name: REAPER_MAX_ALLOCATED_SECONDS, value: {{ .Values.sessionReaper.maxAllocatedSeconds | quote }} }
+              resources:
+                {{- toYaml .Values.sessionReaper.resources | nindent 16 }}
+{{- end }}
