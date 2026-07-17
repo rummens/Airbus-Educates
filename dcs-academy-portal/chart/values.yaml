@@ -163,7 +163,7 @@ admin:
 # and in the workshops chart's `catalogRescan.token`. Empty = token auth off
 # (only an SSAR admin user can rescan; the Job path is disabled).
 rescan:
-  token: ""
+  token: "super-secret"
   existingSecret: ""            # optional: use an existing Secret (key: token) instead
 
 # Kasten K10 backup of this namespace (incl. the CNPG feedback DB). OFF by default
