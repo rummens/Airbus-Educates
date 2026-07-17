@@ -13,8 +13,8 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   title: "Operators on DCS"
-  description: Understand the OpenShift Operator pattern — a controller that reconciles a Custom Resource toward its desired state — and the DCS ownership split: the platform runs the operator, you own the instance it manages.
-  duration: 28m
+  description: "Understand the OpenShift Operator pattern — a controller that reconciles a Custom Resource toward its desired state — and the DCS ownership split: the platform runs the operator, you own the instance it manages."
+  duration: 40m
   difficulty: advanced
   labels:
     - name: module

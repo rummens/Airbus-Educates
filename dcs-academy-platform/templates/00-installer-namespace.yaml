@@ -1,4 +1,6 @@
-{{- if .Values.enabled }}
+{{- if and .Values.enabled .Values.educates.installer.createNamespace }}
+# Some clusters don't let ArgoCD auto-create namespaces for this app
+# (CreateNamespace=true sync option unavailable/blocked). Render it ourselves instead.
 apiVersion: v1
 kind: Namespace
 metadata:
