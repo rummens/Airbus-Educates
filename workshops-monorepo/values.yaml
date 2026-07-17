@@ -108,7 +108,7 @@ catalogRescan:
   enabled: true
   # In-cluster portal Service URL (same host as feedback.analyticsWebhookUrl).
   portalUrl: "http://dcs-academy-portal.dcs-academy-portal.svc:8080"
-  token: ""
+  token: "super-secret"
   # Any image with python3 (stdlib urllib only). Reuse the portal image so there's
   # nothing extra to mirror for air-gap. Override for a private registry.
   image: ghcr.io/rummens/dcs-academy-portal:dev
