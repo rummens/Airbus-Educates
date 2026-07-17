@@ -15,6 +15,7 @@
 # resource limits, and probes into workshop deployments. The mutation is
 # scoped to namespaces labeled with training.educates.dev/environment.name.
 #
+# This is a DEFAULTS-only policy: user-specified values take precedence.
 # See DCS-ACADEMY-TROUBLESHOOTING.md section 3 for details.
 {{ if .Values.enableKyvernoException }}
 apiVersion: kyverno.io/v1
@@ -29,9 +30,9 @@ metadata:
     policies.kyverno.io/category: Educates Academy
     policies.kyverno.io/severity: low
     policies.kyverno.io/description: >-
-      Mutates Educates workshop deployments to add required security context,
-      resource limits, and health probes. This ensures compliance with cluster
-      Kyverno policies without requiring changes to the Educates base images.
+      Sets default security context, resource limits, and health probes on
+      Educates workshop deployments. User-specified values take precedence —
+      only missing fields are filled in as defaults.
 spec:
   background: false
   rules:
@@ -47,7 +48,7 @@ spec:
                     operator: Exists
       preconditions:
         any:
-          - key: "{{ "{{" }} request.operation {{ "}}" }}"
+          - key: '{{ "{{ request.operation }}" }}'
             operator: AnyIn
             value: ["CREATE", "UPDATE"]
       mutate:
@@ -55,29 +56,33 @@ spec:
           spec:
             template:
               spec:
+                volumes:
+                  - name: workshop-tmp
+                    emptyDir: {}
+                  - name: workshop-opt
+                    emptyDir: {}
                 containers:
-                  - name: workshop
+                  - (name): "*"
                     securityContext:
-                      readOnlyRootFilesystem: true
-                      seccompProfile:
+                      +(seccompProfile):
                         type: RuntimeDefault
                     resources:
                       requests:
-                        cpu: 100m
-                        memory: 512Mi
+                        +(cpu): 100m
+                        +(memory): 512Mi
                       limits:
-                        cpu: 500m
-                        memory: 1Gi
-                    livenessProbe:
+                        +(cpu): 500m
+                        +(memory): 1Gi
+                    +(livenessProbe):
                       httpGet:
                         path: /healthz
-                        port: 10080
+                        port: 8080
                       initialDelaySeconds: 30
                       periodSeconds: 10
-                    readinessProbe:
+                    +(readinessProbe):
                       httpGet:
                         path: /healthz
-                        port: 10080
+                        port: 8080
                       initialDelaySeconds: 5
                       periodSeconds: 10
                     volumeMounts:
@@ -85,9 +90,4 @@ spec:
                         mountPath: /tmp
                       - name: workshop-opt
                         mountPath: /opt/workshop
-                volumes:
-                  - name: workshop-tmp
-                    emptyDir: {}
-                  - name: workshop-opt
-                    emptyDir: {}
 {{end}}
