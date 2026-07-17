@@ -1,5 +1,5 @@
 ---
-title: Workshop Overview
+title: "Your Workshop Environment"
 ---
 
 Welcome to the **{{< param product_name >}}** Academy. Before you learn anything about

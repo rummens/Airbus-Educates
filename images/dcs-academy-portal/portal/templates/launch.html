@@ -60,6 +60,10 @@
             // Even an admitted Route can briefly 503 while the router loads it; give it
             // a short settle before redirecting so the first page load succeeds.
             await new Promise(r=>setTimeout(r, 2500));
+            // Don't redirect until the claim has finished establishing the portal
+            // session cookie — the session host's oauth handshake needs it, else the
+            // first load 401s ("auth error" that a reload later fixes).
+            try{ await claimDone; }catch(e){ /* logged in the claim itself */ }
             document.getElementById('spinner').classList.add('ok');
             window.location.href = dest;
             return;
@@ -84,11 +88,11 @@
       // cookie and receives the portal session cookie (needed for the later
       // session-host oauth). redirect:'manual' = don't throw on the cross-origin
       // 302 to the session host; the claim already ran server-side.
-      if (TARGET) {
-        fetch(TARGET, {credentials:'include', redirect:'manual'})
-          .then(r => console.log('[launch] claim', TARGET, '->', r.status, r.type))
-          .catch(e => console.log('[launch] claim FAILED', e));
-      }
+      const claimDone = TARGET
+        ? fetch(TARGET, {credentials:'include', redirect:'manual'})
+            .then(r => console.log('[launch] claim', TARGET, '->', r.status, r.type))
+            .catch(e => console.log('[launch] claim FAILED', e))
+        : Promise.resolve();
       poll();
     </script>
   {% endif %}

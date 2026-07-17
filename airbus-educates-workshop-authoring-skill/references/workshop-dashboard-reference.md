@@ -200,3 +200,28 @@ url: {{< param ingress_protocol >}}://app-{{< param session_hostname >}}/admin
 ````
 
 Note that pre-defining dashboards in `spec.session.dashboards` is still appropriate when the tab's URL will not change during the workshop — for example, when the tab simply displays a web application and the user interacts with it at the same URL throughout.
+
+## Proxying a deployed Service (not the workshop pod) needs `host:`
+
+A session-proxy tab at `app-$(session_hostname)` is backed by a `spec.session.ingresses`
+entry. **By default the ingress proxies to the workshop session pod itself** (`127.0.0.1`),
+where nothing is usually listening — so a tab pointing at an app the learner *deployed*
+(a Deployment + Service in the session namespace) shows OpenShift's **"Application is not
+available"** page.
+
+To proxy a Service, set `host:` (and `protocol:`) on the ingress so it targets the Service
+by cluster DNS:
+
+```yaml
+# Path: spec.session
+session:
+  ingresses:
+  - name: app
+    protocol: http
+    host: hello-dcs.$(session_namespace).svc.cluster.local   # the Service, not the workshop pod
+    port: 8080
+```
+
+Without the `host:` line the proxy has no backend and the tab errors. The Service must also
+exist and be Ready by the time the learner opens the tab — create it earlier in the
+instructions, and pair the tab-opening step with a note that it may take a moment.

@@ -9,7 +9,7 @@ happy path.
 ## What You Did
 
 - Learned the **PVC → StorageClass → PV** model and dynamic provisioning.
-- Claimed a **File** PVC and mounted it at `/data`.
+- Claimed a **File** PVC and mounted it at `/opt/app-root/src/data`.
 - Wrote a marker, restarted the Pod, and **read it back** — persistence proven.
 - Compared **File (RWX)** vs **Block (RWO)** and saw that **classification** drives the choice.
 - Learned that **S3** comes via an **ITSM ticket**, not a PVC.

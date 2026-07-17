@@ -1,0 +1,15 @@
+# The Docker-world source of truth for hello-dcs — what you'd run today with
+# `docker compose up`. This lab maps every line below onto a DCS/Kubernetes
+# object (01-the-mental-model.md onward). Four lines won't survive the trip
+# as-is — 05-what-doesnt-translate.md explains why, line by line.
+services:
+  hello-dcs:
+    image: docker.io/rummens/hello-dcs:latest
+    ports:
+      - "8080:8080"
+    environment:
+      GREETING: "Hello from docker-compose"
+    user: root
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

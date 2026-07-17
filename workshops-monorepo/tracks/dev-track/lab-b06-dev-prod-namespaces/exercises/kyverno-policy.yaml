@@ -1,0 +1,78 @@
+# A representative version of the policy set DCS enforces on PROD-type
+# namespaces, expressed as a Kyverno ClusterPolicy. Real DCS carries more rules
+# than this; these two are the ones this workshop can demonstrate end to end.
+#
+# rule 1 (route-requires-prod): a Route can only be created in a namespace
+#   labelled dcs.airbus/namespace-type=prod. This is the platform rule behind
+#   "a Route needs a PROD-type namespace".
+#
+# rule 2 (prod-requires-resources): inside a PROD-type namespace, every
+#   container must declare CPU/memory requests AND limits. This is what "PROD
+#   enforces harsher policies" looks like concretely. DEV-type namespaces are
+#   not matched by this rule at all — that is the DEV/PROD trade-off in one
+#   policy: DEV trusts you to move fast, PROD makes you prove the workload is
+#   sized before it admits it.
+#
+# Note: rule 2 matches "Pod" — Kyverno auto-generates the equivalent rule for
+# the Deployment (and ReplicaSet) that owns the Pod, so a Deployment that
+# omits resources is rejected immediately on `oc apply`, not only when its
+# ReplicaSet later tries to create a Pod.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: dcs-namespace-type-policy
+  annotations:
+    policies.kyverno.io/title: DCS Namespace-Type Policy (DEV vs PROD)
+    policies.kyverno.io/category: DCS Namespace Policies
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/description: >-
+      Represents the DCS PROD/DEV policy split. Routes are only admitted in a
+      namespace labelled dcs.airbus/namespace-type=prod, and PROD-type
+      namespaces additionally require every container to declare CPU/memory
+      requests and limits. DEV-type namespaces get neither restriction.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+  - name: route-requires-prod
+    match:
+      any:
+      - resources:
+          kinds:
+          - route.openshift.io/v1/Route
+    exclude:
+      any:
+      - resources:
+          namespaceSelector:
+            matchLabels:
+              dcs.airbus/namespace-type: prod
+    validate:
+      message: >-
+        Routes can only be created in a namespace labelled
+        dcs.airbus/namespace-type=prod. This namespace isn't PROD-type —
+        promote this workload to a PROD namespace to expose it externally.
+      deny: {}
+  - name: prod-requires-resources
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+          namespaceSelector:
+            matchLabels:
+              dcs.airbus/namespace-type: prod
+    validate:
+      message: >-
+        PROD-type namespaces (dcs.airbus/namespace-type=prod) require every
+        container to declare CPU/memory requests and limits. Add a resources
+        block to the container spec.
+      pattern:
+        spec:
+          containers:
+          - resources:
+              requests:
+                memory: "?*"
+                cpu: "?*"
+              limits:
+                memory: "?*"
+                cpu: "?*"

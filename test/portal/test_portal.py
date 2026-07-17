@@ -176,6 +176,8 @@ def test_source_and_readme_url():
 
 
 def test_session_route_ready(monkeypatch):
+    # Two-stage gate: the Route must be Admitted AND actually serving (not the router's
+    # 503 page). Stub the HTTP probe so the test needs no network.
     admitted = {"items": [{"spec": {"host": "s1.apps.test"},
                            "status": {"ingress": [{"conditions": [{"type": "Admitted", "status": "True"}]}]}}]}
     pending = {"items": [{"spec": {"host": "s1.apps.test"},
@@ -183,9 +185,18 @@ def test_session_route_ready(monkeypatch):
     class _CO:
         def __init__(self, data): self.data = data
         def list_cluster_custom_object(self, *a, **k): return self.data
+
+    # Admitted + backend serving → ready.
     monkeypatch.setattr(k8sclient, "_co", lambda: _CO(admitted))
+    monkeypatch.setattr(k8sclient, "_route_http_ok", lambda url: True)
     assert k8sclient.session_route_ready("sess", "https://s1.apps.test/") is True
+    # Admitted but the router still serves the 503 page → NOT ready (the race we fixed).
+    monkeypatch.setattr(k8sclient, "_route_http_ok", lambda url: False)
+    assert k8sclient.session_route_ready("sess", "https://s1.apps.test/") is False
+    # Not admitted yet → NOT ready, and the probe is never reached.
     monkeypatch.setattr(k8sclient, "_co", lambda: _CO(pending))
+    monkeypatch.setattr(k8sclient, "_route_http_ok",
+                        lambda url: (_ for _ in ()).throw(AssertionError("probe must not run when not admitted")))
     assert k8sclient.session_route_ready("sess", "https://s1.apps.test/") is False
     assert k8sclient.session_route_ready("sess", "") is False        # no url
 
@@ -775,15 +786,52 @@ def test_session_pods_merges_vcluster(monkeypatch):
     assert names["my-vcluster-0"]["vcluster"] is True and names["my-vcluster-0"]["ready"] == 1
 
 
-def test_session_route_ready_fail_open_on_no_rbac(monkeypatch):
+def test_session_route_ready_no_rbac_falls_through_to_probe(monkeypatch):
+    # Without Routes RBAC we can't check admission, so we rely solely on the HTTP probe
+    # (never fail open early — the probe is the source of truth).
     from kubernetes.client.rest import ApiException
 
     class _Boom:
         def list_cluster_custom_object(self, *a, **k):
             raise ApiException(status=403)
     monkeypatch.setattr(k8sclient, "_co", lambda: _Boom())
-    # can't check → None (fail open), not False
-    assert k8sclient.session_route_ready("sess", "https://s.apps.test/") is None
+
+    monkeypatch.setattr(k8sclient, "_route_http_ok", lambda url: True)
+    assert k8sclient.session_route_ready("sess", "https://s.apps.test/") is True
+    monkeypatch.setattr(k8sclient, "_route_http_ok", lambda url: False)
+    assert k8sclient.session_route_ready("sess", "https://s.apps.test/") is False
+
+
+def test_route_http_ok(monkeypatch):
+    # 503 (router "Application is not available") = not ready; 200/401/3xx = serving;
+    # connection error = not ready.
+    import urllib.error
+    import urllib.request
+
+    def _resp(code):
+        class _R:
+            def getcode(self): return code
+        return _R()
+
+    monkeypatch.setattr(urllib.request, "urlopen", lambda *a, **k: _resp(200))
+    assert k8sclient._route_http_ok("https://s.apps.test/") is True
+    monkeypatch.setattr(urllib.request, "urlopen", lambda *a, **k: _resp(503))
+    assert k8sclient._route_http_ok("https://s.apps.test/") is False
+
+    def _raise_http(code):
+        def _f(*a, **k):
+            raise urllib.error.HTTPError("u", code, "m", {}, None)
+        return _f
+    monkeypatch.setattr(urllib.request, "urlopen", _raise_http(401))
+    assert k8sclient._route_http_ok("https://s.apps.test/") is True   # oauth handshake = serving
+    monkeypatch.setattr(urllib.request, "urlopen", _raise_http(503))
+    assert k8sclient._route_http_ok("https://s.apps.test/") is False
+
+    def _boom(*a, **k):
+        raise OSError("conn refused")
+    monkeypatch.setattr(urllib.request, "urlopen", _boom)
+    assert k8sclient._route_http_ok("https://s.apps.test/") is False
+    assert k8sclient._route_http_ok("") is False
 
 
 def test_user_can_admin_happy_path(monkeypatch):

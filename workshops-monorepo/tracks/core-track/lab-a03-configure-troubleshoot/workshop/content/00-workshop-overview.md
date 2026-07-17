@@ -1,5 +1,5 @@
 ---
-title: Workshop Overview
+title: "Configure & Troubleshoot Your App"
 ---
 
 In A02 you customised your app with `oc set env` — one value, on the command line. That's

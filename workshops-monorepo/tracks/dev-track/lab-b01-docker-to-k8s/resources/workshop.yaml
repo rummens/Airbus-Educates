@@ -1,0 +1,73 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b01-docker-to-k8s
+  labels:
+    academy.dcs/track: dev
+    academy.dcs/order: "10"
+    # Reached in-cluster by DNS only — no Route/Ingress created → dev namespace.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: "From Docker to Kubernetes on DCS"
+  description: Map a Docker / docker-compose mental model onto Kubernetes objects — turn a docker run / compose example into an equivalent Deployment + Service + ConfigMap, deploy it, and reconcile what does not translate on an air-gapped, non-root DCS.
+  duration: 40m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Developer"
+  publish:
+    image: "$(image_repository)/lab-b01-docker-to-k8s-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b01-docker-to-k8s/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b01-docker-to-k8s/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b01-docker-to-k8s/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/dev-track/lab-b01-docker-to-k8s"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b01-docker-to-k8s-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY: single terminal source for the sample-image registry (Plane 3).
+    # Keep in sync with dcs_registry in workshop/config.yaml.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      # Console tab so the learner can watch the Deployment/Pod/Service land as
+      # each manifest is applied (Section 2 of the plan).
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # A single migrated app needs no cluster-scoped objects; the session
+      # namespace IS the learner's DEV namespace. DEV vs PROD split is B06.
+      vcluster:
+        enabled: false

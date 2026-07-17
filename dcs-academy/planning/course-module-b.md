@@ -121,6 +121,7 @@ Same conventions as [course-module-a.md](course-module-a.md). Names: `lab-b0N-na
 **Code exercises:** Inspect CRDs/api-resources; apply a sample CR; watch reconciliation; console Installed Operators view.
 **Key code examples:** A minimal Custom Resource (reuse CloudNativePG images). Operator pattern → upstream; DCS-specific → `{{< param dcs_docs_base_url >}}/concepts/operators`.
 **Design note:** Still the conceptual prerequisite for **Module F** (GitLab, Argo CD, CloudNativePG). Formerly Core A09; now the capstone of the Developer track.
+--> Use CNPG as example but highlight that there is a dedicated track for operators
 
 ## Notes
 

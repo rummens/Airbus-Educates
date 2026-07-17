@@ -1,0 +1,14 @@
+#!/bin/bash
+# Verify 'oc auth can-i --list' returns a non-trivial permission table.
+out=$(oc auth can-i --list 2>/dev/null)
+lines=$(echo "$out" | wc -l | tr -d ' ')
+if [ -z "$out" ] || [ "$lines" -lt 3 ]; then
+  echo "Expected a multi-line permission table from 'oc auth can-i --list', got: $out" >&2
+  exit 1
+fi
+if ! echo "$out" | grep -qi "verbs"; then
+  echo "Expected a 'Verbs' column in 'oc auth can-i --list' output, got: $out" >&2
+  exit 1
+fi
+echo "OK: 'oc auth can-i --list' returned $lines lines with a Verbs column."
+exit 0

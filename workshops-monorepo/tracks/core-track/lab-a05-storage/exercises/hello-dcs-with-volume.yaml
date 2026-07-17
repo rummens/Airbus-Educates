@@ -1,5 +1,9 @@
-# hello-dcs with the File PVC mounted at /data. Data written under /data lives on
-# the PersistentVolume, not the container filesystem — so it survives pod restarts.
+# hello-dcs with the File PVC mounted at /opt/app-root/src/data. Data written there lives
+# on the PersistentVolume, not the container filesystem — so it survives pod restarts.
+# The mount path sits inside the image's own writable app home (/opt/app-root/src): this
+# image runs non-root (UID 1001), and a non-root process can only write where it owns the
+# path. Mounting a volume at a root-level path like /data leaves it root-owned and the app
+# gets "Permission denied" on write. Keep app data under the app's home directory.
 # Apply with: envsubst < hello-dcs-with-volume.yaml | oc apply -f -
 apiVersion: apps/v1
 kind: Deployment
@@ -24,7 +28,7 @@ spec:
         - containerPort: 8080
         volumeMounts:
         - name: data
-          mountPath: /data
+          mountPath: /opt/app-root/src/data
         resources:
           requests:
             cpu: 50m

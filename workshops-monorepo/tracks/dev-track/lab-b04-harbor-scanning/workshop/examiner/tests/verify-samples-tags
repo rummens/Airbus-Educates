@@ -1,0 +1,17 @@
+#!/bin/bash
+# verify-samples-tags <project/repo> <expected-tag>
+# skopeo list-tags shows the project's tags, and the expected one (the image B02 built
+# and pushed) is among them — the read-only check that stands in for a live push here.
+repo="${1:?repository required (e.g. \$DCS_REGISTRY/samples/hello-dcs)}"
+tag="${2:-1.0}"
+tags=$(skopeo list-tags "docker://${repo}" 2>/dev/null)
+if [ -z "$tags" ]; then
+  echo "Could not list tags for 'docker://${repo}'. Is Harbor reachable with the read-only robot account?" >&2
+  exit 1
+fi
+if ! echo "$tags" | grep -q "\"${tag}\""; then
+  echo "Tag '${tag}' not found among the tags returned for ${repo}:" >&2
+  echo "$tags" >&2
+  exit 1
+fi
+echo "OK: tag '${tag}' is present in ${repo}."

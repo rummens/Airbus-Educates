@@ -1,0 +1,11 @@
+#!/bin/bash
+# Verify a quota-exceeded FailedCreate event is visible for hello-dcs's ReplicaSet.
+set -uo pipefail
+
+hit=$(oc get events --field-selector reason=FailedCreate -o jsonpath='{.items[*].message}' 2>/dev/null | grep -c 'exceeded quota')
+if [ "${hit:-0}" -lt 1 ] 2>/dev/null; then
+  echo "No FailedCreate event mentioning 'exceeded quota' found yet. Did 'envsubst < deployment-oversized.yaml | oc apply -f -' run? Check 'oc get events --sort-by=.lastTimestamp' — it can take a few seconds to appear." >&2
+  exit 1
+fi
+
+echo "OK: found a FailedCreate event reporting an exceeded quota — the admission rejection is visible."

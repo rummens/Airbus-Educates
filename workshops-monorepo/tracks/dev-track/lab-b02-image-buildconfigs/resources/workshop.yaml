@@ -1,0 +1,77 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b02-image-buildconfigs
+  labels:
+    academy.dcs/track: dev
+    academy.dcs/order: "20"
+    # No Route/Ingress created by this lab (built image is reached via port-forward,
+    # same as A02) → dev namespace.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: "Building Images with BuildConfigs"
+  description: Get your own code into an image without a local Docker — point a BuildConfig at a git repo, build the image on-cluster (S2I or Dockerfile), push it to Harbor, deploy it, and trigger a rebuild on change.
+  duration: 45m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Developer"
+  publish:
+    image: "$(image_repository)/lab-b02-image-buildconfigs-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b02-image-buildconfigs/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b02-image-buildconfigs/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b02-image-buildconfigs/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/dev-track/lab-b02-image-buildconfigs"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b02-image-buildconfigs-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY: single terminal source for the sample-image registry (Plane 3).
+    # Keep in sync with dcs_registry in workshop/config.yaml.
+    # BUILD_SOURCE_REPO: the git repo this lab's BuildConfigs build from — a small
+    # repo mirrored/reachable in-session without external egress (air-gapped). See
+    # the provisioning caveat at the bottom of 99-workshop-summary.md.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    - name: BUILD_SOURCE_REPO
+      value: "https://git.example.dcs/dcs-academy/samples/hello-dcs-build-source.git"
+    namespaces:
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # BuildConfig/Build/ImageStream are all namespaced objects; no cluster-scoped
+      # objects needed. The session namespace IS the build + deploy workspace.
+      vcluster:
+        enabled: false

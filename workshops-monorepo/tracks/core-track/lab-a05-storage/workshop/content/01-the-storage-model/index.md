@@ -7,11 +7,12 @@ and the platform provisions it. Three objects make that work:
 
 ![How your app gets storage on DCS](storage-model.svg)
 
-- A [**PersistentVolumeClaim (PVC)**](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) —
+- A [**PersistentVolumeClaim (PVC)**](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims) —
   your request: "I want this much space, this type." You write this.
 - A [**StorageClass**](https://kubernetes.io/docs/concepts/storage/storage-classes/) —
   the platform's offering (File, Block, different tiers). DCS provides these.
-- A **PersistentVolume (PV)** — the real volume DCS provisions and **binds** to your claim.
+- A [**PersistentVolume (PV)**](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistent-volumes) —
+  the real volume DCS provisions and **binds** to your claim.
 
 This is **dynamic provisioning**: you never pre-create the disk, you just claim one and DCS
 creates and binds a matching PV automatically.

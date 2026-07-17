@@ -30,7 +30,13 @@ on the command line.
 
 ## Deploy the same app into both namespaces
 
-You'll use the **split terminal**. In the **upper** pane, deploy into `app-a`:
+The key to this whole page is one flag: **`-n <namespace>`**. Every `oc` command runs
+against exactly one namespace, and `-n` is how you pick which. Leave it off and the command
+uses your *current* namespace; add `-n app-a` and it targets `app-a` instead. Same command,
+same manifest — only the `-n` value decides where it lands.
+
+You'll use the **split terminal**. In the **upper** pane, deploy into `app-a` (note the
+`-n ...-app-a`):
 
 ```terminal:execute
 command: envsubst < app.yaml | oc apply -n "$(oc project -q)-app-a" -f -
@@ -89,7 +95,14 @@ Scale the copy in `app-a` down to zero — and watch `app-b` stay exactly as it 
 command: oc scale deploy/hello --replicas=0 -n "$(oc project -q)-app-a"
 ```
 
-The check below reads both namespaces and reports each one's state:
+Now read both, side by side, and see for yourself that only `app-a` changed:
+
+```terminal:execute
+command: echo "app-a:" && oc get deploy hello -n "$(oc project -q)-app-a" && echo "app-b:" && oc get deploy hello -n "$(oc project -q)-app-b"
+```
+
+`app-a` shows `0/0` (scaled to zero); `app-b` still shows `1/1` — untouched by the action
+you took next door. The check below confirms it:
 
 ```examiner:execute-test
 name: verify-isolation

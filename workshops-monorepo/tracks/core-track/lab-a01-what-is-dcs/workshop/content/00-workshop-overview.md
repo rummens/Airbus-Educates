@@ -1,13 +1,19 @@
 ---
-title: Workshop Overview
+title: "What is DCS?"
 ---
 
 Welcome to this workshop, part of **{{< param product_name >}}**. In it you will get
 oriented on {{< param product_short >}} — what the platform is, how containers and
 images fit, and how to work in your environment using the `oc` command line.
 
-This is the first workshop in the Foundations track. It assumes **no prior container
-or Kubernetes knowledge**.
+This is a **concept/orientation lab** — take it any time; it assumes **no prior container
+or Kubernetes knowledge**. If you'd rather start by *doing*, jump into **Deploy Your First
+App** and come back here for the background.
+
+{{< note >}}
+Prefer it visual? Open the **Slides** tab for a low-text overview of everything on these
+pages.
+{{< /note >}}
 
 {{< note >}}
 **First time in one of these labs?** Take two minutes to read the

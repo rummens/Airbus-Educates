@@ -1,0 +1,9 @@
+#!/bin/bash
+# Verify a LimitRange is present in the namespace.
+count=$(oc get limitrange --no-headers 2>/dev/null | wc -l | tr -d ' ')
+if [ "$count" -lt 1 ]; then
+  echo "Expected at least one LimitRange in $(oc project -q), found none." >&2
+  exit 1
+fi
+echo "OK: $count LimitRange(s) found in $(oc project -q)."
+exit 0

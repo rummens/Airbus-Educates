@@ -1,0 +1,14 @@
+#!/bin/bash
+# Verify PROD's dcs-namespace-type-policy rejected the hello-dcs Pods (no
+# resources.requests/limits set) — the concrete demonstration of "PROD
+# enforces harsher policies than DEV" on the identical manifest DEV accepted.
+set -uo pipefail
+
+ns="prod"
+ready=$(oc get deployment hello-dcs -n "$ns" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+if [ -n "$ready" ] && [ "$ready" -ge 1 ] 2>/dev/null; then
+  echo "Deployment 'hello-dcs' has $ready ready replica(s) in the PROD namespace '$ns' — expected Kyverno to reject it (no resources.requests/limits) per the 'prod-requires-resources' rule." >&2
+  exit 1
+fi
+
+echo "OK: hello-dcs has no ready Pods in the PROD namespace '$ns' — Kyverno enforced the resource-requests requirement that DEV does not have."

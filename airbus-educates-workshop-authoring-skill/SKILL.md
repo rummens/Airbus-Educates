@@ -451,6 +451,11 @@ After generating workshop instruction pages, verify the following:
 - [ ] **Every command** has a paired `examiner:execute-test` (automated-pipeline coverage — no unverified commands); checks emit diagnostic failure messages; workshop ends with a Check Your Understanding section (see [references/assessment-reference.md](references/assessment-reference.md))
 - [ ] Long-running steps are preceded by an experience note and paired with a polling check
 - [ ] **Concepts are taught, not just scripted** — each page covers one concept and explains what/why/how; expected output is shown and explained; flags are explained; no foundational concept is skipped (see [references/content-depth-reference.md](references/content-depth-reference.md))
+- [ ] `00-workshop-overview.md` `title` is the **lab's own title** (e.g. `"Expose Your App"`), not a generic "Workshop Overview" (see [references/introduction-page-reference.md](references/introduction-page-reference.md))
+- [ ] Every "show" command produces **legible, meaningful output**; changes are demonstrated with a visible **before/after**, not just asserted or left to an examiner (see [references/content-depth-reference.md](references/content-depth-reference.md))
+- [ ] Non-obvious flags are explained on **first use** (the first `-n` says it selects the namespace, etc.) — assume beginners
+- [ ] `terminal:execute` commands are kept **simple** — no fragile `||`/subshell/quoted-paren one-liners that fail action detection; fallbacks and reasons go in prose (see [references/clickable-actions-reference.md](references/clickable-actions-reference.md))
+- [ ] A session-proxy dashboard tab pointing at a **deployed Service** has `host:` set on its `spec.session.ingresses` entry (else "Application is not available"); volumes for **non-root** images mount under the app's writable home, not `/data` (see [references/workshop-dashboard-reference.md](references/workshop-dashboard-reference.md), [references/openshift-reference.md](references/openshift-reference.md))
 - [ ] Depth was not thinned to hit a time box — long topics were split into more workshops instead
 - [ ] No hardcoded registry hosts, domains, route hosts, namespaces, or versions in content — variables are used throughout
 

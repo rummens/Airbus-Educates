@@ -1,0 +1,14 @@
+#!/bin/bash
+# verify-no-criticals <report-filename> — the report has zero Critical findings (passes the gate).
+file="${1:?report filename required (e.g. scan-report.json)}"
+path="$HOME/exercises/$file"
+if [ ! -f "$path" ]; then
+  echo "Report '$path' not found. Is the fixture shipped in ~/exercises?" >&2
+  exit 1
+fi
+crit=$(jq '.summary.severityCount.Critical // 0' "$path" 2>/dev/null)
+if [ "${crit:-}" != "0" ]; then
+  echo "Expected 0 Critical findings in $file, found ${crit}. A clean image's report must have no Criticals to pass the gate." >&2
+  exit 1
+fi
+echo "OK: $file reports 0 Critical findings — passes the gate."

@@ -38,9 +38,17 @@ internet**. Prove it — try to reach an external site from inside the app's Pod
 command: oc exec deploy/hello-dcs -- python3 -c "import urllib.request; urllib.request.urlopen('https://example.com', timeout=5)"
 ```
 
-It **fails** (times out or refuses) — exactly as intended. Everything an app needs comes
-from *inside* the platform (images from Harbor, packages from internal mirrors), never the
-open internet.
+It **fails** (times out or refuses) — exactly as intended. By default an app gets
+everything it needs from *inside* the platform (images from Harbor, packages from internal
+mirrors), never the open internet.
+
+{{< note >}}
+**There is a controlled exception.** Specific external resources *can* be reached through
+a managed egress proxy — but this is **not on by default**. Each destination must be
+**explicitly whitelisted and enabled** (via a request to the platform team), so egress
+stays deny-by-default and every allowed route is deliberate and auditable. "Air-gapped"
+means *no open path out*, not *no path ever*.
+{{< /note >}}
 
 ```examiner:execute-test
 name: verify-egress-blocked

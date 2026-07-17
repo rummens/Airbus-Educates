@@ -61,3 +61,21 @@ educates delete-workshop
 ### Deploying All Workshops in a Course
 
 When working with a course that contains multiple workshops, each workshop must be published and deployed individually from its own subdirectory. When deploying all workshops in a course, deploy them in the order they appear in the course definition. This ensures they are displayed in the correct order in the training portal UI.
+
+## Test integrity: exercise the learner's real manifest
+
+Automated smoke tests must run **exactly what the learner runs**. Do not mutate the
+workshop's manifest inside the test to make it pass — a plan that `oc patch`es a manifest
+before checking it is testing a different artifact than the one shipped, and it hides real
+bugs (a green test over a workshop that fails for every learner).
+
+- If a manifest needs a fix to work on the platform, fix it **in the manifest**, then let
+  the test run it unaltered.
+- The **only** acceptable in-test mutation is a compatibility shim for a genuine
+  *test-environment* quirk (e.g. a local cluster whose SCC is `RunAsAny` and assigns no
+  fsGroup, unlike real `restricted-v2`). When you add one, **label it loudly** in the plan
+  note as a test-shim, and record what it means the test does **not** cover.
+- Name the coverage gap out loud. A local/CRC cluster does not reproduce every platform
+  behaviour (File/NFS storage ownership, restricted-v2 fsGroup ranges, Route admission
+  policy). If a behaviour can only be validated on real DCS, say so in the plan note and in
+  the test README — a green local run is not a claim that the untested path works.

@@ -126,6 +126,38 @@ command: |-
 
 Always test that commands work correctly in a terminal before embedding them in workshop instructions.
 
+### Keep the command simple — complex shell breaks the clickable action
+
+A `terminal:execute` value that piles on shell operators (`||`, `&&` chains ending in a
+quoted `echo`, subshells, parentheses inside double quotes) can fail to render as a
+clickable action at all — the learner sees a plain code block they can't run ("command not
+detected"). It also reads as noise to a beginner.
+
+**WRONG — fallback `echo` with parens and quotes on one line (fragile, often not detected):**
+
+````markdown
+```terminal:execute
+command: oc logs -l app=hello-dcs --tail=20 || echo "(no logs: the container never started — config error before startup)"
+```
+````
+
+**CORRECT — run the plain command; put the interpretation in prose:**
+
+````markdown
+```terminal:execute
+command: oc logs -l app=hello-dcs --tail=20
+```
+
+You'll likely see **no log lines** — and that absence is the clue: the container never
+started, so the failure is *before* the app runs (configuration, not code).
+````
+
+Rule of thumb: the command should be the single thing you want the learner to run. If you
+need a fallback message, a "why", or a conditional, move it into the surrounding text — not
+into the `command:` value. When a genuine one-liner needs a conditional (e.g. proving a var
+is set), wrap it in `sh -c '…'` with a block scalar (`command: |-`) so the whole thing is
+one clean, quoted unit.
+
 ### Trailing blank lines in text properties
 
 When a `text` or `replacement` property in an editor clickable action ends with one or more blank lines, those blank lines can be silently lost. This happens because Hugo's Markdown processor strips trailing blank lines from inside fenced code blocks before the content reaches the YAML parser. If the property with trailing blank lines is the last property in the YAML block, the blank lines appear as trailing content in the code fence and Hugo removes them.

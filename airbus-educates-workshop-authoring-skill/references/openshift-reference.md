@@ -112,6 +112,31 @@ session:
 
 Only relax when required, and prefer picking an arbitrary-UID-tolerant image over relaxing the policy. Do **not** instruct learners to run `oc adm policy add-scc-to-user` — sessions cannot modify SCC bindings, and the Educates policy layer, not raw SCC edits, governs what the session may deploy.
 
+### Mount volumes where a non-root image can write
+
+A non-root image (e.g. UBI `…/python-311`, running `USER 1001`) can only write where it
+owns the path. A PersistentVolume mounted at a **root-level path like `/data`** comes up
+**root-owned**, and the app hits `Permission denied` on the first write — the volume mounts
+fine, but the process can't write it. This bites storage labs especially, and it is easy to
+miss because it depends on the image's UID and the CSI driver's fsGroup behaviour.
+
+Mount app data **inside the image's own writable home** instead — for the UBI Python base
+that is `/opt/app-root/src`, so mount at `/opt/app-root/src/data`:
+
+```yaml
+volumeMounts:
+- name: data
+  mountPath: /opt/app-root/src/data   # writable by the non-root app; NOT /data
+```
+
+Do **not** paper over this with a hardcoded `securityContext.fsGroup` in the manifest:
+`restricted-v2` assigns fsGroup from a per-namespace range, so a fixed value (e.g. `1001`)
+is rejected on a real DCS namespace even though it "works" on a permissive test cluster.
+The portable fix is the mount path. (If a test cluster's SCC is `RunAsAny` and assigns no
+fsGroup, patch fsGroup **in the test harness only**, and label it a test-shim — never hide
+it in the workshop manifest; see the test-integrity note in
+[local-cluster-deployment-reference.md](local-cluster-deployment-reference.md).)
+
 ## Console
 
 When the OpenShift/Kubernetes web console is enabled, follow the console patterns in [kubernetes-access-reference.md](kubernetes-access-reference.md). The Educates console tab embeds the same generic console; OpenShift-specific console deep-links (developer/administrator perspectives) are not guaranteed and should not be linked from instructions.

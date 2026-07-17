@@ -1,0 +1,13 @@
+#!/bin/bash
+# Verify the Pod created from pod-from-catalog.yaml is Running — proof a catalog pull
+# landed on the cluster, not just that skopeo could see the image.
+if ! oc get pod catalog-pull >/dev/null 2>&1; then
+  echo "Pod 'catalog-pull' not found in $(oc project -q). Did the 'oc apply' step run?" >&2
+  exit 1
+fi
+phase=$(oc get pod catalog-pull -o jsonpath='{.status.phase}' 2>/dev/null)
+if [ "$phase" != "Running" ]; then
+  echo "Pod 'catalog-pull' is in phase '$phase', not Running yet — check 'oc describe pod catalog-pull'." >&2
+  exit 1
+fi
+echo "OK: Pod 'catalog-pull' is Running from the catalog image."

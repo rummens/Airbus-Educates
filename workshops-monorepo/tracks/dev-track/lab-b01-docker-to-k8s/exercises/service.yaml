@@ -1,0 +1,14 @@
+# The migration of the compose `ports: "8080:8080"` line — a stable in-cluster
+# address that load-balances to whichever Pod(s) match the selector below.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  selector:
+    app: hello-dcs
+  ports:
+  - port: 8080
+    targetPort: 8080

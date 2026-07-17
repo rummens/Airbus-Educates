@@ -11,7 +11,10 @@ authz API and grants nothing). Session allocation is NOT done here — that is
 the Educates REST API's job (see educates.py).
 """
 import re
+import ssl
 import threading
+import urllib.error
+import urllib.request
 
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
@@ -298,13 +301,38 @@ def list_sessions():
         return []
 
 
-def session_route_ready(session_name, url):
-    """True once the session's main OpenShift Route is ADMITTED by the router.
+def _route_http_ok(url):
+    """HTTP-probe the session URL. The router serves a **503** "Application is not
+    available" page while an (even admitted) Route has no ready backend; a live route
+    answers 200, or a 3xx/401/403 for the oauth handshake. So: reachable & not 503
+    == ready. A connection error / timeout == not ready. This is what the client's
+    no-cors probe can't tell (an opaque fetch resolves even on the 503 page)."""
+    if not url:
+        return False
+    ctx = None
+    if url.startswith("https") and not cfg.SESSION_TLS_VERIFY:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+    try:
+        resp = urllib.request.urlopen(urllib.request.Request(url), timeout=4, context=ctx)
+        return resp.getcode() != 503
+    except urllib.error.HTTPError as e:
+        return e.code != 503                 # 401/403/3xx-not-followed = route is serving
+    except Exception:                        # noqa: BLE001 — DNS/conn/timeout = not ready
+        return False
 
-    The WorkshopSession can report Ready before its Route is admitted, so redirecting
-    on Ready alone lands on the router's "Application is not available" page (a reload
-    then works). Gating on Route admission removes that race. `url` is
-    status.educates.url; we match the Route whose host equals it."""
+
+def session_route_ready(session_name, url):
+    """True once the session's Route actually serves (not the router's 503 page).
+
+    The WorkshopSession reports Ready before its Route is admitted AND before the
+    router has loaded the backend — redirecting then lands on "Application is not
+    available" (a reload later works). Two-stage gate:
+      1. If we can read the Route (RBAC), require it Admitted — a fast, definitive NO
+         while it isn't.
+      2. Then HTTP-probe the host: even an admitted Route 503s until the backend is up.
+    No Routes RBAC → skip step 1 and rely on the probe (never fail open early)."""
     host = url.split("://", 1)[-1].split("/")[0] if url else ""
     if not host:
         return False
@@ -312,18 +340,17 @@ def session_route_ready(session_name, url):
         routes = _co().list_cluster_custom_object(
             "route.openshift.io", "v1", "routes",
             label_selector=f"training.educates.dev/session.name={session_name}").get("items", [])
+        admitted = any(
+            (r.get("spec", {}) or {}).get("host") == host
+            and c.get("type") == "Admitted" and c.get("status") == "True"
+            for r in routes
+            for ing in ((r.get("status", {}) or {}).get("ingress") or [])
+            for c in (ing.get("conditions") or []))
+        if not admitted:
+            return False                     # route not admitted yet — definitely not ready
     except ApiException:
-        # Can't check (e.g. no Routes RBAC) → fail OPEN: return None so the caller
-        # doesn't hang the launch waiting for a check it can never make.
-        return None
-    for r in routes:
-        if (r.get("spec", {}) or {}).get("host") != host:
-            continue
-        for ing in ((r.get("status", {}) or {}).get("ingress") or []):
-            for c in (ing.get("conditions") or []):
-                if c.get("type") == "Admitted" and c.get("status") == "True":
-                    return True
-    return False
+        pass                                 # no Routes RBAC → rely on the HTTP probe below
+    return _route_http_ok(url)
 
 
 def session_status(name):

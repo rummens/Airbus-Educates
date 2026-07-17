@@ -1,0 +1,79 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b03-dev-spaces
+  labels:
+    academy.dcs/track: dev
+    academy.dcs/order: "30"
+    # Dev Spaces itself is a platform-managed external route, not something this
+    # workshop's content creates — no learner-authored Route/Ingress → dev namespace.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: "Cloud Development with OpenShift Dev Spaces"
+  description: Develop on DCS, not just deploy to it — read a devfile, launch an in-cluster browser IDE, change the sample app and run it inside the cluster, all from Harbor-mirrored images on an air-gapped platform.
+  duration: 40m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Developer"
+  publish:
+    image: "$(image_repository)/lab-b03-dev-spaces-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b03-dev-spaces/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b03-dev-spaces/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b03-dev-spaces/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/dev-track/lab-b03-dev-spaces"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b03-dev-spaces-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY: single terminal source for the sample-image registry (Plane 3).
+    # Keep in sync with dcs_registry in workshop/config.yaml.
+    # WORKSPACE_SOURCE_REPO: the git repo the devfile clones into the workspace — a
+    # small repo mirrored/reachable in-session without external egress (air-gapped),
+    # the same open provisioning question tracked for B02's BUILD_SOURCE_REPO. See
+    # the provisioning caveat at the bottom of 99-workshop-summary.md.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    - name: WORKSPACE_SOURCE_REPO
+      value: "https://git.example.dcs/dcs-academy/hello-dcs.git"
+    namespaces:
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # Dev Spaces is a platform service the session CONSUMES (an external,
+      # operator-installed route), not something the session installs — no
+      # cluster-admin operations needed, so the native session namespace is enough.
+      vcluster:
+        enabled: false

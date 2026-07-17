@@ -46,14 +46,16 @@ references a Secret (or ConfigMap) that doesn't exist yet won't start.
 
 ## Confirm injection — without leaking the value
 
-Confirm the `API_TOKEN` variable **exists** in the container without printing what it holds:
+Confirm the `API_TOKEN` variable **exists and is non-empty** in the container without
+printing what it holds. This checks the value is set and reports only its **length**:
 
 ```terminal:execute
-command: oc exec deploy/hello-dcs -- printenv | grep -o '^API_TOKEN='
+command: oc exec deploy/hello-dcs -- sh -c 'if [ -n "$API_TOKEN" ]; then echo "API_TOKEN is set — ${#API_TOKEN} characters, value hidden"; else echo "API_TOKEN is NOT set"; fi'
 ```
 
-You see `API_TOKEN=` — the key is present, the value stays hidden. That's the habit:
-prove wiring without exposing secrets.
+You see something like `API_TOKEN is set — 40 characters, value hidden` — the key is
+present and carries a real value, but the value itself never reaches your screen. That's
+the habit: prove wiring without exposing secrets.
 
 ```examiner:execute-test
 name: verify-secret-injected

@@ -38,12 +38,13 @@ delay: 2
 ## 3. Logs — when the container at least started
 
 ```terminal:execute
-command: oc logs -l app=hello-dcs --tail=20 || echo "(no logs: the container never started — consistent with a config error before startup)"
+command: oc logs -l app=hello-dcs --tail=20
 ```
 
-For a crash *after* startup you'd add `--previous` to read the dead container's logs. Here
-there are none, which is itself a clue: the failure is **before** the app runs, so it's
-configuration, not code.
+You'll likely see **no log lines at all** — and that absence is itself the clue: the
+container never started, so the app never got to print anything. The failure is **before**
+the app runs, which means configuration, not code. (For a crash *after* startup you'd add
+`--previous` to read the dead container's logs; here there's nothing to read.)
 
 ## The diagnosis
 

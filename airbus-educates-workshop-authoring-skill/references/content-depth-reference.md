@@ -43,9 +43,13 @@ Although you only created the Deployment, it created a ReplicaSet, which created
 
 Expected output lets a learner confirm success and understand what the command reveals. Never leave a command's result to the imagination.
 
+**Every "show" command must actually show something meaningful.** If a step exists to prove a value, the output must make that value visible and legible — not empty, not cryptic. Two real failures to avoid:
+- `oc exec … -- printenv | grep -o '^API_TOKEN='` prints the bare text `API_TOKEN=` — it proves nothing to the learner (looks empty/broken). To prove a secret is wired without leaking it, test-and-report instead: `sh -c 'if [ -n "$API_TOKEN" ]; then echo "set — ${#API_TOKEN} chars, value hidden"; else echo "NOT set"; fi'`.
+- Applying a new ConfigMap and then only running an examiner check leaves the change invisible. **Show the before and the after** with a real command the learner can read — e.g. `oc exec deploy/app -- printenv GREETING` before the rollout (old value, because running Pods don't reload config) and again after (new value). Make the mechanism visible, don't just assert it.
+
 ### 4. Explain flags and options
 
-When a command uses a non-obvious flag, say what it does (`--dry-run=client` shows what *would* be created and validates without creating it). Point learners at `--help` / `oc explain` so they can self-serve.
+When a command uses a non-obvious flag, say what it does (`--dry-run=client` shows what *would* be created and validates without creating it). Point learners at `--help` / `oc explain` so they can self-serve. **Assume no prior CLI knowledge** — the audience is beginners. Explain even "obvious" flags on first use: the first time a lab uses `-n`, say it selects the target namespace (`-n app-a` runs the command against `app-a`); the first `-l` selects by label; the first `-o jsonpath=…` extracts one field. Never assume a learner knows what a single-letter flag means because you do.
 
 ### 5. Build progressively; use a real application
 

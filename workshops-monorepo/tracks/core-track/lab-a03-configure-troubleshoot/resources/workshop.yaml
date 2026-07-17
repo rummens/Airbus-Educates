@@ -14,7 +14,7 @@ spec:
   title: "Configure & Troubleshoot Your App"
   description: Move your app's configuration into a ConfigMap and a Secret, roll out the change — then, when it breaks, diagnose the fault from logs, events and describe, fix it, and confirm recovery.
   duration: 20m
-  difficulty: intermediate
+  difficulty: beginner
   labels:
     - name: module
       value: "A-Foundations"

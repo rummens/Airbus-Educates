@@ -1,0 +1,15 @@
+# The Route you'll try in DEV (rejected) and then in PROD (admitted) — same
+# file, same `oc apply -n <namespace> -f hello-dcs-route.yaml` both times. No
+# explicit host: OpenShift auto-assigns one that includes the namespace.
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  to:
+    kind: Service
+    name: hello-dcs
+  port:
+    targetPort: 8080

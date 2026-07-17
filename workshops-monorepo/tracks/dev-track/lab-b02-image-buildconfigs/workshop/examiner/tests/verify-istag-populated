@@ -1,0 +1,10 @@
+#!/bin/bash
+# Verify the ImageStreamTag now resolves to a real pushed image — proof the
+# build didn't just run, it landed in Harbor.
+ref=$(oc get istag hello-dcs-built:latest-built -o jsonpath='{.image.dockerImageReference}' 2>/dev/null)
+if [ -n "$ref" ]; then
+  echo "OK: hello-dcs-built:latest-built -> ${ref}"
+  exit 0
+fi
+echo "ImageStreamTag 'hello-dcs-built:latest-built' has no image yet. Did the build finish and push? Check 'oc get builds'." >&2
+exit 1

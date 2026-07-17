@@ -1,0 +1,12 @@
+#!/bin/bash
+# Verify the Route was REJECTED in the DEV namespace — DEV-type namespaces
+# cannot expose a Route. A rejected `oc apply` creates no Route object at all.
+set -uo pipefail
+
+ns="dev"
+if oc get route hello-dcs -n "$ns" >/dev/null 2>&1; then
+  echo "Route 'hello-dcs' exists in the DEV namespace '$ns' — it should have been rejected by the dcs-namespace-type-policy ClusterPolicy ('route-requires-prod' rule). Did you apply hello-dcs-route.yaml into 'prod' by mistake?" >&2
+  exit 1
+fi
+
+echo "OK: no Route exists in the DEV namespace '$ns' — the apply was rejected, exactly as DEV's policy posture requires."

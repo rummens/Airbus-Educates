@@ -1,0 +1,10 @@
+# A DEV-type namespace. The dcs.airbus/namespace-type label is what the
+# dcs-namespace-type-policy ClusterPolicy (kyverno-policy.yaml) reads to decide
+# how strictly to police what happens inside this namespace: DEV keeps the
+# looser posture — fast iteration, no resource-shape requirements, no Routes.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+  labels:
+    dcs.airbus/namespace-type: dev

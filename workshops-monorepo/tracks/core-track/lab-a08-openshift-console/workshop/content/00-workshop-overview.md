@@ -1,5 +1,5 @@
 ---
-title: Workshop Overview
+title: "The OpenShift Console — A Guided Tour"
 ---
 
 You've done the whole Core happy path with `oc`. Here's the thing: **every one of those

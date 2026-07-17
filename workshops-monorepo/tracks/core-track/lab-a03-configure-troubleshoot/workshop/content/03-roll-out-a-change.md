@@ -29,14 +29,36 @@ title: Verify the ConfigMap holds the new greeting
 timeout: 10
 ```
 
+## Nothing changed yet — see for yourself
+
+The ConfigMap now holds the new value, but ask the **running** container what greeting it
+has, and it still shows the *old* one:
+
+```terminal:execute
+command: oc exec deploy/hello-dcs -- printenv GREETING
+```
+
+Output: `Configured by a ConfigMap` — the **old** value. Updating a ConfigMap does **not**
+restart running Pods, and a Pod reads its environment only once, at start. So the change
+is staged, but nothing serving it has picked it up.
+
 ## Roll the app onto it
 
-Updating a ConfigMap does **not** restart running Pods on its own — they read their env at
-start. Trigger a rollout so new Pods pick up the change:
+Trigger a rollout so new Pods start and read the updated ConfigMap:
 
 ```terminal:execute
 command: oc rollout restart deploy/hello-dcs && oc rollout status deploy/hello-dcs --timeout=90s
 ```
+
+Now ask the **new** container the same question:
+
+```terminal:execute
+command: oc exec deploy/hello-dcs -- printenv GREETING
+```
+
+Output: `Reconfigured without a redeploy` — the **new** value. Same image, same Pod
+template except for the config it reads: the rollout is what turned the staged change into
+a live one.
 
 {{< note >}}
 Want to watch it happen? In the **lower** terminal you can run `oc get pods -w` to see the

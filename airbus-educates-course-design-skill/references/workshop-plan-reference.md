@@ -38,6 +38,8 @@ The **Duration** must be a single fixed value (e.g., `30m`), never a range (e.g.
 
 The **Difficulty** must be a single value — exactly one of `beginner`, `intermediate`, or `advanced`. Never use a range or combination (e.g., not `beginner-intermediate`). This value maps directly into the Workshop definition, which uses an enum and will only accept one of these three exact values. When the workshop's content could reasonably span two difficulty levels, use the higher (more difficult) level.
 
+**Difficulty tracks the track's audience, not the topic's intrinsic hardness.** A foundations / core track exists to onboard newcomers, so **every core-track lab is `beginner`** — even a lab on troubleshooting or storage, which might feel "intermediate" as a topic, is beginner *for this audience* because it assumes no prior knowledge and builds from zero. Mark the whole entry-level track `beginner` and reserve `intermediate`/`advanced` for later tracks (Developer, Security) that genuinely assume the foundations. A wall of "intermediate" on the first track deters exactly the newcomers it's meant to attract.
+
 For courses that do not use the core/elective model, omit the **Type** field or use "standalone."
 
 The **Status** line links to the workshop's section in `tasks.md` using a relative path (`../tasks.md` since plans are in the `workshop-plans/` subdirectory). Add this line once `tasks.md` exists and tasks have been recorded for the workshop. If the workshop has no outstanding tasks, omit the Status line or set it to "Complete."

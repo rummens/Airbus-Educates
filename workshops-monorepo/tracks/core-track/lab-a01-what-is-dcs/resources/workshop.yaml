@@ -8,7 +8,11 @@ metadata:
     # REQUIRED: which track this lab appears under (must equal a Track's id) and
     # its sort order within that track (string value; low = first).
     academy.dcs/track: core
-    academy.dcs/order: "10"
+    # Sorts after the hands-on quick-win labs (A02–A05): action first, then this
+    # concept/orientation lab. Not a hard prereq for A02 anymore.
+    academy.dcs/order: "55"
+    # No Route/Ingress here (concept lab) → dev namespace, like the rest of Core.
+    dcs.airbus.com/lifecycle: dev
   annotations:
     # Lets ArgoCD apply this CR before the Educates Workshop CRD is dry-run-checked.
     # Keep this wave well BELOW the TrainingPortal's (100) so the workshop exists first.
@@ -65,6 +69,10 @@ spec:
         enabled: true
         layout: split
       editor:
+        enabled: true
+      # A short reveal-free slide deck (workshop/slides/index.html) gives a visual,
+      # low-text overview alongside the pages — this lab is concept-heavy.
+      slides:
         enabled: true
       examiner:
         enabled: true

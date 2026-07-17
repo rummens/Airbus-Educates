@@ -33,7 +33,7 @@
   <!-- pod mounts PV -->
   <rect x="500" y="210" width="160" height="56" rx="6" fill="#ffffff" stroke="#8aa0b4"/>
   <text x="580" y="234" text-anchor="middle" font-size="12" fill="#1b2b3a">Pod</text>
-  <text x="580" y="252" text-anchor="middle" font-size="9" fill="#5a6b7b">mounts PV at /data</text>
+  <text x="580" y="252" text-anchor="middle" font-size="9" fill="#5a6b7b">mounts the PV as a directory</text>
   <g stroke="#5a6b7b" stroke-width="2" fill="#5a6b7b">
     <line x1="640" y1="160" x2="620" y2="208"/><polygon points="620,208 616,199 625,201"/>
   </g>

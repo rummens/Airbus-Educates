@@ -1,0 +1,33 @@
+# S2I (Source-to-Image) strategy: no Dockerfile required. A builder image already
+# knows how to take source code and "assemble" it into a runnable application
+# image. This is the DCS-default strategy — point it at source, get an image.
+#
+# Apply with: envsubst < buildconfig-s2i.yaml | oc apply -f -
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: hello-dcs-s2i
+  labels:
+    app: hello-dcs-built
+spec:
+  # The build source: a small git repository mirrored/reachable in-session
+  # without external egress (DCS is air-gapped — see the first page).
+  source:
+    type: Git
+    git:
+      uri: ${BUILD_SOURCE_REPO}
+      ref: main
+  strategy:
+    type: Source
+    sourceStrategy:
+      # The S2I builder image itself is Harbor-mirrored, like every image on
+      # DCS — never pulled from an external registry.
+      from:
+        kind: DockerImage
+        name: ${DCS_REGISTRY}/s2i-builders/python-311:latest
+  output:
+    to:
+      kind: ImageStreamTag
+      name: hello-dcs-built:latest-built
+  successfulBuildsHistoryLimit: 2
+  failedBuildsHistoryLimit: 2

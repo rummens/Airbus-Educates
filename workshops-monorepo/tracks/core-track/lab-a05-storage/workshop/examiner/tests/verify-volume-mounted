@@ -5,7 +5,7 @@ if [ "${avail:-0}" -lt 1 ] 2>/dev/null; then
   echo "hello-dcs not ready yet (available=${avail:-0})." >&2
   exit 1
 fi
-if oc exec deploy/hello-dcs -- sh -c 'test -d /data' 2>/dev/null; then
+if oc exec deploy/hello-dcs -- sh -c 'test -d /opt/app-root/src/data' 2>/dev/null; then
   echo "OK: app is running with /data mounted."
   exit 0
 fi

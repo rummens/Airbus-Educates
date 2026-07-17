@@ -1,5 +1,5 @@
 ---
-title: Workshop Overview
+title: "The ITSM Console — Self-Service on DCS"
 ---
 
 You've spent five labs doing things yourself with `oc` — deploying, configuring, exposing,

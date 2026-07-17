@@ -33,10 +33,10 @@ differently: PROD is governed more strictly (policy enforcement, and it's where 
 allowed to expose apps), DEV is looser for fast iteration. That the types *exist* is the
 point here; *how* the difference is enforced is a Developer-track topic (**B06**).
 
-Look at the markers on your own namespace:
+Look at the markers on your own namespace — one label per line so they're easy to read:
 
 ```terminal:execute
-command: oc get namespace "$(oc project -q)" -o jsonpath='{.metadata.labels}'; echo
+command: oc get namespace "$(oc project -q)" -o jsonpath='{.metadata.labels}' | tr ',' '\n' | tr -d '{}"'
 ```
 
 ```examiner:execute-test

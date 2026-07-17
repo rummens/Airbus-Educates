@@ -5,9 +5,12 @@ metadata:
   labels:
     academy.dcs/track: core
     academy.dcs/order: "40"
-    # This lab creates a Route (external exposure) → it needs a PROD-type namespace.
-    # lifecycle: prod tells the platform to propagate the prod label onto the session
-    # namespace, so the Route is admitted (Kyverno allows Routes only in PROD).
+    # This lab creates a Route (external exposure) → it is the one Core lab that needs a
+    # PROD-type namespace. This label marks that intent on the Workshop CR. NOTE: the
+    # Kyverno policy that would copy this onto the session namespace is disabled on
+    # OpenShift (kyverno is off — see dcs-academy-platform values), so the label is NOT
+    # yet propagated at runtime. If PROD-scoped policy enforcement is turned on later,
+    # a non-Kyverno propagation path is needed (see portal chart workshopEnvLabel).
     dcs.airbus.com/lifecycle: prod
   annotations:
     argocd.argoproj.io/sync-wave: "5"
@@ -16,7 +19,7 @@ spec:
   title: "Expose Your App"
   description: Give your app a stable in-cluster address with a Service, then expose it for real with a Route on DCS-managed DNS — reachable outside the session — and surface it as a new dashboard tab inside the session too.
   duration: 20m
-  difficulty: intermediate
+  difficulty: beginner
   labels:
     - name: module
       value: "A-Foundations"
@@ -58,8 +61,13 @@ spec:
     # auth-gated HTTPS endpoint at app-$(session_hostname) for the hello-dcs Service
     # on 8080. The dashboard tab is created dynamically in the content (page 04) so
     # the URL is visible in context.
+    # `host` MUST point at the hello-dcs Service in the session namespace — without it
+    # the proxy targets the workshop pod itself (nothing on 8080) and the tab shows
+    # OpenShift's "Application is not available" page.
     ingresses:
     - name: app
+      protocol: http
+      host: hello-dcs.$(session_namespace).svc.cluster.local
       port: 8080
     # Educates' default session role grants most namespace verbs but NOT routes or
     # networkpolicies. Grant the session service account route management (the core

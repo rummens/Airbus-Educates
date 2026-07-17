@@ -1,0 +1,114 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b07-scaling-health
+  labels:
+    academy.dcs/track: dev
+    academy.dcs/order: "70"
+    # No Route/Ingress created by this lab (in-cluster only) → dev namespace.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: "Scaling, Health & Resources"
+  description: Make the sample app resilient and quota-friendly — scale it, hit the namespace budget and right-size, add liveness/readiness probes, then kill a Pod and watch it self-heal.
+  duration: 35m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Developer"
+  publish:
+    image: "$(image_repository)/lab-b07-scaling-health-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b07-scaling-health/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b07-scaling-health/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b07-scaling-health/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/dev-track/lab-b07-scaling-health"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b07-scaling-health-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY: single terminal/manifest source for the sample-image registry
+    # (Plane 3). Keep in sync with dcs_registry in workshop/config.yaml. Manifests
+    # carrying ${DCS_REGISTRY} are applied via `envsubst < f.yaml | oc apply -f -`.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      # medium is deliberately tight: scaling the pre-deployed app to 4 replicas
+      # on the LimitRange defaults exactly meets it, and the oversized manifest
+      # (page 02) is sized to exceed it — the budget is the lesson, not a limit
+      # to work around.
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    # The single-replica, no-probes hello-dcs app is pre-deployed so the lab opens
+    # on page 01 already scaling and reading the quota, not applying a manifest.
+    # Fronted by a Service so probe/self-heal pages have endpoints to check.
+    objects:
+    - apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: hello-dcs
+        labels:
+          app: hello-dcs
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: hello-dcs
+        template:
+          metadata:
+            labels:
+              app: hello-dcs
+          spec:
+            containers:
+            - name: hello-dcs
+              image: harbor.example.dcs/dcs-academy/samples/hello-dcs:1.0
+              ports:
+              - containerPort: 8080
+    - apiVersion: v1
+      kind: Service
+      metadata:
+        name: hello-dcs
+      spec:
+        selector:
+          app: hello-dcs
+        ports:
+        - port: 8080
+          targetPort: 8080
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      # Watch replica count and events land as the quota is scaled into and the
+      # oversized rollout is rejected (Section 2 of the plan).
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # Native session namespace: the namespace budget IS the quota being taught,
+      # so the learner must be working directly against it, not a vcluster's own
+      # separately-budgeted namespace.
+      vcluster:
+        enabled: false

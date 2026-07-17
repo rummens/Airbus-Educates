@@ -1,5 +1,5 @@
 ---
-title: Workshop Overview
+title: "Terms — Namespaces & Tenancy"
 ---
 
 Everything you've deployed so far lived *somewhere* — a place that isolated it, held its

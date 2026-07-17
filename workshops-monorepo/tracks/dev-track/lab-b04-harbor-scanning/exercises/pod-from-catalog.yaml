@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: catalog-pull
+  labels:
+    app: catalog-pull
+spec:
+  containers:
+  - name: hello-dcs
+    # A tag reference, for a manifest you can read before you've run anything. In
+    # production, pin by the digest the `skopeo inspect` step on this page just showed
+    # you (a tag can move; a digest can't) — see the note on this page.
+    image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+    ports:
+    - containerPort: 8080
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi

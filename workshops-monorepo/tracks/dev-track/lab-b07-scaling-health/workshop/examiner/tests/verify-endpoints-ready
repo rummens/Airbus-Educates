@@ -1,0 +1,11 @@
+#!/bin/bash
+# Verify the hello-dcs Service has Ready Pods in its endpoints.
+set -uo pipefail
+
+count=$(oc get endpoints hello-dcs -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null | wc -w | tr -d ' ')
+if [ "${count:-0}" -lt 1 ] 2>/dev/null; then
+  echo "Service 'hello-dcs' has no endpoint addresses — no Pod is currently Ready. Check 'oc get pods -l app=hello-dcs'." >&2
+  exit 1
+fi
+
+echo "OK: Service 'hello-dcs' has $count Ready Pod(s) in its endpoints."

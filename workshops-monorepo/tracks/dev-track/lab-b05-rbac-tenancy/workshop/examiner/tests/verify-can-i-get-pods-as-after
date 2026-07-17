@@ -1,0 +1,10 @@
+#!/bin/bash
+# Verify viewer-bot now has read access to pods (after the Role/RoleBinding exist).
+ns=$(oc project -q 2>/dev/null)
+out=$(oc auth can-i get pods --as="system:serviceaccount:${ns}:viewer-bot" 2>/dev/null)
+if [ "$out" != "yes" ]; then
+  echo "Expected 'yes' for viewer-bot after role-viewer + rolebinding-viewer are applied, got '$out'." >&2
+  exit 1
+fi
+echo "OK: viewer-bot can now get pods (after state)."
+exit 0

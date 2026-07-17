@@ -1,0 +1,11 @@
+#!/bin/bash
+# Verify a ResourceQuota object exists in the session namespace (page 01: oc describe quota).
+set -uo pipefail
+
+count=$(oc get resourcequota -o name 2>/dev/null | wc -l | tr -d ' ')
+if [ "${count:-0}" -lt 1 ] 2>/dev/null; then
+  echo "No ResourceQuota found in this namespace — did 'oc describe quota' show one? A 'medium' budget session should always carry one." >&2
+  exit 1
+fi
+
+echo "OK: found $count ResourceQuota object(s) in this namespace."

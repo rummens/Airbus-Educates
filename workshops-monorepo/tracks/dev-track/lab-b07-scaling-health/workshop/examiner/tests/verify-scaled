@@ -1,0 +1,12 @@
+#!/bin/bash
+# verify-scaled <replicas> — hello-dcs is scaled to and ready at the given replica count.
+set -uo pipefail
+
+want="${1:?replica count required}"
+ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+if [ "${ready:-0}" -ne "$want" ] 2>/dev/null; then
+  echo "hello-dcs has ${ready:-0} ready replicas, expected $want. Did 'oc scale deploy/hello-dcs --replicas=$want' run and finish rolling out?" >&2
+  exit 1
+fi
+
+echo "OK: hello-dcs has $want/$want replicas ready."

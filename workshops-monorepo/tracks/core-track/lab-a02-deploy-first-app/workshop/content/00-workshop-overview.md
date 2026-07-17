@@ -1,10 +1,11 @@
 ---
-title: Workshop Overview
+title: "Deploy Your First App"
 ---
 
-Time for the payoff. In A01 you learned what **{{< param product_name >}}** is and *why*
-Kubernetes runs your apps the way it does. Now you'll get your own app running on it — in
-a few minutes — and then look under the hood to see how it works.
+The quick win, and the entry point to the course: you'll get your own app running on
+**{{< param product_name >}}** in a few minutes — then look under the hood to see how it
+works. No theory first; if you want the background on *what DCS is* and *why Kubernetes*,
+that's the **What is DCS?** lab, any time.
 
 You'll deploy a small sample called **hello-dcs**: a tiny web server that listens on port
 8080 and prints a greeting. Its image already lives in the {{< param product_short >}}
@@ -30,7 +31,8 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- **A01 — What is DCS?** You should be able to run `oc` and find your namespace.
+- **None** — this is the hands-on entry point. Comfort with a terminal helps. New to
+  containers or `oc`? The **What is DCS?** lab gives the background, but isn't required first.
 
 ## Your Environment
 

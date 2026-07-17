@@ -1,0 +1,18 @@
+#!/bin/bash
+# Verify GREETING is wired from the ConfigMap onto the Deployment, and that the
+# app actually serves the configured value (not just that the field is set).
+# `oc set env --from=configmap/NAME` may express the reference either as a
+# single envFrom entry or as per-key valueFrom.configMapKeyRef entries
+# depending on the oc version, so check the raw manifest for the reference
+# rather than one specific field shape.
+if ! oc get deploy hello-dcs -o yaml 2>/dev/null | grep -q "hello-dcs-config"; then
+  echo "Deployment hello-dcs does not reference hello-dcs-config yet. Did 'oc set env deploy/hello-dcs --from=configmap/hello-dcs-config' run?" >&2
+  exit 1
+fi
+ns=$(oc project -q 2>/dev/null)
+body=$(curl -s --max-time 8 "http://hello-dcs.${ns}.svc:8080" 2>/dev/null)
+if ! echo "$body" | grep -q "Migrated from docker-compose"; then
+  echo "App did not serve the configured greeting yet. Got: ${body:-<empty>}" >&2
+  exit 1
+fi
+echo "OK: GREETING is sourced from hello-dcs-config and the app serves it."

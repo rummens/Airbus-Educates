@@ -1,0 +1,15 @@
+#!/bin/bash
+# Verify the namespace's labels are readable and include its own name
+# (kubernetes.io/metadata.name is set by Kubernetes on every namespace).
+ns=$(oc project -q 2>/dev/null)
+labels=$(oc get namespace "$ns" -o jsonpath='{.metadata.labels}' 2>/dev/null)
+if [ -z "$labels" ]; then
+  echo "Could not read labels for namespace '$ns'. Did the jsonpath command run?" >&2
+  exit 1
+fi
+if ! echo "$labels" | grep -q "$ns"; then
+  echo "Labels for '$ns' did not include the namespace's own name — got: $labels" >&2
+  exit 1
+fi
+echo "OK: namespace '$ns' labels include its own name: $labels"
+exit 0

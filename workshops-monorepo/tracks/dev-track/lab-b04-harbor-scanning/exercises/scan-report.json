@@ -1,0 +1,45 @@
+{
+  "artifact": "samples/hello-dcs:1.0",
+  "scanner": {
+    "name": "Trivy",
+    "vendor": "Harbor",
+    "version": "0.50.1"
+  },
+  "generatedAt": "2026-07-10T08:45:00Z",
+  "summary": {
+    "severityCount": {
+      "Critical": 0,
+      "High": 0,
+      "Medium": 1,
+      "Low": 2
+    },
+    "total": 3,
+    "fixable": 2
+  },
+  "vulnerabilities": [
+    {
+      "id": "CVE-2024-2961",
+      "severity": "Medium",
+      "package": "glibc",
+      "installedVersion": "2.34-83.el9",
+      "FixedVersion": "2.34-100.el9",
+      "description": "Out-of-bounds write in the ISO-2022-CN-EXT charset conversion."
+    },
+    {
+      "id": "CVE-2023-29491",
+      "severity": "Low",
+      "package": "ncurses",
+      "installedVersion": "6.2-10.20210508.el9",
+      "FixedVersion": "6.2-10.20210508.el9_4",
+      "description": "Local privilege escalation via crafted terminfo under setuid."
+    },
+    {
+      "id": "CVE-2023-5981",
+      "severity": "Low",
+      "package": "gnutls",
+      "installedVersion": "3.7.6-23.el9",
+      "FixedVersion": "",
+      "description": "Timing side-channel in the RSA-PSK key exchange (no fix yet)."
+    }
+  ]
+}

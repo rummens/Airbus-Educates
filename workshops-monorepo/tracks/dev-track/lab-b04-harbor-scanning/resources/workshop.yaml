@@ -1,0 +1,82 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b04-harbor-scanning
+  labels:
+    academy.dcs/track: dev
+    academy.dcs/order: "40"
+    # No Route/Ingress is created or asked of the learner — every exercise talks to
+    # Harbor (already externally reachable) or reads local fixtures → dev namespace.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: "Harbor & Image Scanning"
+  description: Where your images live and what guards them — navigate DCS Harbor catalogs and robot accounts, pull/inspect with skopeo, confirm the image you built in B02 landed, read a vulnerability/compliance scan report and understand the scan gate, remediate a finding, and know how mirroring/quota happen via ITSM.
+  duration: 40m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Developer"
+  publish:
+    image: "$(image_repository)/lab-b04-harbor-scanning-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    # Report-reading + registry workshop: image work is skopeo (daemonless — no
+    # docker/podman inside the container, avoiding double-virtualization) plus jq over
+    # a mix of live Harbor reads and static scan-report fixtures. Runs on
+    # dcs-workshop-base (skopeo/jq already preinstalled there) — not dcs-tools.
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b04-harbor-scanning/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b04-harbor-scanning/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b04-harbor-scanning/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/dev-track/lab-b04-harbor-scanning"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b04-harbor-scanning-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY: single terminal/manifest source for the sample-image registry
+    # (Plane 3). Keep in sync with dcs_registry in workshop/config.yaml (the
+    # content-rendering copy).
+    #
+    # NOTE (env dependency): skopeo inspects/pulls against Harbor authenticate with a
+    # read-only Harbor robot account, provisioned at deploy time (e.g. a mounted auth
+    # file / REGISTRY_AUTH_FILE) — not hardcoded here. This session carries only the
+    # read-only robot; see 03-push-your-image.md for why the push step is narrated
+    # rather than executed. Scan reports are static fixtures shipped in exercises/ —
+    # no live scanner is required in-session (see exercises/README.md).
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      examiner:
+        enabled: true
+      # skopeo/jq against Harbor + local fixtures — no cluster-scoped objects, so the
+      # plain session namespace is enough; no per-session vcluster needed.
+      vcluster:
+        enabled: false

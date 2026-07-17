@@ -1,5 +1,5 @@
 ---
-title: Workshop Overview
+title: "Expose Your App"
 ---
 
 So far your app has only ever answered a **local tunnel** — a `port-forward` that lived and

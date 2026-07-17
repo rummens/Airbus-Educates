@@ -46,6 +46,7 @@ The page must contain the following, in this order. Use `##` headings (never `#`
 - **Product name is a variable.** Always `{{< param product_name >}}` / `{{< param product_short >}}`, never a literal. See [workshop-variables-reference.md](workshop-variables-reference.md).
 - **Link concepts to docs.** Any concept named in prerequisites or further reading links to official upstream documentation on first mention.
 - **No level-1 heading.** The `title` frontmatter generates the header.
+- **Title the overview page after the lab, not "Workshop Overview".** Set the frontmatter `title` to the lab's own `spec.title` (e.g. `title: "Expose Your App"`), so the first page a learner sees names the lab. A generic "Workshop Overview" makes every lab's first page look identical — learners lose track of which lab they're in.
 - **Subject over platform.** Describe what the learner will learn about the topic, not how Educates works — unless the workshop is specifically about Educates.
 - **No hands-on actions.** The overview is read-only orientation; the first `terminal:execute` / `editor:*` action belongs on `01-*.md` onward.
 
@@ -53,7 +54,7 @@ The page must contain the following, in this order. Use `##` headings (never `#`
 
 ```markdown
 ---
-title: Workshop Overview
+title: "<the lab's own title, e.g. Expose Your App>"
 ---
 
 Welcome to this workshop, part of **{{< param product_name >}}**. In it you will

@@ -1,0 +1,8 @@
+#!/bin/bash
+# Verify the operator has scheduled at least one managed Pod for the sample-db CR.
+pod=$(oc get pods -l cnpg.io/cluster=sample-db -o name 2>/dev/null | head -n1)
+if [ -z "$pod" ]; then
+  echo "No Pod yet with label cnpg.io/cluster=sample-db. The operator may still be provisioning storage — this can take a minute." >&2
+  exit 1
+fi
+echo "OK: operator has scheduled ${pod}."

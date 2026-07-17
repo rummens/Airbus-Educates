@@ -1,0 +1,75 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b08-operators
+  labels:
+    academy.dcs/track: dev
+    academy.dcs/order: "80"
+    # No Route/Ingress created by this lab (CR is created and inspected purely via
+    # oc + the console, reached like every other lab) → dev namespace.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: "Operators on DCS"
+  description: Understand the OpenShift Operator pattern — a controller that reconciles a Custom Resource toward its desired state — and the DCS ownership split: the platform runs the operator, you own the instance it manages.
+  duration: 40m
+  difficulty: advanced
+  labels:
+    - name: module
+      value: "B-Developer"
+  publish:
+    image: "$(image_repository)/lab-b08-operators-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b08-operators/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b08-operators/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/dev-track/lab-b08-operators/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/dev-track/lab-b08-operators"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b08-operators-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY: single terminal source for the sample-image registry (Plane 3).
+    # Keep in sync with dcs_registry in workshop/config.yaml. The sample CR's
+    # imageName substitutes this via envsubst — never a plain `oc apply`.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # This lab never installs an operator — that's cluster-scoped and platform-run.
+      # It only inspects an already-installed operator's CRDs/api-resources and
+      # creates a CR *instance* in the learner's own session namespace, so the
+      # session namespace itself is the workspace. No cluster-admin needed.
+      vcluster:
+        enabled: false

@@ -489,10 +489,11 @@ def _status_feed(name, t0, expect_vc=False):
     # workshop pod being Ready + a session URL, gated to allocated/running phases.
     READY_PHASES = ("Running", "Allocated", "Available")
     url = st.get("url", "")
-    # Only call the session truly Ready once its Route is admitted by the router —
-    # otherwise the redirect hits the router's "Application is not available" page.
-    # session_route_ready → True (admitted), False (not yet), or None (couldn't check,
-    # e.g. no Routes RBAC). Fail OPEN on None so a missing check never hangs the launch.
+    # Only call the session truly Ready once its Route is admitted AND actually serving
+    # (not the router's "Application is not available" 503 page) — otherwise the redirect
+    # lands there. session_route_ready → True/False. It only raises if the whole check
+    # errors unexpectedly; _safe returns None then, and we fail OPEN so a broken check
+    # never hangs the launch.
     rr = _safe(lambda: k8sclient.session_route_ready(name, url)) if url else None
     route_ready = (rr is None) or bool(rr)
     step = "Reserving session"

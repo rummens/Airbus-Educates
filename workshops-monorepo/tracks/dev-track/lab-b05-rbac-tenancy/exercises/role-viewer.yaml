@@ -1,0 +1,11 @@
+# A namespaced Role: permissions only apply inside the namespace this is created in.
+# rules is a list of "apiGroups x resources x verbs" grants. This one is deliberately
+# least-privilege: read-only verbs (get/list/watch), on two resource types only.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: role-viewer
+rules:
+- apiGroups: [""]
+  resources: ["pods", "configmaps"]
+  verbs: ["get", "list", "watch"]

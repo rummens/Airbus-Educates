@@ -55,7 +55,11 @@ Standard constructs mentioned alongside these (Deployment, Secret, ServiceAccoun
 
 ### Networking — Service, Route, Load Balancer, Network Policies
 
-**Blurb:** An app is reached in-cluster via a **Service**, exposed externally via an OpenShift **Route**, which is fronted by an **External Load Balancer** at the cluster edge, using DCS-managed DNS. **A Route requires a PROD-type namespace** on DCS (Kyverno enforces this). On the shared cluster, **Network Policies** (matching on labels) control which workloads may talk to each other — the default posture is restrictive, and egress is limited (air-gapped).
+**Blurb:** An app is reached in-cluster via a **Service**, exposed externally via an OpenShift **Route**, which is fronted by an **External Load Balancer** at the cluster edge, using DCS-managed DNS. The external load balancer is **not** a native Kubernetes object — it is a DCS **security requirement** placing a controlled, monitored edge in front of the cluster so outside traffic never hits it directly. **A Route requires a PROD-type namespace** on DCS. On the shared cluster, **Network Policies** (matching on labels) control which workloads may talk to each other — the default posture is restrictive. Egress is **deny-by-default** (air-gapped): there is no open path to the internet, but specific external destinations *can* be reached through a **managed egress proxy** when **explicitly whitelisted and enabled** per request — it is never on by default.
+
+Accuracy notes (do not overstate):
+- Don't say "no internet, ever" — say egress is deny-by-default and approved destinations are reachable via the managed proxy once enabled.
+- Network Policies are **observe-only** for tenants today (self-service authoring is on the roadmap) — teach them as "inspect", not "author".
 
 - Path (placeholder): `/networking/overview`
 - Taught in: Foundations A06. Network Policies revisited in Security track.
@@ -85,7 +89,12 @@ Standard constructs mentioned alongside these (Deployment, Secret, ServiceAccoun
 
 ### Storage — PVCs, storage classes, S3
 
-**Blurb:** DCS offers persistent storage through standard Kubernetes **PersistentVolumeClaims (PVCs)** backed by DCS **StorageClasses**. Two access types are available via PVC: **File** storage (shareable, RWX-capable) and **Block** storage (single-writer, RWO). The right storage class depends on **data and security classification** (multi-national residency) — different classifications may require different classes. **Object (S3) storage** is provisioned separately, **via an ITSM ticket to the storage team**, not through a PVC.
+**Blurb:** DCS offers persistent storage through standard Kubernetes **PersistentVolumeClaims (PVCs)** backed by DCS **StorageClasses**. Two access types are available via PVC: **File** storage (shareable, RWX-capable) and **Block** storage (single-writer, RWO). The right storage class is driven by **data and security classification** — less about which *country* and more about the **classification level**: some data (e.g. **NATO** or otherwise international-restricted) must sit on **physically separated** disks, kept apart from national data, which means its own dedicated StorageClass. **Object (S3) storage is available on DCS** — it's just not self-service like a PVC: you request a bucket **via an ITSM ticket to the storage team** and consume it over the S3 API. So: File and Block via a PVC; S3 by request — same platform, different path.
+
+Accuracy notes (do not overstate):
+- Frame the S3 story as *available, provisioned differently* — not "there is no S3 / don't look for it". Avoid harsh dead-ends.
+- Classification framing is national vs international (NATO) → physical separation → dedicated SC, not simply "DE vs ES residency".
+- A **non-root** app cannot write a root-owned PV mounted at a root path like `/data` — mount under the image's writable home (e.g. `/opt/app-root/src/data`). See [openshift-reference.md](openshift-reference.md).
 
 - Path (placeholder): `/storage/overview`
 - Taught in: Foundations A07 (concept + persistence); Developer B05 (stateful deep dive).

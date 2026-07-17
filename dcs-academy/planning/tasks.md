@@ -102,23 +102,25 @@ Planning docs (`course-brief.md`, `course-topics.md`, `course-module-a.md`, `cou
 
 ## Module B — Developer restructure
 
-- [ ] **P1** B01: new `lab-b01-docker-to-k8s` (Intermediate) — compose/`docker run` → Deployment/Service/ConfigMap; what doesn't translate on DCS (SCC/non-root, Harbor, no `latest`).
-- [ ] **P1** B02: new `lab-b02-image-buildconfigs` — git as build source; BuildConfig (S2I/Dockerfile) → image in Harbor → deploy → rebuild.
-- [ ] **P1** B03: `lab-b03-dev-spaces` from old B06 — git as in-cluster IDE (devfile); Harbor-mirrored UDI.
-- [ ] **P1** B04: `lab-b04-harbor-scanning` — old A04 (Harbor) **+ all image-scanning merged here**. Read the scan, pass the gate, push the B02 image.
-- [ ] **P1** B05: `lab-b05-rbac-tenancy` — consolidate old A05 (access/tenancy) + old A08 (RBAC deep dive).
-- [ ] **P1** B06: **new** `lab-b06-dev-prod-namespaces` (the missing lab) — DEV vs PROD by policy posture: PROD = harsher Kyverno + **can** create Routes; DEV = looser + **cannot** create Routes; promotion. Uses **vcluster** (deep model from old A03). Kyverno required to demo enforcement (screenshot fallback).
-- [ ] **P2** B07: `lab-b07-scaling-health` from old B03.
-- [ ] **P2** B08: `lab-b08-operators` from old A09 (Advanced) — keep as Module F prerequisite.
-- [ ] **P2** Write/rewrite per-workshop plans for B01–B08 (B01/B02/B06 are new; the rest are moves).
-- [ ] **P2** Update the sample-app note: `hello-dcs` still carried; build labs (B02/B03) also use the learner's own / a provided git repo — confirm a Harbor-mirrorable buildable source repo exists.
-- [ ] **P3** Update Module F prereq references: A09 → **B08** in `course-module-f.md` and `course-brief.md` (brief done).
-- [ ] **P1** B02/B04 need a **session-scoped, push-capable Harbor project + robot account** (B02 builds→pushes; B04 pushes the built image). Riskiest new provisioning dependency — B04 degrades to inspect-only, but **B02 has no clean fallback** for build-and-push. Confirm before authoring.
-- [ ] **P2** B02 needs an **air-gapped-reachable git build source** + S2I builder image (mirrored GitLab vs an in-cluster seeded git repo). Unresolved.
-- [ ] **P2** Confirm the **hello-dcs env var name** the sample reads for the A02 "customise with `oc set env`" step (plans assumed a `GREETING`-style var). Drives A02 + A03 config steps.
+- [x] **P1** B01: **built** `lab-b01-docker-to-k8s` (Intermediate) — compose/`docker run` → Deployment/Service/ConfigMap; what doesn't translate on DCS (SCC/non-root, Harbor, no `latest`). Static-checked only — not yet live-smoke-tested.
+- [x] **P1** B02: **built** `lab-b02-image-buildconfigs` — git as build source; BuildConfig (S2I/Dockerfile) → image in Harbor → deploy → rebuild. Push step models the session-scoped Harbor project as `{{< param dcs_registry >}}/{{ session_namespace }}/...` (design assumption, not confirmed infra — flagged inline in `99-workshop-summary.md`). "Rebuild on change" teaches triggers conceptually + a second real `oc start-build` (no live git-push source available). Static-checked only.
+- [x] **P1** B03: **built** `lab-b03-dev-spaces` — git as in-cluster IDE (devfile); Harbor-mirrored UDI. Delivered per the plan's fallback gate as a diagram/concept lab (SVG mockups, no live Dev Spaces instance available) with one live, honest `oc get checluster -A` check. Static-checked only.
+- [x] **P1** B04: **built** `lab-b04-harbor-scanning` — old A04 (Harbor) **+ all image-scanning merged here**. Push step degrades to inspect-only (no cross-session credential from B02) per the plan's own fallback; scan-report read via fixture. Static-checked only.
+- [x] **P1** B05: **built** `lab-b05-rbac-tenancy` — consolidates old A05 (access/tenancy) + old A08 (RBAC deep dive). Adds an explicit `oc auth can-i` before/after around the Role+RoleBinding grant. Static-checked only.
+- [x] **P1** B06: **built** `lab-b06-dev-prod-namespaces` (the missing lab) — DEV vs PROD by policy posture, **vcluster enabled**, real Route-blocked-in-DEV / works-in-PROD assertions, Kyverno ClusterPolicy read. Static-checked only.
+- [x] **P2** B07: **built** `lab-b07-scaling-health` from old B03 — scale → quota → right-size → probes (break/restore readiness, hello-dcs `/healthz`) → real Pod-delete self-heal. Static-checked only.
+- [x] **P2** B08: **built** `lab-b08-operators` from old A09 (Advanced) — CloudNativePG CR as the example operator; explicitly notes Module F as the deep-dive, this lab stays at the ownership-model level. Console step uses the k8s Dashboard's CRD view (real OpenShift console can't embed, per [educates-openshift-console-limitation]). Static-checked only.
+- [x] **P2** Write/rewrite per-workshop plans for B01–B08 — done, all 8 in `workshop-plans/lab-b0*.md` (B01/B02/B06 new; rest are moves/consolidations).
+- [~] **P2** Sample-app note: `hello-dcs` (GREETING/MODE/PORT/VERSION env, `/healthz`) carried across all 8. Build labs' git-source dependency (B02) still **not resolved** — B02 was authored against a read-only mirror workaround, not a confirmed Harbor-mirrorable buildable source repo. Still open.
+- [x] **P3** Update Module F prereq references: A09 → **B08** in `course-module-f.md` (5 refs fixed) and `course-brief.md` (already done previously).
+- [ ] **P1** B02/B04 need a **session-scoped, push-capable Harbor project + robot account** (B02 builds→pushes; B04 pushes the built image). **Still unconfirmed** — both workshops were authored with the push step degraded/modelled as a design assumption (see B02/B04 notes above), not against real provisioning. Confirm before live-smoke-testing.
+- [ ] **P2** B02 needs an **air-gapped-reachable git build source** + S2I builder image (mirrored GitLab vs an in-cluster seeded git repo). Still unresolved — authored with a narrated/conceptual workaround for the "rebuild on change" step.
+- [x] **P2** Confirm the **hello-dcs env var name**: `GREETING` (confirmed — see `images/hello-dcs/server.py`). Drives A02/A03/B01 config steps.
 - [ ] **P2** Produce screenshot assets: **A07** (ITSM console request flow) + **A08** (OpenShift console Route/PVC/Topology views) — both screenshot-driven since neither embeds cleanly in an air-gapped session.
 - [ ] **P3** Confirm DCS docs paths used across the new plans resolve on the real portal (`/concepts/*`, `/services/*`, `/getting-started/requests`).
-- [x] **P3** 14 old per-workshop plans **archived** to `workshop-plans/_superseded-old-design/` (git mv, history preserved) with a README explaining the supersession — kept as refactor reference; delete once the built workshops are migrated.
+- [x] **P3** 14 old per-workshop plans were archived to `workshop-plans/_superseded-old-design/`, then **deleted** (2026-07-17) now that all 8 built Developer workshops match the new design. Old built `lab-b01…b06` (app-lifecycle design) directories and their stale `test/workshops/smoke-plans/lab-b0{1,2,3,4,5,6}-*.json` fixtures were removed the same session.
+- [ ] **P3** New: write `test/workshops/smoke-plans/lab-b0{1..8}-*.json` for the 8 newly-built Developer workshops (none exist yet — `coverage_check.py --all` currently skips them since a workshop with no plan file is silently not checked). Needs a live/CRC cluster pass to author accurate `run` sequences, not a static guess.
+- [ ] **P3** Live-smoke-test B01–B08 on CRC (portal-less) once a cluster is available — none of the 8 have been run against a real cluster yet, only statically validated (YAML parses, examiner-test/content cross-reference 1:1, no `kubectl`, param trio present).
 
 ## Follow-ups from 2026-07-16 review (queued — details not yet authored, author still reviewing)
 

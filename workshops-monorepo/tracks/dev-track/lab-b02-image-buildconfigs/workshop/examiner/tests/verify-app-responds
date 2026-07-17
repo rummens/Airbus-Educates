@@ -1,0 +1,9 @@
+#!/bin/bash
+# Verify the local port-forward tunnel reaches the built app (HTTP 200 on :8080).
+code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 localhost:8080 2>/dev/null)
+if [ "$code" = "200" ]; then
+  echo "OK: reached the built app locally via the tunnel (HTTP 200)."
+  exit 0
+fi
+echo "Could not reach localhost:8080 (HTTP '${code:-none}'). Is the port-forward running in the lower terminal?" >&2
+exit 1

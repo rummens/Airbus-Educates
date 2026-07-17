@@ -1,0 +1,17 @@
+#!/bin/bash
+# Verify the dev and prod namespaces exist, each with its own namespace-type label.
+set -uo pipefail
+
+for ns in dev prod; do
+  label=$(oc get namespace "$ns" -o jsonpath='{.metadata.labels.dcs\.airbus/namespace-type}' 2>/dev/null)
+  if [ -z "$label" ]; then
+    echo "Namespace '$ns' not found (or missing the dcs.airbus/namespace-type label) — did 'oc apply -f ${ns}-namespace.yaml' run?" >&2
+    exit 1
+  fi
+  if [ "$label" != "$ns" ]; then
+    echo "Namespace '$ns' has dcs.airbus/namespace-type='$label', expected '$ns'." >&2
+    exit 1
+  fi
+done
+
+echo "OK: 'dev' and 'prod' namespaces exist, each labelled with its own type."

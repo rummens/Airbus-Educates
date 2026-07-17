@@ -1,0 +1,22 @@
+# A minimal CloudNativePG Cluster — the instance YOU own and configure.
+# The operator (installed cluster-wide by the platform) watches this object and
+# does the rest: provisions storage, starts PostgreSQL, and keeps it running.
+#
+# ${DCS_REGISTRY} is substituted at apply time — this file is never applied as-is:
+#   envsubst < sample-cr.yaml | oc apply -f -
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: sample-db
+spec:
+  # instances: how many copies you want. 1 is enough to see the pattern; a real
+  # tenant-owned PROD database would use 3 for automatic failover.
+  instances: 1
+
+  # imageName: which PostgreSQL image the operator runs your instances with.
+  # Air-gapped: resolved from the DCS Harbor registry, never a public registry.
+  imageName: ${DCS_REGISTRY}/samples/postgresql:16
+
+  # storage: how much disk this instance gets. Smallest practical size for a demo.
+  storage:
+    size: 1Gi

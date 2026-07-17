@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" font-family="sans-serif">
+  <rect x="0" y="0" width="900" height="260" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="450" y="26" text-anchor="middle" font-size="15" font-weight="bold" fill="#1b2b3a">From git source to a running image, entirely on-cluster</text>
+
+  <!-- 1: Git repo -->
+  <rect x="20" y="90" width="150" height="70" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="95" y="118" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b4a86">Git repo</text>
+  <text x="95" y="136" text-anchor="middle" font-size="10" fill="#5a6b7b">app source</text>
+  <text x="95" y="150" text-anchor="middle" font-size="10" fill="#5a6b7b">(+ Dockerfile, optional)</text>
+
+  <line x1="170" y1="125" x2="205" y2="125" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="205,125 197,121 197,129" fill="#5a6b7b"/>
+
+  <!-- 2: BuildConfig / Build Pod -->
+  <rect x="210" y="90" width="160" height="70" rx="8" fill="#fdf2e0" stroke="#c98a2c" stroke-width="2"/>
+  <text x="290" y="112" text-anchor="middle" font-size="12" font-weight="bold" fill="#8a5a10">BuildConfig</text>
+  <text x="290" y="128" text-anchor="middle" font-size="10" fill="#8a5a10">runs a Build Pod</text>
+  <text x="290" y="144" text-anchor="middle" font-size="10" fill="#8a5a10">S2I or Dockerfile strategy</text>
+
+  <line x1="370" y1="125" x2="405" y2="125" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="405,125 397,121 397,129" fill="#5a6b7b"/>
+
+  <!-- 3: Built image -->
+  <rect x="410" y="90" width="140" height="70" rx="8" fill="#f2eefb" stroke="#7a4fc9" stroke-width="2"/>
+  <text x="480" y="118" text-anchor="middle" font-size="12" font-weight="bold" fill="#4a2c86">Built image</text>
+  <text x="480" y="136" text-anchor="middle" font-size="10" fill="#4a2c86">produced fresh</text>
+  <text x="480" y="150" text-anchor="middle" font-size="10" fill="#4a2c86">every build</text>
+
+  <line x1="550" y1="125" x2="585" y2="125" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="585,125 577,121 577,129" fill="#5a6b7b"/>
+
+  <!-- 4: Harbor -->
+  <rect x="590" y="90" width="140" height="70" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="660" y="112" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c6a3a">Harbor</text>
+  <text x="660" y="128" text-anchor="middle" font-size="10" fill="#2c6a3a">pushed via your</text>
+  <text x="660" y="144" text-anchor="middle" font-size="10" fill="#2c6a3a">session's robot account</text>
+
+  <line x1="730" y1="125" x2="765" y2="125" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="765,125 757,121 757,129" fill="#5a6b7b"/>
+
+  <!-- 5: ImageStream -->
+  <rect x="770" y="90" width="110" height="70" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="825" y="118" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b4a86">ImageStream</text>
+  <text x="825" y="136" text-anchor="middle" font-size="10" fill="#1b4a86">tag you deploy</text>
+  <text x="825" y="150" text-anchor="middle" font-size="10" fill="#1b4a86">from next</text>
+
+  <text x="450" y="205" text-anchor="middle" font-size="11" fill="#5a6b7b">No local Docker, no laptop build — the cluster does the work, and the result</text>
+  <text x="450" y="223" text-anchor="middle" font-size="11" fill="#5a6b7b">is a normal Harbor image you deploy exactly like any other.</text>
+</svg>

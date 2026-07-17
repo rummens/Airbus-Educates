@@ -1,0 +1,45 @@
+# The same hello-dcs workload you ran in A02 — deployed here into DEV first,
+# then PROD, unchanged, so the only variable is which namespace admits it.
+# No resources block on purpose: DEV doesn't care, PROD's
+# dcs-namespace-type-policy does.
+#
+# Contains a ${DCS_REGISTRY} image reference — apply with
+# `envsubst < hello-dcs.yaml | oc apply -n <namespace> -f -`, never plain
+# `oc apply`, or the variable is not expanded.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-dcs
+  template:
+    metadata:
+      labels:
+        app: hello-dcs
+    spec:
+      containers:
+      - name: hello-dcs
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MODE
+          value: "UI"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  selector:
+    app: hello-dcs
+  ports:
+  - port: 8080
+    targetPort: 8080

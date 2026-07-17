@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 260" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="260" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="26" text-anchor="middle" font-size="15" font-weight="bold" fill="#1b2b3a">The inner loop — all inside the workspace Pod</text>
+
+  <rect x="30" y="55" width="200" height="110" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="130" y="78" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b4a86">1. Edit</text>
+  <text x="130" y="100" text-anchor="middle" font-size="10.5" fill="#1b4a86">server.py, in the</text>
+  <text x="130" y="116" text-anchor="middle" font-size="10.5" fill="#1b4a86">workspace's own editor</text>
+  <text x="130" y="136" text-anchor="middle" font-size="10" fill="#5a6b7b">GREETING = "..."</text>
+
+  <line x1="230" y1="110" x2="270" y2="110" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="270,110 262,106 262,114" fill="#5a6b7b"/>
+
+  <rect x="280" y="55" width="200" height="110" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="380" y="78" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c6a3a">2. Run</text>
+  <text x="380" y="100" text-anchor="middle" font-size="10.5" fill="#2c6a3a">devfile `run` command,</text>
+  <text x="380" y="116" text-anchor="middle" font-size="10.5" fill="#2c6a3a">in the workspace terminal</text>
+  <text x="380" y="136" text-anchor="middle" font-size="10" fill="#5a6b7b">python3 server.py :8080</text>
+
+  <line x1="480" y1="110" x2="520" y2="110" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="520,110 512,106 512,114" fill="#5a6b7b"/>
+
+  <rect x="530" y="55" width="200" height="110" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="630" y="78" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b4a86">3. Reach</text>
+  <text x="630" y="100" text-anchor="middle" font-size="10.5" fill="#1b4a86">workspace preview URL</text>
+  <text x="630" y="116" text-anchor="middle" font-size="10.5" fill="#1b4a86">for the :8080 endpoint</text>
+  <text x="630" y="136" text-anchor="middle" font-size="10" fill="#5a6b7b">your edit, live in-cluster</text>
+
+  <text x="380" y="200" text-anchor="middle" font-size="11" fill="#5a6b7b">No image build between step 1 and step 3 — the source runs directly.</text>
+  <text x="380" y="218" text-anchor="middle" font-size="11" fill="#5a6b7b">Compare B02, where the same edit only shows up after a new image is built.</text>
+</svg>

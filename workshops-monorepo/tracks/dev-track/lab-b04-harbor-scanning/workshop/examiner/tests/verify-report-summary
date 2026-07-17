@@ -1,0 +1,13 @@
+#!/bin/bash
+# verify-report-summary <report-filename> — the report has a non-empty severityCount object.
+file="${1:?report filename required (e.g. scan-report.json)}"
+path="$HOME/exercises/$file"
+if [ ! -f "$path" ]; then
+  echo "Report '$path' not found. Is the fixture shipped in ~/exercises?" >&2
+  exit 1
+fi
+if ! jq -e '.summary.severityCount | select(type == "object" and length > 0)' "$path" >/dev/null 2>&1; then
+  echo "No non-empty .summary.severityCount object in $file. Check the report schema with 'jq . $file'." >&2
+  exit 1
+fi
+echo "OK: $file has a severityCount summary."

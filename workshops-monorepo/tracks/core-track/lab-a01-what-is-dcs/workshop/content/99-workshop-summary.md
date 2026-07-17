@@ -54,6 +54,7 @@ continuously reconciles to it, versus a one-shot `docker run`).
 
 ## Next Steps
 
-Continue with **Deploy Your First App**, where you'll get an application running on
-{{< param product_short >}} in minutes — using the [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
-skills you just practised.
+If you haven't already, do **Deploy Your First App** — it gets an application running on
+{{< param product_short >}} in minutes using the [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
+skills you just practised. From here the orientation labs (**Terms**, the **ITSM console**,
+the **OpenShift console**) round out the picture.

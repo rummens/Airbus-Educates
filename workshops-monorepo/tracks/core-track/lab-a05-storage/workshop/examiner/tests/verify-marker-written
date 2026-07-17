@@ -1,6 +1,6 @@
 #!/bin/bash
 # Verify the marker file exists in the mounted volume with the expected value.
-val=$(oc exec deploy/hello-dcs -- cat /data/marker 2>/dev/null)
+val=$(oc exec deploy/hello-dcs -- cat /opt/app-root/src/data/marker 2>/dev/null)
 if [ "$val" = "persisted-marker-42" ]; then
   echo "OK: marker written to the volume."
   exit 0

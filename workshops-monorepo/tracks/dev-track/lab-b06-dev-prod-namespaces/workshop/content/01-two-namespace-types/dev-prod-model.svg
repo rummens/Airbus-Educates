@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 320" font-family="sans-serif">
+  <rect x="0" y="0" width="820" height="320" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="410" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">DEV vs PROD namespace types on DCS</text>
+
+  <!-- DEV box -->
+  <rect x="40" y="56" width="320" height="180" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="200" y="84" text-anchor="middle" font-size="15" font-weight="bold" fill="#2c6a3a">DEV namespace</text>
+  <text x="200" y="112" text-anchor="middle" font-size="12" fill="#2c6a3a">dcs.airbus/namespace-type: dev</text>
+  <text x="66" y="140" font-size="12" fill="#2c6a3a">✓ Fast iteration, loose policy</text>
+  <text x="66" y="162" font-size="12" fill="#2c6a3a">✓ No resource-shape requirement</text>
+  <text x="66" y="184" font-size="12" fill="#a13a3a">✗ Cannot host a Route</text>
+  <text x="66" y="212" font-size="11" fill="#5a6b7b">Kyverno: not enforced here</text>
+
+  <!-- PROD box -->
+  <rect x="460" y="56" width="320" height="180" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="620" y="84" text-anchor="middle" font-size="15" font-weight="bold" fill="#1b4a86">PROD namespace</text>
+  <text x="620" y="112" text-anchor="middle" font-size="12" fill="#1b4a86">dcs.airbus/namespace-type: prod</text>
+  <text x="486" y="140" font-size="12" fill="#1b4a86">✓ Can host a Route</text>
+  <text x="486" y="162" font-size="12" fill="#a13a3a">✗ Requires CPU/memory requests + limits</text>
+  <text x="486" y="184" font-size="12" fill="#1b4a86">✓ Stricter change control</text>
+  <text x="486" y="212" font-size="11" fill="#5a6b7b">Kyverno: dcs-namespace-type-policy enforced</text>
+
+  <!-- promotion arrow -->
+  <g stroke="#5a6b7b" stroke-width="2" fill="#5a6b7b">
+    <line x1="362" y1="146" x2="456" y2="146"/>
+    <polygon points="456,146 446,140 446,152"/>
+  </g>
+  <text x="409" y="132" text-anchor="middle" font-size="11" fill="#5a6b7b">promote</text>
+  <text x="409" y="168" text-anchor="middle" font-size="10" fill="#5a6b7b">(re-deploy vetted</text>
+  <text x="409" y="180" text-anchor="middle" font-size="10" fill="#5a6b7b">workload, don't</text>
+  <text x="409" y="192" text-anchor="middle" font-size="10" fill="#5a6b7b">edit PROD in place)</text>
+
+  <text x="410" y="270" text-anchor="middle" font-size="11" fill="#5a6b7b">Same workload, same manifest — only the namespace's own type label changes what's admitted.</text>
+  <text x="410" y="292" text-anchor="middle" font-size="11" fill="#5a6b7b">A Kyverno ClusterPolicy reads that label and applies PROD's rules only where it says "prod".</text>
+</svg>

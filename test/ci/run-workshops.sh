@@ -37,6 +37,10 @@ echo
 echo "########## links: workshop descriptions ##########"
 python3 "$W/link_check.py" --all || fail=1
 
+echo
+echo "########## lifecycle labels: dev/prod matches Route usage ##########"
+python3 "$W/label_check.py" --all || fail=1
+
 if [ $SMOKE -eq 1 ]; then
   echo
   echo "########## cluster smoke (deploy → grade → teardown) ##########"
@@ -56,6 +60,7 @@ else
   echo "FAIL. Cost of this failure:"
   echo "  - coverage gap  → a workshop command has no automated test; it can break silently."
   echo "  - broken link   → a learner clicks into a 404 / missing diagram."
+  echo "  - label problem → a lab's dev/prod lifecycle label doesn't match its Route usage."
   echo "  - smoke failure → the workshop does not actually work on the platform (examiner red)."
 fi
 exit $fail
