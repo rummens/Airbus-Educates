@@ -166,6 +166,28 @@ rescan:
   token: "super-secret"
   existingSecret: ""            # optional: use an existing Secret (key: token) instead
 
+# Reap orphaned WorkshopSession CRs. A workshop rollout (updates.workshop: true) or a
+# training-portal restart (ephemeral DB) leaves sessions whose per-session OAuth2 client
+# is dead — re-opening them yields "invalid_request Invalid client_id". This CronJob
+# deletes those orphans (the operator then GCs the namespace/pods). See portal/reap.py.
+sessionReaper:
+  enabled: true
+  schedule: "*/15 * * * *"       # every 15 min
+  # Starts in DRY-RUN: the job only LOGS what it would delete. Watch one run's logs
+  # (`kubectl logs job/... -n dcs-academy-portal`) and confirm it lists real orphans and
+  # NOT any healthy in-use session, then set dryRun:false to let it actually reap. This
+  # guard exists because the orphan filter keys off the training.educates.dev/portal.name
+  # label, which can only be confirmed against live sessions.
+  dryRun: false
+  graceSeconds: 300              # never touch a session younger than this (still provisioning)
+  # Backstop for the restart case: an Allocated session older than this is a leaked orphan
+  # (a live session can't outlive its `expires`). MUST exceed the largest workshop `expires`
+  # (portal.expires default 60m). 24h is a safe, non-aggressive default.
+  maxAllocatedSeconds: 86400
+  resources:
+    requests: { cpu: 10m, memory: 64Mi }
+    limits:   { cpu: 100m, memory: 128Mi }
+
 # Kasten K10 backup of this namespace (incl. the CNPG feedback DB). OFF by default
 # and UNTESTED on dev — needs K10 + Kanister CRDs. Policy/Blueprint render into the
 # K10 namespace; a CHECKPOINT hook quiesces the DB before the snapshot. See

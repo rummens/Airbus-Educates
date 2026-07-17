@@ -23,7 +23,7 @@ os.environ.setdefault("PORTAL_OAUTH_ENABLED", "false")
 os.environ["FEEDBACK_DB"] = os.path.join(tempfile.mkdtemp(), "t.db")
 
 import pytest                                    # noqa: E402
-from portal import feedback, k8sclient, educates, auth, proxy, cache   # noqa: E402
+from portal import feedback, k8sclient, educates, auth, proxy, cache, reap   # noqa: E402
 from portal import config as cfg                 # noqa: E402
 from portal import app as appmod                 # noqa: E402
 from portal.app import create_app                # noqa: E402
@@ -832,6 +832,39 @@ def test_route_http_ok(monkeypatch):
     monkeypatch.setattr(urllib.request, "urlopen", _boom)
     assert k8sclient._route_http_ok("https://s.apps.test/") is False
     assert k8sclient._route_http_ok("") is False
+
+
+def test_reap_find_orphans():
+    from datetime import datetime
+    now = 1_000_000.0
+
+    def sess(name, env, phase, age):
+        ts = datetime.utcfromtimestamp(now - age).strftime("%Y-%m-%dT%H:%M:%SZ")
+        return {"metadata": {"name": name, "creationTimestamp": ts},
+                "spec": {"environment": {"name": env}},
+                "status": {"educates": {"phase": phase}}}
+
+    live = {"env-current"}
+    sessions = [
+        sess("healthy", "env-current", "Allocated", 600),          # keep: live env, young
+        sess("reserved-old", "env-current", "Available", 999999),  # keep: spare on live env
+        sess("rollout-orphan", "env-old", "Allocated", 600),       # reap: env gone/terminating
+        sess("just-born", "env-old", "Allocated", 10),             # keep: within grace
+        sess("restart-orphan", "env-current", "Allocated", 90000),  # reap: Allocated past backstop
+    ]
+    got = {n for n, _ in reap.find_orphans(sessions, live, now,
+                                           max_alloc_age_s=24 * 3600, grace_s=300)}
+    assert got == {"rollout-orphan", "restart-orphan"}, got
+
+    # No live envs known (e.g. list failed) → every past-grace session is an env-orphan;
+    # still never reaps within grace.
+    allnames = {n for n, _ in reap.find_orphans(sessions, set(), now,
+                                                max_alloc_age_s=24 * 3600, grace_s=300)}
+    assert "just-born" not in allnames and "healthy" in allnames
+
+
+def test_reap_demo():
+    reap.demo()   # self-check must pass
 
 
 def test_user_can_admin_happy_path(monkeypatch):

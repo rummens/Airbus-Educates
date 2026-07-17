@@ -11,7 +11,13 @@
 #
 # Deliberately does NOT pip-install the portal requirements: they change with the
 # portal and are installed per-job (pip install -r ...) so this image stays stable.
-FROM python:3.13-slim
+#
+# Pinned to Debian 12 (bookworm), NOT the bare `3.13-slim` tag: that now tracks
+# Debian 13 (trixie), whose glibc uses instructions Docker's bundled QEMU mishandles,
+# so `apt-get` SIGBUSes ("Bus error", exit 135) during the emulated-arch leg of a
+# multi-arch build. bookworm emulates cleanly. (Alternative: refresh the host's
+# emulators with `docker run --privileged tonistiigi/binfmt --install all`.)
+FROM python:3.13-slim-bookworm
 
 LABEL org.opencontainers.image.source="https://github.com/rummens/Airbus-Educates" \
       org.opencontainers.image.description="DCS Academy CI base (python + git + curl) for the no-cluster test tier"

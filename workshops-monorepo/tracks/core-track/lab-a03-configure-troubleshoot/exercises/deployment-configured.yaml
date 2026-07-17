@@ -28,6 +28,17 @@ spec:
             name: hello-dcs-config
         ports:
         - containerPort: 8080
+        # Health probes on the app's silent /healthz endpoint (readiness gates routing
+        # until the app serves; liveness restarts a hung pod). /healthz is not logged, so
+        # it doesn't clutter the `oc logs` diagnosis lesson.
+        readinessProbe:
+          httpGet: { path: /healthz, port: 8080 }
+          initialDelaySeconds: 2
+          periodSeconds: 5
+        livenessProbe:
+          httpGet: { path: /healthz, port: 8080 }
+          initialDelaySeconds: 5
+          periodSeconds: 15
         volumeMounts:
         - name: config
           mountPath: /etc/hello-dcs

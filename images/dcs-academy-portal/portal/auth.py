@@ -15,6 +15,7 @@ that gated the landing page gates the session paths, no header bridge needed.
 
 CSRF: a random `state` is kept in the session and checked on callback.
 """
+import logging
 import secrets
 import threading
 import time
@@ -25,6 +26,7 @@ from flask import Blueprint, redirect, request, session, url_for, abort
 
 from . import config as cfg
 
+log = logging.getLogger("portal.auth")
 bp = Blueprint("auth", __name__)
 
 _disco_lock = threading.Lock()
@@ -67,7 +69,12 @@ def _whoami(access_token):
                      headers={"Authorization": f"Bearer {access_token}"},
                      verify=_ca(), timeout=10)
     r.raise_for_status()
-    return (r.json().get("metadata", {}) or {}).get("name", "")
+    name = (r.json().get("metadata", {}) or {}).get("name", "")
+    # This exact string is the session owner the portal hands to Educates on launch and
+    # matches against in My Sessions. Log it so an empty/blank My Sessions can be traced
+    # to an identity that differs from the owner Educates stored.
+    log.info("WHOAMI resolved identity=%r", name)
+    return name
 
 
 def current_user():

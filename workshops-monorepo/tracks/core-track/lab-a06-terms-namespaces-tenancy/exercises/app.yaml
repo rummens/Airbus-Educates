@@ -27,6 +27,16 @@ spec:
           value: "CLI"
         ports:
         - containerPort: 8080
+        # Health probes on the app's silent /healthz endpoint (readiness gates routing
+        # until the app serves; liveness restarts a hung pod).
+        readinessProbe:
+          httpGet: { path: /healthz, port: 8080 }
+          initialDelaySeconds: 2
+          periodSeconds: 5
+        livenessProbe:
+          httpGet: { path: /healthz, port: 8080 }
+          initialDelaySeconds: 5
+          periodSeconds: 15
         resources:
           requests:
             cpu: 50m

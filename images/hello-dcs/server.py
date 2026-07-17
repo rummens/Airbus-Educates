@@ -104,6 +104,10 @@ class Handler(BaseHTTPRequestHandler):
 
     def log_message(self, fmt, *args):
         # Log to stdout so `oc logs` shows request activity (the A03 logging step).
+        # Skip /healthz: it's the liveness/readiness probe target, hit every few
+        # seconds, and would otherwise drown the real request lines learners read.
+        if getattr(self, "path", "") == "/healthz":
+            return
         print("[hello-dcs] " + (fmt % args), flush=True)
 
 

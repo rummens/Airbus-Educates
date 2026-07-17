@@ -179,6 +179,7 @@ def user_sessions(user):
     # Educates route can 404.
     u = urllib.parse.quote(user, safe="")
     url = f"{base}/workshops/user/{u}/sessions/"
+    log.info("USER-SESSIONS request user=%r encoded=%r url=%s", user, u, url)
     r = s.get(url, timeout=10)
     if r.status_code != 200:
         # 403 here usually means the robot isn't in Educates' 'robots' group;
@@ -187,7 +188,11 @@ def user_sessions(user):
                     user, url, r.status_code, r.text)
     r.raise_for_status()
     data = r.json().get("sessions", []) or []
-    log.info("USER-SESSIONS user=%r -> %d session(s)", user, len(data))
+    # Log the returned sessions in full-ish so an empty result is debuggable against
+    # what the DB actually holds (name / workshop / state per session).
+    log.info("USER-SESSIONS user=%r -> %d session(s): %s", user, len(data),
+             [{"name": d.get("name"), "workshop": d.get("workshop"),
+               "state": d.get("state") or d.get("phase")} for d in data])
     return data
 
 

@@ -42,9 +42,12 @@ def _render_md(text):
 
 # Endpoints reachable WITHOUT a login session. auth.* drive the login; health
 # probes are kubelet; /analytics is the Educates webhook (server-to-server, no
-# cookie); static assets must load on the login page itself.
+# cookie); admin_rescan is the workshops-chart PostSync Job (server-to-server, it
+# self-gates on the PORTAL_RESCAN_TOKEN bearer) — without this the login gate 302s
+# the Job to the OAuth login page instead of letting its token be checked; static
+# assets must load on the login page itself.
 _PUBLIC_ENDPOINTS = {"auth.login", "auth.callback", "auth.logout",
-                     "healthz", "readyz", "analytics", "static"}
+                     "healthz", "readyz", "analytics", "admin_rescan", "static"}
 
 
 def _user():
@@ -564,13 +567,28 @@ def _my_sessions(user):
     rest_ws = {m.get("name", ""): m.get("workshop", "") for m in mine if m.get("name")}
     names = set(rest_ws)
     cr_owned = 0
+    cr_owners = set()            # every owner string the live CRs carry (for diagnostics)
+    ed_keys = []                 # field names under status.educates (owner may not be 'user')
     for name, cr in crs.items():
         stt = (cr.get("status", {}) or {}).get("educates", {}) or {}
-        if stt.get("user") == user:
+        if stt and not ed_keys:
+            ed_keys = sorted(stt.keys())
+        owner = stt.get("user")
+        if owner:
+            cr_owners.add(owner)
+        if owner == user:
             names.add(name)
             cr_owned += 1
-    _log.info("MY-SESSIONS user=%r rest=%d cr-owned=%d total=%d",
-              user, len(rest_ws), cr_owned, len(names))
+    _log.info("MY-SESSIONS user=%r rest=%d cr-owned=%d total=%d", user, len(rest_ws), cr_owned, len(names))
+    # Diagnostic for a blank My Sessions when sessions clearly exist: an empty result
+    # is almost always an identity mismatch — the portal's `user` (an OAuth claim)
+    # differs from the owner Educates stored (email vs username, case, domain), so
+    # BOTH the REST lookup and the CR owner-match miss. Log both sides + the actual
+    # status.educates field names (in case the owner isn't under 'user' on this build).
+    if len(names) == 0 and len(crs) > 0:
+        _log.warning("MY-SESSIONS EMPTY but %d WorkshopSession CR(s) exist — likely identity "
+                     "mismatch. portal user=%r | CR owners=%r | status.educates keys=%r | "
+                     "REST names=%r", len(crs), user, sorted(cr_owners), ed_keys, list(rest_ws))
 
     out = []
     for name in names:

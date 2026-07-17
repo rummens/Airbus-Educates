@@ -12,7 +12,11 @@
 ARG BASE=ghcr.io/educates/educates-base-environment@sha256:b7e55570e5b6a98251cc010e96b1615173c788d50f4833f0b9d3e821bb5fcd5a
 FROM ${BASE}
 
-ARG OC_CHANNEL=stable
+# oc client channel on mirror.openshift.com. Pinned to the 4.20 minor (latest 4.20.z,
+# currently 4.20.28) rather than bare `stable` (which floats to the newest OCP, 4.22+)
+# so the client tracks the DCS platform version instead of drifting ahead. Bump this
+# minor when the platform upgrades.
+ARG OC_CHANNEL=stable-4.20
 
 LABEL org.opencontainers.image.source="https://github.com/rummens/Airbus-Educates" \
       org.opencontainers.image.description="DCS Academy workshop base (educates-base-environment + oc)"

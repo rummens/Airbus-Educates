@@ -301,6 +301,31 @@ def list_sessions():
         return []
 
 
+def list_environments():
+    """All WorkshopEnvironment CRs (used by the session reaper to tell which
+    environments are still live vs. draining/gone)."""
+    try:
+        return _co().list_cluster_custom_object(
+            "training.educates.dev", "v1beta1", "workshopenvironments").get("items", [])
+    except ApiException:
+        return []
+
+
+def delete_session(name):
+    """Delete a WorkshopSession CR (cluster-scoped). The Educates operator then GCs
+    the session namespace + pods. Used by the reaper to reap orphaned sessions the
+    portal DB no longer tracks — deleting the CR works even when the robot-authed
+    terminate can't (the DB has no record). Returns True on delete (or already gone)."""
+    try:
+        _co().delete_cluster_custom_object(
+            "training.educates.dev", "v1beta1", "workshopsessions", name)
+        return True
+    except ApiException as e:
+        if e.status == 404:
+            return True          # already gone
+        raise
+
+
 def _route_http_ok(url):
     """HTTP-probe the session URL. The router serves a **503** "Application is not
     available" page while an (even admitted) Route has no ready backend; a live route
