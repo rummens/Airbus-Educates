@@ -15,6 +15,7 @@
 # resource limits, and probes into workshop deployments. The mutation is
 # scoped to namespaces labeled with training.educates.dev/environment.name.
 #
+# This is a DEFAULTS-only policy: user-specified values take precedence.
 # See DCS-ACADEMY-TROUBLESHOOTING.md section 3 for details.
 {{ if .Values.enableKyvernoException }}
 apiVersion: kyverno.io/v1
@@ -29,9 +30,9 @@ metadata:
     policies.kyverno.io/category: Educates Academy
     policies.kyverno.io/severity: low
     policies.kyverno.io/description: >-
-      Mutates Educates workshop deployments to add required security context,
-      resource limits, and health probes. This ensures compliance with cluster
-      Kyverno policies without requiring changes to the Educates base images.
+      Sets default security context, resource limits, and health probes on
+      Educates workshop deployments. Uses TCP probes for the workshop container
+      and HTTP probes for other containers.
 spec:
   background: false
   rules:
@@ -47,47 +48,93 @@ spec:
                     operator: Exists
       preconditions:
         any:
-          - key: "{{ "{{" }} request.operation {{ "}}" }}"
+          - key: '{{ "{{ request.operation }}" }}'
             operator: AnyIn
             value: ["CREATE", "UPDATE"]
       mutate:
-        patchStrategicMerge:
-          spec:
-            template:
+        foreach:
+          # ------------------------------------------------------------------
+          # Loop 1: Apply common default values to ALL existing containers
+          # ------------------------------------------------------------------
+          - list: "request.object.spec.template.spec.containers"
+            patchStrategicMerge:
               spec:
-                containers:
-                  - name: workshop
-                    securityContext:
-                      readOnlyRootFilesystem: true
-                      seccompProfile:
-                        type: RuntimeDefault
-                    resources:
-                      requests:
-                        cpu: 100m
-                        memory: 512Mi
-                      limits:
-                        cpu: 500m
-                        memory: 1Gi
-                    livenessProbe:
-                      httpGet:
-                        path: /healthz
-                        port: 10080
-                      initialDelaySeconds: 30
-                      periodSeconds: 10
-                    readinessProbe:
-                      httpGet:
-                        path: /healthz
-                        port: 10080
-                      initialDelaySeconds: 5
-                      periodSeconds: 10
-                    volumeMounts:
+                template:
+                  spec:
+                    volumes:
                       - name: workshop-tmp
-                        mountPath: /tmp
+                        emptyDir: {}
                       - name: workshop-opt
-                        mountPath: /opt/workshop
-                volumes:
-                  - name: workshop-tmp
-                    emptyDir: {}
-                  - name: workshop-opt
-                    emptyDir: {}
+                        emptyDir: {}
+                    containers:
+                      - name: '{{ "{{ element.name }}" }}'
+                        securityContext:
+                          +(seccompProfile):
+                            type: RuntimeDefault
+                        resources:
+                          requests:
+                            +(cpu): 100m
+                            +(memory): 512Mi
+                          limits:
+                            +(cpu): 500m
+                            +(memory): 1Gi
+                        volumeMounts:
+                          - name: workshop-tmp
+                            mountPath: /tmp
+                          - name: workshop-opt
+                            mountPath: /opt/workshop
+
+          # ------------------------------------------------------------------
+          # Loop 2: TCP Sockets for "workshop" container (silences OAuth warnings)
+          # ------------------------------------------------------------------
+          - list: "request.object.spec.template.spec.containers"
+            preconditions:
+              all:
+                - key: '{{ "{{ element.name }}" }}'
+                  operator: Equals
+                  value: workshop
+            patchStrategicMerge:
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - name: '{{ "{{ element.name }}" }}'
+                        +(livenessProbe):
+                          tcpSocket:
+                            port: 10080
+                          initialDelaySeconds: 30
+                          periodSeconds: 10
+                        +(readinessProbe):
+                          tcpSocket:
+                            port: 10080
+                          initialDelaySeconds: 5
+                          periodSeconds: 10
+
+          # ------------------------------------------------------------------
+          # Loop 3: Standard HTTP Get probes for any container NOT named "workshop"
+          # ------------------------------------------------------------------
+          - list: "request.object.spec.template.spec.containers"
+            preconditions:
+              all:
+                - key: '{{ "{{ element.name }}" }}'
+                  operator: NotEquals
+                  value: workshop
+            patchStrategicMerge:
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - name: '{{ "{{ element.name }}" }}'
+                        +(livenessProbe):
+                          httpGet:
+                            path: /healthz
+                            port: 8080
+                          initialDelaySeconds: 30
+                          periodSeconds: 10
+                        +(readinessProbe):
+                          httpGet:
+                            path: /healthz
+                            port: 8080
+                          initialDelaySeconds: 5
+                          periodSeconds: 10
 {{end}}
