@@ -36,7 +36,7 @@ command: skopeo inspect docker://{{< param dcs_registry >}}/samples/hello-dcs:1.
 name: verify-clean-image
 title: The remediated image is present and inspectable
 args:
-- "{{< param dcs_registry >}}/samples/hello-dcs:1.0"
+- "$DCS_REGISTRY/samples/hello-dcs:1.0"
 timeout: 15
 ```
 

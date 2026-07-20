@@ -28,6 +28,20 @@ By the end of this workshop you will be able to:
 - **A02 — Deploy Your First App.** You know Deployments, rollouts, and the
   Deployment → ReplicaSet → Pod chain. This lab reuses the same `hello-dcs` app.
 
+{{< note >}}
+**New to the command line or containers?** This track goes best if you're comfortable
+with **basic Linux/terminal use** (running a command, reading its output, editing a file)
+and know **a little about containers** (what an image is versus a running container). You
+don't need to be an expert, and nothing here is blocking — but if it's all new, a short
+primer first makes everything click faster:
+
+- [Container Intro — high-level, non-technical](https://drive.google.com/file/d/1HU2t-a4gNn9e_S_rzduL1Y4H59KWP7O-/view?t=2820.945): what containers are and why they matter.
+- [Container 101 — technical](https://drive.google.com/file/d/1RINpBVe2g6js4K5vtW0QbijzTB1P_RVI/view?usp=sharing): images, containers, and the basics.
+- [OpenShift 101 — technical](https://drive.google.com/file/d/11Th5tteTjsNecWdWextEcmac0wparVhE/view?usp=sharing): how OpenShift runs those containers.
+
+A dedicated **Theory track** covering this ground in depth is planned for the future.
+{{< /note >}}
+
 ## Your Environment
 
 A browser-based session with a split **terminal** and an **editor**. The exercise files —

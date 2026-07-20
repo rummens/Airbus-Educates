@@ -49,7 +49,7 @@ the image. You'll come back to this distinction in a moment.
 name: verify-catalog-inspect
 title: Verify skopeo can inspect the catalog image
 args:
-- "{{< param dcs_registry >}}/samples/hello-dcs:1.0"
+- "$DCS_REGISTRY/samples/hello-dcs:1.0"
 timeout: 15
 ```
 

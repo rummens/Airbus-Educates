@@ -57,27 +57,47 @@ def _epoch(ts):
         return None
 
 
+def classify(sessions, live_env_names, now, max_alloc_age_s, grace_s):
+    """Judge every session → list of rows {name, phase, env, env_live, age_s, decision,
+    reason}. `decision` is "reap" or "keep". This is the single source of truth for both
+    the reap list (find_orphans) and the REAPER_DEBUG dump, so what you see logged is
+    exactly what drives the delete."""
+    rows = []
+    for s in sessions:
+        md = s.get("metadata", {}) or {}
+        name = md.get("name", "")
+        if not name:
+            continue
+        created = _epoch(md.get("creationTimestamp"))
+        age = (now - created) if created is not None else 0
+        env = _env_of(s)
+        env_live = env in live_env_names
+        phase = _phase(s)
+        row = {"name": name, "phase": phase, "env": env, "env_live": env_live,
+               "age_s": int(age)}
+        if age < grace_s:
+            row["decision"], row["reason"] = "keep", f"within grace ({grace_s}s)"
+        elif not env_live:
+            row["decision"], row["reason"] = "reap", f"environment {env!r} gone/terminating"
+        elif phase == "Allocated" and age > max_alloc_age_s:
+            row["decision"], row["reason"] = "reap", (
+                f"Allocated {int(age)}s > backstop {max_alloc_age_s}s "
+                f"(portal DB likely lost it on a restart)")
+        else:
+            row["decision"], row["reason"] = "keep", (
+                f"live env, phase={phase!r}, age={int(age)}s < backstop {max_alloc_age_s}s")
+        rows.append(row)
+    return rows
+
+
 def find_orphans(sessions, live_env_names, now, max_alloc_age_s, grace_s):
     """Return [(name, reason)] for sessions that should be reaped.
 
     `live_env_names`: names of WorkshopEnvironments that exist and are NOT terminating.
     A session younger than `grace_s` is never reaped (still provisioning)."""
-    out = []
-    for s in sessions:
-        name = (s.get("metadata", {}) or {}).get("name", "")
-        if not name:
-            continue
-        created = _epoch((s.get("metadata", {}) or {}).get("creationTimestamp"))
-        age = (now - created) if created is not None else 0
-        if age < grace_s:
-            continue                                   # too new to judge
-        env = _env_of(s)
-        if env not in live_env_names:
-            out.append((name, f"environment {env!r} gone/terminating"))
-        elif _phase(s) == "Allocated" and age > max_alloc_age_s:
-            out.append((name, f"Allocated for {int(age)}s > backstop {max_alloc_age_s}s "
-                              f"(portal DB likely lost it on a restart)"))
-    return out
+    return [(r["name"], r["reason"])
+            for r in classify(sessions, live_env_names, now, max_alloc_age_s, grace_s)
+            if r["decision"] == "reap"]
 
 
 def _int_env(key, default):
@@ -96,21 +116,46 @@ def main():
         raise SystemExit(2)
 
     dry = (os.environ.get("REAPER_DRY_RUN", "false").lower() in ("1", "true", "yes"))
+    debug = (os.environ.get("REAPER_DEBUG", "false").lower() in ("1", "true", "yes"))
+    if debug:
+        log.setLevel(logging.DEBUG)
     grace = _int_env("REAPER_GRACE_SECONDS", 300)
     max_alloc = _int_env("REAPER_MAX_ALLOCATED_SECONDS", 24 * 3600)
     now = time.time()
 
+    envs = k8sclient.list_environments()
     live = {(e.get("metadata", {}) or {}).get("name")
-            for e in k8sclient.list_environments()
+            for e in envs
             if not (e.get("metadata", {}) or {}).get("deletionTimestamp")}
+    all_sessions = k8sclient.list_sessions()
     # Only ever consider sessions positively attributed to OUR portal (unlabelled or
     # other-portal sessions are left alone — a wrong label key makes us no-op, not
     # delete the wrong thing).
-    ours = [s for s in k8sclient.list_sessions() if _portal_of(s) == portal]
-    orphans = find_orphans(ours, live, now, max_alloc, grace)
+    ours = [s for s in all_sessions if _portal_of(s) == portal]
+    rows = classify(ours, live, now, max_alloc, grace)
+    orphans = [(r["name"], r["reason"]) for r in rows if r["decision"] == "reap"]
 
-    log.info("reaper: portal=%s live_envs=%d our_sessions=%d orphans=%d dry_run=%s",
-             portal, len(live), len(ours), len(orphans), dry)
+    log.info("reaper: portal=%s envs=%d live_envs=%d all_sessions=%d our_sessions=%d "
+             "orphans=%d dry_run=%s debug=%s",
+             portal, len(envs), len(live), len(all_sessions), len(ours),
+             len(orphans), dry, debug)
+
+    if debug:
+        # Why is a session kept/reaped? Log the decision inputs for every one of OUR
+        # sessions, plus the full status.educates block — so "reaper thinks a dead
+        # session is live" can be traced to the exact phase / env / age it saw.
+        log.info("DEBUG live_env_names=%s", sorted(n for n in live if n))
+        # Portal attribution across ALL sessions (spot a wrong/absent portal label).
+        seen_portals = sorted({_portal_of(s) for s in all_sessions}, key=lambda x: (x is None, x))
+        log.info("DEBUG portal labels seen on sessions: %s (matching %r)", seen_portals, portal)
+        by_name = {(s.get("metadata", {}) or {}).get("name"): s for s in ours}
+        for r in rows:
+            ed = (by_name.get(r["name"], {}).get("status", {}) or {}).get("educates", {}) or {}
+            log.info("DEBUG session=%s decision=%s phase=%r env=%r env_live=%s age=%ss :: %s | "
+                     "status.educates=%s",
+                     r["name"], r["decision"].upper(), r["phase"], r["env"], r["env_live"],
+                     r["age_s"], r["reason"], ed)
+
     reaped = 0
     for name, reason in orphans:
         if dry:

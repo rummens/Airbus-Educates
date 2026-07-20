@@ -60,7 +60,7 @@ needing push rights yourself.
 name: verify-samples-tags
 title: Verify the pushed tag is present in the project
 args:
-- "{{< param dcs_registry >}}/samples/hello-dcs"
+- "$DCS_REGISTRY/samples/hello-dcs"
 - "1.0"
 timeout: 15
 ```

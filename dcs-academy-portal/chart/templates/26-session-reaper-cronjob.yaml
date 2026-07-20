@@ -89,6 +89,7 @@ spec:
               env:
                 - { name: EDUCATES_PORTAL_NAME,        value: {{ .Values.educates.portalName | quote }} }
                 - { name: REAPER_DRY_RUN,              value: {{ .Values.sessionReaper.dryRun | quote }} }
+                - { name: REAPER_DEBUG,                value: {{ .Values.sessionReaper.debug | quote }} }
                 - { name: REAPER_GRACE_SECONDS,        value: {{ .Values.sessionReaper.graceSeconds | quote }} }
                 - { name: REAPER_MAX_ALLOCATED_SECONDS, value: {{ .Values.sessionReaper.maxAllocatedSeconds | quote }} }
               resources:

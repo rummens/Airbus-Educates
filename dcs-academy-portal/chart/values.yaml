@@ -179,6 +179,11 @@ sessionReaper:
   # guard exists because the orphan filter keys off the training.educates.dev/portal.name
   # label, which can only be confirmed against live sessions.
   dryRun: false
+  # Verbose per-session logging: for EVERY one of our sessions, log the decision
+  # (KEEP/REAP) with the phase / environment / env-live / age it saw, plus the full
+  # status.educates block. Turn on to understand why sessions you know are dead are
+  # judged "live" (kept). Pair with dryRun:true to observe without deleting.
+  debug: false
   graceSeconds: 300              # never touch a session younger than this (still provisioning)
   # Backstop for the restart case: an Allocated session older than this is a leaked orphan
   # (a live session can't outlive its `expires`). MUST exceed the largest workshop `expires`
