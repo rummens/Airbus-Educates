@@ -14,7 +14,7 @@ Interactive learning academy for the **Digital Container Service (DCS)**, Airbus
 ## Course conventions
 
 - **Target:** OpenShift; all commands use `oc`, never `kubectl`.
-- **Workshop naming:** `lab-{code}-{name}`, code = module letter + two-digit number (e.g. `lab-a01-what-is-dcs`).
+- **Workshop naming:** `lab-{code}-{name}`, code = module letter + two-digit number (e.g. `lab-a05-what-is-dcs`).
 - **Base images:** `dcs-workshop-base` (default) and `dcs-tools`, both in Harbor.
 - **Namespace model:** vcluster where the prod/dev distinction must be tangible.
 

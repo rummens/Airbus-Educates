@@ -1,9 +1,0 @@
-{
-  "workshop": "lab-a01-what-is-dcs",
-  "steps": [
-    {"check": "verify-whoami"},
-    {"check": "verify-oc-version"},
-    {"check": "verify-project"},
-    {"check": "verify-status"}
-  ]
-}

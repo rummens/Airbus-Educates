@@ -6,7 +6,7 @@ The last section, then the judgement call.
 
 ## Config ↔ `oc`
 
-The console's **ConfigMaps** and **Secrets** views hold the configuration from A03 —
+The console's **ConfigMaps** and **Secrets** views hold the configuration from A02 —
 Secrets shown **masked** in the UI (you reveal a value deliberately, never by accident).
 _(screenshot: OpenShift console ConfigMap detail + a masked Secret.)_
 

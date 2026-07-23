@@ -8,7 +8,7 @@ A credential ends up in the wrong place more than anything else — an API token
 - **Audience:** Intermediate — comfortable applying manifests, setting env on a Deployment, and reading logs with `oc`
 - **Duration:** ~40 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
-- **Prerequisites:** the Core track, especially lab-a02-kubernetes-essentials; familiar with Deployments and container env vars.
+- **Prerequisites:** the Core track, especially lab-a01-kubernetes-essentials; familiar with Deployments and container env vars.
 
 ## By the end of this lab you'll be able to
 

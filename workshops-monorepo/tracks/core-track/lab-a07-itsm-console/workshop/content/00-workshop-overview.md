@@ -25,8 +25,8 @@ Requests are documented in the
 
 ## Prerequisites
 
-- **A01 — What is DCS?** You've also met the *edges* of self-service in A04 (Routes need
-  a PROD namespace) and A05 (S3 comes via a ticket) — this lab names the mechanism behind
+- **A05 — What is DCS?** You've also met the *edges* of self-service in A03 (Routes need
+  a PROD namespace) and A04 (S3 comes via a ticket) — this lab names the mechanism behind
   those asides.
 
 ## Your Environment

@@ -39,7 +39,7 @@ command: envsubst < deployment-probes.yaml | oc apply -f -
 
 {{< note >}}
 This applies the known-good desired state over the stuck rollout from the last page — the
-same declarative-recovery pattern from A03: don't hand-patch what's broken, apply the
+same declarative-recovery pattern from A02: don't hand-patch what's broken, apply the
 manifest you know is correct. Give the rollout a few seconds to complete.
 {{< /note >}}
 

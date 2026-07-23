@@ -28,7 +28,7 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- **A02 — Deploy Your First App** (A03–A05 helpful). This lab *locates* the objects you
+- **A01 — Deploy Your First App** (A02–A04 helpful). This lab *locates* the objects you
   already know in the UI; it doesn't re-explain them.
 
 ## Your Environment

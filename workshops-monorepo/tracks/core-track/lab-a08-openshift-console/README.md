@@ -13,10 +13,10 @@ Networking, Storage, Config — back to the `oc` command that does the same thin
 move fluently between the two and know when each is the faster tool.
 
 - **Track:** Core / Fundamentals · Lab 8
-- **Audience:** Beginner — you've done A02 (A03–A05 helpful)
+- **Audience:** Beginner — you've done A01 (A02–A04 helpful)
 - **Duration:** ~15 min
 - **Format:** Guided tour + `oc`-parity checks (part screenshot-driven)
-- **Prerequisites:** A02 (Deploy Your First App).
+- **Prerequisites:** A01 (Deploy Your First App).
 
 ## By the end of this lab you'll be able to
 

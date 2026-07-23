@@ -91,6 +91,10 @@ def classify(raw, params):
     url = resolve_params(raw, params).rstrip(".,;:")
     if url.startswith("#") or url.startswith("mailto:"):
         return "skip", url
+    # Educates runtime dashboard routes (e.g. /slides/#anchor opens the Slides tab) —
+    # served at session runtime, not content files, so don't resolve them on disk.
+    if url.startswith("/slides/"):
+        return "skip", url
     if url.startswith(("http://", "https://")):
         host = url.split("/", 3)[2] if "/" in url[8:] + "/" else url
         if had_param or any(h in url for h in PLACEHOLDER_HOSTS) or "__UNRESOLVED_" in url:

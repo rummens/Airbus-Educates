@@ -26,7 +26,7 @@ subject).
 | **Educates editor** | View/edit exercise files *during this training* | Every lab — it's scaffolding, not a real workflow |
 | **Dev Spaces** (this lab) | Write and run code, live, **inside the cluster** | Day-to-day development — the fast inner loop |
 | **BuildConfig** (`lab-b02-image-buildconfigs`) | Turn finished source into a deployable **image** | Once a change is ready to become a real artifact |
-| **`oc apply`** (`lab-a02-deploy-first-app`, reinforced in `lab-b01-docker-to-k8s`) | Put a built image **into a running namespace** | Deploying (or promoting) that artifact |
+| **`oc apply`** (`lab-a01-deploy-first-app`, reinforced in `lab-b01-docker-to-k8s`) | Put a built image **into a running namespace** | Deploying (or promoting) that artifact |
 
 Read left to right and the shape becomes obvious: the **same git repository** can
 feed all three real tools (Dev Spaces excluded, since it edits the repo — it
@@ -50,7 +50,7 @@ honest answer?
 
 {{< note >}}
 **Answer:** They don't need it for *that* build — BuildConfig (B02) already turned
-finished source into an image, and `oc apply` (A02/B01) already runs it. Dev
+finished source into an image, and `oc apply` (A01/B01) already runs it. Dev
 Spaces earns its keep **before** that point: while the code is still being
 written, it's the fastest way to edit-and-run without waiting on an image build
 for every change. Once the code is ready, the BuildConfig → `oc apply` path is

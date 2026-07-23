@@ -42,7 +42,7 @@ By the end of this workshop you will be able to:
 ## Prerequisites
 
 - **B02 — Building Images with BuildConfigs.** This workshop picks up the image built
-  there. If you haven't done B02, `samples/hello-dcs:1.0` — the same image A02 deployed —
+  there. If you haven't done B02, `samples/hello-dcs:1.0` — the same image A01 deployed —
   stands in for it throughout.
 - Familiarity with [container images](https://kubernetes.io/docs/concepts/containers/images/)
   and basic [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)

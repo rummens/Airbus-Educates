@@ -13,7 +13,7 @@ sets an environment variable straight in the compose file — fine for one file 
 machine, but it means the value is baked into that file rather than living as its own,
 reusable piece of configuration. On Kubernetes the same variable moves into a
 [**ConfigMap**](https://kubernetes.io/docs/concepts/configuration/configmap/), which you
-already used in A03 to hold this app's config — here you're recreating that same idea by
+already used in A02 to hold this app's config — here you're recreating that same idea by
 migrating it out of a compose file instead of writing it from scratch.
 
 ## Before: no GREETING set
@@ -66,7 +66,7 @@ command: oc set env deploy/hello-dcs --from=configmap/hello-dcs-config
 ```
 
 Because this changes the Deployment's desired state, {{< param product_short >}} rolls out
-a replacement Pod carrying the new environment — the same rollout mechanic from A03, now
+a replacement Pod carrying the new environment — the same rollout mechanic from A02, now
 triggered by a migrated setting.
 
 ```examiner:execute-test

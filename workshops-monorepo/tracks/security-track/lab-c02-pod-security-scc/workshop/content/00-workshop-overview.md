@@ -37,7 +37,7 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- **lab-a02-kubernetes-essentials** — you should be comfortable applying a manifest with `oc apply`
+- **lab-a01-kubernetes-essentials** — you should be comfortable applying a manifest with `oc apply`
   and reading `oc get` / `oc describe`.
 - Familiarity with [Pods](https://kubernetes.io/docs/concepts/workloads/pods/) and basic
   [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html) usage.

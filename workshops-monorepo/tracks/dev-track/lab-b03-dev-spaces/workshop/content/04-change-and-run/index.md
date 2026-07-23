@@ -22,7 +22,7 @@ Inside the workspace, three things happen in sequence:
 ![Edit, run, and reach the change — all inside the workspace](edit-run-reach.svg)
 
 1. **Edit.** Open `server.py` in the workspace's own editor and change the
-   `GREETING` default — the same string A02 taught you to change with
+   `GREETING` default — the same string A01 taught you to change with
    `oc set env`, except here you're editing the *source*, not an environment
    variable on a running Deployment.
 2. **Run.** Trigger the `run-hello-dcs` command from page 02's devfile — one
@@ -33,11 +33,11 @@ Inside the workspace, three things happen in sequence:
    8080`) as a workspace preview URL — click it, and your edited greeting is
    staring back at you, served from a process running inside your namespace.
 
-## Why this is different from B02 and A02
+## Why this is different from B02 and A01
 
 Compare the three ways this course has now gotten a code change running:
 
-- **A02 (`oc apply`)** deploys an image someone already built — you never touch
+- **A01 (`oc apply`)** deploys an image someone already built — you never touch
   source.
 - **B02 (BuildConfig)** turns your source into a *new image* on every change —
   accurate for production, but there's a build cycle between "I edited a line"
@@ -48,7 +48,7 @@ Compare the three ways this course has now gotten a code change running:
 
 None of these replace the others — a workspace is where you iterate; a
 BuildConfig is how the iterated result becomes a deployable image (B02); `oc
-apply` is how that image reaches a real namespace (A02). The next page draws
+apply` is how that image reaches a real namespace (A01). The next page draws
 this boundary explicitly.
 
 ## Check your understanding

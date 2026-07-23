@@ -8,7 +8,7 @@ On the air-gapped Digital Container Service (DCS) there is no public registry to
 - **Audience:** Intermediate — comfortable inspecting images with `skopeo` and reading JSON with `jq`
 - **Duration:** ~40 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
-- **Prerequisites:** lab-c01-image-scanning and lab-a04-harbor-registry; comfortable with the Linux CLI.
+- **Prerequisites:** lab-c01-image-scanning and lab-a03-harbor-registry; comfortable with the Linux CLI.
 
 ## By the end of this lab you'll be able to
 
@@ -26,4 +26,4 @@ On the air-gapped Digital Container Service (DCS) there is no public registry to
 
 ## Before you start
 
-This lab builds directly on lab-c01 (reading a scan report, the Harbor gate) and lab-a04-harbor-registry (`skopeo inspect`, catalogs, digests vs tags, the read-only robot account). Those `skopeo` basics and "what a catalog is" are not re-taught here — finish both first.
+This lab builds directly on lab-c01 (reading a scan report, the Harbor gate) and lab-a03-harbor-registry (`skopeo inspect`, catalogs, digests vs tags, the read-only robot account). Those `skopeo` basics and "what a catalog is" are not re-taught here — finish both first.

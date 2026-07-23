@@ -11,10 +11,10 @@ quota, mirroring an image, a new repo, an S3 bucket, a security exception) go th
 bucket, and walks one request — a quota increase — from form to provisioned change.
 
 - **Track:** Core / Fundamentals · Lab 7
-- **Audience:** Beginner — you've done A01
+- **Audience:** Beginner — you've done A05
 - **Duration:** ~10 min
 - **Format:** Guided tour + knowledge check (screenshot-driven)
-- **Prerequisites:** A01 (What is DCS?).
+- **Prerequisites:** A05 (What is DCS?).
 
 ## By the end of this lab you'll be able to
 

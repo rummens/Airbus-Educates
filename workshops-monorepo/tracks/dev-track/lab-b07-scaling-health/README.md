@@ -13,7 +13,7 @@ actually guarantees.
 - **Audience:** Intermediate — comfortable with `oc scale` and Deployments from the Core track
 - **Duration:** ~28 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
-- **Prerequisites:** lab-a02-deploy-first-app; lab-a03-configure-troubleshoot — comfortable with Deployments, rollouts, and basic `oc` usage
+- **Prerequisites:** lab-a01-deploy-first-app; lab-a02-configure-troubleshoot — comfortable with Deployments, rollouts, and basic `oc` usage
 
 ## By the end of this lab you'll be able to
 

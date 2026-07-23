@@ -12,7 +12,7 @@ namespace types — the vocabulary the Developer track builds its deep model on.
 - **Audience:** Beginner — comfortable deploying with `oc`
 - **Duration:** ~20 min
 - **Format:** Hands-on, guided — split terminal, two pre-provisioned peer namespaces
-- **Prerequisites:** A02 (Deploy Your First App).
+- **Prerequisites:** A01 (Deploy Your First App).
 
 ## By the end of this lab you'll be able to
 

@@ -29,7 +29,7 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- **A02 — Deploy Your First App.** You should be comfortable running `oc` and deploying a workload. This lab reuses that skill; it doesn't re-teach it.
+- **A01 — Deploy Your First App.** You should be comfortable running `oc` and deploying a workload. This lab reuses that skill; it doesn't re-teach it.
 
 ## Your Environment
 

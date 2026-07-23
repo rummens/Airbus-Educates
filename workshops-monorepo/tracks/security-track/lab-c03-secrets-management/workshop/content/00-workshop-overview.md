@@ -50,7 +50,7 @@ By the end you will be able to:
 
 ## Prerequisites
 
-- **Module A** — especially **lab-a02-kubernetes-essentials**: you should be comfortable
+- **Module A** — especially **lab-a01-kubernetes-essentials**: you should be comfortable
   applying a manifest, setting env on a Deployment, and reading logs with `oc`.
 - Familiarity with [Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
   and [environment variables in a container](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/).

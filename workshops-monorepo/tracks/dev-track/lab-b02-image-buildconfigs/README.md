@@ -14,7 +14,7 @@ would after a real commit.
 - **Audience:** Intermediate — comfortable with Deployments and `oc apply`
 - **Duration:** ~30 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
-- **Prerequisites:** lab-b01-docker-to-k8s; lab-a02-deploy-first-app — comfortable with `oc apply` and reading a Deployment manifest
+- **Prerequisites:** lab-b01-docker-to-k8s; lab-a01-deploy-first-app — comfortable with `oc apply` and reading a Deployment manifest
 
 ## By the end of this lab you'll be able to
 

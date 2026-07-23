@@ -25,9 +25,9 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- **A02 — Deploy Your First App.** You know Deployments, `oc scale`, and the
+- **A01 — Deploy Your First App.** You know Deployments, `oc scale`, and the
   Deployment → ReplicaSet → Pod chain.
-- **A03 — Configure & Troubleshoot Your App.** You know how to trigger a rollout and read
+- **A02 — Configure & Troubleshoot Your App.** You know how to trigger a rollout and read
   `oc describe` / `oc get events` when something goes wrong.
 
 This lab does **not** re-teach `oc scale` mechanics or basic quota vocabulary — it assumes

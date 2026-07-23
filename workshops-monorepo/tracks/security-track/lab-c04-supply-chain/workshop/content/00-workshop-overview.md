@@ -4,7 +4,7 @@ title: Workshop Overview
 
 Welcome back. In this workshop, part of **{{< param product_name >}}**, you'll answer a
 question every secure platform has to answer: **where did this image actually come from, and
-can I prove it?** In A04 you pulled images from Harbor; in C01 you saw Harbor scan and gate
+can I prove it?** In A03 you pulled images from Harbor; in C01 you saw Harbor scan and gate
 them. Now you'll follow the whole **software supply chain** — source, build, registry, run —
 and learn the controls that keep it trustworthy on an air-gapped platform: **digest pinning**,
 **provenance**, **signatures/attestations**, and **mirroring**.
@@ -33,7 +33,7 @@ By the end you will be able to:
 ## Prerequisites
 
 - **lab-c01** (Image Scanning & Harbor Gates) — reading a scan report with `jq`, the Harbor gate.
-- **lab-a04-harbor-registry** — `skopeo inspect`, catalogs, digests vs tags, the read-only robot account.
+- **lab-a03-harbor-registry** — `skopeo inspect`, catalogs, digests vs tags, the read-only robot account.
 
 We build directly on those; `skopeo` basics and "what a catalog is" are not re-taught here.
 

@@ -57,7 +57,7 @@ it back. Instead, the [**Deployment**](https://kubernetes.io/docs/concepts/workl
 underlying **ReplicaSet** continuously compares the actual replica count against the
 desired count from `spec.replicas`. The moment actual (3) dropped below desired (4), it
 created a brand-new Pod from the exact same template to close the gap — the same
-reconciliation loop from Core A01, now watched live instead of taken on faith.
+reconciliation loop from Core A05, now watched live instead of taken on faith.
 
 {{< note >}}
 This is the same reconciliation you drove by hand on page 03 (re-applying a manifest) and

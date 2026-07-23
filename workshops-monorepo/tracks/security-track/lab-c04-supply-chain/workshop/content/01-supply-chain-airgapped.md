@@ -41,7 +41,7 @@ trusts.*
 ## The DCS trusted-source set
 
 Images become available in Harbor through a small, governed set of routes — the same catalogs
-you met in A04, now seen as the **inputs to the supply chain**:
+you met in A03, now seen as the **inputs to the supply chain**:
 
 - **DCS Catalogs** — curated image sets the platform vets and maintains (where `samples/hello-dcs` lives).
 - **Allowed External Registries** — an explicit permit-list of upstream registries whose images *may* be brought in. Not "the internet" — a named, governed set.

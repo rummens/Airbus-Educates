@@ -2,7 +2,7 @@
 # Run the CRC smoke tests for a whole track/module in one go.
 #
 #   ./run_track.sh workshops-monorepo/tracks/core-track      # a track folder
-#   ./run_track.sh workshops-monorepo/tracks/core-track/lab-a04-expose-app   # a single lab
+#   ./run_track.sh workshops-monorepo/tracks/core-track/lab-a03-expose-app   # a single lab
 #   ./run_track.sh <folder> [<folder> ...]                   # several
 #
 # Points at a folder, discovers every workshop under it (a dir with

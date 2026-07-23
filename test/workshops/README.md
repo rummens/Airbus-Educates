@@ -44,7 +44,7 @@ selfHeal must be off while testing.
 
 ```bash
 ./run_track.sh workshops-monorepo/tracks/core-track                 # a whole track
-./run_track.sh workshops-monorepo/tracks/core-track/lab-a04-expose-app  # one lab
+./run_track.sh workshops-monorepo/tracks/core-track/lab-a03-expose-app  # one lab
 ./run_track.sh --dry-run workshops-monorepo/tracks/core-track       # list what would run, touch nothing
 ```
 

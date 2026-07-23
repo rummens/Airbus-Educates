@@ -29,7 +29,7 @@ By the end of this workshop you will be able to:
 This workshop assumes you've completed **RBAC, Tenancy & Namespaces** (lab-b05) — or
 already understand the [Tenant → Namespace model]({{< param dcs_docs_base_url >}}/tenancy/tenants-and-namespaces)
 and basic [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) — and
-**Expose Your App** (lab-a04), so a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/),
+**Expose Your App** (lab-a03), so a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/),
 a [Service](https://kubernetes.io/docs/concepts/services-networking/service/) and a Route
 are already familiar shapes. Comfort with [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
 is assumed throughout.

@@ -14,7 +14,7 @@ NOTE: this checks the label on the Workshop CR. Propagating it onto the live ses
 namespace needs a platform mechanism (the portal chart's Kyverno policy is off on
 OpenShift) — that runtime step is out of scope here and validated on the platform.
 
-  ./label_check.py lab-a04-expose-app
+  ./label_check.py lab-a03-expose-app
   ./label_check.py --all
 """
 import argparse

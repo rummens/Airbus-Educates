@@ -4,7 +4,7 @@ title: Container to Deployment
 
 First row of the mapping: the compose `hello-dcs` service becomes a
 [**Deployment**](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/).
-You already built one of these by hand in A02 — this time you're translating an existing
+You already built one of these by hand in A01 — this time you're translating an existing
 definition instead of starting from nothing.
 
 ## Open the starter manifest
@@ -13,7 +13,7 @@ definition instead of starting from nothing.
 file: ~/exercises/deployment.yaml
 ```
 
-The shape should look familiar from A02/A03: `replicas: 1`, a `selector` and Pod
+The shape should look familiar from A01/A02: `replicas: 1`, a `selector` and Pod
 `template` with matching labels. One thing is missing — the `image:` field still reads
 `REPLACE_WITH_HARBOR_IMAGE`. On DCS, an air-gapped platform, every image is pulled from
 the [Harbor]({{< param dcs_docs_base_url >}}/registry/overview) registry

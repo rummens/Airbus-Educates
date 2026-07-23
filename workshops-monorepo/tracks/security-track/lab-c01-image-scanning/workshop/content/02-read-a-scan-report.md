@@ -4,7 +4,7 @@ title: Read a Scan Report
 
 Time to read an actual report. Harbor stores a scan result as JSON against each artifact —
 you'll work with a saved report for the `samples/hello-dcs:1.0` image you already know from
-A04. It's shipped as a fixture so you can read it the same way every time, air-gapped.
+A03. It's shipped as a fixture so you can read it the same way every time, air-gapped.
 
 ## Open the report
 

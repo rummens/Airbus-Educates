@@ -39,7 +39,7 @@ new — Kubernetes just applies it universally, to every object, not just contai
 
 ![Docker world mapped onto Kubernetes objects](mental-model.svg)
 
-You already know what a Deployment, a Service and a ConfigMap *are* from A02/A03 — this
+You already know what a Deployment, a Service and a ConfigMap *are* from A01/A02 — this
 lab is about recognising the compose line that becomes each one, then dealing with the
 lines that have no clean equivalent at all (page 05).
 

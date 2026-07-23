@@ -35,6 +35,6 @@ promotion model it implies.
 ## Before you start
 
 This lab assumes you've done lab-b05-rbac-tenancy (or already know the
-Tenant → Namespace model and basic RBAC) and lab-a04-expose-app (Services and Routes). If
+Tenant → Namespace model and basic RBAC) and lab-a03-expose-app (Services and Routes). If
 a Route or a `Deployment` manifest is unfamiliar, do those first — this lab builds on them
 rather than re-teaching them.

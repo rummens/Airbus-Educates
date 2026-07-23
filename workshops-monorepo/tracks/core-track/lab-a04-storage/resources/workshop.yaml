@@ -1,0 +1,65 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-a04-storage
+  labels:
+    academy.dcs/track: core
+    academy.dcs/order: "40"
+    # PVC only, no Route/Ingress → dev namespace.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: "Storage"
+  description: Give your app storage that survives a restart — request a PVC from a DCS storage class, mount it, write data, restart, and prove the data persists — and learn when to pick File vs Block and how S3 is requested.
+  duration: 20m
+  difficulty: beginner
+  labels:
+    - name: module
+      value: "A-Foundations"
+  publish:
+    image: "$(image_repository)/lab-a04-storage-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a04-storage/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a04-storage/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a04-storage/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/core-track/lab-a04-storage"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-a04-storage-files:$(workshop_version)"
+    {{- end }}
+  session:
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      examiner:
+        enabled: true
+      # PVCs are namespace-scoped self-service — nothing cluster-scoped needed.
+      vcluster:
+        enabled: false

@@ -17,7 +17,7 @@ url: {{< param ingress_protocol >}}://console-{{< param session_hostname >}}/#/w
 ```
 
 It's **empty** right now — you haven't deployed anything yet. That's expected: from
-**A02** onwards you'll deploy apps and come back here to watch them appear. For now, just
+**A01** onwards you'll deploy apps and come back here to watch them appear. For now, just
 note that the tab exists and shows *your* namespace.
 
 {{< note >}}

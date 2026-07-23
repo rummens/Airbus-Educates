@@ -29,7 +29,7 @@ By the end of this workshop you will be able to:
 - **B01 — From Docker to Kubernetes on DCS.** You know Deployments, and how to apply a
   manifest with `envsubst < file.yaml | oc apply -f -` when it references
   `${DCS_REGISTRY}`.
-- Comfort reading a [YAML](https://kubernetes.io/docs/concepts/configuration/overview/) manifest — this lab reuses, rather than re-teaches, the Deployment shape from A02/B01.
+- Comfort reading a [YAML](https://kubernetes.io/docs/concepts/configuration/overview/) manifest — this lab reuses, rather than re-teaches, the Deployment shape from A01/B01.
 
 This lab does **not** re-teach how to write or apply a Deployment, or how to reach a
 Service — B01 already covered that. It's about the *build* step that produces the image

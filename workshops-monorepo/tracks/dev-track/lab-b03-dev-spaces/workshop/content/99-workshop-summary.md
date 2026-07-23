@@ -22,7 +22,7 @@ loop from an edited line of code to that line running inside the cluster.
 - **Traced** the edit → run → reach loop a workspace gives you, and why it skips
   the image-build step that B02's BuildConfig deliberately has.
 - **Placed** Dev Spaces, the Educates editor, BuildConfig (B02), and `oc apply`
-  (A02/B01) on one timeline: write it, build it, run it — four tools, one job
+  (A01/B01) on one timeline: write it, build it, run it — four tools, one job
   each, never substitutes for one another.
 
 ## Check Your Understanding
@@ -60,7 +60,7 @@ iterating.
 
 {{< note >}}
 **Answer:** No — they solve different problems. Dev Spaces is where you *write
-and iterate on* code; `oc apply` (A02/B01) is how a *built* image ends up
+and iterate on* code; `oc apply` (A01/B01) is how a *built* image ends up
 running in a real namespace. A workspace never deploys anything by itself.
 {{< /note >}}
 

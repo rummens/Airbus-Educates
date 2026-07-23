@@ -22,7 +22,7 @@ resolver. Plan lives at smoke-plans/<name>.json:
 Examples:
   ./smoke_test.py lab-a02-kubernetes-essentials
   ./smoke_test.py lab-a03-namespace-model --keep            # leave it running
-  ./smoke_test.py lab-a01-what-is-dcs --no-deploy --no-teardown   # against an existing session
+  ./smoke_test.py lab-a05-what-is-dcs --no-deploy --no-teardown   # against an existing session
 """
 import argparse
 import json

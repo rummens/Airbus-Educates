@@ -8,7 +8,7 @@ Every workload on the Digital Container Service (DCS) is admitted under a restri
 - **Audience:** Intermediate — comfortable applying manifests and reading `oc get` / `oc describe`
 - **Duration:** ~40 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
-- **Prerequisites:** lab-a02-kubernetes-essentials; comfortable with the Linux CLI and familiar with Pods.
+- **Prerequisites:** lab-a01-kubernetes-essentials; comfortable with the Linux CLI and familiar with Pods.
 
 ## By the end of this lab you'll be able to
 

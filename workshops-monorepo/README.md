@@ -8,7 +8,7 @@ every workshop/track from the folder tree — there is no catalog list to edit.
   tracks/
     core-track/         <- a TRACK folder (name is free; the id is in track.yaml)
       track.yaml        <- track metadata incl. explicit `id` → one Track CR
-      lab-a01-what-is-dcs/
+      lab-a05-what-is-dcs/
         resources/
           workshop.yaml <- a complete Educates Workshop CR (emitted verbatim)
         workshop/ …     <- lab content (built to an OCI files-image by CI; chart ignores it)
@@ -117,7 +117,7 @@ it must carry the portal metadata itself:
   can apply the CR before the Educates Workshop CRD is dry-run-checked. Keep the
   workshop wave well **below** the TrainingPortal's 100.
 
-See `tracks/core-track/lab-a01-what-is-dcs/resources/workshop.yaml` for a filled, commented example.
+See `tracks/core-track/lab-a05-what-is-dcs/resources/workshop.yaml` for a filled, commented example.
 
 ## vcluster note (the one duplication cost)
 

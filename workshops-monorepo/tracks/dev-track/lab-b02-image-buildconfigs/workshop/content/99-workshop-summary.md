@@ -13,7 +13,7 @@ watched a fresh image take over.
 - **Connected** a git repository as a build source in a BuildConfig, and compared the
   **S2I** and **Dockerfile** strategies.
 - **Built** an image with `oc start-build` and watched it push into Harbor.
-- **Deployed** the image you built, using the same Deployment skills from A02/B01.
+- **Deployed** the image you built, using the same Deployment skills from A01/B01.
 - **Rebuilt** it and confirmed a fresh image — with a new digest — replaced the old one.
 
 ## Check Your Understanding

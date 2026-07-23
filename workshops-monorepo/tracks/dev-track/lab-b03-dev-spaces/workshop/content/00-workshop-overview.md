@@ -3,7 +3,7 @@ title: "Cloud Development with OpenShift Dev Spaces"
 ---
 
 Welcome to this workshop, part of **{{< param product_name >}}**. So far you've
-deployed a ready-made image straight to your namespace (A02, reinforced in **From
+deployed a ready-made image straight to your namespace (A01, reinforced in **From
 Docker to Kubernetes on DCS**), and connected git as a **build source** so the
 cluster turns your code into an image (**Building Images with BuildConfigs**). Neither
 of those lets you edit and run your code *while it's inside the cluster*. This

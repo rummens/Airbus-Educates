@@ -2,7 +2,7 @@
 title: Workshop Overview
 ---
 
-Welcome to this workshop, part of **{{< param product_name >}}**. In A04 you pulled images
+Welcome to this workshop, part of **{{< param product_name >}}**. In A03 you pulled images
 from Harbor and saw that a **scan gate** can block an unsafe one. Here you go inside that
 gate: you'll read the *content* of a Harbor scan report, tell **vulnerability** scanning
 apart from **compliance** scanning, understand the policy that decides what gets blocked, and
@@ -36,7 +36,7 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- **lab-a04-harbor-registry** — you should be comfortable inspecting an image with
+- **lab-a03-harbor-registry** — you should be comfortable inspecting an image with
   [`skopeo`](https://github.com/containers/skopeo) and know that Harbor catalogs, robot
   accounts, and a scan gate exist.
 - Familiarity with [container images](https://kubernetes.io/docs/concepts/containers/images/),

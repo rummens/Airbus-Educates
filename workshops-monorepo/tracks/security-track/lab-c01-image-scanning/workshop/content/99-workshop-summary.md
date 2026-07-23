@@ -2,7 +2,7 @@
 title: Summary
 ---
 
-You went from "a gate can block an image" (A04) to reading the report behind the decision,
+You went from "a gate can block an image" (A03) to reading the report behind the decision,
 understanding the policy that makes it, and remediating a flagged image — the everyday
 security loop on an air-gapped {{< param product_short >}}.
 

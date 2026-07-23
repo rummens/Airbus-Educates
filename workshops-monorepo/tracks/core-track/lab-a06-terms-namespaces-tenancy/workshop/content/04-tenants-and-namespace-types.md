@@ -49,7 +49,7 @@ The labels are how the platform tracks which Tenant a namespace belongs to and w
 it is.
 
 {{< note >}}
-Don't confuse a **cluster** with a **namespace type**. From A01: Sandbox and PROD are
+Don't confuse a **cluster** with a **namespace type**. From A05: Sandbox and PROD are
 *clusters* — where the platform runs. DEV and PROD here are *namespace types* — how a
 namespace is governed. Different things that reuse the word "PROD".
 {{< /note >}}

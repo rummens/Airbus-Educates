@@ -16,7 +16,7 @@ Both routes end the same way — a re-scanned artifact with the findings gone:
 - **Rebuild on a patched base.** If no ready-made clean tag exists, rebuild the image on an
   updated base (the `FixedVersion` of each finding is your shopping list of package versions),
   push it, and let Harbor scan the result. This is CI's job, not a live in-session step — same
-  as pushing in A04.
+  as pushing in A03.
 
 Either way you finish with an artifact whose report shows the Criticals and Highs gone. In
 this workshop the clean, remediated artifact is the one you already trust:
@@ -25,7 +25,7 @@ this workshop the clean, remediated artifact is the one you already trust:
 ## Confirm the remediated image passes
 
 First, prove the clean image is real and pullable — inspect it in Harbor (this reads live over
-your read-only robot account, exactly like A04):
+your read-only robot account, exactly like A03):
 
 ```terminal:execute
 command: skopeo inspect docker://$DCS_REGISTRY/samples/hello-dcs:1.0

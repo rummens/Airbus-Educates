@@ -1,0 +1,86 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-a05-what-is-dcs
+  # --- DCS portal catalog metadata (this file is emitted verbatim; the portal
+  #     reads these academy.dcs/* labels+annotations off metadata, NOT spec) ----
+  labels:
+    # REQUIRED: which track this lab appears under (must equal a Track's id) and
+    # its sort order within that track (string value; low = first).
+    academy.dcs/track: core
+    # Sorts after the hands-on quick-win labs (A02–A05): action first, then this
+    # concept/orientation lab. Not a hard prereq for A02 anymore.
+    academy.dcs/order: "50"
+    # No Route/Ingress here (concept lab) → dev namespace, like the rest of Core.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    # Lets ArgoCD apply this CR before the Educates Workshop CRD is dry-run-checked.
+    # Keep this wave well BELOW the TrainingPortal's (100) so the workshop exists first.
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    # Optional display overrides (each falls back to spec / first sentence of desc):
+    #   academy.dcs/display-name, academy.dcs/summary, academy.dcs/icon,
+    #   academy.dcs/author, academy.dcs/details, academy.dcs/duration, academy.dcs/difficulty
+    # Optional per-workshop session lifetime in the TrainingPortal (else values default):
+    #   academy.dcs/expires, academy.dcs/orphaned
+spec:
+  title: What is DCS?
+  description: Get oriented on the Digital Container Service — what it is, how containers and images fit, and how to work in the DCS environment with oc.
+  duration: 15m
+  difficulty: beginner
+  # spec.labels are Educates-native (searchable in Educates' own UI). Catalog
+  # grouping/order live in the academy.dcs/* metadata labels above — keep only
+  # descriptive labels here (the track label moved up, so it's dropped).
+  labels:
+    - name: module
+      value: "A-Foundations"
+  publish:
+    image: "$(image_repository)/lab-a05-what-is-dcs-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a05-what-is-dcs/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a05-what-is-dcs/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a05-what-is-dcs/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/core-track/lab-a05-what-is-dcs"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-a05-what-is-dcs-files:$(workshop_version)"
+    {{- end }}
+  session:
+    namespaces:
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      # A short reveal-free slide deck (workshop/slides/index.html) gives a visual,
+      # low-text overview alongside the pages — this lab is concept-heavy.
+      slides:
+        enabled: true
+      examiner:
+        enabled: true
+      # vcluster decision (house standard: always record it explicitly). This lab
+      # runs in a NATIVE OpenShift session namespace — no per-session vcluster. Set
+      # enabled: true ONLY for labs needing a throwaway cluster with cluster-admin
+      # (real namespaces / cluster-scoped objects — see lab-a03). A vcluster lab ALSO
+      # needs the educates-privileged-scc RoleBinding in session.objects (see a03) or
+      # CoreDNS crashloops on OpenShift, plus namespaces.budget: large.
+      vcluster:
+        enabled: false

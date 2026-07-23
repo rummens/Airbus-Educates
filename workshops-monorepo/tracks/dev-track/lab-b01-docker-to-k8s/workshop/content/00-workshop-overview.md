@@ -29,14 +29,14 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- **A02 — Deploy Your First App.** You know Deployments, Pods, and the
+- **A01 — Deploy Your First App.** You know Deployments, Pods, and the
   Deployment → ReplicaSet → Pod chain.
-- **A03 — Configure & Troubleshoot Your App.** You know ConfigMaps and how a config
+- **A02 — Configure & Troubleshoot Your App.** You know ConfigMaps and how a config
   change triggers a rollout.
 - Comfort reading a `docker run` command or a `docker-compose.yml` file — this lab assumes
   that background rather than teaching it.
 
-This lab does **not** re-teach what a Deployment, Service or ConfigMap *is* — A02/A03
+This lab does **not** re-teach what a Deployment, Service or ConfigMap *is* — A01/A02
 already covered that. It's about the *mapping* from the Docker world onto those objects,
 and the constraints DCS adds along the way.
 

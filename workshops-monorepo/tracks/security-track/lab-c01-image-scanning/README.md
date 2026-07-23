@@ -8,7 +8,7 @@ On the Digital Container Service (DCS) the registry is the security checkpoint. 
 - **Audience:** Intermediate — comfortable with `oc`, container images, and the idea of a CVE
 - **Duration:** ~40 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace
-- **Prerequisites:** lab-a04-harbor-registry; comfortable with the Linux CLI and familiar with containers and CVEs.
+- **Prerequisites:** lab-a03-harbor-registry; comfortable with the Linux CLI and familiar with containers and CVEs.
 
 ## By the end of this lab you'll be able to
 
