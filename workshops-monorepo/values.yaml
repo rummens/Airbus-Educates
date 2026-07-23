@@ -63,21 +63,26 @@ educates:
 portal:
   title: "DCS Enablement"
   # Public academy host = portal chart's auth.hostname. Educates uses it for
-  # PORTAL_HOSTNAME (URLs, cookies, CSP). The oauth-proxy claims it.
+  # PORTAL_HOSTNAME (URLs, cookies, CSP). The Flask portal (SA-as-OAuthClient) owns it.
   hostname: academy
   registration:
-    type: anonymous            # oauth-proxy is the sole gate; no Educates signup
+    type: anonymous            # portal auth.py is the sole gate; no Educates signup
   sessions:
     maximum: 3
   workshop:
-    reserved: 1
+    # reserved:0 — no warm spare pool. A spare's expires/orphaned clocks run from
+    # session CREATION, so a spare sitting > orphaned goes stale and is orphan-reaped
+    # the instant it's allocated (→ dead oauth client → "400 Invalid client_id" on
+    # rewarm). With maximum:3 a warm pool buys little; pay the ~30-60s cold start.
+    reserved: 0
     initial: 0
   # Default per-workshop session lifecycle for the TrainingPortal list. Override
   # per lab with annotations academy.dcs/expires + academy.dcs/orphaned.
   expires: 60m
-  # Grace before an allocated-but-never-accessed session is reaped. Bumped from 5m
-  # to give a slow first connect (SSO + per-session host resolve) more headroom.
-  orphaned: 15m
+  # Grace before a session with no connected browser (never-accessed OR backgrounded
+  # tab whose dashboard websocket dropped) is reaped. 40m so a learner working in
+  # another tab isn't killed long before the 60m expires hard cap. Must stay < expires.
+  orphaned: 40m
 
 feedback:
   # Educates analytics webhook → the portal app's /analytics (CNPG-backed).
