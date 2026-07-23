@@ -9,10 +9,10 @@
      · avg clarity {{ avg(overall.avg_clarity) }} · {{ overall.n_comment }} comments</p>
 
   <h2>Site banner</h2>
-  <p class="muted">Shown to everyone on the landing page (maintenance notices, announcements). Empty = hidden.</p>
+  <p class="muted">Shown to everyone on the landing page (maintenance notices, announcements). Empty = hidden. Markdown supported (bold, lists, links); blank lines separate paragraphs.</p>
   <form method="post" action="{{ url_for('admin_banner') }}" class="banner-form">
-    <input type="text" name="banner" maxlength="500" value="{{ banner }}"
-           placeholder="e.g. Maintenance window Sat 20:00–22:00 CET — sessions may restart">
+    <textarea name="banner" maxlength="2000" rows="4"
+              placeholder="e.g. **Maintenance** Sat 20:00–22:00 CET — sessions may restart">{{ banner }}</textarea>
     <button class="btn btn-primary" type="submit">Save</button>
   </form>
 

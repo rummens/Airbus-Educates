@@ -95,14 +95,14 @@ def test_trophies_none_when_nothing_done(db):
 
 def test_trophies_partial_and_grouping(db):
     feedback.mark_progress("alice", "l1", "completed")
-    feedback.mark_progress("alice", "l2", "completed")       # module M1 + track T1 complete
+    feedback.mark_progress("alice", "l2", "completed")       # track T1 complete
     t = appmod._trophies("alice", _TROPHY_COURSES)
     earned = {x["title"]: x["earned"] for x in t["items"]}
     assert t["done"] == 2
     assert earned["First Lab"] is True
-    assert earned["M1 Module"] is True
-    assert earned["M2 Module"] is False
+    assert "M1 Module" not in earned                         # no per-module trophies anymore
     assert earned["T1 Track"] is True
+    assert earned["T2 Track"] is False
     assert earned["Academy Master"] is False                 # l3 still open
 
 
@@ -202,12 +202,12 @@ def test_session_route_ready(monkeypatch):
 
 
 def test_trophies_dynamic_from_tracks(db):
-    # per-track/per-module trophies come from the live courses+tracks → adding a track grows them
+    # per-track trophies come from the live Track CRs → adding a track grows them; no per-module
     courses = [{"name": "x1", "module": "B-Developer", "track": "dev"}]
     tracks = [{"name": "dev", "title": "Developer — Build on DCS"}]
     t = appmod._trophies("alice", courses, tracks)
     titles = [x["title"] for x in t["items"]]
-    assert "Developer Module" in titles           # module label prettified (B- stripped)
+    assert not any("Module" in x for x in titles)  # no per-module trophies
     assert "Developer — Build on DCS Track" in titles or "Developer — Build on DCS" in titles
 
 
@@ -303,6 +303,14 @@ def test_banner_renders_on_landing(client):
     assert b"Scheduled maintenance tonight" in client.get("/").data
     feedback.set_setting("banner", "")
     assert b"Scheduled maintenance tonight" not in client.get("/").data
+
+
+def test_banner_renders_markdown(client):
+    feedback.set_setting("banner", "**down** now\n\nsee [docs](http://x)")
+    body = client.get("/").data
+    feedback.set_setting("banner", "")
+    assert b"<strong>down</strong>" in body            # markdown → HTML
+    assert b'<a href="http://x">docs</a>' in body      # multi-paragraph + links
 
 
 def test_trophies_render_for_dev_user(client, monkeypatch):
@@ -731,13 +739,11 @@ def test_usage_and_de_filter(monkeypatch):
     assert re.match(r"\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}", de("2026-07-13T10:00:00"))
 
 
-def test_abs_session_url_and_pretty_module():
+def test_abs_session_url():
     assert appmod._abs_session_url("") == ""
     assert appmod._abs_session_url("session/x") == "/session/x"
     assert appmod._abs_session_url("/session/x") == "/session/x"
     assert appmod._abs_session_url("https://h/s") == "https://h/s"
-    assert appmod._pretty_module("B-Developer") == "Developer"
-    assert appmod._pretty_module("Foundations") == "Foundations"
 
 
 # --- metrics live collector -------------------------------------------------

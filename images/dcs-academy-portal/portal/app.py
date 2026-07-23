@@ -172,7 +172,7 @@ def create_app():
                                min_reviews=cfg.FEEDBACK_MIN_REVIEWS, is_admin=_is_admin(),
                                difficulty_icon=DIFFICULTY_ICON, progress=progress,
                                stats=_catalog_stats(courses, tracks), hidden=hidden,
-                               cont=cont_course, banner=_banner(),
+                               cont=cont_course, banner=_render_md(_banner()),
                                trophies=_trophies(_user(), courses, tracks))
 
     @app.route("/trophies")
@@ -300,7 +300,7 @@ def create_app():
         """Set/clear the site-wide banner (maintenance / announcement)."""
         if not _is_admin():
             abort(403)
-        _safe(lambda: feedback.set_setting("banner", request.form.get("banner", "").strip()[:500]))
+        _safe(lambda: feedback.set_setting("banner", request.form.get("banner", "").strip()[:2000]))
         return redirect(url_for("admin"))
 
     @app.route("/admin/rescan", methods=["POST"])
@@ -368,16 +368,11 @@ def _banner():
     return _safe(lambda: feedback.get_setting("banner", "")) or ""
 
 
-def _pretty_module(mod):
-    """'B-Developer' → 'Developer'; leaves a plain value untouched."""
-    return mod.split("-", 1)[1] if "-" in mod and len(mod.split("-", 1)[0]) <= 2 else mod
-
-
 def _trophies(user, courses, tracks=None):
-    """Trophies from completed-lab progress. DYNAMIC: the per-module and per-track
-    trophies are derived from the live Workshop CRs (module label) and Track CRs, so
-    adding a new track/module + its labs grows the trophy set automatically — no code
-    change. Each entry carries earned state, the requirement, and progress (done/need)."""
+    """Trophies from completed-lab progress. Two trophies are FIXED (First Lab,
+    Academy Master); every other trophy is DYNAMIC — one per live Track CR, so
+    adding a track + its labs grows the trophy set automatically, no code change.
+    Each entry carries earned state, the requirement, and progress (done/need)."""
     done = {w for w, s in _progress_safe(user).items() if s == "completed"}
     total = len(courses)
     track_title = {t["name"]: t.get("title", t["name"]) for t in (tracks or [])}
@@ -396,10 +391,6 @@ def _trophies(user, courses, tracks=None):
     items = [{"key": "first", "title": "First Lab", "icon": "trophy",
               "earned": len(done) >= 1, "detail": "Complete any one lab",
               "done": min(len(done), 1), "need": 1}]
-    for mod, labs in sorted(group("module").items()):
-        name = _pretty_module(mod)
-        items.append(entry(f"module:{mod}", f"{name} Module", "medal", labs,
-                           f"Complete all {len(labs)} labs in the {name} module"))
     for tr, labs in sorted(group("track").items()):
         title = track_title.get(tr, tr.title())
         label = title if "track" in title.lower() else f"{title} Track"

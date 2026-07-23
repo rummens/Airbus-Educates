@@ -2,7 +2,7 @@
 {% import "_macros.html" as m with context %}
 {% block content %}
 
-{% if banner %}<div class="banner" role="status">{{ icon('info')|safe }} <span>{{ banner }}</span></div>{% endif %}
+{% if banner %}<div class="banner" role="status">{{ icon('info')|safe }} <div class="banner-body">{{ banner }}</div></div>{% endif %}
 
 <section class="hero">
   <span class="eyebrow">{% if current_user %}Welcome back, {{ current_user|firstname }}{% else %}Interactive training platform{% endif %}</span>
