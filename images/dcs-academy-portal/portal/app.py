@@ -16,7 +16,7 @@ from flask import (Flask, render_template, request, redirect, abort, jsonify,
 from markupsafe import Markup
 
 from . import config as cfg
-from . import k8sclient, educates, feedback, metrics, proxy, auth, cache
+from . import k8sclient, educates, feedback, metrics, proxy, auth, cache, slides
 from .icons import ICONS, DIFFICULTY_ICON, resolve_icon
 
 _log = logging.getLogger("portal")
@@ -33,12 +33,17 @@ def _steps_for(vcluster):
     return s
 
 
-def _render_md(text):
-    """Render trusted README markdown → safe HTML for the course view. Source is
-    our own repo (git), rendered server-side; tables/fenced code enabled."""
+def _render_md(text, breaks=False):
+    """Render trusted markdown → safe HTML. Source is our own repo/admins,
+    rendered server-side; tables/fenced code enabled. breaks=True adds nl2br so a
+    single newline becomes <br> (banner: admins type plain lines, not markdown
+    paragraphs) — off for READMEs, whose hard-wrapped prose must NOT break per line."""
     if not text:
         return ""
-    return Markup(md.markdown(text, extensions=["fenced_code", "tables", "toc", "sane_lists"]))
+    exts = ["fenced_code", "tables", "toc", "sane_lists"]
+    if breaks:
+        exts.append("nl2br")
+    return Markup(md.markdown(text, extensions=exts))
 
 # Endpoints reachable WITHOUT a login session. auth.* drive the login; health
 # probes are kubelet; /analytics is the Educates webhook (server-to-server, no
@@ -77,6 +82,7 @@ def create_app():
                       SESSION_COOKIE_SAMESITE=cfg.SESSION_COOKIE_SAMESITE,
                       SESSION_COOKIE_SECURE=True)
     app.register_blueprint(auth.bp)
+    app.register_blueprint(slides.bp)
 
     @app.before_request
     def _require_login():
@@ -172,7 +178,7 @@ def create_app():
                                min_reviews=cfg.FEEDBACK_MIN_REVIEWS, is_admin=_is_admin(),
                                difficulty_icon=DIFFICULTY_ICON, progress=progress,
                                stats=_catalog_stats(courses, tracks), hidden=hidden,
-                               cont=cont_course, banner=_render_md(_banner()),
+                               cont=cont_course, banner=_render_md(_banner(), breaks=True),
                                trophies=_trophies(_user(), courses, tracks))
 
     @app.route("/trophies")
@@ -202,7 +208,8 @@ def create_app():
         return render_template("course.html", c=c, ratings=ratings,
                                min_reviews=cfg.FEEDBACK_MIN_REVIEWS, is_admin=_is_admin(),
                                difficulty_icon=DIFFICULTY_ICON, readme_html=_render_md(readme),
-                               status=_progress_safe(_user()).get(name, ""))
+                               status=_progress_safe(_user()).get(name, ""),
+                               has_slides=slides.has_slides(name))
 
     # --- launch / provisioning ---------------------------------------------
     @app.route("/launch/<name>")
