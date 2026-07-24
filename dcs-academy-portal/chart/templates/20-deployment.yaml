@@ -82,6 +82,12 @@ spec:
             {{- else }}
             - { name: FEEDBACK_DB, value: /tmp/feedback.db }
             {{- end }}
+            {{- if and .Values.slides.enabled .Values.slides.git.repo }}
+            # Slides served outside a session: the git-sync sidecar keeps the content
+            # repo checked out at /slides-src/repo; slides.py serves each lab's
+            # workshop/slides/ dir at /slides/<lab>/.
+            - { name: PORTAL_SLIDES_ROOT, value: /slides-src/repo }
+            {{- end }}
             {{- if (.Values.openssl.armcap | toString) }}
             # Skip OpenSSL's aarch64 CPU-capability probe (software crypto). Set on
             # Apple-Silicon CRC where the probe SIGILLs under Virtualization.framework.
@@ -102,11 +108,18 @@ spec:
             # requests() trusts this bundle for outbound HTTPS (README fetch).
             - { name: REQUESTS_CA_BUNDLE, value: /etc/pki/portal-ca/ca-bundle.crt }
             {{- end }}
-          {{- if .Values.trustedCA.enabled }}
+          {{- if or .Values.trustedCA.enabled (and .Values.slides.enabled .Values.slides.git.repo) }}
           volumeMounts:
+            {{- if .Values.trustedCA.enabled }}
             - name: trusted-ca
               mountPath: /etc/pki/portal-ca
               readOnly: true
+            {{- end }}
+            {{- if and .Values.slides.enabled .Values.slides.git.repo }}
+            - name: slides-src
+              mountPath: /slides-src
+              readOnly: true
+            {{- end }}
           {{- end }}
           readinessProbe:
             httpGet: { path: /readyz, port: http }
@@ -118,13 +131,50 @@ spec:
             periodSeconds: 20
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      {{- if .Values.trustedCA.enabled }}
+        {{- if and .Values.slides.enabled .Values.slides.git.repo }}
+        # git-sync sidecar: keeps the workshop content repo checked out on a shared
+        # volume and RE-PULLS every --period, so new/edited slides appear without a
+        # pod restart. Air-gap: mirror the git-sync image to Harbor and point
+        # slides.git.repo at the internal git host.
+        - name: git-sync
+          image: {{ .Values.slides.git.image | quote }}
+          args:
+            - --repo={{ .Values.slides.git.repo }}
+            - --ref={{ .Values.slides.git.ref }}
+            - --period={{ .Values.slides.git.period }}
+            - --depth=1
+            - --root=/slides-src
+            - --link=repo
+          {{- if .Values.slides.git.existingSecret }}
+          env:
+            - name: GITSYNC_USERNAME
+              valueFrom: { secretKeyRef: { name: {{ .Values.slides.git.existingSecret }}, key: username } }
+            - name: GITSYNC_PASSWORD
+              valueFrom: { secretKeyRef: { name: {{ .Values.slides.git.existingSecret }}, key: password } }
+          {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - name: slides-src
+              mountPath: /slides-src
+          resources:
+            {{- toYaml .Values.slides.resources | nindent 12 }}
+        {{- end }}
+      {{- if or .Values.trustedCA.enabled (and .Values.slides.enabled .Values.slides.git.repo) }}
       volumes:
+        {{- if .Values.trustedCA.enabled }}
         - name: trusted-ca
           configMap:
             name: {{ .Values.trustedCA.existingConfigMap | default (printf "%s-trusted-ca" .Chart.Name) }}
             items:
               - key: ca-bundle.crt
                 path: ca-bundle.crt
+        {{- end }}
+        {{- if and .Values.slides.enabled .Values.slides.git.repo }}
+        - name: slides-src
+          emptyDir: {}
+        {{- end }}
       {{- end }}
 {{- end }}

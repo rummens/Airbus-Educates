@@ -2,9 +2,12 @@
 title: Change It and Watch the Rollout
 ---
 
-Here's the {{< param product_short >}} promise from A05 made concrete. Change the desired
-state, and the platform reconciles to it — it rolls out a **new** Pod with the new config
-and retires the old one, with no downtime and nothing for you to restart by hand.
+This is the core {{< param product_short >}} behaviour, made concrete. When you change the
+desired state (here, the greeting), the platform reconciles to it: it rolls out a **new**
+Pod with the new configuration and retires the old one, with no downtime and nothing for
+you to restart by hand. The next page defines this "desired state" idea properly.
+
+*[📊 See this on a slide](/slides/#/rollout) — opens the **Slides** tab on this topic.*
 
 ## Change the greeting again (upper terminal)
 

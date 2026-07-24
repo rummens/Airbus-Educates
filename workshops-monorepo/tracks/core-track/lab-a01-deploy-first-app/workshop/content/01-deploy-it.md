@@ -7,6 +7,8 @@ is how you tell {{< param product_short >}} "keep one copy of this image running
 it pulls the image, starts a [Pod](https://kubernetes.io/docs/concepts/workloads/pods/),
 and keeps it alive.
 
+*[📊 See this on a slide](/slides/#/deploy) — opens the **Slides** tab on this topic.*
+
 ## Create the Deployment
 
 ```terminal:execute

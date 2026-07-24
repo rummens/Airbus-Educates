@@ -6,26 +6,31 @@ Everything you run on {{< param product_short >}} runs in a **container** — in
 apps you've already deployed earlier in this track. Here's what that actually means, and
 how it differs from the virtual machines you may already know.
 
-*[📊 See this on a slide](/slides/#images) — opens the **Slides** tab on this topic.*
+*[📊 See this on a slide](/slides/#/images) — opens the **Slides** tab on this topic.*
 
 ## From Virtual Machines to Containers
 
-Think of a **virtual machine** like a private house: it brings its own foundation,
-plumbing, and walls — a full operating system — which is powerful but heavy. A
-[container](https://kubernetes.io/docs/concepts/containers/) is more like an apartment
-in a modern building: it carries only what your application needs and shares the
-building's infrastructure. Containers start in seconds, are lightweight, and run the
-same way everywhere.
+A **virtual machine** carries a full operating system of its own, which makes it powerful
+but heavy — it takes minutes to boot and gigabytes of disk. A
+[container](https://kubernetes.io/docs/concepts/containers/) carries only your application
+and the few libraries it needs, and shares the host's operating system kernel. The result:
+containers start in seconds, are much smaller, and run the same way on any machine.
+
+{{< note >}}
+If you've run VMs: a container is like a VM stripped down to just your app — no separate
+guest OS to boot or patch. The analogy stops there, though: a container is process
+isolation, not a full machine.
+{{< /note >}}
 
 ## Image vs Container
 
 Two words that are easy to mix up:
 
 - An [image](https://kubernetes.io/docs/concepts/containers/images/) is the **built
-  artifact** — a packaged, read-only template of your application and everything it
-  needs to run. Think of it as the blueprint.
+  artifact** — a packaged, read-only template of your application and everything it needs
+  to run.
 - A **container** is a **running instance** of that image. One image can start many
-  containers, the same way one blueprint can build many identical apartments.
+  containers at once.
 
 You build an image once, then run it as a container wherever you need it.
 

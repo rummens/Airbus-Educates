@@ -2,19 +2,20 @@
 title: Roll Out a Change
 ---
 
-Configuration in a ConfigMap earns its keep when you *change* it. Let's edit the greeting,
-apply it, and roll the app onto the new value — no image involved.
+The point of keeping configuration in a ConfigMap is that you can *change* it without
+touching the image. On this page you edit the greeting, apply the change, and roll the app
+onto the new value — the image never changes.
+
+*[📊 See this on a slide](/slides/#/rollout) — opens the **Slides** tab on this topic.*
 
 ## Edit the ConfigMap
 
+This updates the `GREETING` line in the ConfigMap file to a new message:
+
 ```editor:replace-matching-text
 file: ~/exercises/configmap.yaml
-match: |
-  data:
-    GREETING: "Configured by a ConfigMap"
-replacement: |
-  data:
-    GREETING: "Reconfigured without a redeploy"
+match: 'GREETING: "Configured by a ConfigMap"'
+replacement: 'GREETING: "Reconfigured without a redeploy"'
 ```
 
 Apply the updated ConfigMap:

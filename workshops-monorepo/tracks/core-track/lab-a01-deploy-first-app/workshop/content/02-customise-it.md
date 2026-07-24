@@ -6,6 +6,8 @@ The sample app reads its greeting from an [**environment variable**](https://kub
 called `GREETING`. Setting an env var is the simplest way to change how an app behaves
 **without rebuilding the image** — same image, different configuration.
 
+*[📊 See this on a slide](/slides/#/customise) — opens the **Slides** tab on this topic.*
+
 ## Before: no GREETING set
 
 First, look at the Deployment's environment as it is now — straight from the image, with

@@ -84,3 +84,10 @@ spec:
       # CoreDNS crashloops on OpenShift, plus namespaces.budget: large.
       vcluster:
         enabled: false
+    # Feedback tab is pre-declared so it is ALWAYS visible, not created only on the
+    # last page. Completion/trophies still fire solely when the form is SUBMITTED
+    # (portal POST /feedback), so a permanently-visible tab does not mark the lab
+    # done early. Page 98 opens this tab; it no longer creates it.
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-a05-what-is-dcs&session=$(session_namespace)"

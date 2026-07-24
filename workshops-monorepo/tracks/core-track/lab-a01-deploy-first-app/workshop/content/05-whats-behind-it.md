@@ -2,10 +2,25 @@
 title: What's Behind It
 ---
 
-You did all of that with imperative commands — "do this", "set that". But underneath,
-{{< param product_short >}} turned every one of those into a single **desired-state
-document**. Let's reveal it — this is the bridge to every later lab, where you'll write
-these documents yourself.
+You did all of that with imperative commands. Underneath, {{< param product_short >}}
+turned every one of those into a single **desired-state document**. This page shows you
+that document — it is the bridge to every later lab, where you write these documents
+yourself.
+
+*[📊 See this on a slide](/slides/#/behind) — opens the **Slides** tab on this topic.*
+
+{{< note >}}
+**Two ways to work: imperative and declarative.** These two words come up throughout the
+course, so it is worth defining them plainly:
+
+- **Imperative** means you give step-by-step commands — "create this", "set that". Each
+  command does one thing, once. `oc create deployment` and `oc set env` are imperative.
+- **Declarative** means you write down the end result you want — the *desired state* — in a
+  file, and the platform makes reality match it and keeps it that way. The YAML you are
+  about to see is declarative.
+
+You just worked imperatively. From A02 on, you work declaratively.
+{{< /note >}}
 
 ## Save and open the generated YAML
 

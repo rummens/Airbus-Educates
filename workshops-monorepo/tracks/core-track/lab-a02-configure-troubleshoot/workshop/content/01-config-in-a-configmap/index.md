@@ -8,7 +8,7 @@ then run in DEV, QA and PROD with different ConfigMaps — no rebuild to change 
 On an air-gapped platform that matters: promoting an app moves its **config**, not a new
 image.
 
-*[📊 See this on a slide](/slides/#configmap) — opens the **Slides** tab on this topic.*
+*[📊 See this on a slide](/slides/#/configmap) — opens the **Slides** tab on this topic.*
 
 {{< note >}}
 If you've run VMs: a ConfigMap is like the answer file or config drive you attach to one

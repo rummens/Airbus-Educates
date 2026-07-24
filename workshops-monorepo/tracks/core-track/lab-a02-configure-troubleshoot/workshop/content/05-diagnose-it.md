@@ -2,14 +2,17 @@
 title: Diagnose It
 ---
 
-Three lenses tell you almost everything about a misbehaving workload. Use them in order —
-each narrows the problem. The rule of thumb: **read the console before you rebuild the
-machine.**
+Three commands tell you almost everything about a misbehaving workload. Use them in order —
+each one narrows the problem. The general rule: read what the platform is reporting before
+you change anything.
+
+*[📊 See this on a slide](/slides/#/diagnose) — opens the **Slides** tab on this topic.*
 
 ## 1. Describe the Pod — its status and events
 
-`oc describe` ends with an **Events** list: the play-by-play of what the platform tried
-and what failed.
+`oc describe` prints a long report about the Pod that ends with an **Events** list: a
+step-by-step record of what the platform tried and what failed. The output is long, so
+`| tail -n 30` keeps only the **last 30 lines** — where the events are:
 
 ```terminal:execute
 command: oc describe pod -l app=hello-dcs | tail -n 30
@@ -20,6 +23,10 @@ because a **ConfigMap it references doesn't exist** — the name it's looking fo
 `hello-dcs-conf`.
 
 ## 2. Cluster events — the same story, cluster-wide
+
+This lists events for the whole namespace. `--sort-by=.lastTimestamp` orders them oldest to
+newest, and `| tail -n 15` keeps the **15 most recent** so the latest problem is at the
+bottom:
 
 ```terminal:execute
 command: oc get events --sort-by=.lastTimestamp | tail -n 15

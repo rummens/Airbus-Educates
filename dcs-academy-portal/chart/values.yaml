@@ -137,6 +137,28 @@ feedback:
     database: academy
     owner: academy
 
+# -----------------------------------------------------------------------------
+# Slides outside a session. A git-sync sidecar keeps a checkout of the workshop
+# content repo on a shared volume; the portal serves each lab's workshop/slides/
+# dir at /slides/<lab>/ (a "Open slides" button appears on the course page for any
+# lab that ships a deck). This lets learners re-read a deck without starting a
+# container. git-sync re-pulls every git.period, so new content shows up with no
+# pod restart. Set git.repo to turn it on — empty repo = feature off (button
+# hidden, /slides 404s).
+slides:
+  enabled: true
+  git:
+    repo: ""                 # e.g. https://gitlab.internal/dcs/airbus-educates.git
+    ref: main
+    period: 60s              # how often git-sync re-pulls
+    # Mirror this image into Harbor for air-gapped installs and set the mirrored ref.
+    image: registry.k8s.io/git-sync/git-sync:v4.4.0
+    # Optional: Secret (keys: username, password) for a private repo over HTTPS.
+    existingSecret: ""
+  resources:
+    requests: { cpu: 10m, memory: 32Mi }
+    limits:   { cpu: 100m, memory: 128Mi }
+
 # Server-side TLS verification for Educates REST + reachability probes.
 # Dev clusters use self-signed certs → false there.
 sessionTlsVerify: false

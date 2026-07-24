@@ -43,6 +43,12 @@ CATALOG_REFRESH_SECONDS = int(os.environ.get("PORTAL_CATALOG_REFRESH_SECONDS", "
 DATABASE_URL = os.environ.get("DATABASE_URL", "")      # postgres://… → CNPG; empty → sqlite
 FEEDBACK_DB = os.environ.get("FEEDBACK_DB", "/tmp/feedback.db")   # sqlite path (dev/local)
 
+# Filesystem root of the workshops-monorepo checkout maintained by the git-sync
+# sidecar (see slides.py). The portal serves each lab's workshop/slides/ dir from
+# here at /slides/<lab>/ so decks are readable without starting a session. Empty
+# (no sidecar) → the Slides feature is off (button hidden, /slides 404s).
+SLIDES_ROOT = os.environ.get("PORTAL_SLIDES_ROOT", "").rstrip("/")
+
 # Admin gate: SelfSubjectAccessReview with the *user's* token. Admin = whoever
 # can perform this verb on this resource in the portal namespace.
 ADMIN_SSAR_GROUP = os.environ.get("ADMIN_SSAR_GROUP", "training.educates.dev")

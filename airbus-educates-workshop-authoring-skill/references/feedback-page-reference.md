@@ -6,13 +6,31 @@ Feedback is collected by the **DCS Academy portal** (the `/form` route, backed b
 CloudNativePG in prod) and surfaced in the portal's `/admin` view, on each course's
 detail page as a live star rating, and in a Grafana dashboard.
 
-## What the page does
+## The Feedback tab is always visible
 
-It opens a **Feedback** dashboard tab pointing at the portal's form, pre-filled
-with this workshop's name and the session namespace. The form captures a 1–5
-rating, a 1–5 clarity score, and an optional comment — all stored per course.
+**Pre-declare the Feedback tab** in `resources/workshop.yaml` so it is present for the
+whole session, not created only on the last page. Learners can give feedback whenever
+they like, and the last page simply switches to the tab.
 
-## Template
+This is safe for trophies: a lab is marked **completed only when the form is submitted**
+(the portal's `POST /feedback` → `mark_progress("completed")`), never when the tab is
+merely opened. A permanently-visible tab therefore does not mark labs done early.
+
+Declare it under `spec.session.dashboards` (uses Educates `$(...)` data variables):
+
+```yaml
+# Path: spec.session
+dashboards:
+- name: Feedback
+  url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=<WORKSHOP-NAME>&session=$(session_namespace)"
+```
+
+The form captures a 1–5 rating, a 1–5 clarity score, and an optional comment, stored
+per course.
+
+## Page 98 template
+
+The page opens the already-present tab (it no longer creates it):
 
 ```markdown
 ---
@@ -24,12 +42,11 @@ directly shapes how **{{< param product_name >}}** training improves.
 
 ## Leave your feedback
 
-Open the **Feedback** tab and fill in the short form — a rating, how clear the
-instructions were, and an optional comment:
+Open the **Feedback** tab (always available at the top of your session) and fill in
+the short form — a rating, how clear the instructions were, and an optional comment:
 
-```dashboard:create-dashboard
+```dashboard:open-dashboard
 name: Feedback
-url: "https://academy.{{< param ingress_domain >}}/form?workshop=<WORKSHOP-NAME>&session={{< param session_namespace >}}"
 ```
 
 {{< note >}}
@@ -43,9 +60,9 @@ name: Terminal
 
 ## Rules
 
-- Replace `<WORKSHOP-NAME>` with the workshop's `metadata.name` (drives per-course reporting).
+- Replace `<WORKSHOP-NAME>` with the workshop's `metadata.name` (drives per-course reporting) in the `dashboards` entry.
 - No examiner checks on this page — feedback is voluntary, not verified.
-- The form is served by the portal at `academy.{{< param ingress_domain >}}/form`
-  (same host as the catalog — the standalone `feedback.*` collector was absorbed into
-  the portal). The path/params are stable; only the host tracks the portal.
+- Completion/trophies fire only on form **submit**, not on opening the tab — so it is safe to leave the tab always visible.
+- The form is served by the portal at `academy.$(ingress_domain)/form` (same host as the
+  catalog). The path/params are stable; only the host tracks the portal.
 - Keep it short: one tab, one form, back to the terminal.

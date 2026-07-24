@@ -81,7 +81,26 @@ Ground new abstractions in something the learner already knows. For DCS's audien
 
 Keep analogies honest — note where they break down (a container is *not* a lightweight VM; it shares the host kernel). A misleading analogy is worse than none.
 
+## Plain language — avoid idioms, metaphors, and figurative speech
+
+Write for a beginner audience that includes many non-native English speakers. **Prefer plain, literal wording over clever phrasing.** Idioms, metaphors, wordplay, and figurative "punchy" lines add reading load and translate badly — they make content harder, not friendlier.
+
+- Reject phrasings like "earns its keep", "under the hood", "read the console before you rebuild the machine", "guess-and-poke", "the play-by-play", "fire-and-forget". State the thing plainly instead ("configuration in a ConfigMap is useful because you can change it without rebuilding the image").
+- This does **not** ban the sanctioned VM-world analogies above — a labelled, honest analogy is a teaching device. The rule is against *stray* idioms and figurative flourishes that carry no teaching value.
+- One clear, literal sentence beats a witty one. When in doubt, cut the metaphor.
+
+## Name declarative vs imperative explicitly
+
+Beginners meet both styles early (`oc create`/`oc set env` are imperative; a Deployment manifest is declarative) and are easily confused if the two words are used before they are defined. **Define them plainly the first time either appears in a track**, in one short box:
+
+- **Imperative** — step-by-step commands; each does one thing, once.
+- **Declarative** — you write down the desired end state; the platform makes reality match it and keeps it that way.
+
+Then use the terms consistently. Do not assume a later "concepts" lab defines them — if an earlier hands-on lab uses the words, that earlier lab must define them.
+
 ## Diagrams and images — teach the structure visually
+
+Learners consistently name diagrams the most helpful and refreshing part of a workshop, so **err toward adding one** — a page that teaches any relationship, flow, or hierarchy in prose alone is a candidate for a diagram.
 
 Some concepts are inherently structural or relational and are far clearer as a picture than as prose. **Add a diagram wherever a relationship, flow, or hierarchy is being taught**, e.g.:
 
@@ -105,6 +124,23 @@ Every concept page should offer more than one way in, so visual, verbal, and han
 
 Not every page needs all four, but a foundational concept should hit at least the prose + a visual or analogy + the hands-on action.
 
+## Slides — one per page, concept plus snippet
+
+Give each lab a slide deck: **one slide per instruction page**, carrying that page's core concept in a few bullets plus any key command or snippet. The deck is the visual "map" of the lab — a learner can skim it to recall the shape of a topic without re-reading the prose.
+
+- Author slides as **markdown** in `workshop/slides/slides.md`, one slide per `---` separator, in page order. Ship the self-contained renderer as `workshop/slides/index.html` (fetches `slides.md`; no reveal.js, no CDN — air-gapped). Enable the slides application in `resources/workshop.yaml` (`spec.session.applications.slides.enabled: true`).
+- Give each slide a stable id (an `id`-comment) and link to it from the matching content page: `*[📊 See this on a slide](/slides/#/<id>) …*`. **The `#/` form matters** — Educates only routes a slide link to the **Slides** tab when it is `/slides/#/<id>`; a plain `/slides/#<id>` instead navigates the instructions pane to the deck (wrong). The renderer accepts both forms.
+- Keep slides low-text: bullets and a snippet, not paragraphs. The page holds the full explanation; the slide is the summary.
+- The same files are served **outside a session** by the portal (an "Open slides" button on the course page), so a learner can re-read a deck without starting a container — another reason to keep the deck self-explanatory.
+
+## Keep commands simple and explained
+
+Beginners struggle with dense one-liners. **Prefer several short, explained commands over one chained command.**
+
+- Split `a | b && c` into separate `terminal:execute` steps, each with a sentence saying what it does and why. Do not chain `apply` + `rollout status` + `sleep` into one line the learner cannot parse.
+- Explain every flag and every shell operator (`|`, `-`, `--from`, `--sort-by`) on first use. Assume no prior CLI knowledge.
+- See [clickable-actions-reference.md](clickable-actions-reference.md) for why complex shell also breaks the clickable action itself.
+
 ## Estimating duration realistically
 
 Do not over-estimate. Learners move through guided, clickable content faster than the page count suggests — most click through a page in **~2–4 minutes**, and reading-only pages faster. Estimate roughly `pages × ~3 min` plus real wait time (image pulls, rollouts), then round to a friendly figure; when unsure, err **lower** — an over-long estimate deters learners. A ~10-page guided Foundations workshop is typically **30–40 minutes**, not 60+. Validate against a real click-through when you can, and correct the estimate to what it actually took.
@@ -117,6 +153,9 @@ Do not over-estimate. Learners move through guided, clickable content faster tha
 - Multiple unrelated concepts crammed onto one page.
 - Skipping foundational concepts because they are "obvious."
 - Cutting explanation to stay under a time target.
+- Idioms, metaphors, or witty phrasing where a plain sentence would do.
+- Chained one-liner commands (`a | b && c && sleep`) a beginner cannot parse.
+- Using "declarative"/"imperative" (or similar) before defining them.
 
 ## Checklist
 
@@ -128,8 +167,12 @@ Do not over-estimate. Learners move through guided, clickable content faster tha
 - [ ] A coherent sample application motivates the concepts (progressive build where it fits)
 - [ ] Dynamic behaviour is shown with split-terminal `watch` where relevant
 - [ ] No foundational concept for the topic is skipped
-- [ ] Structural/relational concepts have a diagram (SVG in the page bundle); UI steps have screenshots where helpful
+- [ ] Structural/relational concepts have a diagram (SVG in the page bundle); UI steps have screenshots where helpful — err toward adding one
 - [ ] New abstractions are grounded in an analogy (VM world for DCS), tapering with skill level
+- [ ] Plain language throughout — no stray idioms, metaphors, or figurative flourishes
+- [ ] "Declarative"/"imperative" (and similar term pairs) are defined the first time they appear
+- [ ] Commands are short and explained (no dense chained one-liners); every flag/operator explained on first use
+- [ ] Lab has a slide deck (`slides.md`, one slide per page) and each page links to its slide
 - [ ] Each foundational concept offers multiple ways in (prose + visual/analogy + hands-on)
 - [ ] Duration estimate is realistic (~3 min/guided page + waits) and errs low, not inflated
 - [ ] Depth was not sacrificed to hit a time target; long topics were split instead

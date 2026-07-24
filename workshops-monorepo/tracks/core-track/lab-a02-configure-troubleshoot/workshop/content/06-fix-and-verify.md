@@ -6,6 +6,8 @@ You've named the root cause: the broken manifest's `envFrom` points at a ConfigM
 `hello-dcs-conf`, which doesn't exist — the real one is `hello-dcs-config`. Time to fix
 and confirm.
 
+*[📊 See this on a slide](/slides/#/fix) — opens the **Slides** tab on this topic.*
+
 ## See the bad line
 
 ```editor:open-file
@@ -19,10 +21,18 @@ wrong name is the whole fault.
 
 Rather than hand-patch the running object, apply the manifest you know is correct —
 `deployment-configured.yaml`, which references the right ConfigMap. Applying the known-good
-desired state is the declarative way to recover:
+desired state is the declarative way to recover.
+
+Apply the good manifest (same two steps as before — fill in the registry and apply):
 
 ```terminal:execute
-command: envsubst < deployment-configured.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=90s
+command: envsubst < deployment-configured.yaml | oc apply -f -
+```
+
+Then wait for the new Pod to become Ready:
+
+```terminal:execute
+command: oc rollout status deploy/hello-dcs --timeout=90s
 ```
 
 ```examiner:execute-test

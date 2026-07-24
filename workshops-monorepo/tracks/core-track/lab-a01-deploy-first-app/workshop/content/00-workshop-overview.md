@@ -2,10 +2,10 @@
 title: "Deploy Your First App"
 ---
 
-The quick win, and the entry point to the course: you'll get your own app running on
-**{{< param product_name >}}** in a few minutes — then look under the hood to see how it
-works. No theory first; if you want the background on *what DCS is* and *why Kubernetes*,
-that's the **What is DCS?** lab, any time.
+This is the entry point to the course: you'll get your own app running on
+**{{< param product_name >}}** in a few minutes, then look at how it works underneath.
+There is no theory to read first. If you want the background on *what DCS is* and *why
+Kubernetes*, that is the **What is DCS?** lab, which you can take at any time.
 
 You'll deploy a small sample called **hello-dcs**: a tiny web server that listens on port
 8080 and prints a greeting. Its image already lives in the {{< param product_short >}}

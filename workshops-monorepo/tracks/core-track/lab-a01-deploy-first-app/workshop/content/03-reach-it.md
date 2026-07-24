@@ -7,6 +7,8 @@ local test you can open a **tunnel** from your terminal straight to the Pod with
 [`oc port-forward`](https://docs.openshift.com/container-platform/latest/nodes/containers/nodes-containers-port-forwarding.html) —
 no public address required.
 
+*[📊 See this on a slide](/slides/#/reach) — opens the **Slides** tab on this topic.*
+
 {{< note >}}
 This is a *local* tunnel, just for you, just while the command runs — not real exposure.
 Giving the app a proper external address (a **Route**) is the whole point of **A03**.
