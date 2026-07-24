@@ -23,6 +23,10 @@ spec:
       kind: ClusterPolicy
       jsonPointers:
         - /spec/rules/0/skipBackgroundRequests
+    - group: kyverno.io
+      kind: ClusterPolicy
+      jqPathExpressions:
+        - .spec.rules[].context[].apiCall.method
   sources:
     - repoURL: https://github.com/rummens/Airbus-Educates
       targetRevision: main
