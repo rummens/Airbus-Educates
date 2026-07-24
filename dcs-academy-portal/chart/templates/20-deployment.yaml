@@ -145,12 +145,19 @@ spec:
             - --depth=1
             - --root=/slides-src
             - --link=repo
-          {{- if .Values.slides.git.existingSecret }}
+          {{- if or .Values.slides.git.existingSecret .Values.trustedCA.enabled }}
           env:
+            {{- if .Values.slides.git.existingSecret }}
             - name: GITSYNC_USERNAME
               valueFrom: { secretKeyRef: { name: {{ .Values.slides.git.existingSecret }}, key: username } }
             - name: GITSYNC_PASSWORD
               valueFrom: { secretKeyRef: { name: {{ .Values.slides.git.existingSecret }}, key: password } }
+            {{- end }}
+            {{- if .Values.trustedCA.enabled }}
+            # Point git (used by git-sync to clone/fetch over HTTPS) at the merged
+            # OpenShift trust bundle so it trusts the internal git host's private CA.
+            - { name: GIT_SSL_CAINFO, value: /etc/pki/portal-ca/ca-bundle.crt }
+            {{- end }}
           {{- end }}
           securityContext:
             allowPrivilegeEscalation: false
@@ -159,6 +166,11 @@ spec:
           volumeMounts:
             - name: slides-src
               mountPath: /slides-src
+            {{- if .Values.trustedCA.enabled }}
+            - name: trusted-ca
+              mountPath: /etc/pki/portal-ca
+              readOnly: true
+            {{- end }}
           resources:
             {{- toYaml .Values.slides.resources | nindent 12 }}
         {{- end }}

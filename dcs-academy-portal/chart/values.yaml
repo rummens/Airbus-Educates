@@ -21,10 +21,12 @@ image:
   tag: dev
   pullPolicy: Always
 
-# Custom CA trust for the portal's OUTBOUND HTTPS. The only such call is the
-# course-view README fetch from the workshop content git host — an internal
-# GitLab behind a private CA in air-gapped installs. Without its CA the fetch
-# fails TLS and the course view silently falls back to the short CR description.
+# Custom CA trust for the portal's OUTBOUND HTTPS. Two consumers: the course-view
+# README fetch, and the git-sync sidecar (slides.*) cloning the content repo — both
+# hit an internal GitLab behind a private CA in air-gapped installs. Without its CA
+# the README fetch falls back to the short CR description and git-sync FAILS to clone
+# (x509 unknown authority). Enabling this mounts the merged bundle into both and sets
+# GIT_SSL_CAINFO for git-sync + REQUESTS_CA_BUNDLE for the app.
 # When enabled we mount a CA bundle and point REQUESTS_CA_BUNDLE at it; Python
 # `requests` then trusts it (this affects only calls with no explicit verify=,
 # i.e. exactly the README fetch — Educates REST + OAuth pass their own verify).
