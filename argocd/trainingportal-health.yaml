@@ -1,0 +1,51 @@
+# Layer 3 — custom ArgoCD health for the Educates TrainingPortal.
+#
+# WHY: WorkshopEnvironment/WorkshopSession are created by the training-portal, NOT by
+# Argo, so they never appear in the Application tree and Argo cannot health-check them —
+# that is why a rolled workshop can leave the app "Synced + Healthy" while a lab 403s.
+# The env-guard PostSync gate (workshops chart) is what actually catches that. THIS file
+# is the complementary piece Argo *can* see: it makes the Argo-tracked TrainingPortal
+# report Healthy only once the portal itself is Running, so its rollout is honest too.
+#
+# NOT part of the app-of-apps: it configures the openshift-gitops ArgoCD instance, which
+# is operator-owned. Apply once with cluster-admin. Pick ONE of the two forms below.
+#
+# ── Form A (preferred on OpenShift GitOps): patch the ArgoCD CR ────────────────
+#   oc -n openshift-gitops patch argocd openshift-gitops --type merge \
+#     --patch-file argocd/trainingportal-health.yaml
+apiVersion: argoproj.io/v1beta1
+kind: ArgoCD
+metadata:
+  name: openshift-gitops
+  namespace: openshift-gitops
+spec:
+  resourceHealthChecks:
+    - group: training.educates.dev
+      kind: TrainingPortal
+      check: |
+        hs = {}
+        if obj.status ~= nil and obj.status.educates ~= nil and obj.status.educates.phase ~= nil then
+          if obj.status.educates.phase == "Running" then
+            hs.status = "Healthy"
+            hs.message = "TrainingPortal Running"
+            return hs
+          end
+          hs.status = "Progressing"
+          hs.message = "TrainingPortal phase: " .. obj.status.educates.phase
+          return hs
+        end
+        hs.status = "Progressing"
+        hs.message = "Waiting for TrainingPortal status"
+        return hs
+# ── Form B (vanilla Argo CD): add to the argocd-cm ConfigMap instead ───────────
+#   Under data:, add key  resource.customizations.health.training.educates.dev_TrainingPortal
+#   whose value is the same Lua body as `check:` above. Example:
+#
+#   apiVersion: v1
+#   kind: ConfigMap
+#   metadata: { name: argocd-cm, namespace: openshift-gitops }
+#   data:
+#     resource.customizations.health.training.educates.dev_TrainingPortal: |
+#       hs = {}
+#       ... (same Lua as above) ...
+#       return hs

@@ -1,0 +1,150 @@
+{{- if and .Values.enabled .Values.envGuard.enabled }}
+# WorkshopEnvironment guard — two ArgoCD PostSync hooks that run right after the
+# Workshop/TrainingPortal CRs sync, closing the gap that causes "start → 403":
+#
+#   1. reconcile — `python3 -m portal.reap`: drains stale/duplicate WorkshopEnvironments
+#      the create/delete-only training-portal leaves behind when a workshop rolls (and
+#      reaps orphaned sessions). Without this the stale env lingers until the next
+#      CronJob tick; with it, every Argo sync converges immediately.
+#   2. validate — `python3 -m portal.validate`: the gate. Polls until every workshop in
+#      TrainingPortal.spec.workshops has a Running env; if not, exits non-zero so the
+#      PostSync hook FAILS → Argo marks the app Degraded and retries (the app's retry
+#      policy then re-syncs toward a clean state). Set envGuard.mode=warn to log-only.
+#
+# WorkshopEnvironment/Session are portal-created and invisible to Argo's own health, so
+# this active check is the only honest signal that a sync actually produced a usable lab.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Chart.Name }}-env-guard
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ws.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Chart.Name }}-env-guard
+  labels:
+    {{- include "ws.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["training.educates.dev"]
+    resources: ["workshopsessions", "workshopenvironments"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: ["training.educates.dev"]
+    resources: ["trainingportals"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Chart.Name }}-env-guard
+  labels:
+    {{- include "ws.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Chart.Name }}-env-guard
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Chart.Name }}-env-guard
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-env-reconcile
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ws.labels" . | nindent 4 }}
+  annotations:
+    # sync-wave 1: after the operator has settled the portal (memory-limit/rescan at 0).
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 300
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        {{- include "ws.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Chart.Name }}-env-guard
+      restartPolicy: Never
+      {{- with .Values.global.registry.pullSecret }}
+      imagePullSecrets:
+        - name: {{ . }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: reconcile
+          image: {{ .Values.envGuard.image | quote }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          command: ["python3", "-m", "portal.reap"]
+          env:
+            - { name: EDUCATES_PORTAL_NAME, value: {{ .Values.educates.portalName | quote }} }
+            - { name: REAPER_ENV_ENABLED,   value: "true" }
+            - { name: REAPER_DRY_RUN,       value: {{ .Values.envGuard.dryRun | quote }} }
+            - { name: REAPER_DEBUG,         value: {{ .Values.envGuard.debug | quote }} }
+            - { name: REAPER_GRACE_SECONDS, value: {{ .Values.envGuard.graceSeconds | quote }} }
+          resources:
+            requests: { cpu: 10m, memory: 64Mi }
+            limits:   { cpu: 200m, memory: 192Mi }
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-env-validate
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ws.labels" . | nindent 4 }}
+  annotations:
+    # sync-wave 2: LAST — after reconcile. Fails the sync (mode=fail) if any workshop
+    # still lacks a ready env. Kept on failure for log inspection.
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: {{ add .Values.envGuard.settleSeconds 120 }}
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        {{- include "ws.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Chart.Name }}-env-guard
+      restartPolicy: Never
+      {{- with .Values.global.registry.pullSecret }}
+      imagePullSecrets:
+        - name: {{ . }}
+      {{- end }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: validate
+          image: {{ .Values.envGuard.image | quote }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          command: ["python3", "-m", "portal.validate"]
+          env:
+            - { name: EDUCATES_PORTAL_NAME,     value: {{ .Values.educates.portalName | quote }} }
+            - { name: VALIDATE_MODE,            value: {{ .Values.envGuard.mode | quote }} }
+            - { name: VALIDATE_SETTLE_SECONDS,  value: {{ .Values.envGuard.settleSeconds | quote }} }
+            - { name: VALIDATE_READY_PHASES,    value: {{ .Values.envGuard.readyPhases | quote }} }
+          resources:
+            requests: { cpu: 10m, memory: 64Mi }
+            limits:   { cpu: 200m, memory: 192Mi }
+{{- end }}

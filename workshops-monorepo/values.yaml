@@ -126,3 +126,28 @@ catalogRescan:
   trustedCA:
     enabled: true
     existingConfigMap: ""
+
+# WorkshopEnvironment guard (see templates/env-guard.yaml). Two PostSync hooks that run
+# after every sync: (1) reconcile drains stale/duplicate envs a rolled workshop leaves
+# behind — the create/delete-only training-portal never updates an env in place, so a
+# lingering stale env is what makes "start" 403; (2) validate is the gate — it fails the
+# sync if any catalog workshop lacks a Running env, so a broken deploy shows Degraded in
+# Argo (which retries) instead of a false green. Steady-state cleanup between syncs is the
+# portal chart's sessionReaper CronJob (reapEnvironments: true).
+envGuard:
+  enabled: true
+  # Reuse the portal image — it carries portal.reap / portal.validate. Air-gap: mirror
+  # this one image (already needed for the portal + catalogRescan).
+  image: ghcr.io/rummens/dcs-academy-portal:dev
+  # reconcile (portal.reap): start dryRun:true to LOG what it would delete; confirm it
+  # targets only stale/orphan envs+sessions, then set false to let it act.
+  dryRun: false
+  debug: false
+  graceSeconds: 300              # never touch an env/session younger than this
+  # validate gate: fail → Argo sync fails + retries; warn → log only, sync stays green.
+  mode: fail
+  settleSeconds: 240            # how long to wait for envs to converge before deciding
+  # Env phases counted as ready. Default matches Educates' Running; widen if your
+  # Educates build reports a different ready phase (a functioning env that already backs
+  # a live session is treated as ready regardless, so this rarely needs changing).
+  readyPhases: "Running"

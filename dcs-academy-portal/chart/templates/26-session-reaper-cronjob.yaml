@@ -25,8 +25,15 @@ rules:
   - apiGroups: ["training.educates.dev"]
     resources: ["workshopsessions"]
     verbs: ["get", "list", "delete"]
+  # delete: the reaper also drains stale/duplicate WorkshopEnvironments a rolled
+  # workshop leaves behind (create/delete-only portal reconcile). See portal/reap.py.
   - apiGroups: ["training.educates.dev"]
     resources: ["workshopenvironments"]
+    verbs: ["get", "list", "delete"]
+  # get/list: read the desired catalog from TrainingPortal.spec.workshops so env
+  # reaping is scoped to the current catalog (never reap against an empty read).
+  - apiGroups: ["training.educates.dev"]
+    resources: ["trainingportals"]
     verbs: ["get", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -92,6 +99,7 @@ spec:
                 - { name: REAPER_DEBUG,                value: {{ .Values.sessionReaper.debug | quote }} }
                 - { name: REAPER_GRACE_SECONDS,        value: {{ .Values.sessionReaper.graceSeconds | quote }} }
                 - { name: REAPER_MAX_ALLOCATED_SECONDS, value: {{ .Values.sessionReaper.maxAllocatedSeconds | quote }} }
+                - { name: REAPER_ENV_ENABLED,          value: {{ .Values.sessionReaper.reapEnvironments | quote }} }
               resources:
                 {{- toYaml .Values.sessionReaper.resources | nindent 16 }}
 {{- end }}

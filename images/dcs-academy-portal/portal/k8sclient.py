@@ -326,6 +326,35 @@ def delete_session(name):
         raise
 
 
+def delete_environment(name):
+    """Delete a WorkshopEnvironment CR (cluster-scoped). The training-portal reconciles
+    environments by create/delete ONLY — never an in-place update — so a stale env left
+    behind by a rolled workshop must be removed for the portal to build a fresh one on
+    its working create path. Returns True on delete (or already gone)."""
+    try:
+        _co().delete_cluster_custom_object(
+            "training.educates.dev", "v1beta1", "workshopenvironments", name)
+        return True
+    except ApiException as e:
+        if e.status == 404:
+            return True          # already gone
+        raise
+
+
+def trainingportal_workshops():
+    """Desired workshop names for OUR portal, from TrainingPortal.spec.workshops[].name —
+    the authoritative catalog the portal is meant to serve. Returns an EMPTY set on any
+    error; callers MUST treat empty as 'unknown' and refuse to reap (never nuke the world
+    because a single read blipped)."""
+    try:
+        obj = _co().get_cluster_custom_object(
+            "training.educates.dev", "v1beta1", "trainingportals", cfg.PORTAL_NAME)
+    except ApiException:
+        return set()
+    ws = (obj.get("spec", {}) or {}).get("workshops", []) or []
+    return {w.get("name") for w in ws if isinstance(w, dict) and w.get("name")}
+
+
 def _route_http_ok(url):
     """HTTP-probe the session URL. The router serves a **503** "Application is not
     available" page while an (even admitted) Route has no ready backend; a live route

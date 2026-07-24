@@ -184,7 +184,12 @@ sessionReaper:
   # status.educates block. Turn on to understand why sessions you know are dead are
   # judged "live" (kept). Pair with dryRun:true to observe without deleting.
   debug: false
-  graceSeconds: 300              # never touch a session younger than this (still provisioning)
+  # Also drain stale/duplicate WorkshopEnvironments the create/delete-only portal leaves
+  # behind on a workshop roll (drain-safe: only envs with 0 Allocated sessions, past
+  # grace, scoped to this portal + the current TrainingPortal catalog). This is what
+  # clears the "rolled workshop → no env → 403 on start" state between syncs.
+  reapEnvironments: true
+  graceSeconds: 300              # never touch a session/env younger than this (still provisioning)
   # Backstop for the restart case: an Allocated session older than this is a leaked orphan
   # (a live session can't outlive its `expires`). MUST exceed the largest workshop `expires`
   # (portal.expires default 60m). 24h is a safe, non-aggressive default.

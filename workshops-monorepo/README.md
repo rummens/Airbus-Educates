@@ -83,6 +83,49 @@ only fills it with instances. One ArgoCD Application points at this repo (prune 
 selfHeal). Add a lab = add a folder with a `workshop.yaml` + push. Remove = delete
 the folder + push.
 
+## PostSync hooks (rescan, memory-limit, env-guard)
+
+The chart emits ArgoCD **PostSync** hook Jobs that run after each sync:
+
+| Hook (`templates/…`) | sync-wave | Does |
+|---|---|---|
+| `memory-limit-job.yaml` | 0 | patches the operator-owned `training-portal` Deployment to 512Mi |
+| `catalog-rescan-job.yaml` | 0 | `POST /admin/rescan` so the custom portal refreshes its catalog now, not after TTL |
+| `env-guard.yaml` → `env-reconcile` | 1 | `portal.reap` — drains stale/duplicate WorkshopEnvironments (+ orphan sessions) |
+| `env-guard.yaml` → `env-validate` | 2 | `portal.validate` — **gate**: fails the sync if any catalog workshop has no Running env |
+
+### Why env-guard exists
+
+The Educates CR chain: **Workshop** + **TrainingPortal** (both synced by Argo) → the
+training-portal pod creates a **WorkshopEnvironment** per catalog workshop → a
+**WorkshopSession** per learner. The portal reconciles environments by **create/delete
+only — never an in-place update**, so when a workshop rolls (new content image, edited
+spec) the old env can linger while the new one never appears. A `start` then has no
+environment to allocate → **403**. And because WorkshopEnvironment/WorkshopSession are
+portal-created, they're **invisible to Argo's health** — the app stays "Synced + Healthy"
+while a lab is broken.
+
+env-guard closes both gaps:
+- **reconcile** deletes the stale/duplicate env (drain-safe: only envs with 0 Allocated
+  sessions, past grace, scoped to this portal + the current catalog) → the portal rebuilds
+  it on its working create path, on *every* sync.
+- **validate** polls until every `TrainingPortal.spec.workshops` entry has a Running env;
+  if not, exits non-zero → the hook fails → Argo goes **Degraded** and retries. Set
+  `envGuard.mode: warn` to log-only. Ready = phase `Running` **or** already backing a live
+  session (avoids a false fail on an unrecognised phase string).
+
+Steady-state cleanup **between** syncs is the `dcs-academy-portal` chart's
+`sessionReaper` CronJob (`reapEnvironments: true` — same `portal.reap` logic, every
+15 min). Argo can't see envs, but it *can* see the TrainingPortal: apply
+[`argocd/trainingportal-health.yaml`](../argocd/trainingportal-health.yaml) (cluster-admin,
+one-off) so the portal's own rollout reports Healthy only when Running.
+
+> **Toggles** (`values.yaml → envGuard`): `enabled`, `mode` (fail|warn), `dryRun`,
+> `settleSeconds`, `readyPhases`. First rollout: run `dryRun: true` + `mode: warn`, confirm
+> the reconcile logs target only real stale/orphan envs, then flip to act. The Jobs run
+> from the **portal image** (`envGuard.image`) — rebuild+push it before syncing chart
+> changes that touch `portal.reap`/`portal.validate`.
+
 ## Add a track
 
 `tracks/<any-folder>/track.yaml`:
