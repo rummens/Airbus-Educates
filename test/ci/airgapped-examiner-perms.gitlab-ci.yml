@@ -1,0 +1,56 @@
+# Examiner test-script permission guard — for the AIR-GAPPED workshops repo.
+#
+# WHY: Educates runs each `workshop/examiner/tests/*` file by exec'ing it, so every
+# one MUST be git mode 100755. Commits made on Windows (Git default
+# core.fileMode=false, NTFS has no exec bit) record them as 100644 — the examiner
+# then 404s at runtime ("test not found"). This pipeline flips any wrong mode in the
+# git index and commits the fix back to the SAME branch with [skip ci], so it does
+# not re-trigger itself.
+#
+# WHERE: copy this to the ROOT of the air-gapped repo as `.gitlab-ci.yml`.
+#
+# ONE-TIME SETUP: create a Project (or Group) Access Token with the
+# `write_repository` scope and expose it to CI as a masked variable named
+# GIT_PUSH_TOKEN  (Settings > CI/CD > Variables). CI_JOB_TOKEN cannot push commits.
+
+stages:
+  - fix-perms
+
+fix-examiner-perms:
+  stage: fix-perms
+  # Air-gapped: swap for a git-capable image you have mirrored internally.
+  image: alpine/git:latest
+  rules:
+    # Branch pushes only. Our own fix commit carries [skip ci] so GitLab won't create
+    # a pipeline for it (no recursion); excluding tags/MRs here is belt-and-suspenders.
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH'
+  variables:
+    GIT_STRATEGY: clone
+    GIT_DEPTH: "0"                 # full clone — clean push of the new commit
+    BOT_NAME: "DCS CI perm-fixer"
+    BOT_EMAIL: "ci-bot@dcs.local"
+  script:
+    - set -eu
+    - |
+      # examiner test files whose git-tracked mode is not 100755. Anchored on
+      # /examiner/tests/ so it works at any nesting (tracks/ at root or deeper) and
+      # catches subdir-prefixed tests too.
+      bad=$(git ls-files -s | awk '$4 ~ /\/examiner\/tests\// && $1 != "100755" { print $4 }')
+      if [ -z "$bad" ]; then
+        echo "OK: every examiner test file is executable (100755). Nothing to fix."
+        exit 0
+      fi
+      echo "Non-executable examiner tests (mode != 100755):"
+      printf '  %s\n' $bad
+      printf '%s\n' $bad | xargs git update-index --chmod=+x
+      echo "Re-asserted +x on $(printf '%s\n' $bad | wc -l | tr -d ' ') file(s)."
+    - |
+      # Commit + push the mode fix back to the same branch. [skip ci] stops re-trigger.
+      test -n "${GIT_PUSH_TOKEN:-}" || { echo "ERROR: GIT_PUSH_TOKEN unset (need a write_repository token)"; exit 1; }
+      git config user.name  "$BOT_NAME"
+      git config user.email "$BOT_EMAIL"
+      git remote set-url origin "https://oauth2:${GIT_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+      git commit -m "ci: chmod +x examiner test scripts [skip ci]"
+      # HEAD:branch — CI runs on detached HEAD; push the new commit onto the branch ref.
+      # No --force: if the branch advanced meanwhile the job fails instead of clobbering.
+      git push origin "HEAD:${CI_COMMIT_BRANCH}"

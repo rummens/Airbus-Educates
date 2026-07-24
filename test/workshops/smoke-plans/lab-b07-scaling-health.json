@@ -1,0 +1,24 @@
+{
+  "workshop": "lab-b07-scaling-health",
+  "_note": "hello-dcs is (re)created here against ${DCS_REGISTRY} (ghcr.io/rummens on CRC) + exposed as a Service, because the lab's session.objects copy pins an unreachable harbor.example.dcs image that won't pull on CRC. The scaling + probe + self-healing checks all reproduce on CRC. The three QUOTA checks are excluded: a portless CRC session namespace carries no `medium` ResourceQuota, and on a single node the oversized rollout would stall on node capacity (Insufficient cpu) rather than the quota admission rejection the lab teaches — so verify-oversized-pending/verify-quota-event-visible would be nondeterministic and verify-quota-present would always fail. All three validate only on a real DCS budgeted namespace.",
+  "steps": [
+    {"run": "oc delete deployment hello-dcs --ignore-not-found && oc create deployment hello-dcs --image=${DCS_REGISTRY}/samples/hello-dcs:1.0 --port=8080 && (oc expose deployment hello-dcs --port=8080 2>/dev/null || true) && oc rollout status deploy/hello-dcs --timeout=150s"},
+    {"run": "oc scale deploy/hello-dcs --replicas=4 && oc rollout status deploy/hello-dcs --timeout=150s"},
+    {"check": "verify-scaled", "args": ["4"]},
+    {"run": "envsubst < deployment-probes.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=150s"},
+    {"check": "verify-right-sized"},
+    {"check": "verify-probes-configured"},
+    {"check": "verify-endpoints-ready"},
+    {"run": "oc set probe deployment/hello-dcs --readiness --get-url=http://:8080/this-path-does-not-exist && sleep 30"},
+    {"check": "verify-readiness-broken"},
+    {"run": "envsubst < deployment-probes.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=150s"},
+    {"check": "verify-readiness-restored"},
+    {"run": "oc get pods -l app=hello-dcs -o name | head -n 1 > /tmp/deleted-pod.txt && oc delete \"$(cat /tmp/deleted-pod.txt)\" && sleep 5 && oc rollout status deploy/hello-dcs --timeout=120s"},
+    {"check": "verify-pod-replaced"}
+  ],
+  "exclude": [
+    {"check": "verify-quota-present", "reason": "A portless CRC session namespace carries no `medium` ResourceQuota, so this always fails; the quota only exists on a real DCS budgeted namespace."},
+    {"check": "verify-oversized-pending", "reason": "The oversized rollout is meant to stall on the quota admission rejection; on a single-node CRC it would instead stall (or not) on raw node capacity, making the readyReplicas<desired signal nondeterministic. Validates only on real DCS."},
+    {"check": "verify-quota-event-visible", "reason": "Depends on a FailedCreate 'exceeded quota' event that only the DCS ResourceQuota admission produces; CRC has no quota so no such event appears."}
+  ]
+}
