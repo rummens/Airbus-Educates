@@ -129,7 +129,18 @@ Not every page needs all four, but a foundational concept should hit at least th
 Give each lab a slide deck: **one slide per instruction page**, carrying that page's core concept in a few bullets plus any key command or snippet. The deck is the visual "map" of the lab — a learner can skim it to recall the shape of a topic without re-reading the prose.
 
 - Author slides as **markdown** in `workshop/slides/slides.md`, one slide per `---` separator, in page order. Ship the self-contained renderer as `workshop/slides/index.html` (fetches `slides.md`; no reveal.js, no CDN — air-gapped). Enable the slides application in `resources/workshop.yaml` (`spec.session.applications.slides.enabled: true`).
-- Give each slide a stable id (an `id`-comment) and link to it from the matching content page: `*[📊 See this on a slide](/slides/#/<id>) …*`. **The `#/` form matters** — Educates only routes a slide link to the **Slides** tab when it is `/slides/#/<id>`; a plain `/slides/#<id>` instead navigates the instructions pane to the deck (wrong). The renderer accepts both forms.
+- Give each slide a stable id (an `id`-comment) and jump to it from the matching content page with a **`dashboard:reload-dashboard` clickable action** targeting the built-in `Slides` tab — this reliably opens the Slides tab *and* lands on the right slide:
+
+  ````markdown
+  Open the slide for this page (📊 **Slides** tab):
+
+  ```dashboard:reload-dashboard
+  name: Slides
+  url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/<id>
+  ```
+  ````
+
+  Do **not** use a plain markdown link like `[…](/slides/#/<id>)` — Educates does not reliably intercept it, so it navigates the instructions pane into the deck (renders wrong). `dashboard:reload-dashboard` is the only reliable way to set a dashboard tab's URL (see [clickable-actions/dashboard-actions.md](clickable-actions/dashboard-actions.md)). The renderer reads the `#/<id>` hash on load and scrolls to that slide.
 - Keep slides low-text: bullets and a snippet, not paragraphs. The page holds the full explanation; the slide is the summary.
 - The same files are served **outside a session** by the portal (an "Open slides" button on the course page), so a learner can re-read a deck without starting a container — another reason to keep the deck self-explanatory.
 

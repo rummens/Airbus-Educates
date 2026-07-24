@@ -7,7 +7,12 @@ turned every one of those into a single **desired-state document**. This page sh
 that document — it is the bridge to every later lab, where you write these documents
 yourself.
 
-*[📊 See this on a slide](/slides/#/behind) — opens the **Slides** tab on this topic.*
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/behind
+```
 
 {{< note >}}
 **Two ways to work: imperative and declarative.** These two words come up throughout the

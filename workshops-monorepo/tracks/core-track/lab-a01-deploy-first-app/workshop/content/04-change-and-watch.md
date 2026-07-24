@@ -7,7 +7,12 @@ desired state (here, the greeting), the platform reconciles to it: it rolls out 
 Pod with the new configuration and retires the old one, with no downtime and nothing for
 you to restart by hand. The next page defines this "desired state" idea properly.
 
-*[📊 See this on a slide](/slides/#/rollout) — opens the **Slides** tab on this topic.*
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/rollout
+```
 
 ## Change the greeting again (upper terminal)
 

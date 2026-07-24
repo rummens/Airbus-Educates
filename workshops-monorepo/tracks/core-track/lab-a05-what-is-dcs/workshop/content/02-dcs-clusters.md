@@ -7,7 +7,12 @@ tenant you meet two of them: a **Sandbox** cluster and a **PROD** cluster. The i
 thing to know up front is that they are **essentially identical**: same platform, same
 capabilities, same way of working. Sandbox is not a smaller or weaker version of PROD.
 
-*[📊 See this on a slide](/slides/#/clusters) — opens the **Slides** tab on this topic.*
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/clusters
+```
 
 ## The one real difference: rollout timing and maintenance
 

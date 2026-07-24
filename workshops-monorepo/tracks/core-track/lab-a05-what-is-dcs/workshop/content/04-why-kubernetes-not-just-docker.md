@@ -9,7 +9,12 @@ That's what [Kubernetes](https://kubernetes.io/docs/concepts/overview/) — and 
 which builds on it — adds. It's the "why" behind everything you've already been doing on
 {{< param product_short >}}.
 
-*[📊 See this on a slide](/slides/#/kubernetes) — opens the **Slides** tab on this topic.*
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/kubernetes
+```
 
 Here are the four wins that matter most.
 

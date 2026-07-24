@@ -8,7 +8,12 @@ secure place to run containerised applications without managing the underlying
 infrastructure — and because it runs on-premises and **air-gapped**, everything you
 need (images, tools) is provided from within the platform.
 
-*[📊 See this on a slide](/slides/#/platform) — opens the **Slides** tab on this topic.*
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/platform
+```
 
 ## Why DCS?
 

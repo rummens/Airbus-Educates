@@ -10,7 +10,12 @@ ConfigMap but is for sensitive values — tokens, passwords, keys. Two differenc
   Secrets is restricted by RBAC and the values are kept out of manifests and logs.
 - You **never** print a Secret's value to the terminal or bake it into an image.
 
-*[📊 See this on a slide](/slides/#/secret) — opens the **Slides** tab on this topic.*
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/secret
+```
 
 ## Apply the Secret
 

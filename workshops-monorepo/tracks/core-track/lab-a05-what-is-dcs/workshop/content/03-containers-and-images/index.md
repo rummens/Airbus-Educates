@@ -6,7 +6,12 @@ Everything you run on {{< param product_short >}} runs in a **container** — in
 apps you've already deployed earlier in this track. Here's what that actually means, and
 how it differs from the virtual machines you may already know.
 
-*[📊 See this on a slide](/slides/#/images) — opens the **Slides** tab on this topic.*
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/images
+```
 
 ## From Virtual Machines to Containers
 

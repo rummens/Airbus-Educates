@@ -7,7 +7,12 @@ local test you can open a **tunnel** from your terminal straight to the Pod with
 [`oc port-forward`](https://docs.openshift.com/container-platform/latest/nodes/containers/nodes-containers-port-forwarding.html) —
 no public address required.
 
-*[📊 See this on a slide](/slides/#/reach) — opens the **Slides** tab on this topic.*
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/reach
+```
 
 {{< note >}}
 This is a *local* tunnel, just for you, just while the command runs — not real exposure.

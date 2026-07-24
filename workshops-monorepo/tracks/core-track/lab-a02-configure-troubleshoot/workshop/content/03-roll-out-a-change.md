@@ -6,7 +6,12 @@ The point of keeping configuration in a ConfigMap is that you can *change* it wi
 touching the image. On this page you edit the greeting, apply the change, and roll the app
 onto the new value — the image never changes.
 
-*[📊 See this on a slide](/slides/#/rollout) — opens the **Slides** tab on this topic.*
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/rollout
+```
 
 ## Edit the ConfigMap
 

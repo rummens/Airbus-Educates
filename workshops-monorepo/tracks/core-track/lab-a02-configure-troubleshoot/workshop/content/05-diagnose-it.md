@@ -6,7 +6,12 @@ Three commands tell you almost everything about a misbehaving workload. Use them
 each one narrows the problem. The general rule: read what the platform is reporting before
 you change anything.
 
-*[📊 See this on a slide](/slides/#/diagnose) — opens the **Slides** tab on this topic.*
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/diagnose
+```
 
 ## 1. Describe the Pod — its status and events
 

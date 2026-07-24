@@ -12,7 +12,12 @@ Your session also has an **editor** tab for viewing files and manifests, and the
 terminal is **split** into an upper pane (`execute-1`) and a lower pane (`execute-2`) —
 the same split terminal you've been using in the hands-on labs.
 
-*[📊 See this on a slide](/slides/#/session) — opens the **Slides** tab on this topic.*
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/session
+```
 
 ## Who Am I?
 

@@ -6,7 +6,12 @@ The sample app reads its greeting from an [**environment variable**](https://kub
 called `GREETING`. Setting an env var is the simplest way to change how an app behaves
 **without rebuilding the image** — same image, different configuration.
 
-*[📊 See this on a slide](/slides/#/customise) — opens the **Slides** tab on this topic.*
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/customise
+```
 
 ## Before: no GREETING set
 

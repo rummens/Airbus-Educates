@@ -6,7 +6,12 @@ Config changes are also a common way for apps to break. Someone applies a manife
 small mistake, and the app no longer starts. This page introduces such a mistake
 deliberately, so the next pages can teach you how to find and fix it.
 
-*[📊 See this on a slide](/slides/#/breaks) — opens the **Slides** tab on this topic.*
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/breaks
+```
 
 ## Apply the broken version
 

@@ -6,7 +6,12 @@ You've named the root cause: the broken manifest's `envFrom` points at a ConfigM
 `hello-dcs-conf`, which doesn't exist — the real one is `hello-dcs-config`. Time to fix
 and confirm.
 
-*[📊 See this on a slide](/slides/#/fix) — opens the **Slides** tab on this topic.*
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/fix
+```
 
 ## See the bad line
 
