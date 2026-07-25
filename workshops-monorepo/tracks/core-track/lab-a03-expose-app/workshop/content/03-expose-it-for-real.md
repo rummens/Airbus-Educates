@@ -2,18 +2,24 @@
 title: Expose It for Real
 ---
 
-Now the payoff: a real external URL. One thing to know first —
+Now you give the app a real external URL with a Route. One thing to know first.
+
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/route
+```
 
 {{< note >}}
 **A Route requires a PROD-type namespace.** DCS only admits Routes in namespaces marked
-PROD; a DEV namespace can't expose anything. Your session namespace is PROD-type for this
-lab, so you're good. *Why* PROD enforces this — and how — is a Developer-track topic
-(**B06**).
+PROD; a DEV namespace cannot expose anything. Your session namespace is PROD-type for this
+lab, so this works. *Why* PROD enforces this, and how, is a Developer-track topic (**B06**).
 {{< /note >}}
 
 ## Create the Route
 
-Open it — there's no explicit `host`, so OpenShift assigns one that includes your
+Open it. There is no explicit `host`, so OpenShift assigns one that includes your
 namespace, on the DCS `*.apps` domain:
 
 ```editor:open-file
@@ -32,7 +38,9 @@ retries: .INF
 delay: 2
 ```
 
-See the host DCS assigned:
+See the host DCS assigned. The `-o jsonpath='...'` flag extracts one field from the object
+instead of printing all of it; `{.spec.host}` selects the host name, and `{"\n"}` adds a
+line break after it:
 
 ```terminal:execute
 command: oc get route hello-dcs -o jsonpath='{.spec.host}{"\n"}'
@@ -46,8 +54,11 @@ timeout: 10
 
 ## Reach it from outside the session
 
-That host is on public DCS DNS — reachable from a normal browser, not just this session.
-Call it:
+That host is on public DCS DNS, reachable from a normal browser, not just this session.
+Call it. The first line stores the Route host in a shell variable named `HOST`; the second
+line calls it with `curl`. The `-k` flag tells `curl` to accept the DCS TLS certificate
+without complaint, and `%{http_code} from "$HOST"` prints the status code and the host it
+reached:
 
 ```terminal:execute
 command: |-
@@ -63,5 +74,5 @@ retries: .INF
 delay: 2
 ```
 
-`HTTP 200`. Because the app runs in **UI mode**, that page also prints its *own* Route
-URL — the live DCS DNS name — so you can see the real address it's serving on.
+`HTTP 200`. Because the app runs in **UI mode**, that page also prints its own Route URL,
+the live DCS DNS name, so you can see the real address it is serving on.

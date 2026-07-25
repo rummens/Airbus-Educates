@@ -5,6 +5,13 @@ title: File, Block & Classification
 You used a File volume. {{< param product_short >}} offers more than one kind, and picking
 the right one is part performance, part **compliance**.
 
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/file-block
+```
+
 ## File vs Block
 
 The difference is mostly the [**access mode**](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes):

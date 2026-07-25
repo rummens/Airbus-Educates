@@ -2,14 +2,21 @@
 title: Network Policies & Egress
 ---
 
-Exposing an app is only half the network story. The other half is what's *allowed* — and
-on a shared, air-gapped platform, the defaults are restrictive on purpose.
+Exposing an app is one part of networking. The other part is which traffic is *allowed* to
+and from the app. On a shared, air-gapped platform the defaults are restrictive on purpose.
+
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/network
+```
 
 ## Network policies isolate workloads
 
 A [**NetworkPolicy**](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 controls which traffic may reach a Pod, matched by **labels**. On {{< param product_short >}}
-the posture is locked down by default, and one has been pre-provisioned for your app.
+traffic is restricted by default, and one policy has been pre-provisioned for your app.
 
 {{< note >}}
 **Observe only.** Tenants can't self-create NetworkPolicies on {{< param product_short >}}
@@ -29,18 +36,21 @@ timeout: 10
 Read the `PodSelector` (`app=hello-dcs`) and the ingress rule (TCP 8080): it says *only*
 traffic to port 8080 on the app's Pods is allowed in.
 
-## Air-gapped means no way out
+## Air-gapped means no outbound internet access
 
 {{< param product_short >}} is air-gapped: workloads have **no route to the public
-internet**. Prove it — try to reach an external site from inside the app's Pod:
+internet**. Confirm this by trying to reach an external site from inside the app's Pod.
+`oc exec` runs a command inside a running container; `deploy/hello-dcs` selects a Pod from
+that Deployment; everything after `--` is the command to run in the container (here a short
+Python one-liner, where `-c` passes the code as a string):
 
 ```terminal:execute
 command: oc exec deploy/hello-dcs -- python3 -c "import urllib.request; urllib.request.urlopen('https://example.com', timeout=5)"
 ```
 
-It **fails** (times out or refuses) — exactly as intended. By default an app gets
-everything it needs from *inside* the platform (images from Harbor, packages from internal
-mirrors), never the open internet.
+It **fails** (it times out or is refused), which is the intended result. By default an app
+gets everything it needs from inside the platform (images from Harbor, packages from
+internal mirrors), never from the open internet.
 
 {{< note >}}
 **There is a controlled exception.** Specific external resources *can* be reached through

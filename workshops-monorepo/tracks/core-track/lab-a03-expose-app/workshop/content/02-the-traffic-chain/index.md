@@ -2,9 +2,16 @@
 title: The Traffic Chain
 ---
 
-Your Service works — but only *inside* the cluster. A colleague on their laptop can't
-reach `hello-dcs.<namespace>.svc`; that name only resolves in cluster DNS. To let traffic
-in from outside, {{< param product_short >}} uses a chain of pieces, each with one job.
+Your Service works, but only inside the cluster. A colleague on their laptop cannot reach
+`hello-dcs.<namespace>.svc`; that name only resolves in cluster DNS. To let traffic in from
+outside, {{< param product_short >}} uses a chain of parts, each with one job.
+
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/traffic-chain
+```
 
 ![How outside traffic reaches your app on DCS](traffic-chain.svg)
 

@@ -2,10 +2,17 @@
 title: What Is a Namespace?
 ---
 
-You've been working *inside* a [**Namespace**](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
+You have been working inside a [**Namespace**](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
 this whole time without a name for it. A namespace groups and isolates a set of
 workloads: the Deployments, Pods, Services, ConfigMaps and so on that belong together.
-Objects in one namespace don't collide with — or see — objects in another.
+Objects in one namespace do not see or collide with objects in another.
+
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/namespace
+```
 
 On {{< param product_short >}}, the namespace is also the **unit of consumption**: you
 request namespaces and ship applications into them. That's what "Namespace as a Service"
@@ -15,7 +22,8 @@ means — the namespace, not a server, is the thing you're given. Learn more in 
 ## Your active namespace
 
 Your **active namespace** is the one your `oc` context points at right now — the default
-for every command that doesn't say otherwise. Show it:
+for every command that does not name a different one. Show it with `oc project`, which
+prints the active namespace and nothing else:
 
 ```terminal:execute
 command: oc project
@@ -35,7 +43,9 @@ above it. We'll come back to that on the Tenancy page.
 
 ## What's in it
 
-Everything you create lands here unless you say otherwise. List your workloads:
+Everything you create lands here unless you say otherwise. List your workloads. Passing
+a comma-separated list of kinds (`deployments,pods,services`) asks `oc` for all three at
+once, so you see the whole picture in a single command:
 
 ```terminal:execute
 command: oc get deployments,pods,services

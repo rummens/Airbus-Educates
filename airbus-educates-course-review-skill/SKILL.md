@@ -9,7 +9,10 @@ description: >
   concept per page; what/why/how; expected output; analogies; diagrams; learning
   styles; realistic duration), examiner coverage (a check for every command) plus
   knowledge check and challenge, the vcluster-vs-namespace decision, `config.yaml`
-  params format, split-terminal wording, and planning/cross-reference consistency.
+  params format, split-terminal wording, plain-language tone (no idioms; simple
+  explained commands; declarative/imperative defined before use), the always-visible
+  feedback tab, the per-page slides deck (one slide per page, page diagrams repeated
+  on their slides, `reload-dashboard` jump links), and planning/cross-reference consistency.
   Optionally, if the user grants access to the internal (otherwise unreachable)
   versioned DCS documentation, it also checks that linked doc pages are still valid
   and relevant, are pinned to a fixed version (never the floating `latest`), and
@@ -103,14 +106,14 @@ the usual remedy. References point at the authoritative source.
 ### F. Introduction page & first-time note
 - **Rule:** `00-workshop-overview.md` exists with product framing via `{{< param product_name >}}`, the **first-time note** linking the environment guide via `{{< param dcs_docs_base_url >}}`, What You'll Learn, Prerequisites, Your Environment, Time & Difficulty; no clickable actions. **Check:** read page 00. **Fix:** add the missing elements. *(introduction-page-reference.)*
 
-### F2. Feedback page
-- **Rule:** a `98-your-feedback.md` page exists and opens the feedback form (a `dashboard:create-dashboard` **Feedback** tab pointing at `feedback.{{< param ingress_domain >}}/form?workshop=<name>&session=...`). **Check:** the page exists; the `workshop=` param matches the workshop `metadata.name`. **Fix:** add the page from the template. *(feedback-page-reference — Minor if missing.)*
+### F2. Feedback page & always-visible tab
+- **Rule:** the **Feedback** tab is **pre-declared** in `spec.session.dashboards` so it is always visible, pointing at `$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=<name>&session=$(session_namespace)`; a `98-your-feedback.md` page exists and **opens** that tab with `dashboard:open-dashboard` (name: Feedback) — **not** the old `dashboard:create-dashboard` pattern. Completion/trophies fire only on form **submit**, so an always-visible tab is safe. **Check:** the `dashboards` entry exists with a `workshop=` matching `metadata.name`; page 98 uses `open-dashboard`, not `create-dashboard`. **Fix:** pre-declare the tab; switch page 98 to `open-dashboard`. *(feedback-page-reference — Minor if missing or still using the old create-dashboard/`feedback.<domain>` pattern.)*
 
 ### G. Documentation links (hybrid)
 - **Rule:** first mention of each concept links its docs — standard constructs → upstream; DCS-specific concepts → `{{< param dcs_docs_base_url >}}` with an inline blurb; internal procedures → DCS docs. No standard construct mislinked to the DCS portal, or vice versa. **Check:** scan each page's first mentions. **Fix:** add/repoint links. *(documentation-links-reference, dcs-concepts-reference.)*
 
 ### H. Content depth
-- **Rule:** one concept per page; each explains **what/why/how** (+ trade-offs), shows and explains **expected output**, explains non-obvious flags; foundational concepts aren't skipped; **structural concepts have a diagram** (SVG page bundle); new abstractions use an **analogy** (VM world) that tapers with skill level; multiple learning styles per key concept; **duration realistic and erring low** (~3 min/guided page). **Check:** read pages; count concepts/page; look for diagrams, analogies, expected output; sanity-check `duration`. **Fix:** split pages; add why/output/diagram/analogy; lower an inflated estimate. *(content-depth-reference.)*
+- **Rule:** one concept per page; each explains **what/why/how** (+ trade-offs), shows and explains **expected output**, explains non-obvious flags; foundational concepts aren't skipped; **structural concepts have a diagram** (SVG page bundle); new abstractions use an **analogy** (VM world) that tapers with skill level; multiple learning styles per key concept; **duration realistic and erring low** (~3 min/guided page); **plain language** (no idioms/metaphors/figurative flourishes); **commands kept simple** (no dense chained one-liners — split `a | b && c`; explain flags/operators on first use); **term pairs like declarative/imperative defined before first use**. **Check:** read pages; count concepts/page; look for diagrams, analogies, expected output; grep for idioms and chained-command one-liners; confirm declarative/imperative are defined before use; sanity-check `duration`. **Fix:** split pages; add why/output/diagram/analogy; replace idioms with plain wording; split chained commands; define term pairs; lower an inflated estimate. *(content-depth-reference.)*
 
 ### I. Assessment
 - **Rule:** **every command** has a paired `examiner:execute-test` (automated-pipeline coverage; atomic sequences may share one); checks emit **diagnostic** failure messages; a **knowledge check** per workshop and (recommended) an unguided **challenge** with hint + reveal-solution; long-running steps have an experience note + polling check. **Check:** map each `terminal:execute` to a check; read test scripts for diagnostics; confirm the summary section. **Fix:** add missing checks/diagnostics/knowledge-check. *(assessment-reference — Blocker for an unverified command.)*
@@ -123,6 +126,9 @@ the usual remedy. References point at the authoritative source.
 
 ### J. Clickable actions & terminal
 - **Rule:** guided experience (no manual typing); YAML block-scalar safety (`|-`, indent indicators, `|+`+`eot`); dashboard tab visibility tracked; split terminal referred to as **upper/lower** (`execute-1`=upper, `execute-2`=lower), never left/right; terminal working directory tracked. **Check:** read actions and prose. **Fix:** correct wording/YAML/tab guidance. *(clickable-actions reference, workshop-dashboard-reference, content-depth-reference.)*
+
+### M. Slides deck
+- **Rule:** each lab ships `workshop/slides/` with the **copy-verbatim** renderer (`index.html`, identical to the authoring skill's `references/slides/index.html`) and `slides.md` — **one slide per instruction page**, enriched (short explanation + bullets + key command + expected result where useful, **not** bare bullets); the slides app is enabled in `resources/workshop.yaml` (`spec.session.applications.slides.enabled: true`); **each page's diagram is repeated on its slide** (the SVG copied into `slides/`); each content page links to its slide via a **`dashboard:reload-dashboard`** action (`name: Slides`, `url: …/slides/#/<id>`) — **never** a plain markdown link like `[…](/slides/#/<id>)` (Educates won't route it). **Check:** `index.html` matches the skill reference; slide count ≈ instruction-page count; every `#/<id>` link resolves to a real slide id; `grep` content for a plain `](/slides/` link (should be none); each page that has an SVG shows it on its slide. **Fix:** copy the renderer; author/enrich `slides.md`; copy diagrams into `slides/`; convert any plain slide link to a `reload-dashboard` action. *(slides-reference — **Major** if the deck is missing; **Minor** for bare-bullet slides, a missing diagram-on-slide, or a plain-link jump.)*
 
 ### K. Live verification *(optional)*
 - **Rule:** the workshop actually deploys, renders, its links resolve, and every examiner check passes. **Check:** `test/workshops/deploy_workshop.py <name>` then `test/workshops/smoke_test.py <name>` (examiner + link check + restart); optionally `test/workshops/flow_test.py` for the session-comes-up + basic-commands user flow. **Fix:** address whatever the run surfaces (setup/ytt, render, unreachable link, failing check). *(authoring SKILL "Smoke-Test in a Live Session".)*

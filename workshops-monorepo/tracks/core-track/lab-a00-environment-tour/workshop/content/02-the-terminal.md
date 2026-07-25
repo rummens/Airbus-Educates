@@ -7,9 +7,16 @@ session. It starts in the `~/exercises` directory, where each lab's files live, 
 command is run with [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html),
 the OpenShift command line.
 
-Notice it's **split** into two panes, one above the other — an **upper** pane
+Notice it is **split** into two panes, one above the other — an **upper** pane
 (`execute-1`) and a **lower** pane (`execute-2`). Many labs use both: one to `watch`
 something while the other makes a change. Let's run a command in each.
+
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/terminal
+```
 
 ## Run a command in the upper pane
 

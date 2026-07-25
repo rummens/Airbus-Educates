@@ -61,6 +61,12 @@ spec:
         layout: split
       editor:
         enabled: true
+      # A slide deck (workshop/slides/index.html renders workshop/slides/slides.md)
+      # gives a visual, one-slide-per-page overview. Each content page links to its
+      # slide with /slides/#/<id>. The same files are served outside a session by the
+      # portal's Slides button.
+      slides:
+        enabled: true
       # The Console tab is the generic Kubernetes Dashboard usable as the session SA
       # (the real OpenShift web console can't be embedded — frame-ancestors DENY, no
       # SSO propagation). Real-console-only views are shown as screenshots.
@@ -70,3 +76,10 @@ spec:
         enabled: true
       vcluster:
         enabled: false
+    # Feedback tab is pre-declared so it is ALWAYS visible, not created only on the
+    # last page. Completion/trophies still fire solely when the form is SUBMITTED
+    # (portal POST /feedback), so a permanently-visible tab does not mark the lab
+    # done early. Page 98 opens this tab; it no longer creates it.
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-a08-openshift-console&session=$(session_namespace)"

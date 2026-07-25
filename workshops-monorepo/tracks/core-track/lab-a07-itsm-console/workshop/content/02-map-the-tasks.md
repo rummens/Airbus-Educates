@@ -2,14 +2,23 @@
 title: Map the Tasks
 ---
 
-Time to test the line you just learned. Open the worksheet and decide, for each task,
-whether it's self-service or a ticket:
+Now check what you just learned. In this page you sort a set of tasks into self-service
+or ticket.
+
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/map-tasks
+```
+
+Open the worksheet and decide, for each task, whether it is self-service or a ticket:
 
 ```editor:open-file
 file: ~/exercises/self-service-vs-ticket.md
 ```
 
-Think it through before you reveal the answers.
+Decide each one before you reveal the answers.
 
 ## Answers
 
@@ -22,7 +31,7 @@ Harbor · request an S3 bucket · add a new Harbor catalog/repo · request a sec
 exception.
 {{< /note >}}
 
-The tell: if it changes **what's inside your namespace** using rights you already have,
+The rule: if it changes **what's inside your namespace** using rights you already have,
 it's `oc`. If it changes **your entitlements or the shared platform**, it's a ticket.
 
 ## Quick check

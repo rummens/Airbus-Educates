@@ -3,9 +3,9 @@ title: "The ITSM Console — Self-Service on DCS"
 ---
 
 You've spent five labs doing things yourself with `oc` — deploying, configuring, exposing,
-persisting. But on **{{< param product_name >}}** you can't just click everything. Some
+persisting. But on **{{< param product_name >}}** not every action is self-service. Some
 actions are **requests**: they go through the platform team via an ITSM ticket. This lab
-draws that line and shows you where requests happen.
+defines which actions are which, and shows you where requests happen.
 
 {{< note >}}
 **First time in one of these labs?** See the
@@ -25,9 +25,9 @@ Requests are documented in the
 
 ## Prerequisites
 
-- **A05 — What is DCS?** You've also met the *edges* of self-service in A03 (Routes need
-  a PROD namespace) and A04 (S3 comes via a ticket) — this lab names the mechanism behind
-  those asides.
+- **A05 — What is DCS?** You've also seen the limits of self-service in A03 (Routes need
+  a PROD namespace) and A04 (S3 comes via a ticket) — this lab explains the mechanism behind
+  those notes.
 
 ## Your Environment
 

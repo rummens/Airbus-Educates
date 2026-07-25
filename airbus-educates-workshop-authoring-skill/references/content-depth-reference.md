@@ -124,25 +124,16 @@ Every concept page should offer more than one way in, so visual, verbal, and han
 
 Not every page needs all four, but a foundational concept should hit at least the prose + a visual or analogy + the hands-on action.
 
-## Slides — one per page, concept plus snippet
+## Slides — one per page, with the page's diagram
 
-Give each lab a slide deck: **one slide per instruction page**, carrying that page's core concept in a few bullets plus any key command or snippet. The deck is the visual "map" of the lab — a learner can skim it to recall the shape of a topic without re-reading the prose.
+Give each lab a slide deck — **one slide per instruction page** — carrying that page's core
+concept (a short explanation + bullets + the key command), and **the page's diagram repeated
+on its slide** so the visual sticks. The deck is the lab's visual map; the portal also serves
+it outside a session for later reference. Slides must be genuinely useful, not bare bullets.
 
-- Author slides as **markdown** in `workshop/slides/slides.md`, one slide per `---` separator, in page order. Ship the self-contained renderer as `workshop/slides/index.html` (fetches `slides.md`; no reveal.js, no CDN — air-gapped). Enable the slides application in `resources/workshop.yaml` (`spec.session.applications.slides.enabled: true`).
-- Give each slide a stable id (an `id`-comment) and jump to it from the matching content page with a **`dashboard:reload-dashboard` clickable action** targeting the built-in `Slides` tab — this reliably opens the Slides tab *and* lands on the right slide:
-
-  ````markdown
-  Open the slide for this page (📊 **Slides** tab):
-
-  ```dashboard:reload-dashboard
-  name: Slides
-  url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/<id>
-  ```
-  ````
-
-  Do **not** use a plain markdown link like `[…](/slides/#/<id>)` — Educates does not reliably intercept it, so it navigates the instructions pane into the deck (renders wrong). `dashboard:reload-dashboard` is the only reliable way to set a dashboard tab's URL (see [clickable-actions/dashboard-actions.md](clickable-actions/dashboard-actions.md)). The renderer reads the `#/<id>` hash on load and scrolls to that slide.
-- Keep slides low-text: bullets and a snippet, not paragraphs. The page holds the full explanation; the slide is the summary.
-- The same files are served **outside a session** by the portal (an "Open slides" button on the course page), so a learner can re-read a deck without starting a container — another reason to keep the deck self-explanatory.
+Full mechanics — the copy-verbatim renderer, `slides.md` format, putting diagrams on slides,
+and the `dashboard:reload-dashboard` jump link (do **not** use a plain `/slides/#/…` markdown
+link, Educates won't route it) — are in **[slides-reference.md](slides-reference.md)**.
 
 ## Keep commands simple and explained
 

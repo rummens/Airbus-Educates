@@ -7,6 +7,13 @@ your `~/exercises` folder. Labs use it for two things: to *show* you a file (a m
 config) and to *edit* one — always through clickable actions, so you can watch the change
 happen instead of typing it.
 
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/editor
+```
+
 ## Open a file
 
 Click the box below. It switches to the Editor tab and opens the welcome file in your

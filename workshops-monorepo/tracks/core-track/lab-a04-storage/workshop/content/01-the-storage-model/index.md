@@ -2,8 +2,15 @@
 title: The Storage Model
 ---
 
-You don't hand an app a disk directly on {{< param product_short >}}. You *ask* for one,
-and the platform provisions it. Three objects make that work:
+You do not attach a disk to an app directly on {{< param product_short >}}. You request
+storage, and the platform provisions it. Three objects make that work:
+
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/storage-model
+```
 
 ![How your app gets storage on DCS](storage-model.svg)
 

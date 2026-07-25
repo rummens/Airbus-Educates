@@ -2,13 +2,13 @@
 title: "Terms — Namespaces & Tenancy"
 ---
 
-Everything you've deployed so far lived *somewhere* — a place that isolated it, held its
-objects, and had a name you kept seeing in prompts and commands. This workshop, part of
-**{{< param product_name >}}**, names that place: the **Namespace**. Then it makes
-isolation concrete — you'll run the *same* app in two namespaces at once and watch them
-stay completely out of each other's way.
+Everything you have deployed so far ran inside a place that isolated it, held its objects,
+and had a name you saw in your prompts and commands. This workshop, part of
+**{{< param product_name >}}**, names that place: the **Namespace**. It then shows
+isolation directly — you will run the *same* app in two namespaces at once and see that
+neither one affects the other.
 
-This is vocabulary plus a hands-on demo, not the deep governance model — that lands later
+This is vocabulary plus a hands-on demo, not the full governance model, which comes later
 in the Developer track.
 
 {{< note >}}

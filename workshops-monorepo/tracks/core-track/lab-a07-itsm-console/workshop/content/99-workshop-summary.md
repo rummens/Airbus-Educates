@@ -7,9 +7,9 @@ just what you can do yourself, but what you **request** — and where.
 
 ## What You Did
 
-- Drew the line between **self-service `oc`** actions and **ITSM requests**.
-- Sorted a set of tasks into the right bucket.
-- Toured the **ITSM console** and walked a quota-increase request end to end.
+- Distinguished **self-service `oc`** actions from **ITSM requests**.
+- Sorted a set of tasks into self-service or ticket.
+- Toured the **ITSM console** and followed a quota-increase request from start to finish.
 - Learned the **request → approval → provisioning** loop.
 
 ## Check Your Understanding
@@ -35,6 +35,6 @@ bucket, security exception.
 
 ## Next Steps
 
-**A08** tours the *other* console — the OpenShift web console — mapped to the `oc`
-commands you already know. And across the Developer and Security tracks you'll lean on ITSM
+**A08** tours the other console — the OpenShift web console — mapped to the `oc`
+commands you already know. And across the Developer and Security tracks you'll use ITSM
 for mirroring, catalogs, and exceptions.

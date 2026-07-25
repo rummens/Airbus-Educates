@@ -111,9 +111,22 @@ spec:
         layout: split
       editor:
         enabled: true
+      # A slide deck (workshop/slides/index.html renders workshop/slides/slides.md)
+      # gives a visual, one-slide-per-page overview. Each content page links to its
+      # slide with /slides/#/<id>. The same files are served outside a session by the
+      # portal's Slides button.
+      slides:
+        enabled: true
       examiner:
         enabled: true
       # Two peer namespaces are enough to show isolation; a per-session throwaway
       # cluster is reserved for the DEV/PROD *policy* demo (Developer B06).
       vcluster:
         enabled: false
+    # Feedback tab is pre-declared so it is ALWAYS visible, not created only on the
+    # last page. Completion/trophies still fire solely when the form is SUBMITTED
+    # (portal POST /feedback), so a permanently-visible tab does not mark the lab
+    # done early. Page 98 opens this tab; it no longer creates it.
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-a06-terms-namespaces-tenancy&session=$(session_namespace)"

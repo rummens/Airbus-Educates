@@ -2,9 +2,21 @@
 title: Isolation in Action
 ---
 
-Talk is cheap — let's *see* isolation. Two extra namespaces were created for you when
-this session started: `app-a` and `app-b` (their full names are your session namespace
-with `-app-a` / `-app-b` on the end). Confirm they exist:
+Now see isolation directly. Two extra namespaces were created for you when this session
+started: `app-a` and `app-b` (their full names are your session namespace with `-app-a`
+and `-app-b` on the end).
+
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/isolation
+```
+
+Confirm they exist. This command uses two shell features: `$(oc project -q)` runs
+`oc project -q` first and substitutes its output (your active namespace, with `-q` for the
+quiet, name-only form), and the pipe `|` sends the full namespace list into `grep`, which
+keeps only the lines that match your two peer namespaces:
 
 ```terminal:execute
 command: oc get namespaces | grep "$(oc project -q)-app-"
@@ -24,19 +36,23 @@ Open the app you'll deploy:
 file: ~/exercises/app.yaml
 ```
 
-It's a single Deployment named **`hello`** — a fixed name, on purpose. Notice there's no
-`namespace:` field. That's the trick: the same file targets whichever namespace you name
-on the command line.
+It is a single Deployment named **`hello`** — a fixed name, on purpose. Notice there is no
+`namespace:` field. That is what makes the demo work: the same file targets whichever
+namespace you name on the command line.
 
 ## Deploy the same app into both namespaces
 
-The key to this whole page is one flag: **`-n <namespace>`**. Every `oc` command runs
-against exactly one namespace, and `-n` is how you pick which. Leave it off and the command
-uses your *current* namespace; add `-n app-a` and it targets `app-a` instead. Same command,
-same manifest — only the `-n` value decides where it lands.
+The important flag on this page is **`-n <namespace>`**. Every `oc` command runs against
+exactly one namespace, and `-n` is how you pick which. Leave it off and the command uses
+your *current* namespace; add `-n app-a` and it targets `app-a` instead. Same command,
+same manifest — only the `-n` value decides where the app is created.
 
-You'll use the **split terminal**. In the **upper** pane, deploy into `app-a` (note the
-`-n ...-app-a`):
+The deploy command combines three parts. `envsubst < app.yaml` reads `app.yaml` (the `<`
+feeds the file in as input) and replaces `${DCS_REGISTRY}` with the registry value; the
+pipe `|` sends that filled-in manifest to `oc apply`; and `-f -` tells `oc apply` to read
+the manifest from that piped input instead of from a file (the `-` means "standard input").
+
+You will use the **split terminal**. In the **upper** pane, deploy into `app-a`:
 
 ```terminal:execute
 command: envsubst < app.yaml | oc apply -n "$(oc project -q)-app-a" -f -
@@ -50,7 +66,7 @@ retries: .INF
 delay: 2
 ```
 
-Now the **lower** pane — the *identical* manifest into `app-b`:
+Now the **lower** pane — the identical manifest into `app-b`, changing only the `-n` value:
 
 ```terminal:execute
 command: envsubst < app.yaml | oc apply -n "$(oc project -q)-app-b" -f -
@@ -66,16 +82,23 @@ delay: 2
 ```
 
 {{< note >}}
-`envsubst` fills in the registry from the `DCS_REGISTRY` variable before `oc apply`
-reads the manifest — the house pattern for any manifest carrying a `${VAR}`.
+Using `envsubst` to fill in a `${VAR}` before piping to `oc apply` is the house pattern for
+any manifest that carries a variable.
 {{< /note >}}
 
 ## Same name, two independent copies
 
-Both namespaces now have a Deployment called `hello` — the identical name, no clash:
+Both namespaces now have a Deployment called `hello`, with the identical name and no clash.
+Read the one in `app-a`:
 
 ```terminal:execute
-command: oc get deploy hello -n "$(oc project -q)-app-a" && oc get deploy hello -n "$(oc project -q)-app-b"
+command: oc get deploy hello -n "$(oc project -q)-app-a"
+```
+
+Now read the one in `app-b`:
+
+```terminal:execute
+command: oc get deploy hello -n "$(oc project -q)-app-b"
 ```
 
 ```examiner:execute-test
@@ -84,25 +107,32 @@ title: Verify the same name exists independently in both
 timeout: 10
 ```
 
-On a single cluster you have two things both called `hello`, and neither knows the other
-exists. The namespace is the boundary that makes that safe.
+On a single cluster you have two Deployments both called `hello`, and neither knows the
+other exists. The namespace is the boundary that makes that safe.
 
 ## Actions don't leak
 
-Scale the copy in `app-a` down to zero — and watch `app-b` stay exactly as it was:
+Scale the copy in `app-a` down to zero. `--replicas=0` sets the desired number of running
+copies to zero, so the platform stops the Pod in `app-a`:
 
 ```terminal:execute
 command: oc scale deploy/hello --replicas=0 -n "$(oc project -q)-app-a"
 ```
 
-Now read both, side by side, and see for yourself that only `app-a` changed:
+Now read both Deployments and confirm that only `app-a` changed. First `app-a`, which
+should show `0/0` (scaled to zero):
 
 ```terminal:execute
-command: echo "app-a:" && oc get deploy hello -n "$(oc project -q)-app-a" && echo "app-b:" && oc get deploy hello -n "$(oc project -q)-app-b"
+command: oc get deploy hello -n "$(oc project -q)-app-a"
 ```
 
-`app-a` shows `0/0` (scaled to zero); `app-b` still shows `1/1` — untouched by the action
-you took next door. The check below confirms it:
+Then `app-b`, which should still show `1/1` — unchanged by the action you took in `app-a`:
+
+```terminal:execute
+command: oc get deploy hello -n "$(oc project -q)-app-b"
+```
+
+The check below confirms it:
 
 ```examiner:execute-test
 name: verify-isolation
@@ -112,5 +142,5 @@ retries: .INF
 delay: 2
 ```
 
-`app-a` is now empty; `app-b` is untouched. **Names, objects, and actions are all scoped
-to the namespace.** That's the whole idea.
+`app-a` is now empty; `app-b` is unchanged. **Names, objects, and actions are all scoped
+to the namespace.** That is the core idea.

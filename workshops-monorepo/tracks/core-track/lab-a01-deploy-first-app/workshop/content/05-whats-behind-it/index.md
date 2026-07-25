@@ -58,7 +58,11 @@ Three parts are worth finding:
 
 The Deployment didn't create Pods directly. It created a
 [**ReplicaSet**](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/),
-and the ReplicaSet created the Pod. See all three at once:
+and the ReplicaSet created the Pod.
+
+![Deployment creates a ReplicaSet, which creates the Pod](deployment-chain.svg)
+
+See all three at once:
 
 ```terminal:execute
 command: oc get all -l app=hello-dcs

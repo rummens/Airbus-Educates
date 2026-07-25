@@ -2,14 +2,21 @@
 title: Why Split Into Namespaces?
 ---
 
-You just saw isolation work. So why would a real tenant deliberately run more than one
-namespace? Four common reasons — all of them things you *just watched happen*.
+You just saw isolation work. So why would a real tenant run more than one namespace? Here
+are four common reasons, each one something you saw in the demo.
+
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/why-split
+```
 
 ## Separate instances of one app
 
-The most common one: **DEV / QA / PROD** copies of the same service, each in its own
-namespace, each with the same object names, each on its own lifecycle. Exactly the
-`hello`-in-two-places demo you ran — scaled up to a real delivery pipeline.
+The most common reason: **DEV / QA / PROD** copies of the same service, each in its own
+namespace, each with the same object names, each on its own lifecycle. This is the same as
+the `hello`-in-two-namespaces demo you ran, applied to a real delivery pipeline.
 
 {{< note >}}
 DEV and PROD aren't just naming conventions on {{< param product_short >}} — they're
@@ -19,9 +26,9 @@ Developer track (**B06**).
 
 ## Team and blast-radius isolation
 
-A mistake in one namespace — a bad rollout, a runaway workload, an accidental delete —
-**can't reach another**. Scaling `app-a` to zero didn't touch `app-b`. Teams get a blast
-radius they control.
+A mistake in one namespace — a bad rollout, a workload consuming too much, an accidental
+delete — **cannot reach another**. Scaling `app-a` to zero did not touch `app-b`. Each
+team's mistakes stay within their own namespace.
 
 ## Independent quotas and RBAC
 
@@ -31,7 +38,7 @@ namespace can be generous and open; another's can be locked down and small — i
 
 ## Naming freedom
 
-The name clash you *didn't* get is the point. Two teams can both call their app `hello`,
+The absence of a name clash is the point. Two teams can both call their app `hello`,
 `api`, or `db` without coordinating — because the namespace keeps the names apart.
 
 ## Check your understanding

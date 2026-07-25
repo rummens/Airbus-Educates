@@ -2,8 +2,15 @@
 title: The Dashboard Layout
 ---
 
-Take a look at your screen. It's split into two halves, and every lab in the academy uses
-the same layout — so once you know it, you know them all.
+Look at your screen. It is split into two halves, and every lab in the academy uses the
+same layout, so once you learn it every other lab works the same way.
+
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/dashboard-layout
+```
 
 ![DCS Academy workshop dashboard](dashboard-layout.svg)
 
@@ -36,11 +43,11 @@ inspects the cluster — is the pod actually running? did the Service answer? �
 green only when the previous step truly succeeded. They exist for two reasons:
 
 - **You get instant, honest feedback** that a step worked, instead of guessing.
-- **They gate progress on purpose** — if a check is red, something's off; fix it before
-  moving on rather than piling the next step on a broken one.
+- **They gate progress on purpose** — if a check is red, something is wrong; fix it before
+  moving on, rather than running the next step against a setup that is already broken.
 
 If a check is red, re-read the expected output of the step above, make sure the right tab
-is visible, and click the step (then the check) again — they're safe to re-run.
+is visible, and click the step (then the check) again — the checks are safe to re-run.
 
 {{< note >}}
 **Two habits worth forming now:**

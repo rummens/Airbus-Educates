@@ -2,9 +2,16 @@
 title: Summary & Challenge
 ---
 
-Your app can now remember things. You claimed a volume, mounted it, wrote to it, and proved
-the data survived a Pod restart — the last piece of the {{< param product_name >}} Core
-happy path.
+Your app can now keep data across restarts. You claimed a volume, mounted it, wrote to it,
+and proved the data survived a Pod restart — the last step of the {{< param product_name >}}
+Core basics.
+
+Open the closing slide (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/close
+```
 
 ## What You Did
 
@@ -18,8 +25,17 @@ happy path.
 
 You've done File. Now claim a **Block** (ReadWriteOnce) volume and confirm it binds.
 
+Apply the Block PVC:
+
 ```terminal:execute
-command: oc apply -f pvc-block.yaml && oc get pvc hello-dcs-block
+command: oc apply -f pvc-block.yaml
+```
+
+Check its status. `oc get pvc hello-dcs-block` shows the claim's phase — `Bound`, or
+`Pending` until a Pod mounts it:
+
+```terminal:execute
+command: oc get pvc hello-dcs-block
 ```
 
 ```examiner:execute-test
@@ -71,7 +87,7 @@ has no storage class. File and Block are PVCs; S3 is a request.
 
 ## Next Steps
 
-That's the Core happy path complete: **what DCS is → deploy → configure & fix → expose →
+That completes the Core basics: **what DCS is → deploy → configure & fix → expose →
 persist**. Next come the orientation labs — **A06** (the terms: namespaces & tenancy),
 **A07** (the ITSM self-service console), **A08** (the OpenShift web console) — and then the
 **Developer track** for the mechanisms behind everything you just did.

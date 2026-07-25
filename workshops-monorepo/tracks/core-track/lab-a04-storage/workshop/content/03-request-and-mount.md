@@ -2,8 +2,15 @@
 title: Request and Mount
 ---
 
-You saw the container's own filesystem forget everything on restart. Now give the app a
-volume that *doesn't*.
+You saw the container's own filesystem lose everything on restart. Now give the app a
+volume that keeps its data.
+
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/request-mount
+```
 
 ## Claim a volume
 
@@ -12,6 +19,9 @@ Open the PVC — it asks for 1Gi of **File** (ReadWriteMany) storage:
 ```editor:open-file
 file: ~/exercises/pvc-file.yaml
 ```
+
+Apply the file to create the claim. `oc apply -f pvc-file.yaml` reads the manifest from the
+named file (`-f` means "from this file") and creates the object in your namespace:
 
 ```terminal:execute
 command: oc apply -f pvc-file.yaml
@@ -35,8 +45,20 @@ path like `/data` stays root-owned, and the app hits **`Permission denied`** try
 write. Mounting inside the image's own writable home (`/opt/app-root/src`) avoids that.
 {{< /note >}}
 
+Applying it takes two steps. The manifest names its image as `${DCS_REGISTRY}/...` instead
+of a hard-coded registry, so the same file works on any DCS environment. `envsubst` replaces
+`${DCS_REGISTRY}` with the real value and prints the finished manifest; the `|` pipe hands
+that output straight to `oc apply -f -` (the `-` means "read the manifest from the pipe, not
+a file"):
+
 ```terminal:execute
-command: envsubst < hello-dcs-with-volume.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=120s
+command: envsubst < hello-dcs-with-volume.yaml | oc apply -f -
+```
+
+Now wait for the new Pod to be ready:
+
+```terminal:execute
+command: oc rollout status deploy/hello-dcs --timeout=120s
 ```
 
 Once the Pod is scheduled, DCS provisions a PV and **binds** it to your claim. Confirm both

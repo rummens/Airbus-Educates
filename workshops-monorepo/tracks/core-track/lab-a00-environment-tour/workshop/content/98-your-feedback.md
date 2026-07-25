@@ -3,17 +3,16 @@ title: Your Feedback
 ---
 
 Before you finish, please take 15 seconds to rate this workshop. Your feedback
-directly shapes how **{{< param product_name >}}** training improves — and this is the
-last tab of the environment tour, so you're trying the feedback form too.
+directly shapes how **{{< param product_name >}}** training improves — and trying the
+feedback form is the last stop on this environment tour.
 
 ## Leave your feedback
 
-Open the **Feedback** tab and fill in the short form — a rating, how clear the
-instructions were, and an optional comment:
+Open the **Feedback** tab (always available at the top of your session) and fill in the
+short form — a rating, how clear the instructions were, and an optional comment:
 
-```dashboard:create-dashboard
+```dashboard:open-dashboard
 name: Feedback
-url: "https://academy.{{< param ingress_domain >}}/form?workshop=lab-a00-environment-tour&session={{< param session_namespace >}}"
 ```
 
 {{< note >}}

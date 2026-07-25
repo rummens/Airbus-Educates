@@ -2,13 +2,28 @@
 title: Prove It Persists
 ---
 
-Here's the whole point. Destroy the Pod, let {{< param product_short >}} create a fresh
-one, and check the marker is still there — because it lives on the PV, not the container.
+This is the key test. Destroy the Pod, let {{< param product_short >}} create a fresh one,
+and check the marker is still there — it lives on the PV, not on the container.
+
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/persists
+```
 
 ## Restart the Pod
 
+`oc rollout restart` retires the current Pod and starts a new one from the same Deployment:
+
 ```terminal:execute
-command: oc rollout restart deploy/hello-dcs && oc rollout status deploy/hello-dcs --timeout=90s
+command: oc rollout restart deploy/hello-dcs
+```
+
+Wait for the new Pod to be ready:
+
+```terminal:execute
+command: oc rollout status deploy/hello-dcs --timeout=90s
 ```
 
 {{< note >}}

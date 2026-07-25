@@ -2,10 +2,11 @@
 title: "Expose Your App"
 ---
 
-So far your app has only ever answered a **local tunnel** — a `port-forward` that lived and
-died with a single terminal command. That's fine for a quick test, useless for anything
-real. In this workshop on **{{< param product_name >}}** you'll give the app a proper
-address: first a stable in-cluster name, then a real external URL that anyone can reach.
+So far your app has only been reachable through a **local tunnel** — a `port-forward` that
+runs only while a single terminal command is open. That works for a quick test, but not for
+anything real. In this workshop on **{{< param product_name >}}** you will give the app a
+proper address: first a stable in-cluster name, then a real external URL that anyone can
+reach.
 
 {{< note >}}
 **First time in one of these labs?** See the

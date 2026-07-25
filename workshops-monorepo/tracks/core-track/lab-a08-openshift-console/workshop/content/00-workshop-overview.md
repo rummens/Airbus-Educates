@@ -2,10 +2,10 @@
 title: "The OpenShift Console — A Guided Tour"
 ---
 
-You've done the whole Core happy path with `oc`. Here's the thing: **every one of those
-actions has a visual equivalent** in the {{< param product_name >}} web console. This
-closing lab tours it and maps each view back to the command you already know — so you can
-switch between UI and CLI without missing a beat.
+Through Core you did everything with `oc`. **Every one of those actions also has a visual
+equivalent** in the {{< param product_name >}} web console. This closing lab tours the
+console and maps each view to the command you already know, so you can move between the UI
+and the CLI comfortably.
 
 {{< note >}}
 **First time in one of these labs?** See the

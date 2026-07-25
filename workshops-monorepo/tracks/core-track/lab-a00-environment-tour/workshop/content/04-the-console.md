@@ -7,6 +7,13 @@ The **Console** tab is a visual, point-and-click view of your namespace — the
 When a lab has you create something from the terminal, you can flip here to *see* it:
 Deployments, Pods, Services, and more, laid out visually instead of as command output.
 
+Open the slide for this page (📊 **Slides** tab):
+
+```dashboard:reload-dashboard
+name: Slides
+url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/console
+```
+
 ## Open the Console on your namespace
 
 Click below to switch to the Console tab and point it at your own project:
