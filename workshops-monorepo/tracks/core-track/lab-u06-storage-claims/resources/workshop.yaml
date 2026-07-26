@@ -40,10 +40,15 @@ metadata:
 
       ### What you will do
 
-      - Open the project's claims and read the Status column (`oc get pvc`)
-      - Read capacity, access mode and storage class on the claim (`oc describe pvc`)
-      - Check the claim's events — where a Pending claim explains itself
-      - Find the pod that mounts the claim, and the path it is mounted at
+      You will not type any commands — this lab is entirely in the console. Each screen
+      names the command it replaces, so you can map one onto the other afterwards.
+
+      - Read a claim's Bound-or-Pending status, where `oc get pvc` would report it
+      - Read requested size against granted capacity, the access mode and the storage class —
+        the summary `oc describe pvc` prints, and the one choice you cannot change afterwards
+      - Check the claim's events, where a Pending claim explains itself
+      - Trace it to the pod that mounts it and the path it is mounted at, and see why anything
+        written elsewhere is lost when the pod is replaced
 
       ### When to reach for the console
 

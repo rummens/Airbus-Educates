@@ -43,11 +43,16 @@ metadata:
 
       ### What you will do
 
-      - Open the project's Services (`oc get service`)
-      - Read a Service's selector and the pods it currently matches (`oc get endpoints`)
-      - Open the project's Routes and find the published URL (`oc get route`)
-      - Read a Route's host, TLS settings and target Service and port
-      - Find the NetworkPolicies that decide what may reach these pods (`oc get netpol`)
+      You will not type any commands — this lab is entirely in the console. Each screen
+      names the command it replaces, so you can map one onto the other afterwards.
+
+      - Read a Service's selector and port mapping, where `oc get service` reports the address
+      - Check what that selector actually matched on the Service's Pods tab — the screen behind
+        `oc get endpoints`, and the first thing to look at when nothing answers
+      - Open the Route that publishes it and read its host, target Service and TLS settings,
+        the facts `oc get route` prints
+      - Find the NetworkPolicies that decide what may reach these pods, and why on DCS you read
+        them rather than write them
 
       ### When to reach for the console
 

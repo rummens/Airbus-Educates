@@ -40,12 +40,16 @@ metadata:
 
       ### What you will do
 
-      - Read desired versus available replicas in the Deployments list (`oc get deployment`)
-      - Open the Deployment and find the replica control (`oc scale`)
-      - List the pods the Deployment owns (`oc get pods -l app=lab-app`)
-      - Look at the ReplicaSet per revision (`oc rollout history`, `oc rollout undo`)
-      - Read the Deployment's events (`oc describe deployment`)
-      - Open the live YAML and see why editing it here is not the same as changing a manifest
+      You will not type any commands — this lab is entirely in the console. Each screen names
+      the command it replaces, so you can map one onto the other afterwards.
+
+      - Read desired versus available replicas where `oc get deployment` would report them
+      - Find the replica control and the strategy, selector and status behind `oc describe`
+      - List the pods this Deployment owns, already filtered by its own selector
+      - Look at the ReplicaSet per revision — what `oc rollout history` and `undo` work on
+      - Read the events, and the live YAML, and see why editing it here is not the same as
+        changing the manifest in git
+      - Open the Actions menu and the edit form behind it, the console's `oc set`
 
       ### When to reach for the console
 

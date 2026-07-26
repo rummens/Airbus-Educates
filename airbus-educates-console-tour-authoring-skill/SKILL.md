@@ -41,22 +41,38 @@ point it at a later slot in the track or send the concept back to a terminal lab
 2. **Explain the why, not the click.** Never ship a step whose text is "Click Deployments".
    Every step says what this screen is *for* and why a practitioner would come here. See
    [references/step-writing-reference.md](references/step-writing-reference.md).
-3. **A real prospectus in the portal.** A console lab has no README, so
+3. **A page you open is a page you show something on.** Every navigation step is followed by at
+   least one step pointing at something on the page it opened — the values, the section, the
+   toggle. Nothing there worth highlighting means the lab had no reason to open it. Content with
+   nothing to click gets `detailsSection` + `verify: { type: acknowledge }`, which waits for
+   **Next**. Never end a lab on a signpost such as an opened Actions menu: go through the door.
+   And land at least once on the page where these objects are wired to each other — a
+   Deployment's Environment tab — or the lab has shown pages, not a system.
+4. **Every action has a reaction.** A step whose click changes the screen is followed by a step
+   saying what changed — the learner reads a step *before* acting on it, so the result has to be
+   explained by the next one. Reveal values is the example: click, then an `acknowledge` step on
+   the now-readable Data section.
+5. **Name the command, do not appear to issue it.** The learner types nothing in a console lab,
+   so a trailing `(oc get cm -o yaml)` reads as an instruction to run it. Write the command as
+   what this screen replaces: "where `oc get cm -o yaml` would print it".
+6. **A real prospectus in the portal.** A console lab has no README, so
    `academy.dcs/details` (markdown, rendered on the course page) is its description. A single
    sentence is not enough — see [references/portal-metadata-reference.md](references/portal-metadata-reference.md).
-4. **Plain language, DCS voice.** Same rules as the workshop skill: no idioms, no metaphors, no
+7. **Plain language, DCS voice.** Same rules as the workshop skill: no idioms, no metaphors, no
    marketing tone. Short sentences. Define nothing that a prerequisite lab already defined.
-5. **Naming.** Folder name, `ConsoleLab` `metadata.name`, and the paired Workshop name are
+8. **Naming.** Folder name, `ConsoleLab` `metadata.name`, and the paired Workshop name are
    identical. Default tours are `tour-<subject>`; portal-launched labs are `lab-u<NN>-<subject>`
    (`u` for the console/UI series, numbered in delivery order).
-6. **Every step must be reachable.** A target that does not exist on the current page stalls an
-   assisted learner. Verify placement rules in
+9. **Every step must be reachable, and none already done.** A target that does not exist on the
+   current page stalls an assisted learner; a step whose verification is already true when it
+   becomes current is skipped in silence and never read. Both traps, and the rest of the
+   placement rules, are in
    [references/consolelab-crd-reference.md](references/consolelab-crd-reference.md).
-7. **Parameters use `<<name>>`.** Lab files are rendered by Helm at deploy time, so `{{ }}` and
+10. **Parameters use `<<name>>`.** Lab files are rendered by Helm at deploy time, so `{{ }}` and
    `$( )` are already taken. `ns` is always supplied by the portal; never declare it.
-8. **Test on a cluster before you ship.** A console lab is coupled to console markup; reviewing
-   the YAML is not evidence that it runs. See
-   [references/testing-reference.md](references/testing-reference.md).
+11. **Test on a cluster before you ship.** A console lab is coupled to console markup;
+    reviewing the YAML is not evidence that it runs. See
+    [references/testing-reference.md](references/testing-reference.md).
 
 ## Decide the kind first
 
@@ -91,7 +107,10 @@ Location: `workshops-monorepo/tracks/<track>/<lab-name>/resources/consolelab.yam
 Field-by-field contract, targets, operations and verifications:
 [references/consolelab-crd-reference.md](references/consolelab-crd-reference.md).
 
-Keep tours to **4–8 steps**. A longer journey is two tours.
+Keep a pure navigation tour to **4–8 steps**. A lab that opens objects budgets roughly **two
+steps per page** — one to go there, one to show what is on it — so three or four object pages
+land at 12–15. A longer *journey* is two tours; more steps spent on one page is depth, not
+length.
 
 ### 3. Pair it with a Workshop (hidden labs only)
 
@@ -108,7 +127,7 @@ Full recipe and the traps: [references/portal-launch-reference.md](references/po
 ### 5. Test it on CRC
 
 Apply the CR, run the tour end to end as a learner, and confirm every step advances **without**
-pressing Continue. [references/testing-reference.md](references/testing-reference.md).
+pressing Continue — Next on an `acknowledge` step is the learner's own action, not Continue. [references/testing-reference.md](references/testing-reference.md).
 
 ### 6. Ship
 
@@ -121,10 +140,17 @@ Check, in this order:
 
 1. Does any step teach a concept instead of applying one? → move it to a terminal lab.
 2. Does any step text amount to "click this"? → rewrite with the reason and the CLI equivalent.
-3. Is the portal description one thin sentence? → write the `details` prospectus.
-4. Does every target exist on the page the previous step leaves the learner on?
-5. Do all `<<parameters>>` come from the portal, and is `ns` absent from `console-lab-params`?
-6. Does it run start to finish on a cluster without using Continue as a crutch?
+3. Does the lab open an object and then leave? → add the steps that teach that details page:
+   its values, the tab that answers what Details cannot, the Actions menu, and the page where
+   this object's link to the others is visible.
+4. Does any click change the screen without the next step saying what changed? → split it into
+   an action step and an `acknowledge` reaction step.
+5. Is the portal description one thin sentence? → write the `details` prospectus.
+6. Does every target exist on the page the previous step leaves the learner on?
+7. Is any step's verification already true when the step becomes current? → it will be skipped
+   in silence. Most often a namespace-selection step in a lab the portal already scoped.
+8. Do all `<<parameters>>` come from the portal, and is `ns` absent from `console-lab-params`?
+9. Does it run start to finish on a cluster without using Continue as a crutch?
 
 ## References
 

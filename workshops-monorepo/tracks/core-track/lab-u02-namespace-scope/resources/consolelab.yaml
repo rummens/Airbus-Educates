@@ -46,44 +46,36 @@ spec:
         operation: { type: activateTarget }
         verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
     - id: open-configmaps
-      title: Open ConfigMaps across projects
+      title: Open ConfigMaps
       description: >-
-        Start from the cluster-wide list. You will then set an explicit project scope and
-        watch the same list change meaning.
+        The list shows one project only — the one named in the project selector above it, which
+        the lab already set to <<namespace>>. This is oc get configmap with your current
+        context; nothing here is cluster-wide.
       target: { type: consoleElement, id: navigationLink, value: ConfigMaps }
       complete:
-        operation: { type: navigate, path: /k8s/all-namespaces/core~v1~ConfigMap }
-        verify: { type: route, path: /k8s/all-namespaces/core~v1~ConfigMap }
-    - id: open-first-selector
-      title: Open the project selector
-      description: The selected project is the Kubernetes namespace every view is scoped to.
-      target: { type: consoleElement, id: namespaceSelector }
-      complete:
-        operation: { type: activateTarget }
-        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
-    - id: filter-first-namespace
-      title: Filter the project list
-      description: Type the first project name to narrow the list without changing scope yet.
-      target: { type: consoleElement, id: namespaceFilter }
-      complete:
-        operation: { type: fillTarget, value: '<<namespace>>' }
-        verify: { type: targetValue, value: '<<namespace>>' }
-    - id: select-first-namespace
-      title: Select the first project
-      description: Selecting a project scopes every resource list and action to <<namespace>>.
-      target: { type: consoleElement, id: namespaceOption, value: '<<namespace>>' }
-      complete:
-        operation: { type: activateTarget }
-        verify: { type: namespace, value: '<<namespace>>' }
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~ConfigMap' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~ConfigMap' }
     - id: open-first-configmap
       title: Open kube-root-ca.crt in the first project
       description: >-
-        This object belongs to <<namespace>>. Its name does not collide with copies in other
-        projects, because namespace is part of a resource's identity.
+        Every project has an object with this name. Open the one in this project and note
+        what identifies it.
       target: { type: href, value: '/k8s/ns/<<namespace>>/configmaps/kube-root-ca.crt' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/configmaps/kube-root-ca.crt' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/configmaps/kube-root-ca.crt' }
+    - id: read-first-configmap
+      title: Name plus namespace
+      description: >-
+        Name and Namespace sit next to each other for a reason: together they are this
+        object's identity. The name kube-root-ca.crt does not collide with the copies in
+        other projects, because the namespace is part of what identifies it — the same rule
+        that lets oc get configmap in two projects return two different objects. Note the
+        UID; you will see a different one shortly.
+      target: { type: consoleElement, id: detailsSection, value: ConfigMap details }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-second-selector
       title: Open the project selector again
       description: Change only the project scope — the resource kind and name stay the same.
@@ -117,9 +109,19 @@ spec:
     - id: open-second-configmap
       title: Open kube-root-ca.crt in the second project
       description: >-
-        Same name, different object. Deleting or editing this one has no effect on the copy
-        in <<namespace>> — that is what a namespace boundary means.
+        The same name is in this project's list too. Open it and compare the two pages.
       target: { type: href, value: '/k8s/ns/<<secondNamespace>>/configmaps/kube-root-ca.crt' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<secondNamespace>>/configmaps/kube-root-ca.crt' }
         verify: { type: route, path: '/k8s/ns/<<secondNamespace>>/configmaps/kube-root-ca.crt' }
+    - id: read-second-configmap
+      title: Same name, different object
+      description: >-
+        Same kind, same name, different Namespace — and a different UID, which is what proves
+        these are two objects rather than one seen twice. Deleting or editing this one has no
+        effect on the copy in <<namespace>>. That is the whole meaning of a namespace
+        boundary, and why quota, RBAC and NetworkPolicy are all set per project.
+      target: { type: consoleElement, id: detailsSection, value: ConfigMap details }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }

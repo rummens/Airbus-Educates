@@ -15,7 +15,15 @@ that should have been `<<>>`, and a literal `{{` inside a comment, both of which
 time rather than in review.
 
 The `consolelabs.academy.dcs` CRD must already exist — it ships with the console plugin
-deployment, not with this chart.
+deployment, not with this chart. If `oc apply` rejects a step with
+`Unsupported value: "acknowledge"` (or any other operation/verification), the cluster is running
+an older CRD than the engine: apply the plugin repo's copy first, and remember that ArgoCD's
+selfHeal reverts a hand-applied CRD within minutes, so the plugin repo has to be pushed for the
+change to stick.
+
+```bash
+bin/pluginctl render ocp-4.22 -s templates/crds.yaml | oc apply -f -   # console plugin repo
+```
 
 ## 2. Run the tour as a learner
 
@@ -42,11 +50,38 @@ the image by hand for a local run, or test the annotations through the portal in
 
 Tear down with `./deploy_workshop.py <lab> --delete`.
 
+If `<lab>-01` does not exist and `deploy_workshop.py` reports the environment as already
+present, the standalone `WorkshopEnvironment`/`WorkshopSession` pair was deleted at some point.
+Recreate them directly — Educates names the session namespace `<environment>-<session id>`:
+
+```bash
+oc apply -f - <<'EOF'
+apiVersion: training.educates.dev/v1beta1
+kind: WorkshopEnvironment
+metadata: { name: lab-u01-container-access }
+spec: { workshop: { name: lab-u01-container-access } }
+---
+apiVersion: training.educates.dev/v1beta1
+kind: WorkshopSession
+metadata: { name: lab-u01-container-access-w01 }
+spec:
+  environment: { name: lab-u01-container-access }
+  session: { id: "01", password: educates, username: educates }
+EOF
+```
+
 ## 3. What to check
 
 - **Every step advances on its own.** Walk the tour performing each action yourself and never
   touching Continue. A step that needs Continue is a broken target or a wrong verification —
-  Continue is a failsafe for console upgrades, not a substitute for a working detector.
+  Continue is a failsafe for console upgrades, not a substitute for a working detector. **Next**
+  on an `acknowledge` step is not Continue: it is that step's own action.
+- **Every step is anchored.** The guidance bubble must appear beside the highlight. If the
+  workflow panel says *"Waiting for the console element"* instead, the engine cannot measure the
+  target even though it exists — the step is unusable, and no amount of reading the YAML shows
+  it.
+- **No step is skipped.** Watch the step counter. A step whose verification is already true when
+  it becomes current flashes past; its text is never read.
 - **The namespace is right.** Start the lab with a *different* project selected first. The
   launcher must switch the console to the lab's namespace; the tour must never run in the
   project that happened to be open.
@@ -79,7 +114,14 @@ run to completion, Finish returns).
 ConsoleLab from the cluster and performs the learner action for every step, asserting that the
 target exists on the page the previous step ended on and that the lab advances without Continue.
 A new lab therefore needs no new spec — add its name to `ACADEMY_HIDDEN_LABS` and its launch
-parameters to that file's `LAB_PARAMS`, with the lab's session namespace already provisioned:
+parameters to that file's `LAB_PARAMS`, with the lab's session namespace already provisioned.
+Two things the spec needs when a lab uses a control no lab used before:
+
+- its `targetLocator` map must learn the new `consoleElement` id, or the run fails with
+  `unknown consoleElement id: …`;
+- Playwright's `toBeVisible()` means "in the DOM with a box", **not** "on screen", so the spec
+  also asserts the guidance bubble rendered. Keep that assertion: without it a target below the
+  fold passes the test while the learner is told to press Continue.
 
 ```bash
 cd tests/e2e   # in the console plugin repo

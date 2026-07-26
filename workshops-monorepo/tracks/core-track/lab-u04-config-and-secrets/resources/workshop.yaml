@@ -41,11 +41,15 @@ metadata:
 
       ### What you will do
 
-      - Open the project's ConfigMaps and read the application config (`oc get cm -o yaml`)
-      - See why editing a value does not change a running container
-      - Open the project's Secrets and reveal the values (`oc extract secret/...`)
-      - Understand what Reveal values implies: base64 is encoding, not encryption
-      - Find the Deployment that consumes both, on its Environment tab (`oc set env --from`)
+      You will not type any commands — this lab is entirely in the console. Each screen names
+      the command it replaces, so you can map one onto the other afterwards.
+
+      - Read the application config, values and YAML, where `oc get cm -o yaml` would print it
+      - Reveal a Secret's values in one click, instead of decoding each key with `base64 -d`
+      - See what that implies: base64 is encoding, not encryption
+      - Find both objects named on the Deployment's Environment tab, the screen behind
+        `oc set env --from`
+      - Open the form the console edits that wiring in, and see why the change starts a rollout
 
       ### When to reach for the console
 

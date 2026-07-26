@@ -13,6 +13,10 @@ description: >
   explained commands; declarative/imperative defined before use), the always-visible
   feedback tab, the per-page slides deck (one slide per page, page diagrams repeated
   on their slides, `reload-dashboard` jump links), and planning/cross-reference consistency.
+  Also reviews CONSOLE LABS (`ConsoleLab` custom resources run by the academy console
+  plugin): step depth, a page you open being a page you show something on, every action
+  having a reaction, CLI commands named rather than apparently issued, target reachability,
+  steps the engine would silently skip, and the portal prospectus.
   Optionally, if the user grants access to the internal (otherwise unreachable)
   versioned DCS documentation, it also checks that linked doc pages are still valid
   and relevant, are pinned to a fixed version (never the floating `latest`), and
@@ -43,13 +47,21 @@ not, the rubric here is sufficient to review against.
 Scope it first: a **single workshop** (a `workshops/lab-*` dir) or a **whole
 course** (the `planning/` docs + all workshops). Confirm scope, then review.
 
+**Two media, two rubrics.** A lab folder holding `resources/consolelab.yaml` is a
+**console lab** — a guided tour of the OpenShift web console, not an Educates
+workshop. Dimensions C–M do not apply to it (no content pages, no examiner, no
+slides, no terminal); review it against **dimension N** instead, plus B2 and E for
+its paired `workshop.yaml`. A lab with both files is one lab in two halves: the
+Workshop provisions the namespace, the ConsoleLab is the lesson.
+
 ## Review process
 
 1. **Gather.** List the workshop dir(s) and, for a course, the `planning/` docs.
    Read each workshop's `resources/workshop.yaml`, `workshop/config.yaml`,
    `workshop/content/**`, `workshop/examiner/tests/**`, and `exercises/**`. For a
    catalog-repo workshop, also read the owning `tracks/<track>/track.yaml` (needed
-   for dimension B2).
+   for dimension B2). If `resources/consolelab.yaml` is present, read it in full and
+   review it under dimension N.
 2. **Review by dimension** (the rubric below). For each check, look at the actual
    files; cite `file:line` for every finding.
 3. **Offer the documentation check (optional — must ask).** The DCS documentation
@@ -142,6 +154,69 @@ When access **is** granted, for **every link that points at the DCS documentatio
 - **Rule 3 — newer version available (periodic bump).** Because links are pinned, they go stale as the docs release new versions. **Check:** for each pinned link, compare its version against the newest available version in the internal docs; list links that lag. **Fix:** bump the link to the newer version **after confirming the newer page still matches the workshop's intent** (don't bump blindly — a newer version may have moved/changed the content). Treat this as a recurring maintenance pass, not a one-off.
 
 **Severity:** a dead/wrong DCS-docs link is **Major**; a floating `latest` link is **Major** (violates the fixed-version rule); a link that merely lags a newer version is a **Suggestion** (queue for the next bump pass). *(course-brief `dcs_docs_base_url`; documentation-links-reference.)*
+
+### N. Console labs (`resources/consolelab.yaml`)
+
+The authoritative rules are the **`airbus-educates-console-tour-authoring`** skill and its
+references; read `references/step-writing-reference.md` and
+`references/consolelab-crd-reference.md` before reviewing one. Walk the steps in order and
+keep asking two questions: *what is on screen now?* and *what did the last click do?*
+
+- **N1. Pedagogical contract.** **Rule:** the lab applies concepts a terminal lab already
+  taught and introduces none of its own; the prerequisite lab is named in the text.
+  **Check:** any step that defines what an object *is*. **Fix:** send the concept back to the
+  terminal lab. *(**Major**.)*
+- **N2. A page you open is a page you show something on.** **Rule:** every navigation step
+  (`href` to a tab, `navigationLink`, a `menuItem`) is followed by at least one step pointing
+  at something on the page it opened. **Check:** read the step list alone — a run of
+  consecutive navigation steps is the defect. A page with nothing worth highlighting should
+  not be opened at all. **Fix:** add a `detailsSection` (a block, by its heading) or
+  `pageContent` (a tab body with no heading) step with
+  `operation: { type: none }` / `verify: { type: acknowledge }`. *(**Major** — the learner is
+  taken to the screen that holds the answer and never shown it.)*
+- **N3. Every action has a reaction.** **Rule:** a step whose click changes the screen is
+  followed by a step saying what changed. **Check:** each `activateTarget` and each tab
+  navigation — is the *next* step about the result, or about somewhere else? The learner reads
+  a step **before** acting, so a result described in the acting step is described before it
+  exists. **Fix:** split into an action step and an `acknowledge` reaction step. *(**Major**.)*
+- **N4. Name the command, do not appear to issue it.** **Rule:** the learner types nothing, so
+  a trailing `(oc get cm -o yaml)` reads as an instruction to run it. **Check:** grep the CR
+  and the `academy.dcs/details` prospectus for a parenthesised command; the prospectus bullet
+  list is the usual offender. **Fix:** rewrite as what the screen replaces — "where
+  `oc get cm -o yaml` would print it". *(**Minor**.)*
+- **N5. Placement.** **Rule:** every target exists on the page the previous step leaves the
+  learner on; no step ends the lab on a signpost (an opened Actions menu with nothing after
+  it); the lab lands at least once on the page where the objects are wired together.
+  **Check:** trace the page the learner is on step by step. **Fix:** add the missing
+  navigation step, or the step that goes through the door. *(**Blocker** for an unreachable
+  target: assisted mode stalls and the learner must press Continue.)*
+- **N6. No step the engine will skip.** **Rule:** no step's `verify` is already true when the
+  step becomes current — detection is continuous, so such a step flashes past unread. **Check:**
+  `verify: { type: namespace, value: '<<namespace>>' }` in a hidden lab (the launcher already
+  scoped the console), and any `route` verification naming the page the previous step ended on.
+  **Fix:** delete the step, or verify the state the learner actually has to reach. *(**Major** —
+  invisible in review of the YAML alone; it is why walking the lab is mandatory.)*
+- **N7. Step budget.** **Rule:** a pure navigation tour is 4–8 steps; a lab that opens objects
+  runs about two steps per page, so 12–17 is normal and is depth, not bloat. **Check:** count
+  navigation steps versus content steps — many steps that are all navigation is the failure,
+  not the total. **Fix:** split the journey into two tours, or add the missing content steps.
+  *(**Minor**.)*
+- **N8. Parameters and rendering.** **Rule:** placeholders are `<<name>>`, never `{{ }}` (Helm
+  renders the file) and never `$( )` (Educates); `ns` is never declared as a parameter; every
+  other placeholder appears in the paired Workshop's `academy.dcs/console-lab-params`.
+  **Check:** grep for `{{` anywhere in the file, comments included; compare placeholders
+  against the annotation. **Fix:** switch the delimiter; declare the parameter. *(**Blocker** —
+  a `{{` fails the Helm render for the whole chart.)*
+- **N9. Portal prospectus.** **Rule:** a console lab has no README, so `academy.dcs/details`
+  (markdown) is the course page. It states what the lab is, what the learner should already
+  know, what they will do, and when the console beats the CLI. **Check:** read the annotation.
+  **Fix:** write it. *(**Major** if a single sentence.)*
+- **N10. It runs.** **Rule:** the lab walks start to finish with no Continue, every step
+  anchored. **Check:** add the lab to `ACADEMY_HIDDEN_LABS` (and `LAB_PARAMS`) in the console
+  plugin's `tests/e2e/specs/hidden-labs.spec.ts` and run it; then walk it once by hand. Watch
+  for the workflow panel saying *"Waiting for the console element"* — the target exists but the
+  engine cannot measure it. **Fix:** whatever the run surfaces.
+  *(**Blocker** if it needs Continue; see the authoring skill's `references/testing-reference.md`.)*
 
 ## Output format
 

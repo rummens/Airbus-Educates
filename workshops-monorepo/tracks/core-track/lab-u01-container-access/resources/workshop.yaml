@@ -41,10 +41,16 @@ metadata:
 
       ### What you will do
 
-      - Find the running pod under **Workloads → Pods** (`oc get pods`)
-      - Open its details page and read status, containers and events (`oc describe pod`)
-      - Stream its logs from the **Logs** tab (`oc logs -f`)
-      - Open a shell inside the container from the **Terminal** tab (`oc rsh`)
+      You will not type any commands — this lab is entirely in the console. Each screen
+      names the command it replaces, so you can map one onto the other afterwards.
+
+      - Read a project's pod list, where `oc get pods` would report it — and watch it refresh
+        without a watch flag
+      - Read the containers inside one pod: image, state, restart count, the part of
+        `oc describe pod` that matters during an incident
+      - Follow its live output on the **Logs** tab, the screen behind `oc logs -f`
+      - Open a shell in the container from the **Terminal** tab, where `oc rsh` puts you — and
+        learn the one rule about repairing anything from in there
 
       ### When to reach for the console
 

@@ -17,7 +17,9 @@
     <div class="detail-readme markdown">{{ readme_html }}</div>
     {% else %}
     <p class="detail-desc">{{ c.description }}</p>
-    {% if details_html %}<div class="detail-more markdown">{{ details_html }}</div>{% endif %}
+    {# Same class as the README block: for a console lab this annotation IS the prospectus,
+       so it should read like one, not like muted small print. #}
+    {% if details_html %}<div class="detail-readme markdown">{{ details_html }}</div>{% endif %}
     {% endif %}
   </div>
 

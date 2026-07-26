@@ -17,8 +17,9 @@ spec:
     Walk from Route to Service to pods on screen, and see where a broken chain shows
     itself first.
   completionText: >-
-    Done. You followed a request from the Route to the Service to the pods behind it —
-    the console equivalent of oc get route, oc get service and oc get endpoints.
+    Done. You followed a request backwards from the Route to the Service to the pods the
+    selector matched, and saw where the platform's own NetworkPolicies sit — everything
+    oc get route, oc get service and oc get endpoints tell you, on four screens.
   visibility: hidden
   mode: assisted
   context:
@@ -54,9 +55,8 @@ spec:
     - id: open-services
       title: Open Services
       description: >-
-        A Service is the stable name and address that survives pods being replaced. The
-        list is oc get service, scoped to this project. Ports and the cluster IP are on the
-        row; the interesting part is one click deeper.
+        Start at the inside of the chain. A Service is the stable name and address that
+        survives pods being replaced.
       target: { type: consoleElement, id: navigationLink, value: Services }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~Service' }
@@ -64,20 +64,47 @@ spec:
     - id: open-service
       title: Open the lab service
       description: >-
-        Two facts matter here: the pod selector, and the Pods tab that lists what the
-        selector currently matches. That list is oc get endpoints. When it is empty the
-        Service answers nothing, and the usual cause is a selector that no longer matches
-        the labels on the pods.
+        The list is oc get service with its ports and cluster IP. What decides whether the
+        Service works is one click deeper.
       target: { type: href, value: '/k8s/ns/<<namespace>>/services/lab-app' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/services/lab-app' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/services/lab-app' }
+    - id: read-service-routing
+      title: The selector is the wiring
+      description: >-
+        Service routing shows the pod selector and the port mapping: which labels a pod must
+        carry to receive this Service's traffic, and which container port each service port
+        forwards to. Nothing here validates that any pod matches — a Service with a selector
+        that matches nothing looks perfectly healthy on this screen.
+      target: { type: consoleElement, id: detailsSection, value: Service routing }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-service-pods
+      title: See what the selector matched
+      description: >-
+        So check it. The Pods tab lists what this Service currently resolves to.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/services/lab-app/pods' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/services/lab-app/pods' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/services/lab-app/pods' }
+    - id: read-service-pods
+      title: This list is the endpoints
+      description: >-
+        These are the pods the selector matched, which is what oc get endpoints prints. An
+        empty list is the single most useful fact in this lab: the Service answers nothing,
+        and the cause is almost always a selector that no longer matches the labels the pods
+        carry. Check this before you suspect the Route or the network.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-routes
       title: Open Routes
       description: >-
-        A Route publishes one Service on a DCS-managed hostname, which is the step that
-        takes an application from reachable-inside-the-cluster to reachable by a user. The
-        Location column carries the URL that oc get route prints.
+        The Service is reachable inside the cluster. Publishing it to a user outside is a
+        different object.
       target: { type: consoleElement, id: navigationLink, value: Routes }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/route.openshift.io~v1~Route' }
@@ -85,21 +112,40 @@ spec:
     - id: open-route
       title: Open the lab route
       description: >-
-        The details page shows the host, the TLS settings, and the Service and port the
-        Route sends traffic to. A Route with a host but no working Service still returns an
-        error page — which is why you check the Service's pods first and the Route second.
+        The Location column carries the URL oc get route prints. Open the Route to see what
+        that URL is attached to.
       target: { type: href, value: '/k8s/ns/<<namespace>>/routes/lab-app' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/routes/lab-app' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/routes/lab-app' }
+    - id: read-route-details
+      title: Host, service, port
+      description: >-
+        Route details names the DCS-managed hostname, the Service it forwards to and the
+        target port, and the TLS settings below decide whether the platform terminates
+        HTTPS. Read the chain end to end here: a Route with a valid host pointing at a
+        Service with no endpoints still returns an error page to the user.
+      target: { type: consoleElement, id: detailsSection, value: Route details }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-networkpolicies
       title: Look at the NetworkPolicies
       description: >-
-        NetworkPolicies decide which traffic is allowed to reach the pods in a project. On
-        DCS you read them, you do not write them: the platform team owns them and a change
-        goes through an ITSM request. Knowing where they are is how you explain a
-        connection that fails while the Service and Route both look correct.
+        Service and Route can both be correct and a connection still fail. One more object
+        decides that, and it is not owned by you.
       target: { type: consoleElement, id: navigationLink, value: NetworkPolicies }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/networking.k8s.io~v1~NetworkPolicy' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/networking.k8s.io~v1~NetworkPolicy' }
+    - id: read-networkpolicies
+      title: Read-only on DCS
+      description: >-
+        These policies decide which traffic may reach the pods in a project. On DCS you read
+        them and the platform team owns them, so a change goes through an ITSM request rather
+        than an oc apply. Knowing this screen exists is how you explain a connection that
+        fails while the Service has endpoints and the Route is correct.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }

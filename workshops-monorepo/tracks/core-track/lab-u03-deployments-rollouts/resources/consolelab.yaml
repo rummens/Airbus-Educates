@@ -19,9 +19,9 @@ spec:
     Read desired versus available replicas, the pods a Deployment owns, its rollout
     history and its events — the console side of oc get deployment and oc rollout.
   completionText: >-
-    Done. You read a Deployment's rollout state, the pods it owns, its revision history
-    and its events — the console equivalent of oc get deployment, oc rollout history and
-    oc describe.
+    Done. You read a Deployment's rollout state, the pods it owns, its revision history, its
+    events and its YAML, then found the menu that writes to it and the form behind it —
+    everything oc get deployment, oc rollout history, oc describe and oc set give you.
   visibility: hidden
   mode: assisted
   context:
@@ -64,53 +64,136 @@ spec:
     - id: open-deployment
       title: Open the lab deployment
       description: >-
-        The details page opens on the replica ring — desired count in the middle, arrows
-        to change it. That control is oc scale. Around it sit the facts you read with
-        oc describe deployment: strategy, selector, and the current rollout status.
+        The details page opens on the replica ring — desired count in the middle, arrows to
+        change it. Those arrows are what oc scale does. The rest of the object is in the
+        block below the ring and in the tab row above it.
       target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app' }
+    - id: read-deployment-details
+      title: Read the rollout facts
+      description: >-
+        Below are the fields you would go looking for in oc describe deployment: the update
+        strategy and its surge and unavailable limits, the pod selector that decides which
+        pods belong to this Deployment, and the status line saying whether the current
+        revision is fully out. Read those three before touching anything — they explain most
+        of what a rollout does next.
+      target: { type: consoleElement, id: detailsSection, value: Deployment details }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-pods-tab
       title: List the pods it owns
       description: >-
-        This tab is oc get pods with the Deployment's own selector already applied, so it
-        shows this application and nothing else. Use it to tell a Deployment problem from a
-        pod problem: a Deployment that reports one of two available has one bad pod here.
+        A replica count is a number. The pods behind it are on the next tab.
       target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/pods' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/pods' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/pods' }
+    - id: read-pods-tab
+      title: One application, nothing else
+      description: >-
+        These are the pods matching this Deployment's selector and no others — the filtering
+        you would write out as oc get pods -l app=lab-app. Each row carries its own status,
+        restart count and node. This is how you tell a Deployment problem from a pod problem:
+        a Deployment reporting one of two available has exactly one bad row here.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-replicasets
       title: See the rollout history
       description: >-
-        A Deployment does not replace pods itself. It creates a ReplicaSet per revision and
-        moves replicas from the old one to the new one, which is what you watched with
-        oc rollout status in Deploy Your First App. The older entries are the revisions
-        oc rollout undo would return to.
+        A Deployment does not replace pods itself. Something sits between the two, and the
+        next tab is where it is kept.
       target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/replicasets' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/replicasets' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/replicasets' }
+    - id: read-replicasets
+      title: One ReplicaSet per revision
+      description: >-
+        Each row is one revision of the pod template. A rollout creates a new ReplicaSet and
+        moves replicas from the old one to it, which is what oc rollout status was reporting
+        in Deploy Your First App. Rows scaled to zero are the previous revisions, kept so
+        oc rollout undo has something to return to.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-events
       title: Read the events
       description: >-
-        Events are the cluster's own account of what it tried to do — scaling up a
-        ReplicaSet, failing to pull an image, refusing a quota. This is the tail of
-        oc describe deployment, and it is where a rollout that never finishes explains
-        itself. Events expire, so an empty list means quiet, not healthy.
+        Status fields say what is true now. When a rollout is stuck you need what the cluster
+        tried and failed to do, which is the next tab.
       target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/events' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/events' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/events' }
+    - id: read-events
+      title: What the cluster tried to do
+      description: >-
+        This stream is the cluster's own account of its attempts — scaling a ReplicaSet up,
+        failing to pull an image, being refused by a quota. It is the tail of
+        oc describe deployment, updating by itself, and it is where a rollout that never
+        finishes explains itself. Events expire after about an hour, so an empty list means
+        quiet, not healthy.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-yaml
       title: Open the YAML
       description: >-
-        The whole object, the same text oc get deployment -o yaml prints, editable in
-        place. Saving here applies immediately, with no review and no record outside the
-        cluster. Use it to read and to try something in a lab; changes that must survive
-        belong in the manifest you keep in git.
+        Every tab so far showed one part of the object through a widget. One tab shows all of
+        it as text.
       target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/yaml' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/yaml' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/yaml' }
+    - id: read-yaml
+      title: The whole object, editable
+      description: >-
+        This is the complete Deployment, the text oc get deployment -o yaml returns, and the
+        pod template inside it is what a rollout actually replaces. It is an editor: Save
+        applies at once, with no review and no record outside the cluster. Read here, and
+        make changes that must survive in the manifest you keep in git. Press Hide if the
+        guidance box is over the text you want to read.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-actions
+      title: Find the write actions
+      description: >-
+        The tabs you walked through only read. Everything that changes this Deployment is in
+        this one menu, and it is on every details page in the console: Pause rollouts,
+        Restart rollout, Edit update strategy, Edit resource limits, Delete — the work of
+        oc rollout pause, oc rollout restart and oc set. Scaling is the exception; that
+        stays on the replica ring. Open it and take Edit Deployment.
+      target: { type: consoleElement, id: actionsMenu }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-edit-form
+      title: Open Edit Deployment
+      description: >-
+        Most entries here open one small dialog. Edit Deployment opens the full form the
+        console also uses to create a workload, so it is the one place where every editable
+        field sits together. Nothing changes until you press Save at the bottom.
+      target: { type: consoleElement, id: menuItem, value: Edit Deployment }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/form' }
+    - id: read-strategy-form
+      title: Change a rollout, safely
+      description: >-
+        The Deployment strategy section holds the two numbers that decide how disruptive a
+        rollout is: how many pods may be unavailable, and how many extra may run during the
+        change. This form and oc rollout / oc set write the same field. Leave without
+        saving — the lab is finished, and nothing on this page has changed the object.
+      target: { type: consoleElement, id: detailsSection, value: Deployment strategy }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }

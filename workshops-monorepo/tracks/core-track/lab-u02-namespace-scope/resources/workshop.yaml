@@ -41,11 +41,15 @@ metadata:
 
       ### What you will do
 
-      - Start from the all-projects resource list and see what "no project selected" means
-      - Set an explicit project scope with the selector (`oc project`)
-      - Open an object that belongs to the first project (`oc get cm -n <first>`)
-      - Switch the scope to the second project and find its own object of the same name
-      - Confirm that editing one has no effect on the other
+      You will not type any commands — this lab is entirely in the console. Each screen
+      names the command it replaces, so you can map one onto the other afterwards.
+
+      - Open an object in your first project and see that its identity is name **plus** namespace
+      - Switch the project selector, the console's equivalent of `oc project`, to a second
+        project
+      - Find that project's own object carrying the same name
+      - Compare the two pages — same kind, same name, different UID — and see why editing one
+        cannot affect the other
 
       ### When to reach for the console
 

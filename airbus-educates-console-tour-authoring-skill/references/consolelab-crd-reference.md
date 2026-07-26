@@ -80,7 +80,27 @@ Continue and by timed mode), **this proves it happened** (`verify`, watched cont
 |---|---|---|
 | `quickStartId` | element with `data-quickstart-id="<value>"` | navigation sections: `qs-nav-home`, `qs-nav-workloads`, `qs-nav-networking`, `qs-nav-storage` |
 | `href` | anchor whose URL matches `value` (GVK and legacy plural forms both match) | a link to a specific object or tab |
-| `consoleElement` | a named control via the version adapter | `namespaceSelector`, `namespaceFilter`, `namespaceOption` (exact option text in `value`), `navigationLink` (exact sidebar link name), `resourceSearch` |
+| `consoleElement` | a named control via the version adapter | `namespaceSelector`, `namespaceFilter`, `namespaceOption` / `menuItem` (exact entry text of an open menu in `value`), `navigationLink` (exact sidebar link name), `resourceSearch`, `actionsMenu` (the Actions toggle on any details page), `revealSecretValues` (Reveal values on a Secret), `detailsSection` (the block a heading introduces — heading *and* content — by its heading text in `value`: `Data`, `Deployment strategy`, `Environment Variables`), `pageContent` (what a tab put on screen — table, event stream or YAML editor — for bodies with no heading) |
+
+### Controls worth knowing
+
+Verified against OpenShift 4.22. Each is one step's `target` plus the `verify` that proves the
+learner did it.
+
+| Control | Target | Verify |
+|---|---|---|
+| A navigation section | `quickStartId: qs-nav-workloads` | `targetAttribute: aria-expanded = 'true'` |
+| A sidebar link | `consoleElement: navigationLink`, exact link text | `route` to the list path |
+| A details-page tab | `href` to the tab path (`…/deployments/lab-app/environment`) | `route` to it |
+| A section of a details page | `consoleElement: detailsSection`, its heading text | `acknowledge` |
+| A tab body with no heading | `consoleElement: pageContent` | `acknowledge` |
+| The Actions menu | `consoleElement: actionsMenu` | `targetAttribute: aria-expanded = 'true'` |
+| An entry of that menu | `consoleElement: menuItem`, its exact label | most open a dialog; **Edit Deployment** routes to `…/deployments/<name>/form`, so `route` |
+| Reveal values on a Secret | `consoleElement: revealSecretValues` | `targetText: Hide values` |
+| The project selector | `namespaceSelector` → `namespaceFilter` → `namespaceOption` | `aria-expanded`, `targetValue`, `namespace` |
+
+`value` is matched against the console's own text **verbatim**, punctuation included:
+`All values from existing ConfigMaps or Secrets (envFrom)`, not a shortened version of it.
 
 ### Operations
 
@@ -89,6 +109,7 @@ Continue and by timed mode), **this proves it happened** (`verify`, watched cont
 | `activateTarget` | clicks the highlighted control |
 | `navigate` | routes to `path` |
 | `fillTarget` | types `value` into the highlighted input |
+| `none` | nothing — pair with `acknowledge` for a step that asks the learner to read, not to change |
 
 ### Verifications
 
@@ -97,7 +118,9 @@ Continue and by timed mode), **this proves it happened** (`verify`, watched cont
 | `route` | the browser reaches a URL equivalent to `path` |
 | `targetAttribute` | the target carries `attribute: value` (use for expandable sections: a click alone does not prove the section opened) |
 | `targetValue` | the highlighted input contains `value` exactly |
+| `targetText` | the target's own text equals `value` — for a toggle whose only state is its label, e.g. Reveal values becoming `Hide values` |
 | `namespace` | the current route is scoped to `value` |
+| `acknowledge` | never — the learner presses **Next**. The only way to hold a step on a page whose content is read, not clicked |
 
 Route comparison is tolerant of the console's alternative URLs for the same page
 (`apps~v1~Deployment` ↔ `deployments`, a project-scoped list ↔ the all-namespaces list) but
@@ -116,6 +139,17 @@ The target of step *N* must exist on the page step *N-1* leaves the learner on.
   whose pods carry a generated suffix.
 - A step whose target never appears does not fail loudly: assisted mode waits, and the learner
   has to press Continue. Treat "Continue was required" as a bug in the lab.
+- **A target below the fold is fine.** The engine scrolls a target into view on the first
+  measurement that finds it off screen, including one clipped out of the sidebar's own scroll by
+  an earlier step. What is *not* fine is a target that never renders on this page.
+- **An open menu over the panel is fine.** The workflow panel moves to the other corner when the
+  highlighted control lands under it, so a `menuItem` step in a long Actions menu still works.
+- **A step whose verification is already true is skipped, silently.** Detection is continuous
+  and runs the moment a step becomes current, so the learner never sees that step's text. The
+  launcher sets the active project before the first step, so a hidden lab must not spend steps
+  selecting the namespace it was launched into — `verify: { type: namespace, value: '<<namespace>>' }`
+  is satisfied before the lab starts. The same applies to a `route` verification for the page
+  the previous step already left the learner on.
 
 ## What not to put in a lab
 

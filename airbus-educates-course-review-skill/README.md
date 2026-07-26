@@ -18,4 +18,8 @@ Or ask Claude to "review / audit / QA this workshop (or course) against our
 rules" or "how can this workshop be improved?". Scope is a single workshop
 (`workshops/lab-*`) or a whole course (`planning/` + all workshops).
 
+A lab holding `resources/consolelab.yaml` is a **console lab** and is reviewed
+against dimension N instead of the workshop dimensions — its rules come from the
+`airbus-educates-console-tour-authoring` skill.
+
 See `SKILL.md` for the review process, severity levels, and the full rubric.

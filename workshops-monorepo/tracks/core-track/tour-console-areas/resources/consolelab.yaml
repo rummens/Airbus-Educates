@@ -13,8 +13,12 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   title: Tour the console resource areas
-  description: Open Deployments, Services, PersistentVolumeClaims, and ConfigMaps in your project.
-  completionText: Tour complete — you located the main resource areas of your project.
+  description: >-
+    Open Deployments, Services, PersistentVolumeClaims and ConfigMaps in your own project, and
+    read what each list is actually reporting.
+  completionText: >-
+    Tour complete — you know which navigation group holds workloads, networking, storage and
+    configuration, and what each list is telling you.
   visibility: default
   mode: assisted
   context:
@@ -32,7 +36,8 @@ spec:
     - id: open-workloads
       title: Open Workloads
       description: >-
-        Workloads contains the controllers and Pods that correspond to oc get deployment,pods.
+        The navigation is grouped by what an object does, not by its API group. Workloads is
+        the group holding everything that runs — the objects behind oc get deployment,pods.
       target: { type: quickStartId, value: qs-nav-workloads }
       complete:
         operation: { type: activateTarget }
@@ -40,15 +45,28 @@ spec:
     - id: open-deployments
       title: Open Deployments
       description: >-
-        Deployments show desired replicas, availability, rollout status, and links to
-        the Pods they own.
+        The section expanded into the kinds it holds. Take Deployments, the controller most
+        applications are run by.
       target: { type: consoleElement, id: navigationLink, value: Deployments }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/apps~v1~Deployment' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/apps~v1~Deployment' }
+    - id: read-deployments
+      title: One row, one workload
+      description: >-
+        This is oc get deployment for the project named in the selector above the list. Each
+        row carries desired against available replicas and the rollout status, refreshing on
+        its own, and the name is a link into the object and the pods it owns. An empty list
+        means this project has none — not that you are looking in the wrong place.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-networking
       title: Open Networking
-      description: Networking groups stable in-cluster Services and externally reachable Routes.
+      description: >-
+        Running is not the same as reachable. The objects that publish an application are in
+        their own group.
       target: { type: quickStartId, value: qs-nav-networking }
       complete:
         operation: { type: activateTarget }
@@ -56,17 +74,26 @@ spec:
     - id: open-services
       title: Open Services
       description: >-
-        Services correspond to oc get service and provide one stable address in front of
-        a changing set of Pods.
+        Services first: the stable in-cluster address in front of a changing set of pods.
       target: { type: consoleElement, id: navigationLink, value: Services }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~Service' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~Service' }
+    - id: read-services
+      title: Addresses, not pods
+      description: >-
+        What oc get service prints: each row is a name, a cluster IP and the ports it
+        answers on. Routes sit in the same group and publish one of these to a URL outside
+        the cluster. Neither row tells you whether any pod is actually behind it — that is
+        one click into the Service, on its Pods tab.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-storage
       title: Open Storage
       description: >-
-        Storage contains PersistentVolumeClaims with their capacity, access mode, storage
-        class, and bound state.
+        Anything a workload must keep across restarts is claimed from a third group.
       target: { type: quickStartId, value: qs-nav-storage }
       complete:
         operation: { type: activateTarget }
@@ -74,18 +101,39 @@ spec:
     - id: open-pvcs
       title: Open PersistentVolumeClaims
       description: >-
-        This view is the visual equivalent of oc get pvc and exposes storage class and
-        bound status at a glance.
+        Claims are the part a project owns; the volumes behind them belong to the platform.
       target: { type: consoleElement, id: navigationLink, value: PersistentVolumeClaims }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~PersistentVolumeClaim' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~PersistentVolumeClaim' }
+    - id: read-pvcs
+      title: Bound or waiting
+      description: >-
+        The visual form of oc get pvc: capacity, access mode, storage class, and the status
+        that decides everything else. Bound means a volume exists and a pod can mount it;
+        Pending means the request has not been satisfied and any pod that wants it will wait
+        rather than start.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-configmaps
       title: Open ConfigMaps
       description: >-
-        ConfigMaps expose non-secret application configuration, corresponding to
-        oc get configmap.
+        One group left that matters daily: the configuration a workload reads at startup.
+        ConfigMaps live back under Workloads, next to the objects that consume them.
       target: { type: consoleElement, id: navigationLink, value: ConfigMaps }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~ConfigMap' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~ConfigMap' }
+    - id: read-configmaps
+      title: More than you created
+      description: >-
+        oc get configmap, for this project. Alongside your own entries are objects the
+        platform put here, such as the cluster trust bundle — a project always contains more
+        than what you made. Opening any row shows its keys and values in full, which is the
+        subject of the configuration lab.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }

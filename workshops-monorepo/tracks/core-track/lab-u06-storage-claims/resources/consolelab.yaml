@@ -18,8 +18,9 @@ spec:
     Find a PersistentVolumeClaim, read its capacity, access mode and class, and see which
     pod holds it.
   completionText: >-
-    Done. You read a claim's status, capacity and class, checked its events, and found the
-    pod that mounts it — the console equivalent of oc get pvc and oc describe pvc.
+    Done. You read a claim's capacity, access mode and class, found out from its events why a
+    claim would stay Pending, and traced it to the path it is mounted at inside the pod —
+    everything oc get pvc and oc describe pvc report.
   visibility: hidden
   mode: assisted
   context:
@@ -57,9 +58,8 @@ spec:
     - id: open-pvcs
       title: Open PersistentVolumeClaims
       description: >-
-        The list is oc get pvc, scoped to this project. The Status column is the one that
-        matters: Bound means a volume was provisioned and can be mounted, Pending means
-        nothing has satisfied the request yet.
+        A claim is a request for storage; the volume behind it is the platform's answer.
+        Claims are what a project owns, so that is the list to open.
       target: { type: consoleElement, id: navigationLink, value: PersistentVolumeClaims }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~PersistentVolumeClaim' }
@@ -67,24 +67,47 @@ spec:
     - id: open-pvc
       title: Open the lab claim
       description: >-
-        Requested size, granted capacity, access mode and storage class, on one screen —
-        the summary oc describe pvc prints. The class is the decision that matters on DCS:
-        it selects File or Block and the performance tier, and it cannot be changed after
-        the claim is bound.
+        This list is oc get pvc, and its Status column is the only one that matters at a
+        glance: Bound means a volume exists and can be mounted, Pending means nothing has
+        satisfied the request. Open the claim for the rest.
       target: { type: href, value: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data' }
+    - id: read-pvc-details
+      title: Requested, granted, and by whom
+      description: >-
+        Requested size against granted capacity, the access mode, and the storage class that
+        served it — the summary oc describe pvc prints. The class is the decision that
+        matters on DCS: it selects File or Block and the performance tier, and it cannot be
+        changed once the claim is bound. Getting it wrong means creating a new claim and
+        copying the data.
+      target:
+        type: consoleElement
+        id: detailsSection
+        value: PersistentVolumeClaim details
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-pvc-events
       title: Check the claim's events
       description: >-
-        A claim that stays Pending says why here: no storage class matched, the class has
-        no provisioner, or the requested size cannot be satisfied. This is the first screen
-        to open when a pod will not start and the reason mentions a volume.
+        A Bound claim needs no explanation. A Pending one gives its reason on the next tab.
       target: { type: href, value: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data/events' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data/events' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data/events' }
+    - id: read-pvc-events
+      title: Why a claim stays Pending
+      description: >-
+        This stream names the fault in the platform's own words: no storage class matched,
+        the class has no provisioner, or the requested size cannot be satisfied. It is the
+        first screen to open when a pod will not start and the reason mentions a volume — and
+        on DCS the answer is often an ITSM request rather than a change you can make.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-workloads
       title: Open Workloads
       description: >-
@@ -97,9 +120,7 @@ spec:
     - id: open-pods
       title: Open Pods
       description: >-
-        The pod list, as oc get pods shows it. A pod that mounts a claim which is not yet
-        Bound never reaches Running — it waits, and the reason is on the pod, not on the
-        claim.
+        The claim named no consumer. The pod does, so go and find it there.
       target: { type: consoleElement, id: navigationLink, value: Pods }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~Pod' }
@@ -107,10 +128,20 @@ spec:
     - id: open-pod
       title: Open the mounting pod
       description: >-
-        The Volumes section of this page names the claim and the path it is mounted at —
-        the pairing you wrote by hand in Storage. Data written anywhere else in the
-        container is lost when the pod is replaced; only this path survives.
+        A pod that mounts a claim which is not yet Bound never reaches Running: it waits, and
+        the reason appears on the pod rather than on the claim. Open this one.
       target: { type: href, value: '/k8s/ns/<<namespace>>/pods/lab-app' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/lab-app' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/lab-app' }
+    - id: read-pod-volumes
+      title: Where the claim is mounted
+      description: >-
+        The Volumes section names the claim and the path it is mounted at — the pairing you
+        wrote by hand in Storage, read back from the running object. This is the fact to check
+        when data goes missing: anything written outside this path lives in the container
+        filesystem and is gone the moment the pod is replaced.
+      target: { type: consoleElement, id: detailsSection, value: Volumes }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }

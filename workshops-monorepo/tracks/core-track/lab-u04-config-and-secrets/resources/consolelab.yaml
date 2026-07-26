@@ -17,8 +17,9 @@ spec:
     Locate the ConfigMap and the Secret an application runs on, and the place that shows
     which workload consumes them.
   completionText: >-
-    Done. You read a ConfigMap and a Secret in the console and found the workload that
-    consumes them — the equivalent of oc get cm/secret -o yaml and oc set env --from.
+    Done. You read a ConfigMap's values and its YAML, decoded a Secret in one click, found
+    both named on the Deployment that imports them, and opened the form that edits that
+    wiring — everything oc get cm -o yaml, base64 -d and oc set env --from give you.
   visibility: hidden
   mode: assisted
   context:
@@ -64,14 +65,44 @@ spec:
     - id: open-configmap
       title: Open the application config
       description: >-
-        Each key and its value, as oc get configmap app-config -o yaml would print them.
-        Editing a value here saves immediately, but running containers keep the values they
-        started with — the workload still has to be rolled out, exactly as in Configure &
-        Troubleshoot Your App.
+        The details page has two halves: the metadata at the top, and the configuration
+        itself lower down. What you came for is the lower half — go there next.
       target: { type: href, value: '/k8s/ns/<<namespace>>/configmaps/app-config' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/configmaps/app-config' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/configmaps/app-config' }
+    - id: read-config-values
+      title: Read the values
+      description: >-
+        Every key in this ConfigMap is listed below with its full value, unhidden and
+        wrapped for reading. This is the console's answer to printing the object with
+        oc get configmap app-config -o yaml, and it is the fastest way to answer "what was
+        this application actually given?". Changing a value is the Actions menu, not here.
+      target: { type: consoleElement, id: detailsSection, value: Data }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-configmap-yaml
+      title: Read it as YAML
+      description: >-
+        The Details tab renders the fields the console has a widget for. Everything else is
+        one tab away. Open YAML.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/configmaps/app-config/yaml' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/configmaps/app-config/yaml' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/configmaps/app-config/yaml' }
+    - id: read-configmap-yaml
+      title: The whole object, editable
+      description: >-
+        This is the complete ConfigMap, the text oc get cm app-config -o yaml returns —
+        including what the Details tab does not render: ownership, annotations, resource
+        version. It is an editor, not a viewer: Save writes to the cluster at once, with no
+        review and no record outside it. Read here; change things in the manifest you keep in
+        git. Press Hide if the guidance box is over the text you want to read.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-secrets
       title: Open Secrets
       description: >-
@@ -85,14 +116,35 @@ spec:
     - id: open-secret
       title: Open the application secret
       description: >-
-        Values are hidden until you press Reveal values. That button is the whole security
-        model in one place: a Secret is base64-encoded, not encrypted, so anyone allowed to
-        read it in this project reads it in full. The boundary is the namespace and its
-        permissions, not the encoding.
+        The page is laid out exactly like the ConfigMap's, with one difference in the Data
+        section: the values are masked. Open it and look at what is missing.
       target: { type: href, value: '/k8s/ns/<<namespace>>/secrets/app-secret' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/secrets/app-secret' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/secrets/app-secret' }
+    - id: reveal-secret-values
+      title: Reveal the values
+      description: >-
+        This one button replaces base64 -d on every key at once — the console decodes for
+        you. It also demonstrates the security model: anyone who may read Secrets in this
+        project reads them in full. The boundary is the namespace and its RBAC, as you saw
+        in Terms — Namespaces & Tenancy, not the encoding.
+      target: { type: consoleElement, id: revealSecretValues }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetText, value: Hide values }
+    - id: read-secret-values
+      title: What that just did
+      description: >-
+        Every key is now readable in plain text, and the button offers to hide them again.
+        The console decoded them for you — the work of base64 -d, or of oc extract secret
+        app-secret, on all keys at once. Nothing was unlocked: the value was never encrypted,
+        only encoded, so anyone allowed to read Secrets in this project reads them in full.
+        The boundary is the namespace and its RBAC, as in Terms — Namespaces & Tenancy.
+      target: { type: consoleElement, id: detailsSection, value: Data }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-deployments
       title: Open Deployments
       description: >-
@@ -106,11 +158,67 @@ spec:
     - id: open-deployment
       title: Open the consuming workload
       description: >-
-        The Environment tab on this page lists the ConfigMap and the Secret this Deployment
-        pulls its environment from, and lets you attach another — the console's form for
-        oc set env --from. Changing it here writes a new pod template, so the change also
-        starts a rollout.
+        Nothing on the details page names the ConfigMap or the Secret: the wiring lives in
+        the pod template, not in the summary. The tab row — Details, YAML, ReplicaSets, Pods,
+        Environment, Events — holds the rest of the object, and the one you want is
+        Environment.
       target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app' }
+    - id: open-environment
+      title: Open the Environment tab
+      description: >-
+        This tab is where the relationship between the three objects is written down. It has
+        two halves: single variables typed in by hand, and whole objects imported at once.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/environment' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/environment' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/environment' }
+    - id: read-environment-sources
+      title: See the two objects wired in
+      description: >-
+        Listed below are app-config and app-secret — the two objects you just read, named as
+        the sources this container imports its whole environment from. This screen is the
+        console's equivalent of oc set env --from, and it is the answer to "where is this
+        value coming from?". Adding a source rewrites the pod template, which starts a
+        rollout: a configuration change replaces pods, it does not update running ones.
+      target:
+        type: consoleElement
+        id: detailsSection
+        value: All values from existing ConfigMaps or Secrets (envFrom)
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-actions
+      title: Find the write actions
+      description: >-
+        Every details page carries this same menu, and it is where the console keeps
+        everything that changes the object: Edit resource limits, Edit update strategy,
+        Restart rollout, Delete. Reading is spread across the tabs; writing is always here.
+        Open it and take Edit Deployment.
+      target: { type: consoleElement, id: actionsMenu }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-edit-form
+      title: Open Edit Deployment
+      description: >-
+        Most entries in this menu open one small dialog. Edit Deployment opens the full form
+        the console also uses to create a workload — the guided equivalent of editing the
+        manifest by hand. Nothing changes until you press Save at the bottom.
+      target: { type: consoleElement, id: menuItem, value: Edit Deployment }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/form' }
+    - id: read-environment-form
+      title: Edit the environment here
+      description: >-
+        The form's Environment Variables section is where a ConfigMap or a Secret is attached
+        or detached — the write side of the tab you just read, and the console's form for
+        oc set env. Leave without saving: the lab is finished, and this page changes nothing
+        until Save is pressed.
+      target: { type: consoleElement, id: detailsSection, value: Environment Variables }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }

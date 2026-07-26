@@ -41,11 +41,18 @@ metadata:
 
       ### What you will do
 
-      - Spot the failing pod in the list by its status (`oc get pods`)
-      - Read the container state on the pod's details page (`oc describe pod`)
+      You will not type any commands — this lab is entirely in the console. Each screen
+      names the command it replaces, so you can map one onto the other afterwards.
+
+      - Compare a healthy and a failing pod where `oc get pods` would list them, and read the
+        status word that decides what you open next
+      - Read the container's own state and reason, the part of `oc describe pod` that separates
+        a bad pod from a bad container
       - Find the cause in the pod's events — the screen that ends most investigations
-      - See why a pod in this state has no logs at all (`oc logs`)
-      - Confirm the cause in the manifest (`oc get pod -o yaml`) and decide where the fix belongs
+      - See why a pod in this state has no logs at all, and why that emptiness is itself a
+        finding
+      - Confirm the cause in the manifest, as `oc get pod -o yaml` would show it, and decide
+        where the fix belongs
 
       ### When to reach for the console
 
