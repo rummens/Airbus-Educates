@@ -185,14 +185,15 @@ metadata:
   annotations:
     academy.dcs/console-lab: lab-container-access      # ConsoleLab CR name
     academy.dcs/console-lab-params: podName=lab-app    # everything except ns
-    academy.dcs/orphaned: "0"                          # see below
+    academy.dcs/orphaned: "0s"                         # see below
 ```
 
 Rules that are easy to get wrong:
 
-- **`orphaned: "0"` is required.** Orphan detection watches the workshop dashboard,
+- **`orphaned: "0s"` is required.** Orphan detection watches the workshop dashboard,
   which a console-lab learner never opens — leave the default and Educates reclaims
-  the session out from under them mid-lab. `expires` remains the real bound.
+  the session out from under them mid-lab. `expires` remains the real bound. The CRD
+  pattern is `^\d+(s|m|h)$`, so the value needs its unit: `"0s"`, never `"0"`.
 - **`ns` is never declared.** The portal injects the allocated session namespace.
   `console-lab-params` fills the lab's other `{{placeholders}}`.
 - **Pre-deploy with `spec.session.objects`.** The learner is dropped into a ready

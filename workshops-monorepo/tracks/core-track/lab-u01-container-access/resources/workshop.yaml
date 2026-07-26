@@ -26,9 +26,10 @@ metadata:
     academy.dcs/console-lab: lab-container-access
     academy.dcs/console-lab-params: podName=lab-app
     # A console-lab learner never opens the workshop dashboard, so Educates would
-    # see the session as orphaned and reclaim it out from under them. 0 disables
-    # that timer; `expires` remains the real lifetime bound.
-    academy.dcs/orphaned: "0"
+    # see the session as orphaned and reclaim it out from under them. A zero
+    # duration disables that timer; `expires` remains the real lifetime bound.
+    # The CRD pattern is ^\d+(s|m|h)$, so it must carry a unit: 0s, not 0.
+    academy.dcs/orphaned: "0s"
     academy.dcs/expires: 60m
 spec:
   title: "Inspect a running container (console)"

@@ -27,6 +27,11 @@ import deploy_workshop as dw          # resolver + REPO_ROOT (same dir)
 GREEN, RED, YEL, DIM, RST = "\033[32m", "\033[31m", "\033[33m", "\033[2m", "\033[0m"
 
 LIFECYCLE_RE = re.compile(r'dcs\.airbus\.com/lifecycle:\s*["\']?([A-Za-z0-9_-]+)')
+# Session lifetimes land in TrainingPortal.spec.workshops[], whose CRD types them as
+# strings matching ^\d+(s|m|h)$. A unitless value ("0") renders as a YAML int and breaks
+# ArgoCD's structured-merge diff for the WHOLE app — one bad lab blocks every sync.
+DURATION_ANN_RE = re.compile(r'academy\.dcs/(expires|orphaned):\s*["\']?([^"\'\s#]+)')
+DURATION_RE = re.compile(r'^\d+(s|m|h)$')
 ROUTE_RE = re.compile(r"kind:\s*Route\b|route\.openshift\.io", re.IGNORECASE)
 VALID = {"dev", "prod"}
 
@@ -46,12 +51,18 @@ def check_lab(name, subpath):
     ws = lab_dir / "resources" / "workshop.yaml"
     if not ws.exists():
         return [f"{RED}FAIL{RST} {name}: no resources/workshop.yaml"]
-    m = LIFECYCLE_RE.search(ws.read_text())
+    text = ws.read_text()
+    m = LIFECYCLE_RE.search(text)
     label = m.group(1) if m else None
     route = lab_creates_route(lab_dir)
     expected = "prod" if route else "dev"
 
     errs = []
+    for ann, value in DURATION_ANN_RE.findall(text):
+        if not DURATION_RE.match(value):
+            errs.append(f"{RED}FAIL{RST} {name}: academy.dcs/{ann}='{value}' must match "
+                        f"^\\d+(s|m|h)$ (e.g. '60m', or '0s' to disable) — a unitless "
+                        f"value breaks the ArgoCD diff for the whole app")
     if label is None:
         errs.append(f"{RED}FAIL{RST} {name}: missing dcs.airbus.com/lifecycle label "
                     f"(expected '{expected}')")
@@ -94,9 +105,9 @@ def main():
     for e in errors:
         print(e)
     if fails:
-        print(f"\n{RED}{len(fails)} lifecycle-label problem(s).{RST}")
+        print(f"\n{RED}{len(fails)} workshop metadata problem(s).{RST}")
         sys.exit(1)
-    print(f"\n{GREEN}All lifecycle labels correct.{RST}")
+    print(f"\n{GREEN}All lifecycle labels and session lifetimes correct.{RST}")
 
 
 if __name__ == "__main__":

@@ -43,8 +43,11 @@ spec:
   {{- $meta := ((tpl ($root.Files.Get $path) $root | fromYaml).metadata) }}
   {{- $ann := $meta.annotations | default dict }}
     - name: {{ $meta.name }}
-      expires: {{ index $ann "academy.dcs/expires" | default $root.Values.portal.expires }}
-      orphaned: {{ index $ann "academy.dcs/orphaned" | default $root.Values.portal.orphaned }}
+      {{- /* Both are CRD strings matching ^\d+(s|m|h)$. Unquoted, a value like "0s"
+             is fine but a bare number is emitted as a YAML int, which fails the
+             server-side apply diff with "expected string, got 0". Always quote. */}}
+      expires: {{ index $ann "academy.dcs/expires" | default $root.Values.portal.expires | quote }}
+      orphaned: {{ index $ann "academy.dcs/orphaned" | default $root.Values.portal.orphaned | quote }}
       # Shared author params → session env for every workshop. The lab's
       # config.yaml params read these via `aliases:` (see values.params).
       env:
