@@ -162,6 +162,57 @@ it must carry the portal metadata itself:
 
 See `tracks/core-track/lab-a05-what-is-dcs/resources/workshop.yaml` for a filled, commented example.
 
+## Console labs (`lab-format: console`)
+
+Two lab formats share this catalog:
+
+| Format | Learner works in | Content |
+|---|---|---|
+| `terminal` (default) | the Educates dashboard — instructions, terminal, editor | `workshop/content/**` |
+| `console` | the OpenShift web console, guided by the academy console plugin | none — a `ConsoleLab` CR |
+
+A console lab still allocates a normal Educates session: the session namespace, its
+quota, `spec.session.objects`, capacity and the reaper are all unchanged. Only the
+final redirect differs — the portal sends the browser to the console instead of the
+workshop dashboard, and the learner never opens the dashboard at all.
+
+Mark one with:
+
+```yaml
+metadata:
+  labels:
+    academy.dcs/lab-format: console
+  annotations:
+    academy.dcs/console-lab: lab-container-access      # ConsoleLab CR name
+    academy.dcs/console-lab-params: podName=lab-app    # everything except ns
+    academy.dcs/orphaned: "0"                          # see below
+```
+
+Rules that are easy to get wrong:
+
+- **`orphaned: "0"` is required.** Orphan detection watches the workshop dashboard,
+  which a console-lab learner never opens — leave the default and Educates reclaims
+  the session out from under them mid-lab. `expires` remains the real bound.
+- **`ns` is never declared.** The portal injects the allocated session namespace.
+  `console-lab-params` fills the lab's other `{{placeholders}}`.
+- **Pre-deploy with `spec.session.objects`.** The learner is dropped into a ready
+  environment; they do not build it by following instructions. Objects are created
+  with the session and deleted with it.
+- **Name pods explicitly.** A ConsoleLab navigates to exact paths like
+  `/k8s/ns/<ns>/pods/lab-app`, so use a bare Pod (or a fixed-name resource) — a
+  Deployment's generated pod suffix cannot be templated into the lab.
+- **Label lab pods** `training.educates.dev/session.name: $(session_name)` so the
+  portal's readiness feed waits for them before redirecting.
+- **Real images.** Unlike an image merely *named* in content, an image in
+  `session.objects` is actually pulled — take it from `values.workshopImages.*` so
+  air-gapped installs repoint it once.
+
+The referenced `ConsoleLab` CR (the step-by-step guidance) lives in the **console
+plugin repo** (`labs/`), not here. Both must be synced for the lab to run; the
+plugin refuses to start a lab whose parameters are missing rather than half-running.
+
+Example: `tracks/core-track/lab-u01-container-access/resources/workshop.yaml`.
+
 ## vcluster note (the one duplication cost)
 
 Because workshops are emitted verbatim, per-session boilerplate lives in each

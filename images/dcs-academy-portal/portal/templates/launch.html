@@ -29,6 +29,10 @@
       const NAME = {{ session_name|tojson }};
       const T0 = {{ t0 }};
       const TARGET = {{ target|tojson }};
+      // A console lab redirects to the OpenShift console, but must still claim its
+      // Educates allocation here — hence two URLs, not one.
+      const CLAIM = {{ claim_url|tojson }};
+      const CONSOLE_LAB = {{ console_lab|tojson }};
       const VC = {{ course.vcluster|tojson }};   // workshop uses a vcluster → gate readiness on it
       console.log('[launch] NAME=', NAME, 'TARGET=', TARGET);
       const steps = document.querySelectorAll('#steps li');
@@ -36,7 +40,7 @@
                         // (e.g. the vcluster coredns pod appears late), so never regress.
       async function poll(){
         try{
-          const r = await fetch(`/api/session/${encodeURIComponent(NAME)}/status?t0=${T0}&vc=${VC?1:0}`);
+          const r = await fetch(`/api/session/${encodeURIComponent(NAME)}/status?t0=${T0}&vc=${VC?1:0}&console=${CONSOLE_LAB?1:0}`);
           const d = await r.json();
           console.log('[launch] poll', JSON.stringify(d));
           maxIdx = Math.max(maxIdx, d.index);
@@ -49,17 +53,24 @@
           });
           const pods = document.getElementById('pods');
           pods.innerHTML = d.pods.map(p=>`<li><span>${p.name}<br><small class="muted">${p.namespace}</small></span><span>${p.ready} ${p.phase}${p.vcluster?' · vcluster':''}</span></li>`).join('');
-          if(d.ready && (d.url || TARGET)){
-            const dest = d.url || TARGET;
+          if(d.access === false){
+            document.getElementById('msg').textContent =
+              'Your lab namespace could not be shared with your account — the lab may look empty. Tell an administrator.';
+          }
+          if(d.ready && (CONSOLE_LAB ? TARGET : (d.url || TARGET))){
+            const dest = CONSOLE_LAB ? TARGET : (d.url || TARGET);
             // The session reports Ready before its OpenShift Route is necessarily
             // admitted by the router — redirecting too early lands on a dead host
             // that a reload later fixes. Probe the session host first and only
-            // redirect once it actually answers.
-            document.getElementById('msg').textContent = 'Session ready — waiting for its route…';
-            await waitForRoute(dest);
-            // Even an admitted Route can briefly 503 while the router loads it; give it
-            // a short settle before redirecting so the first page load succeeds.
-            await new Promise(r=>setTimeout(r, 2500));
+            // redirect once it actually answers. A console lab skips this: the
+            // console's Route is a long-lived cluster Route already serving this page.
+            if(!CONSOLE_LAB){
+              document.getElementById('msg').textContent = 'Session ready — waiting for its route…';
+              await waitForRoute(dest);
+              // Even an admitted Route can briefly 503 while the router loads it; give
+              // it a short settle before redirecting so the first page load succeeds.
+              await new Promise(r=>setTimeout(r, 2500));
+            }
             // Don't redirect until the claim has finished establishing the portal
             // session cookie — the session host's oauth handshake needs it, else the
             // first load 401s ("auth error" that a reload later fixes).
@@ -88,9 +99,9 @@
       // cookie and receives the portal session cookie (needed for the later
       // session-host oauth). redirect:'manual' = don't throw on the cross-origin
       // 302 to the session host; the claim already ran server-side.
-      const claimDone = TARGET
-        ? fetch(TARGET, {credentials:'include', redirect:'manual'})
-            .then(r => console.log('[launch] claim', TARGET, '->', r.status, r.type))
+      const claimDone = CLAIM
+        ? fetch(CLAIM, {credentials:'include', redirect:'manual'})
+            .then(r => console.log('[launch] claim', CLAIM, '->', r.status, r.type))
             .catch(e => console.log('[launch] claim FAILED', e))
         : Promise.resolve();
       poll();

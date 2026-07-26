@@ -1,0 +1,58 @@
+{{- if and .Values.enabled .Values.consoleLabs.enabled }}
+# The role a console-lab learner holds in their OWN session namespace, bound by the
+# portal after the session is allocated (see portal/k8sclient.py ensure_lab_access).
+#
+# Scope discipline: this is granted namespace-scoped, per session, to one user. It
+# is a copy of `edit` minus the ability to hand the namespace to someone else —
+# without rolebindings the learner cannot widen their own blast radius, and the
+# portal SA holds `bind` on this role ONLY, so the pair cannot escalate.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Values.consoleLabs.role }}
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources:
+      - configmaps
+      - endpoints
+      - persistentvolumeclaims
+      - pods
+      - pods/log
+      - pods/exec
+      - pods/portforward
+      - replicationcontrollers
+      - secrets
+      - serviceaccounts
+      - services
+      - events
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["batch"]
+    resources: ["cronjobs", "jobs"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses", "networkpolicies"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["route.openshift.io"]
+    resources: ["routes"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["build.openshift.io", "image.openshift.io", "apps.openshift.io"]
+    resources: ["*"]
+    verbs: ["get", "list", "watch"]
+  # Read-only on the namespace itself so the console can resolve the project and
+  # show it in the project selector.
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["project.openshift.io"]
+    resources: ["projects"]
+    verbs: ["get", "list", "watch"]
+  # Read-only on quota/limits so a lab can show why something was rejected.
+  - apiGroups: [""]
+    resources: ["resourcequotas", "limitranges"]
+    verbs: ["get", "list", "watch"]
+{{- end }}

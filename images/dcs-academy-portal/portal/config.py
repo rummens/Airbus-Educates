@@ -61,6 +61,16 @@ ADMIN_SSAR_NAMESPACE = os.environ.get("ADMIN_SSAR_NAMESPACE", PORTAL_CR_NAMESPAC
 # only an SSAR admin user can trigger a rescan (the Job path is then disabled).
 RESCAN_TOKEN = os.environ.get("PORTAL_RESCAN_TOKEN", "")
 
+# --- console labs (lab-format: console) -------------------------------------
+# Base URL of the OpenShift web console the learner is redirected to. Empty =
+# derive it from the `console` Route in openshift-console at runtime, so no
+# per-cluster value is needed.
+CONSOLE_URL = os.environ.get("PORTAL_CONSOLE_URL", "").rstrip("/")
+# ClusterRole granted to the learner in their own session namespace so the guided
+# console lab has something to act on. The portal SA may bind THIS role and no
+# other (RBAC `bind` verb, see the chart) — keep the two in sync.
+CONSOLE_LAB_ROLE = os.environ.get("PORTAL_CONSOLE_LAB_ROLE", "academy-console-lab-user")
+
 # --- login (portal is the OpenShift OAuth client; no oauth-proxy) -----------
 # The portal runs the OAuth2 authorization-code flow itself against the cluster's
 # OpenShift OAuth server (ServiceAccount-as-OAuthClient), so it learns the real

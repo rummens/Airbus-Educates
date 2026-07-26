@@ -33,6 +33,15 @@
   {%- if c.duration -%}
   <span class="pill">{{ icon('clock')|safe }}{{ c.duration }}</span>
   {%- endif -%}
+  {#- Which interface the learner works in: a console lab runs inside the OpenShift
+      console (guided), a terminal lab in the Educates dashboard. -#}
+  <span class="pill">
+    {%- if c.lab_format == 'console' -%}
+      {{ icon('monitor')|safe }}Console lab
+    {%- else -%}
+      {{ icon('terminal')|safe }}Terminal lab
+    {%- endif -%}
+  </span>
 </div>
 {%- endmacro %}
 

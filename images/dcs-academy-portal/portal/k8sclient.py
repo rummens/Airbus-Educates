@@ -10,6 +10,7 @@ Everything is read-only via the SA except SSAR (which is a create against the
 authz API and grants nothing). Session allocation is NOT done here — that is
 the Educates REST API's job (see educates.py).
 """
+import logging
 import re
 import ssl
 import threading
@@ -22,6 +23,8 @@ from kubernetes.client.rest import ApiException
 from . import config as cfg
 from .cache import Cached
 from .icons import resolve_icon
+
+log = logging.getLogger("portal.k8sclient")
 
 _lock = threading.Lock()
 _loaded = False
@@ -249,6 +252,11 @@ def _list_courses_live():
             "source_url": _source_url(spec),
             "readme_url": _readme_raw_url(spec),
             "vcluster": _uses_vcluster(spec),
+            # Lab format: "terminal" (Educates dashboard, the default) or "console"
+            # (redirect into the OpenShift console; see consolelab.py).
+            "lab_format": _lbl(meta, "lab-format", "terminal"),
+            "console_lab": _ann(meta, "console-lab"),
+            "console_lab_params": _ann(meta, "console-lab-params"),
             # academy.dcs/icon (FA-style name) → vendored icon; "" → tile falls
             # back to the track's section icon.
             "icon": resolve_icon(_ann(meta, "icon"), default="") if _ann(meta, "icon") else "",
@@ -417,6 +425,13 @@ def session_status(name):
     return (obj.get("status", {}) or {}).get("educates", {}) or {}
 
 
+def session_namespace(name):
+    """The session's own namespace. Educates names it after the session; the status
+    field is preferred so a convention change can't silently point a console lab at
+    the wrong namespace."""
+    return session_status(name).get("namespace") or name
+
+
 def session_pods(session_name):
     """Pods across the session + vcluster namespaces for a session.
 
@@ -452,6 +467,66 @@ def session_pods(session_name):
             "total": len(cs),
         })
     return out
+
+
+# --- console labs -----------------------------------------------------------
+
+def _console_url_live():
+    """Public base URL of the OpenShift web console, from its Route."""
+    obj = _co().get_namespaced_custom_object(
+        "route.openshift.io", "v1", "openshift-console", "routes", "console")
+    host = (obj.get("spec", {}) or {}).get("host", "")
+    return f"https://{host}" if host else ""
+
+
+_console_url = Cached("console-url", _console_url_live,
+                      ttl=cfg.CATALOG_REFRESH_SECONDS, default="")
+
+
+def console_base_url():
+    """Configured console URL, else the cluster's own console Route ('' if neither)."""
+    return cfg.CONSOLE_URL or _console_url.get()
+
+
+def ensure_lab_access(namespace, user):
+    """Grant the SSO learner the console-lab role in their own session namespace.
+
+    Educates has no data variable carrying the human's identity — the session runs
+    as its ServiceAccount — so `spec.session.objects` cannot bind the learner and
+    the portal has to do it once the namespace exists. Idempotent: an existing
+    binding (409) is success.
+
+    The portal SA may bind exactly one ClusterRole (cfg.CONSOLE_LAB_ROLE), enforced
+    by the RBAC `bind` verb in the chart, so a bug here cannot escalate a learner
+    beyond that role.
+    """
+    if not (namespace and user):
+        return False
+    _ensure()
+    api = client.RbacAuthorizationV1Api()
+    body = client.V1RoleBinding(
+        metadata=client.V1ObjectMeta(
+            name="academy-console-lab-user",
+            namespace=namespace,
+            labels={f"{cfg.ACADEMY_PREFIX}/managed-by": "portal"}),
+        role_ref=client.V1RoleRef(
+            api_group="rbac.authorization.k8s.io",
+            kind="ClusterRole",
+            name=cfg.CONSOLE_LAB_ROLE),
+        subjects=[client.RbacV1Subject(
+            api_group="rbac.authorization.k8s.io", kind="User", name=user)])
+    try:
+        api.create_namespaced_role_binding(namespace, body)
+        log.info("CONSOLE-LAB bound %s to %s in %s", cfg.CONSOLE_LAB_ROLE, user, namespace)
+        return True
+    except ApiException as e:
+        if e.status == 409:
+            return True
+        # 403 here means the chart's bind grant is missing — the lab would open with
+        # a namespace the learner cannot see, so make it loud.
+        log.warning("CONSOLE-LAB rolebinding failed ns=%s user=%r: %s %s",
+                    namespace, user, e.status, e.reason)
+        return False
 
 
 # --- admin gate (user token) ------------------------------------------------

@@ -24,6 +24,7 @@ os.environ["FEEDBACK_DB"] = os.path.join(tempfile.mkdtemp(), "t.db")
 
 import pytest                                    # noqa: E402
 from portal import feedback, k8sclient, educates, auth, proxy, cache, reap   # noqa: E402
+from portal import consolelab                    # noqa: E402
 from portal import config as cfg                 # noqa: E402
 from portal import app as appmod                 # noqa: E402
 from portal.app import create_app                # noqa: E402
@@ -930,6 +931,150 @@ def test_auth_callback_error_and_missing_code(monkeypatch):
     with c.session_transaction() as s:
         s["oauth_state"] = "st"
     assert c.get("/oauth/callback?state=st", follow_redirects=False).status_code == 400  # no code
+
+
+# --- console labs (lab-format: console) -------------------------------------
+
+CONSOLE_COURSE = {
+    "name": "lab-u01-container-access",
+    "lab_format": "console",
+    "console_lab": "lab-container-access",
+    "console_lab_params": "podName=lab-app",
+}
+
+
+def test_console_lab_detection():
+    assert consolelab.is_console_lab(CONSOLE_COURSE) is True
+    assert consolelab.is_console_lab({"lab_format": "terminal"}) is False
+    assert consolelab.is_console_lab({}) is False          # unlabelled = terminal
+    assert consolelab.is_console_lab(None) is False
+
+
+def test_console_lab_param_parsing():
+    assert consolelab.parse_params("podName=lab-app") == {"podName": "lab-app"}
+    assert consolelab.parse_params(" a=1 , b=2 ") == {"a": "1", "b": "2"}
+    assert consolelab.parse_params("") == {}
+    assert consolelab.parse_params(None) == {}
+    # Malformed pairs are dropped, not fatal.
+    assert consolelab.parse_params("nope,=x,y=") == {}
+    # ns/returnUrl/mode are the portal's to set — a lab may not override them.
+    assert consolelab.parse_params("ns=evil,returnUrl=http://x,mode=timed") == {}
+    # Values that could smuggle a second parameter or markup are rejected.
+    assert consolelab.parse_params("a=b&c=d") == {}
+    assert consolelab.parse_params('a=<script>') == {}
+
+
+def test_console_lab_launch_url():
+    url = consolelab.launch_url(CONSOLE_COURSE, "sess-ns", "https://console.apps.test/",
+                                return_url="https://academy.test/course/lab-u01-container-access")
+    assert url.startswith("https://console.apps.test/academy/lessons/lab-container-access/start?")
+    assert "ns=sess-ns" in url
+    assert "podName=lab-app" in url
+    assert "returnUrl=https%3A%2F%2Facademy.test%2Fcourse%2Flab-u01-container-access" in url
+
+
+def test_console_lab_launch_url_refuses_incomplete_input():
+    # Any missing piece → "" so the caller falls back to the Educates dashboard
+    # instead of redirecting the browser to a broken URL.
+    assert consolelab.launch_url(CONSOLE_COURSE, "sess-ns", "") == ""
+    assert consolelab.launch_url(CONSOLE_COURSE, "", "https://console.test") == ""
+    assert consolelab.launch_url({"lab_format": "console"}, "ns", "https://console.test") == ""
+    assert consolelab.launch_url({"lab_format": "terminal", "console_lab": "x"},
+                                 "ns", "https://console.test") == ""
+
+
+def test_console_lab_course_fields_read_from_cr():
+    meta = {"labels": {"academy.dcs/lab-format": "console"},
+            "annotations": {"academy.dcs/console-lab": "lab-container-access",
+                            "academy.dcs/console-lab-params": "podName=lab-app"}}
+    assert k8sclient._lbl(meta, "lab-format", "terminal") == "console"
+    assert k8sclient._ann(meta, "console-lab") == "lab-container-access"
+    # A workshop without the label is a terminal lab.
+    assert k8sclient._lbl({"labels": {}}, "lab-format", "terminal") == "terminal"
+
+
+def test_session_namespace_prefers_status(monkeypatch):
+    monkeypatch.setattr(k8sclient, "session_status", lambda n: {"namespace": "from-status"})
+    assert k8sclient.session_namespace("sess") == "from-status"
+    monkeypatch.setattr(k8sclient, "session_status", lambda n: {})
+    assert k8sclient.session_namespace("sess") == "sess"
+
+
+def test_ensure_lab_access_binds_the_pinned_role(monkeypatch):
+    created = {}
+
+    class _Rbac:
+        def create_namespaced_role_binding(self, ns, body):
+            created["ns"] = ns
+            created["role"] = body.role_ref.name
+            created["kind"] = body.role_ref.kind
+            created["subject"] = (body.subjects[0].kind, body.subjects[0].name)
+
+    monkeypatch.setattr(k8sclient, "_ensure", lambda: None)
+    monkeypatch.setattr(k8sclient.client, "RbacAuthorizationV1Api", lambda: _Rbac())
+    assert k8sclient.ensure_lab_access("sess-ns", "alice") is True
+    assert created["ns"] == "sess-ns"
+    assert created["kind"] == "ClusterRole"
+    assert created["role"] == cfg.CONSOLE_LAB_ROLE
+    assert created["subject"] == ("User", "alice")
+    # No user (OAuth off) → nothing is bound rather than binding to an empty name.
+    created.clear()
+    assert k8sclient.ensure_lab_access("sess-ns", "") is False
+    assert created == {}
+
+
+def test_ensure_lab_access_is_idempotent_and_reports_denial(monkeypatch):
+    from kubernetes.client.rest import ApiException
+
+    class _Rbac:
+        def __init__(self, status): self.status = status
+        def create_namespaced_role_binding(self, ns, body):
+            raise ApiException(status=self.status, reason="x")
+
+    monkeypatch.setattr(k8sclient, "_ensure", lambda: None)
+    monkeypatch.setattr(k8sclient.client, "RbacAuthorizationV1Api", lambda: _Rbac(409))
+    assert k8sclient.ensure_lab_access("ns", "alice") is True        # already bound
+    monkeypatch.setattr(k8sclient.client, "RbacAuthorizationV1Api", lambda: _Rbac(403))
+    assert k8sclient.ensure_lab_access("ns", "alice") is False       # chart grant missing
+
+
+def test_console_url_falls_back_to_the_cluster_route(monkeypatch):
+    class _CO:
+        def get_namespaced_custom_object(self, *a, **k):
+            return {"spec": {"host": "console.apps.test"}}
+
+    monkeypatch.setattr(cfg, "CONSOLE_URL", "")
+    monkeypatch.setattr(k8sclient, "_co", lambda: _CO())
+    k8sclient._console_url.invalidate() if hasattr(k8sclient._console_url, "invalidate") else None
+    monkeypatch.setattr(k8sclient, "_console_url",
+                        cache.Cached("t", k8sclient._console_url_live, ttl=1, default=""))
+    assert k8sclient.console_base_url() == "https://console.apps.test"
+    # An explicit value always wins (air-gapped installs with a vanity host).
+    monkeypatch.setattr(cfg, "CONSOLE_URL", "https://explicit.test")
+    assert k8sclient.console_base_url() == "https://explicit.test"
+
+
+def test_status_feed_grants_access_only_for_console_labs(monkeypatch):
+    calls = []
+    monkeypatch.setattr(k8sclient, "session_status",
+                        lambda n: {"phase": "Allocated", "url": "/s/x", "namespace": "sess-ns"})
+    monkeypatch.setattr(k8sclient, "session_pods",
+                        lambda n: [{"name": "p", "namespace": "sess-ns", "vcluster": False,
+                                    "phase": "Running", "ready": 1, "total": 1}])
+    monkeypatch.setattr(k8sclient, "ensure_lab_access",
+                        lambda ns, user: calls.append((ns, user)) or True)
+    monkeypatch.setattr(k8sclient, "session_route_ready",
+                        lambda *a: (_ for _ in ()).throw(AssertionError("console labs must not probe the session route")))
+
+    feed = appmod._status_feed("sess", 0, console_lab=True, user="alice")
+    assert feed["ready"] is True and feed["access"] is True
+    assert calls == [("sess-ns", "alice")]
+
+    # A terminal lab neither grants access nor reports the field.
+    calls.clear()
+    monkeypatch.setattr(k8sclient, "session_route_ready", lambda *a: True)
+    feed = appmod._status_feed("sess", 0, console_lab=False, user="alice")
+    assert feed["access"] is None and calls == []
 
 
 if __name__ == "__main__":

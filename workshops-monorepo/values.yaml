@@ -23,6 +23,10 @@ global:
 workshopImages:
   base: ghcr.io/rummens/dcs-workshop-base:develop
   # tools: ghcr.io/rummens/dcs-workshop-tools:dev
+  # Sample app a console lab pre-deploys into the session namespace (spec.session
+  # .objects). Unlike an image named in workshop CONTENT, this one is really pulled
+  # by the cluster, so air-gapped installs must repoint it at Harbor.
+  sample: ghcr.io/rummens/samples/hello-dcs:1.0
 
 # Where each lab's CONTENT (workshop/, exercises/, README.md) is fetched from.
 #   useGit=false (default, prod): the published $(image_repository)/<lab>-files

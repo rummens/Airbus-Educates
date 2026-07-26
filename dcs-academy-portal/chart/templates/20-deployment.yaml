@@ -40,6 +40,8 @@ spec:
             - { name: EDUCATES_PORTAL_SERVICE_URL,   value: {{ .Values.educates.portalServiceUrl | quote }} }
             # --- behaviour ---
             - { name: PORTAL_SESSION_TLS_VERIFY,     value: {{ .Values.sessionTlsVerify | quote }} }
+            - { name: PORTAL_CONSOLE_URL,            value: {{ .Values.consoleLabs.consoleUrl | quote }} }
+            - { name: PORTAL_CONSOLE_LAB_ROLE,       value: {{ .Values.consoleLabs.role | quote }} }
             - { name: FEEDBACK_MIN_REVIEWS,          value: {{ .Values.feedback.minReviews | quote }} }
             # --- login: portal IS the OpenShift OAuth client (no oauth-proxy) ---
             - { name: PORTAL_OAUTH_ENABLED,          value: {{ .Values.auth.enabled | quote }} }

@@ -15,8 +15,11 @@ from flask import (Flask, render_template, request, redirect, abort, jsonify,
                    Response, url_for)
 from markupsafe import Markup
 
+from urllib.parse import urljoin
+
 from . import config as cfg
-from . import k8sclient, educates, feedback, metrics, proxy, auth, cache, slides
+from . import (auth, cache, consolelab, educates, feedback, k8sclient, metrics,
+               proxy, slides)
 from .icons import ICONS, DIFFICULTY_ICON, resolve_icon
 
 _log = logging.getLogger("portal")
@@ -232,10 +235,29 @@ def create_app():
             metrics.ERRORS.labels("session_request").inc()
             return render_template("launch.html", course=c, error=str(e),
                                    session_name="", target="", steps=steps, t0=0), 502
+        session_name = sess.get("name", "")
         target = _abs_session_url(sess.get("url", ""))
+        if consolelab.is_console_lab(c):
+            # The console lab runs in the OpenShift console, not the Educates
+            # dashboard. The session (namespace + its pre-deployed objects) is still
+            # what we just allocated; we only redirect somewhere else. An empty
+            # target here (no ConsoleLab annotation, no console Route) falls back to
+            # the dashboard rather than sending the browser to a broken URL.
+            console_target = consolelab.launch_url(
+                c, k8sclient.session_namespace(session_name), k8sclient.console_base_url(),
+                return_url=_return_url(name))
+            if console_target:
+                target = console_target
+            else:
+                log.warning("CONSOLE-LAB %s: no console target, falling back to the dashboard", name)
         return render_template("launch.html", course=c, error="",
-                               session_name=sess.get("name", ""), target=target,
-                               steps=steps, t0=int(time.time()))
+                               session_name=session_name, target=target,
+                               # Always the Educates activation URL: the browser must
+                               # claim the allocation even when it then leaves for the
+                               # console, or Educates reclaims the un-accessed session.
+                               claim_url=_abs_session_url(sess.get("url", "")),
+                               steps=steps, t0=int(time.time()),
+                               console_lab=consolelab.is_console_lab(c))
 
     @app.route("/session/<name>/end", methods=["POST"])
     def session_end(name):
@@ -266,7 +288,9 @@ def create_app():
         # launch page which read the course flag). Don't infer it from live pods —
         # early in provisioning the -vc pods don't exist yet.
         return jsonify(_status_feed(name, request.args.get("t0", type=int),
-                                    request.args.get("vc") == "1"))
+                                    request.args.get("vc") == "1",
+                                    console_lab=request.args.get("console") == "1",
+                                    user=_user()))
 
     # --- feedback (absorbed) -----------------------------------------------
     @app.route("/form")
@@ -460,7 +484,13 @@ def _abs_session_url(path):
     return path if path.startswith("/") else "/" + path
 
 
-def _status_feed(name, t0, expect_vc=False):
+def _return_url(course_name):
+    """Absolute URL the console lab sends the learner back to when it completes.
+    The console plugin only honours a returnUrl on the portal's own origin."""
+    return urljoin(request.url_root, url_for("course", name=course_name))
+
+
+def _status_feed(name, t0, expect_vc=False, console_lab=False, user=""):
     """Merge WorkshopSession phase + pods → a human step + progress %.
 
     expect_vc: this workshop uses a vcluster (from the course flag). When True the
@@ -495,7 +525,10 @@ def _status_feed(name, t0, expect_vc=False):
     # lands there. session_route_ready → True/False. It only raises if the whole check
     # errors unexpectedly; _safe returns None then, and we fail OPEN so a broken check
     # never hangs the launch.
-    rr = _safe(lambda: k8sclient.session_route_ready(name, url)) if url else None
+    # A console lab never opens the session dashboard, so whether its Route is
+    # already served is irrelevant — probing it only adds latency (and on CRC the
+    # session host needs an /etc/hosts entry, which the learner will never have).
+    rr = None if console_lab else (_safe(lambda: k8sclient.session_route_ready(name, url)) if url else None)
     route_ready = (rr is None) or bool(rr)
     step = "Reserving session"
     if phase in READY_PHASES and ws_ready and vc_ok and url and route_ready:
@@ -511,6 +544,12 @@ def _status_feed(name, t0, expect_vc=False):
     ready = step == "Ready"
     if ready and t0:
         metrics.PROVISION.observe(max(0, time.time() - t0))
+    # Grant the learner RBAC on their session namespace before the browser leaves
+    # for the console. Idempotent, so re-polling after Ready costs one 409.
+    access = None
+    if ready and console_lab:
+        access = bool(_safe(lambda: k8sclient.ensure_lab_access(
+            k8sclient.session_namespace(name), user)))
     # "Waiting for route" sits between Loading content and Ready — show it on the
     # last content step so the bar doesn't jump back to the start.
     idx = STEPS.index(step) if step in STEPS else (len(STEPS) - 2 if step == "Waiting for route" else 0)
@@ -521,6 +560,10 @@ def _status_feed(name, t0, expect_vc=False):
         "index": idx,
         "total": len(STEPS),
         "ready": ready,
+        # None for terminal labs; False means the console lab opens without the
+        # learner holding RBAC on its namespace (chart grant missing) — the launch
+        # page warns instead of silently handing over an empty-looking console.
+        "access": access,
         "url": _abs_session_url(st.get("url", "")),
         "pods": [{"name": p["name"], "namespace": p["namespace"],
                   "ready": f'{p["ready"]}/{p["total"]}',

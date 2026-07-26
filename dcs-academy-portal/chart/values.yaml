@@ -107,6 +107,27 @@ auth:
 # that chart on educates.portalName and auth.hostname.
 
 # -----------------------------------------------------------------------------
+# Console labs (Workshop label academy.dcs/lab-format: console). These reuse the
+# whole Educates session machinery (namespace, quota, spec.session.objects,
+# reaper) but redirect the learner into the OpenShift console instead of the
+# workshop dashboard, where the academy console plugin guides them.
+#
+# Enabling this grants the portal ServiceAccount its ONLY write permission:
+# creating a RoleBinding for the signed-in learner in their own session namespace.
+# The `bind` verb is pinned to the single role below, so the API server refuses
+# any attempt to bind a different (e.g. cluster-admin) role. Turn this off and the
+# portal is read-only again; console labs then fall back to the dashboard.
+# -----------------------------------------------------------------------------
+consoleLabs:
+  enabled: true
+  # ClusterRole granted to the learner, namespace-scoped, in their own session
+  # namespace only. Shipped by templates/02-console-lab-rbac.yaml.
+  role: academy-console-lab-user
+  # Base URL of the OpenShift console to redirect to. Empty = read the cluster's
+  # own `console` Route at runtime (correct on every cluster, no per-env value).
+  consoleUrl: ""
+
+# -----------------------------------------------------------------------------
 # Theme → CSS variables. Defaults reproduce the DCS docs look; only primary/
 # secondary/logo are conceptually required, all have on-brand defaults.
 # -----------------------------------------------------------------------------
