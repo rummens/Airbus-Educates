@@ -43,6 +43,23 @@ workshopContent:
   # live elsewhere (air-gap mirror, different repo, etc).
   tracksRoot: /workshops-monorepo/tracks
 
+# -----------------------------------------------------------------------------
+# Console labs (guided tours of the OpenShift web console, run by the academy
+# console plugin). Their ConsoleLab CRs live next to the workshops they belong to,
+# at tracks/<track>/<lab>/resources/consolelab.yaml, and are emitted by
+# templates/consolelabs.yaml through `tpl` — so a lab can reference these values
+# instead of hardcoding cluster-specific names.
+#
+# The consolelabs.academy.dcs CRD comes from the console plugin's own deployment;
+# set enabled: false on a cluster where that plugin is not installed.
+# -----------------------------------------------------------------------------
+consoleLabs:
+  enabled: true
+  # Namespace a DEFAULT (always-listed) console lab points at when the learner has
+  # no project selected and the launch URL carries no ns. Empty = the lab requires
+  # a selected project, and the plugin says so instead of guessing.
+  defaultNamespace: ""
+
 # Extra labels merged onto the Track CRs + TrainingPortal this chart emits.
 # (Workshop CRs are NOT verbatim — rendered through `tpl`, so .Values work there.)
 labels: {}

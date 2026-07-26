@@ -15,6 +15,7 @@ especially **dcs-academy-course-design**, **dcs-domain-corrections**, and
 |---|---|
 | `airbus-educates-workshop-authoring-skill/` | Skill: create/author Educates workshops (OpenShift house standards). Fork of upstream. |
 | `airbus-educates-course-design-skill/` | Skill: plan multi-workshop courses. |
+| `airbus-educates-console-tour-authoring-skill/` | Skill: author **console labs** — guided tours of the OpenShift web console (`ConsoleLab` CRs), as opposed to terminal-based workshops. |
 | `airbus-educates-course-review-skill/` | Skill: review/QA a workshop or course against all house standards; reports findings + suggestions (advises, doesn't rewrite). |
 | `dcs-academy/` | The course: `planning/` (brief, topics, module maps, per-workshop plans) + `workshops/` (built workshops: A01, A02 done; A03–A06 planned). See `dcs-academy/CLAUDE.md`. |
 | `images/` | `dcs-workshop-base` (Educates base + oc) and `hello-dcs` (RH UBI9) Containerfiles + `build.sh`. Pushed to `ghcr.io/rummens/*` (public, multiarch). |
@@ -24,7 +25,8 @@ especially **dcs-academy-course-design**, **dcs-domain-corrections**, and
 
 ## Which skill to use
 
-- Authoring/editing a workshop → **airbus-educates-workshop-authoring**.
+- Authoring/editing a workshop (terminal lab) → **airbus-educates-workshop-authoring**.
+- Authoring/editing a console lab (guided console tour) → **airbus-educates-console-tour-authoring**.
 - Planning a course / module / per-workshop plans → **airbus-educates-course-design**.
 - Reviewing/QAing an existing workshop or course → **airbus-educates-course-review**.
 
@@ -62,7 +64,9 @@ cd test/workshops
 ./link_check.py     --all    # (no cluster) every content link resolves
 ```
 The CRC git-source reads `origin/main`, so **push content changes before re-deploying**.
-Portal is broken on CRC arm64 (SIGILL) — always portal-less. Editor/console tabs need the
+The portal **does** run on CRC arm64 (`OPENSSL_armcap=0`, enabled in
+`argocd/envs/platform-crc.yaml`) — the scripts are portal-less because that is faster and
+isolates one lab, not because the portal is broken. Editor/console tabs need the
 CRC self-signed cert trusted (see test/workshops/README). Full test strategy: `TEST_STRATEGY.md`.
 
 ## Deploy / git

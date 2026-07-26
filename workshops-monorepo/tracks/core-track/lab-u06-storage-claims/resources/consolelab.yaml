@@ -1,0 +1,116 @@
+# Hidden lab: needs a bound PersistentVolumeClaim and a pod that mounts it, so it is
+# launched from the academy portal:
+#   /academy/lessons/lab-u06-storage-claims/start?ns=<namespace>
+# Only <<namespace>> is templated; the object names are owned by the paired workshop.yaml
+# in this folder and written out literally. The mounting workload is a bare Pod so its
+# exact name can be path-targeted.
+apiVersion: academy.dcs/v1alpha1
+kind: ConsoleLab
+metadata:
+  name: lab-u06-storage-claims
+  annotations:
+    # The CRD is owned by the console plugin's deployment, not this chart.
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Read a storage claim in the console
+  description: >-
+    Find a PersistentVolumeClaim, read its capacity, access mode and class, and see which
+    pod holds it.
+  completionText: >-
+    Done. You read a claim's status, capacity and class, checked its events, and found the
+    pod that mounts it — the console equivalent of oc get pvc and oc describe pvc.
+  visibility: hidden
+  mode: assisted
+  context:
+    primaryResource: labClaim
+    resources:
+      labClaim:
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        label: Lab claim
+        name: lab-data
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/core~v1~PersistentVolumeClaim'
+        consolePath: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data'
+        tabs:
+          events: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data/events'
+      labPod:
+        apiVersion: v1
+        kind: Pod
+        label: Mounting pod
+        name: lab-app
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/core~v1~Pod'
+        consolePath: '/k8s/ns/<<namespace>>/pods/lab-app'
+  steps:
+    - id: open-storage
+      title: Open Storage
+      description: >-
+        Storage holds the claims a project makes for durable disk space. You asked for one
+        from the terminal in Storage; this is where the platform's answer is visible without
+        printing YAML.
+      target: { type: quickStartId, value: qs-nav-storage }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-pvcs
+      title: Open PersistentVolumeClaims
+      description: >-
+        The list is oc get pvc, scoped to this project. The Status column is the one that
+        matters: Bound means a volume was provisioned and can be mounted, Pending means
+        nothing has satisfied the request yet.
+      target: { type: consoleElement, id: navigationLink, value: PersistentVolumeClaims }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~PersistentVolumeClaim' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~PersistentVolumeClaim' }
+    - id: open-pvc
+      title: Open the lab claim
+      description: >-
+        Requested size, granted capacity, access mode and storage class, on one screen —
+        the summary oc describe pvc prints. The class is the decision that matters on DCS:
+        it selects File or Block and the performance tier, and it cannot be changed after
+        the claim is bound.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data' }
+    - id: open-pvc-events
+      title: Check the claim's events
+      description: >-
+        A claim that stays Pending says why here: no storage class matched, the class has
+        no provisioner, or the requested size cannot be satisfied. This is the first screen
+        to open when a pod will not start and the reason mentions a volume.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data/events' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data/events' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data/events' }
+    - id: open-workloads
+      title: Open Workloads
+      description: >-
+        A claim on its own stores nothing. The other half of the story is the workload that
+        mounts it, and that lives back under Workloads.
+      target: { type: quickStartId, value: qs-nav-workloads }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-pods
+      title: Open Pods
+      description: >-
+        The pod list, as oc get pods shows it. A pod that mounts a claim which is not yet
+        Bound never reaches Running — it waits, and the reason is on the pod, not on the
+        claim.
+      target: { type: consoleElement, id: navigationLink, value: Pods }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~Pod' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~Pod' }
+    - id: open-pod
+      title: Open the mounting pod
+      description: >-
+        The Volumes section of this page names the claim and the path it is mounted at —
+        the pairing you wrote by hand in Storage. Data written anywhere else in the
+        container is lost when the pod is replaced; only this path survives.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/pods/lab-app' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/lab-app' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/lab-app' }

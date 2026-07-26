@@ -48,8 +48,8 @@ namespace access, a ConfigMap write). Two variants:
 test/workshops/flow_test.py --mode both
 ```
 
-Runs portal-less (the Educates portal SIGILLs on CRC arm64 — your answer #2, CRC is the
-only test target; x86 is the final home where the same mechanics front the portal login).
+Runs portal-less — faster and one lab at a time; the portal itself runs fine on CRC
+(`OPENSSL_armcap=0`) and fronts the same session mechanics with a login and a catalog.
 
 ## Layer 3 — per-workshop
 

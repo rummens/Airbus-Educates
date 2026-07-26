@@ -1,0 +1,25 @@
+{{- /*
+  ConsoleLab CRs — the guided-tour content the OpenShift console plugin runs.
+  Discovery mirrors workshops.yaml: every tracks/<track>/<lab>/resources/consolelab.yaml
+  is emitted, rendered through `tpl` so a lab can use .Values (registry, namespaces,
+  per-cluster names) instead of hardcoding them.
+
+  Two kinds live here, distinguished by spec.visibility inside the file:
+    * default — listed in the console's own lab catalog for any user; the folder
+      usually has ONLY a consolelab.yaml (no Educates session behind it);
+    * hidden  — launched from the portal with ?ns=<session namespace>; the folder
+      also holds the workshop.yaml whose session provisions that namespace.
+
+  CRD OWNERSHIP: consolelabs.academy.dcs is shipped by the CONSOLE PLUGIN repo
+  (deploy/base/crd.yaml), not by this chart — same split as the Track CRD, which the
+  portal chart owns. The plugin must therefore be deployed before these CRs. The
+  sync-wave + SkipDryRunOnMissingResource below keep a first-ever sync from failing
+  while that CRD is still being registered.
+*/ -}}
+{{- if and .Values.enabled .Values.consoleLabs.enabled }}
+{{- range $path, $_ := .Files.Glob "tracks/*/*/resources/consolelab.yaml" }}
+---
+# from: {{ $path }}
+{{ tpl ($.Files.Get $path) $ }}
+{{- end }}
+{{- end }}

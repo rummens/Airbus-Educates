@@ -17,7 +17,7 @@
     <div class="detail-readme markdown">{{ readme_html }}</div>
     {% else %}
     <p class="detail-desc">{{ c.description }}</p>
-    {% if c.details_md %}<div class="detail-more">{{ c.details_md }}</div>{% endif %}
+    {% if details_html %}<div class="detail-more markdown">{{ details_html }}</div>{% endif %}
     {% endif %}
   </div>
 

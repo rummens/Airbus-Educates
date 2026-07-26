@@ -1,10 +1,10 @@
 apiVersion: training.educates.dev/v1beta1
 kind: Workshop
 metadata:
-  name: lab-u01-container-access
+  name: lab-u03-deployments-rollouts
   labels:
     academy.dcs/track: core
-    academy.dcs/order: "90"
+    academy.dcs/order: "100"
     # Console lab: the portal allocates this session for the namespace + objects
     # below, then redirects the learner into the OpenShift console instead of the
     # workshop dashboard. The academy console plugin guides them from there.
@@ -13,13 +13,13 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    academy.dcs/display-name: "Inspect a running container (console)"
+    academy.dcs/display-name: "Deployments & rollouts (console)"
     academy.dcs/duration: "10 min"
     academy.dcs/difficulty: beginner
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
-      Do the pod investigation you already know from the terminal — get pods, logs,
-      rsh — in the OpenShift web console instead, guided step by step.
+      Read replicas, rollout history and events for a running Deployment in the
+      OpenShift web console, guided step by step.
     # A console lab has no workshop content, so there is no README for the portal to
     # fetch: this annotation is the course page's prospectus. Markdown, rendered.
     academy.dcs/details: |
@@ -29,29 +29,29 @@ metadata:
       OpenShift web console and walks you through it: the step you are on is highlighted
       on the real page, and the guidance box follows you as you navigate.
 
-      Your own project is created before the lab starts, with a running pod already in
-      it, so everything you click is live — nothing is a screenshot or a simulation.
+      Your own project is created before the lab starts, with a Deployment already
+      running two replicas, so every screen shows live data.
 
       ### What you should already know
 
       This lab assumes the concepts, not the clicks. You should have finished
-      **Deploy Your First App** and **Configure & Troubleshoot Your App**, where you met
-      pods, logs and container shells from the command line. Here you only map that
-      knowledge onto the console — no new Kubernetes concepts are introduced.
+      **Deploy Your First App**, where you created a Deployment and watched a rollout
+      with `oc rollout status`. No new Kubernetes concepts are introduced here.
 
       ### What you will do
 
-      - Find the running pod under **Workloads → Pods** (`oc get pods`)
-      - Open its details page and read status, containers and events (`oc describe pod`)
-      - Stream its logs from the **Logs** tab (`oc logs -f`)
-      - Open a shell inside the container from the **Terminal** tab (`oc rsh`)
+      - Read desired versus available replicas in the Deployments list (`oc get deployment`)
+      - Open the Deployment and find the replica control (`oc scale`)
+      - List the pods the Deployment owns (`oc get pods -l app=lab-app`)
+      - Look at the ReplicaSet per revision (`oc rollout history`, `oc rollout undo`)
+      - Read the Deployment's events (`oc describe deployment`)
+      - Open the live YAML and see why editing it here is not the same as changing a manifest
 
       ### When to reach for the console
 
-      The console wins for looking around: live status without re-running a command,
-      related objects one click apart, and events beside the object they concern. The CLI
-      still wins for anything you need to repeat, script, or review — which is why the
-      terminal labs come first.
+      The console wins when you want the rollout state and the objects underneath it on one
+      screen, updating on their own. The CLI still wins for anything you need to repeat,
+      script, or review — which is why the terminal labs come first.
 
       ### Cleaning up
 
@@ -59,10 +59,9 @@ metadata:
       and shuts the project down. Leaving the tab open just leaves it running until it
       expires.
     # The ConsoleLab CR (academy.dcs/v1alpha1, shipped by the console plugin repo)
-    # this session drives, plus the parameters it templates besides ns, which the
-    # portal always injects from the allocated session namespace.
-    academy.dcs/console-lab: lab-u01-container-access
-    academy.dcs/console-lab-params: podName=lab-app
+    # this session drives. It templates only <<namespace>>, which the portal always
+    # injects from the allocated session namespace, so there are no extra params.
+    academy.dcs/console-lab: lab-u03-deployments-rollouts
     # A console-lab learner never opens the workshop dashboard, so Educates would
     # see the session as orphaned and reclaim it out from under them. A zero
     # duration disables that timer; `expires` remains the real lifetime bound.
@@ -70,11 +69,12 @@ metadata:
     academy.dcs/orphaned: "0s"
     academy.dcs/expires: 60m
 spec:
-  title: "Inspect a running container (console)"
+  title: "Deployments & rollouts (console)"
   description: >-
-    A guided tour of pod inspection in the OpenShift web console: locate a running
-    pod, read its logs, and open a terminal inside its container. Runs in your own
-    project, which is created and populated for you before the lab starts.
+    You created a Deployment and watched it roll out from the terminal in Deploy Your
+    First App. This lab walks the same object through the OpenShift web console —
+    replicas, owned pods, revision history, events and live YAML — so you can recognise
+    each command's equivalent on screen.
   duration: 10m
   difficulty: beginner
   labels:
@@ -101,36 +101,40 @@ spec:
         enabled: false
       slides:
         enabled: false
-    # The environment the learner is dropped into. Educates creates these with the
-    # session and deletes them with it, so the lab is meaningful from the first
-    # second and leaves nothing behind.
     objects:
-      # A bare Pod, not a Deployment: the ConsoleLab navigates to an exact pod path
-      # (/k8s/ns/<ns>/pods/lab-app), and a Deployment's generated pod suffix cannot
-      # be templated into the lab. A 10-minute session needs no rescheduling.
-      - apiVersion: v1
-        kind: Pod
+      # A Deployment (not a bare Pod) is the subject of this tour, and its own name is
+      # stable, so the lab can path-target it. Two replicas so the Pods tab and the
+      # replica ring have something to show.
+      - apiVersion: apps/v1
+        kind: Deployment
         metadata:
           name: lab-app
           namespace: $(session_namespace)
-          labels:
-            app: lab-app
-            # Makes the lab pod visible to the portal's readiness feed, which queries
-            # this Educates session label — so the browser is not redirected to the
-            # console before the pod the lab talks about is actually running.
-            training.educates.dev/session.name: $(session_name)
         spec:
-          containers:
-            - name: app
-              image: "{{ .Values.workshopImages.sample }}"
-              ports:
-                - containerPort: 8080
-              resources:
-                requests:
-                  cpu: 10m
-                  memory: 64Mi
-                limits:
-                  memory: 128Mi
+          replicas: 2
+          selector:
+            matchLabels:
+              app: lab-app
+          template:
+            metadata:
+              labels:
+                app: lab-app
+                # Makes the lab pods visible to the portal's readiness feed, which queries
+                # this Educates session label — so the browser is not redirected to the
+                # console before the workload the lab talks about is actually running.
+                training.educates.dev/session.name: $(session_name)
+            spec:
+              containers:
+                - name: app
+                  image: "{{ .Values.workshopImages.sample }}"
+                  ports:
+                    - containerPort: 8080
+                  resources:
+                    requests:
+                      cpu: 10m
+                      memory: 64Mi
+                    limits:
+                      memory: 128Mi
       - apiVersion: v1
         kind: Service
         metadata:

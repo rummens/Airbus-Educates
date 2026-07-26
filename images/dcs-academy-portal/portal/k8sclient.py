@@ -432,6 +432,32 @@ def session_namespace(name):
     return session_status(name).get("namespace") or name
 
 
+def session_lab_namespaces(session_name):
+    """Every namespace a console lab may need the learner to read.
+
+    Usually just the session namespace, but a lab that compares two projects gets a
+    secondary namespace from Educates; both carry the session label. The vcluster
+    host namespace is excluded — it is infrastructure, and no console lab runs
+    against it. Falls back to the session namespace alone if the lookup fails, so a
+    missing read grant degrades to today's behaviour instead of stranding the
+    learner with no access at all.
+    """
+    primary = session_namespace(session_name)
+    found = []
+    try:
+        _ensure()
+        sel = f"training.educates.dev/session.name={session_name}"
+        for ns in _core().list_namespace(label_selector=sel).items:
+            name = ns.metadata.name
+            if name and not name.endswith("-vc"):
+                found.append(name)
+    except Exception as e:                       # noqa: BLE001 — RBAC/API error, not fatal
+        log.warning("CONSOLE-LAB namespace lookup failed session=%s: %s", session_name, e)
+    if primary and primary not in found:
+        found.insert(0, primary)
+    return found
+
+
 def session_pods(session_name):
     """Pods across the session + vcluster namespaces for a session.
 

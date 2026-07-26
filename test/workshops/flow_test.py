@@ -5,7 +5,7 @@ This is the "does a learner actually get a working environment" test, run end-to
 against a live cluster. For each variant it:
 
   1. deploys a workshop session (reuses deploy_workshop.py — the same CR path the portal
-     drives; portal-less because the Educates portal SIGILLs on CRC arm64, see README),
+     drives; portal-less for speed and isolation, not because the portal cannot run — see README),
   2. waits for the session pod to reach Running,
   3. verifies the session is reachable over HTTP — the dashboard AND the editor answer 200
      (this is the "content loads" step a learner sees in the browser),
@@ -26,8 +26,8 @@ Two variants, matching the two run-locations a workshop can choose (see the hous
   ./flow_test.py --mode vcluster --workshop lab-a03-namespace-model
   ./flow_test.py --keep                # leave sessions up to inspect
 
-Final setup runs on x86 where the real portal works; there the same session mechanics
-front the portal login → catalog → launch flow. On CRC this drives them portal-less.
+The real portal fronts the same session mechanics with a login → catalog → launch flow
+(on CRC too); this script drives them directly instead.
 """
 import argparse
 import sys

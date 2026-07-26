@@ -15,7 +15,7 @@ from flask import (Flask, render_template, request, redirect, abort, jsonify,
                    Response, url_for)
 from markupsafe import Markup
 
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit
 
 from . import config as cfg
 from . import (auth, cache, consolelab, educates, feedback, k8sclient, metrics,
@@ -211,6 +211,10 @@ def create_app():
         return render_template("course.html", c=c, ratings=ratings,
                                min_reviews=cfg.FEEDBACK_MIN_REVIEWS, is_admin=_is_admin(),
                                difficulty_icon=DIFFICULTY_ICON, readme_html=_render_md(readme),
+                               # academy.dcs/details is markdown (hence details_md) and was
+                               # being printed escaped. A console lab has no README to fetch,
+                               # so this annotation IS its prospectus — render it.
+                               details_html=_render_md(c.get("details_md", "")),
                                status=_progress_safe(_user()).get(name, ""),
                                has_slides=slides.has_slides(name))
 
@@ -245,7 +249,7 @@ def create_app():
             # the dashboard rather than sending the browser to a broken URL.
             console_target = consolelab.launch_url(
                 c, k8sclient.session_namespace(session_name), k8sclient.console_base_url(),
-                return_url=_return_url(name))
+                return_url=_return_url(name, session_name))
             if console_target:
                 target = console_target
             else:
@@ -258,6 +262,34 @@ def create_app():
                                claim_url=_abs_session_url(sess.get("url", "")),
                                steps=steps, t0=int(time.time()),
                                console_lab=consolelab.is_console_lab(c))
+
+    @app.route("/lab/<name>/complete")
+    def lab_complete(name):
+        """Where a console lab sends the learner when they press Finish.
+
+        A console lab runs outside the portal, so this is the only moment the portal
+        learns it happened: record the completion and free the environment (the lab is
+        over — its namespace exists only for that run). Then hand off to the normal
+        end-of-lab feedback form.
+
+        GET, because it is reached by a plain browser navigation from the console.
+        Terminating is gated on the session being the caller's OWN (same rule as
+        /session/<name>/end), so the worst a forged link can do is end a lab session
+        the visitor already owns.
+        """
+        c = next((x for x in k8sclient.list_courses() if x["name"] == name), None)
+        if not c:
+            abort(404)
+        _safe(lambda: feedback.mark_progress(_user(), name, "completed"))
+        session_name = request.args.get("session", "")
+        if session_name:
+            mine = {s["name"] for s in _my_sessions(_user())}
+            if session_name in mine or _is_admin():
+                _safe(lambda: educates.terminate_session(session_name))
+            else:
+                log.warning("LAB-COMPLETE %s: session %r is not %r's — not terminating",
+                            name, session_name, _user())
+        return render_template("form.html", workshop=name, session=session_name)
 
     @app.route("/session/<name>/end", methods=["POST"])
     def session_end(name):
@@ -484,10 +516,33 @@ def _abs_session_url(path):
     return path if path.startswith("/") else "/" + path
 
 
-def _return_url(course_name):
-    """Absolute URL the console lab sends the learner back to when it completes.
-    The console plugin only honours a returnUrl on the portal's own origin."""
-    return urljoin(request.url_root, url_for("course", name=course_name))
+def _portal_base():
+    """This portal's PUBLIC origin (scheme + host), no trailing slash.
+
+    Deliberately not `request.url_root`: TLS terminates at the OpenShift route, and the
+    app sees a plain-http request with no ProxyFix in front of it, so url_root advertises
+    `http://…`. The console plugin honours a returnUrl only when its origin matches the
+    configured portal URL exactly, so an http:// value is silently dropped and Finish
+    stops returning the learner. The TrainingPortal status carries the real public URL;
+    the OAuth redirect URL is the next best known-public value.
+    """
+    url = (_safe(k8sclient.portal_status) or {}).get("url", "").rstrip("/")
+    if url:
+        return url
+    if cfg.OAUTH_REDIRECT_URL:
+        parts = urlsplit(cfg.OAUTH_REDIRECT_URL)
+        if parts.scheme and parts.netloc:
+            return f"{parts.scheme}://{parts.netloc}"
+    # Last resort: the request, forced to https — the portal is only served over TLS.
+    return f"https://{request.host}"
+
+
+def _return_url(course_name, session_name):
+    """Absolute URL the console lab sends the learner back to when it completes: the
+    completion route, which records progress and frees the session."""
+    return urljoin(
+        _portal_base() + "/",
+        url_for("lab_complete", name=course_name, session=session_name))
 
 
 def _status_feed(name, t0, expect_vc=False, console_lab=False, user=""):
@@ -548,8 +603,12 @@ def _status_feed(name, t0, expect_vc=False, console_lab=False, user=""):
     # for the console. Idempotent, so re-polling after Ready costs one 409.
     access = None
     if ready and console_lab:
-        access = bool(_safe(lambda: k8sclient.ensure_lab_access(
-            k8sclient.session_namespace(name), user)))
+        # A lab can span more than one namespace (the two-project namespace-scope lab
+        # gets a secondary session namespace). Bind the learner in each, or the console
+        # opens on a project they cannot read.
+        nss = _safe(lambda: k8sclient.session_lab_namespaces(name)) or []
+        access = bool(nss) and all(
+            bool(_safe(lambda ns=ns: k8sclient.ensure_lab_access(ns, user))) for ns in nss)
     # "Waiting for route" sits between Loading content and Ready — show it on the
     # last content step so the bar doesn't jump back to the start.
     idx = STEPS.index(step) if step in STEPS else (len(STEPS) - 2 if step == "Waiting for route" else 0)

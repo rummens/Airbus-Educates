@@ -16,6 +16,7 @@ session delete, admin banner).
 import os
 import re
 import tempfile
+import types
 
 os.environ["PORTAL_DEMO"] = "1"
 os.environ["DATABASE_URL"] = ""
@@ -964,6 +965,17 @@ def test_console_lab_param_parsing():
     assert consolelab.parse_params('a=<script>') == {}
 
 
+def test_console_lab_param_session_namespace_substitution():
+    # A secondary session namespace is named after the primary one, which the lab
+    # author cannot know — the portal resolves it at launch. The literal form has
+    # characters the sanitizer rejects, so substitution must happen first.
+    assert consolelab.parse_params("secondNamespace=$(session_namespace)-two",
+                                   "lab-01") == {"secondNamespace": "lab-01-two"}
+    # Without a namespace to substitute, the unresolved value is dropped rather than
+    # passed to the console as literal "$(session_namespace)-two".
+    assert consolelab.parse_params("secondNamespace=$(session_namespace)-two") == {}
+
+
 def test_console_lab_launch_url():
     url = consolelab.launch_url(CONSOLE_COURSE, "sess-ns", "https://console.apps.test/",
                                 return_url="https://academy.test/course/lab-u01-container-access")
@@ -998,6 +1010,27 @@ def test_session_namespace_prefers_status(monkeypatch):
     assert k8sclient.session_namespace("sess") == "from-status"
     monkeypatch.setattr(k8sclient, "session_status", lambda n: {})
     assert k8sclient.session_namespace("sess") == "sess"
+
+
+def test_session_lab_namespaces_includes_secondary_but_not_vcluster(monkeypatch):
+    class _Ns:
+        def __init__(self, name): self.metadata = types.SimpleNamespace(name=name)
+
+    class _Core:
+        def list_namespace(self, label_selector=""):
+            assert label_selector == "training.educates.dev/session.name=sess"
+            return types.SimpleNamespace(items=[_Ns("sess-ns"), _Ns("sess-ns-two"),
+                                                _Ns("sess-ns-vc")])
+
+    monkeypatch.setattr(k8sclient, "_ensure", lambda: None)
+    monkeypatch.setattr(k8sclient, "_core", lambda: _Core())
+    monkeypatch.setattr(k8sclient, "session_status", lambda n: {"namespace": "sess-ns"})
+    assert k8sclient.session_lab_namespaces("sess") == ["sess-ns", "sess-ns-two"]
+
+    # A failed lookup (no read grant) degrades to the session namespace alone rather
+    # than leaving the learner bound nowhere.
+    monkeypatch.setattr(k8sclient, "_core", lambda: (_ for _ in ()).throw(RuntimeError("403")))
+    assert k8sclient.session_lab_namespaces("sess") == ["sess-ns"]
 
 
 def test_ensure_lab_access_binds_the_pinned_role(monkeypatch):
@@ -1075,6 +1108,77 @@ def test_status_feed_grants_access_only_for_console_labs(monkeypatch):
     monkeypatch.setattr(k8sclient, "session_route_ready", lambda *a: True)
     feed = appmod._status_feed("sess", 0, console_lab=False, user="alice")
     assert feed["access"] is None and calls == []
+
+
+def test_lab_complete_records_and_frees_the_session(monkeypatch, db):
+    """Finish in the console → completion recorded AND the lab environment freed."""
+    terminated = []
+    monkeypatch.setattr(cfg, "DEV_USER", "alice")          # OAuth off in tests
+    monkeypatch.setattr(k8sclient, "list_courses",
+                        lambda: [{"name": "lab-u01-container-access"}])
+    monkeypatch.setattr(appmod, "_my_sessions", lambda user: [{"name": "sess-1"}])
+    monkeypatch.setattr(educates, "terminate_session",
+                        lambda n: terminated.append(n) or True)
+    c = create_app().test_client()
+    r = c.get("/lab/lab-u01-container-access/complete?session=sess-1")
+    assert r.status_code == 200
+    assert terminated == ["sess-1"]
+    assert feedback.user_progress("alice").get("lab-u01-container-access") == "completed"
+
+
+def test_lab_complete_refuses_to_free_someone_elses_session(monkeypatch, db):
+    terminated = []
+    monkeypatch.setattr(k8sclient, "list_courses",
+                        lambda: [{"name": "lab-u01-container-access"}])
+    monkeypatch.setattr(appmod, "_my_sessions", lambda user: [{"name": "mine"}])
+    monkeypatch.setattr(appmod, "_is_admin", lambda: False)
+    monkeypatch.setattr(educates, "terminate_session",
+                        lambda n: terminated.append(n) or True)
+    c = create_app().test_client()
+    # Completion is still recorded for the caller; the foreign session is left alone.
+    assert c.get("/lab/lab-u01-container-access/complete?session=not-mine").status_code == 200
+    assert terminated == []
+    # Unknown lab → 404 rather than recording progress against nothing.
+    assert c.get("/lab/nope/complete?session=mine").status_code == 404
+
+
+def test_return_url_points_at_the_completion_route(monkeypatch):
+    monkeypatch.setattr(k8sclient, "portal_status",
+                        lambda: {"url": "https://academy.test/"})
+    app = create_app()
+    with app.test_request_context("/launch/x", base_url="https://academy.test"):
+        url = appmod._return_url("lab-u01-container-access", "sess-1")
+    assert url == ("https://academy.test/lab/lab-u01-container-access/complete?session=sess-1")
+
+
+def test_return_url_never_advertises_http(monkeypatch):
+    """TLS terminates at the route and there is no ProxyFix, so the request looks like
+    plain http. An http:// returnUrl fails the console plugin's origin check against the
+    https portal URL and Finish silently stops returning the learner."""
+    app = create_app()
+
+    # 1. The TrainingPortal status is the source of truth for the public URL.
+    monkeypatch.setattr(k8sclient, "portal_status", lambda: {"url": "https://academy.test"})
+    with app.test_request_context("/launch/x", base_url="http://academy.test"):
+        assert appmod._portal_base() == "https://academy.test"
+        assert appmod._return_url("lab", "s").startswith("https://academy.test/")
+
+    # 2. No status URL → fall back to the (public) OAuth redirect origin.
+    monkeypatch.setattr(k8sclient, "portal_status", lambda: {})
+    monkeypatch.setattr(cfg, "OAUTH_REDIRECT_URL", "https://academy.test/oauth/callback")
+    with app.test_request_context("/launch/x", base_url="http://academy.test"):
+        assert appmod._portal_base() == "https://academy.test"
+
+    # 3. Neither available → the request host, forced to https.
+    monkeypatch.setattr(cfg, "OAUTH_REDIRECT_URL", "")
+    with app.test_request_context("/launch/x", base_url="http://academy.test"):
+        assert appmod._portal_base() == "https://academy.test"
+
+    # 4. A broken status URL must not produce a scheme-less or http URL.
+    monkeypatch.setattr(k8sclient, "portal_status",
+                        lambda: (_ for _ in ()).throw(RuntimeError("api down")))
+    with app.test_request_context("/launch/x", base_url="http://academy.test"):
+        assert appmod._return_url("lab", "s").startswith("https://academy.test/lab/")
 
 
 if __name__ == "__main__":

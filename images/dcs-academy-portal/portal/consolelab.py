@@ -38,12 +38,18 @@ def is_console_lab(course):
     return (course or {}).get("lab_format") == CONSOLE_FORMAT
 
 
-def parse_params(annotation):
+def parse_params(annotation, session_namespace=""):
     """`podName=web,secondNamespace=other` → {"podName": "web", ...}.
 
     Invalid pairs are dropped with a warning rather than failing the launch: a
     typo in one annotation should not make the lab unlaunchable, and the console
     plugin already refuses to start a lab whose parameters are missing.
+
+    A value may contain `$(session_namespace)`, the one Educates variable a lab
+    author cannot resolve at authoring time: a secondary session namespace is named
+    `$(session_namespace)-<suffix>` and the session namespace is only known once the
+    session is allocated. It is substituted before validation, because the literal
+    form contains characters the sanitizer rejects.
     """
     params = {}
     for pair in (annotation or "").split(","):
@@ -52,6 +58,8 @@ def parse_params(annotation):
             continue
         key, sep, value = pair.partition("=")
         key, value = key.strip(), value.strip()
+        if session_namespace:
+            value = value.replace("$(session_namespace)", session_namespace)
         if not sep or not key or not value:
             log.warning("CONSOLE-LAB ignoring malformed param %r", pair)
             continue
@@ -76,7 +84,7 @@ def launch_url(course, session_namespace, console_base, return_url=""):
     lab = (course or {}).get("console_lab", "")
     if not (is_console_lab(course) and lab and session_namespace and console_base):
         return ""
-    params = parse_params(course.get("console_lab_params", ""))
+    params = parse_params(course.get("console_lab_params", ""), session_namespace)
     params["ns"] = session_namespace
     if return_url:
         params["returnUrl"] = return_url

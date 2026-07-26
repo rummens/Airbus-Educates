@@ -46,7 +46,7 @@ current-context. Catalog, provisioning status feed (real session pods),
 metrics, feedback (sqlite) and the SSAR admin gate all work this way. Test the
 admin gate: `curl -H "X-Forwarded-Access-Token: $(oc --context crc-admin whoami -t)" .../admin`.
 Only **/launch** (Educates REST session request) needs the portal pod running —
-broken on CRC arm64 (SIGILL), so verify that path on the x86 cluster.
+which it does on CRC too, with `OPENSSL_armcap=0` (`argocd/envs/platform-crc.yaml`).
 
 ## Build
 ```bash
@@ -60,7 +60,7 @@ Harbor for prod (air-gap).
 1. **Proxy allowlist** (`proxy.py:ALLOW_PREFIXES`) — start a real session behind
    the oauth-proxy and confirm the minimal set of `academy/…` paths the session
    gateway hits. Under-proxy breaks sessions; over-proxy re-exposes the Educates
-   UI. (Not reproducible on CRC — portal is SIGILL there; verify on the x86 cluster.)
+   UI.
 2. **Workshop fields** — confirmed on the live CRD: `spec.title`/`spec.description`
    are populated; `difficulty`/`duration`/summary/track/order come from
    `academy.dcs/*` labels+annotations (real Workshop CRs don't set spec.difficulty).

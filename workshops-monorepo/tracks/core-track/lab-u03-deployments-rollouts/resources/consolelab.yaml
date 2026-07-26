@@ -1,0 +1,116 @@
+# Hidden lab: needs a Deployment to look at, so it is launched from the academy portal,
+# which provisions the namespace and passes it in the URL:
+#   /academy/lessons/lab-u03-deployments-rollouts/start?ns=<namespace>
+# Only <<namespace>> is templated. The object names are owned by the paired workshop.yaml
+# in this folder, so they are written out literally rather than declared as launch
+# parameters — one less thing that can be missing at launch time. A Deployment name is
+# safe to path-target; a Pod name from a Deployment is not (generated suffix).
+apiVersion: academy.dcs/v1alpha1
+kind: ConsoleLab
+metadata:
+  name: lab-u03-deployments-rollouts
+  annotations:
+    # The CRD is owned by the console plugin's deployment, not this chart.
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Follow a Deployment through the console
+  description: >-
+    Read desired versus available replicas, the pods a Deployment owns, its rollout
+    history and its events — the console side of oc get deployment and oc rollout.
+  completionText: >-
+    Done. You read a Deployment's rollout state, the pods it owns, its revision history
+    and its events — the console equivalent of oc get deployment, oc rollout history and
+    oc describe.
+  visibility: hidden
+  mode: assisted
+  context:
+    primaryResource: labDeployment
+    resources:
+      labDeployment:
+        apiVersion: apps/v1
+        kind: Deployment
+        label: Lab deployment
+        name: lab-app
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/apps~v1~Deployment'
+        consolePath: '/k8s/ns/<<namespace>>/deployments/lab-app'
+        tabs:
+          pods: '/k8s/ns/<<namespace>>/deployments/lab-app/pods'
+          replicasets: '/k8s/ns/<<namespace>>/deployments/lab-app/replicasets'
+          events: '/k8s/ns/<<namespace>>/deployments/lab-app/events'
+          yaml: '/k8s/ns/<<namespace>>/deployments/lab-app/yaml'
+  steps:
+    - id: open-workloads
+      title: Open Workloads
+      description: >-
+        Workloads holds the controllers that keep your application running, and the pods
+        they create. You come here to answer "is the current version out, and is it
+        healthy?" — the question oc get deployment answers from the terminal.
+      target: { type: quickStartId, value: qs-nav-workloads }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-deployments
+      title: Open Deployments
+      description: >-
+        Each row carries the same facts as oc get deployment: how many replicas you asked
+        for and how many are available. The count refreshes on its own, so a rollout is
+        visible here without repeating a command or watching one.
+      target: { type: consoleElement, id: navigationLink, value: Deployments }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/apps~v1~Deployment' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/apps~v1~Deployment' }
+    - id: open-deployment
+      title: Open the lab deployment
+      description: >-
+        The details page opens on the replica ring — desired count in the middle, arrows
+        to change it. That control is oc scale. Around it sit the facts you read with
+        oc describe deployment: strategy, selector, and the current rollout status.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app' }
+    - id: open-pods-tab
+      title: List the pods it owns
+      description: >-
+        This tab is oc get pods with the Deployment's own selector already applied, so it
+        shows this application and nothing else. Use it to tell a Deployment problem from a
+        pod problem: a Deployment that reports one of two available has one bad pod here.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/pods' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/pods' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/pods' }
+    - id: open-replicasets
+      title: See the rollout history
+      description: >-
+        A Deployment does not replace pods itself. It creates a ReplicaSet per revision and
+        moves replicas from the old one to the new one, which is what you watched with
+        oc rollout status in Deploy Your First App. The older entries are the revisions
+        oc rollout undo would return to.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/replicasets' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/replicasets' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/replicasets' }
+    - id: open-events
+      title: Read the events
+      description: >-
+        Events are the cluster's own account of what it tried to do — scaling up a
+        ReplicaSet, failing to pull an image, refusing a quota. This is the tail of
+        oc describe deployment, and it is where a rollout that never finishes explains
+        itself. Events expire, so an empty list means quiet, not healthy.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/events' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/events' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/events' }
+    - id: open-yaml
+      title: Open the YAML
+      description: >-
+        The whole object, the same text oc get deployment -o yaml prints, editable in
+        place. Saving here applies immediately, with no review and no record outside the
+        cluster. Use it to read and to try something in a lab; changes that must survive
+        belong in the manifest you keep in git.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/yaml' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/yaml' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/yaml' }

@@ -1,0 +1,105 @@
+# Hidden lab: needs a namespace holding a Service, a Route and a NetworkPolicy, so it is
+# launched from the academy portal:
+#   /academy/lessons/lab-u05-services-and-routes/start?ns=<namespace>
+# Only <<namespace>> is templated; the object names are owned by the paired workshop.yaml
+# in this folder and written out literally.
+apiVersion: academy.dcs/v1alpha1
+kind: ConsoleLab
+metadata:
+  name: lab-u05-services-and-routes
+  annotations:
+    # The CRD is owned by the console plugin's deployment, not this chart.
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Follow the traffic chain in the console
+  description: >-
+    Walk from Route to Service to pods on screen, and see where a broken chain shows
+    itself first.
+  completionText: >-
+    Done. You followed a request from the Route to the Service to the pods behind it —
+    the console equivalent of oc get route, oc get service and oc get endpoints.
+  visibility: hidden
+  mode: assisted
+  context:
+    primaryResource: labService
+    resources:
+      labService:
+        apiVersion: v1
+        kind: Service
+        label: Lab service
+        name: lab-app
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/core~v1~Service'
+        consolePath: '/k8s/ns/<<namespace>>/services/lab-app'
+      labRoute:
+        apiVersion: route.openshift.io/v1
+        kind: Route
+        label: Lab route
+        name: lab-app
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/route.openshift.io~v1~Route'
+        consolePath: '/k8s/ns/<<namespace>>/routes/lab-app'
+  steps:
+    - id: open-networking
+      title: Open Networking
+      description: >-
+        Networking holds the objects that make an application reachable: Services for a
+        stable in-cluster address, Routes for a URL outside the cluster. You worked through
+        exactly this chain from the terminal in Expose Your App.
+      target: { type: quickStartId, value: qs-nav-networking }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-services
+      title: Open Services
+      description: >-
+        A Service is the stable name and address that survives pods being replaced. The
+        list is oc get service, scoped to this project. Ports and the cluster IP are on the
+        row; the interesting part is one click deeper.
+      target: { type: consoleElement, id: navigationLink, value: Services }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~Service' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~Service' }
+    - id: open-service
+      title: Open the lab service
+      description: >-
+        Two facts matter here: the pod selector, and the Pods tab that lists what the
+        selector currently matches. That list is oc get endpoints. When it is empty the
+        Service answers nothing, and the usual cause is a selector that no longer matches
+        the labels on the pods.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/services/lab-app' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/services/lab-app' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/services/lab-app' }
+    - id: open-routes
+      title: Open Routes
+      description: >-
+        A Route publishes one Service on a DCS-managed hostname, which is the step that
+        takes an application from reachable-inside-the-cluster to reachable by a user. The
+        Location column carries the URL that oc get route prints.
+      target: { type: consoleElement, id: navigationLink, value: Routes }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/route.openshift.io~v1~Route' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/route.openshift.io~v1~Route' }
+    - id: open-route
+      title: Open the lab route
+      description: >-
+        The details page shows the host, the TLS settings, and the Service and port the
+        Route sends traffic to. A Route with a host but no working Service still returns an
+        error page — which is why you check the Service's pods first and the Route second.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/routes/lab-app' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/routes/lab-app' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/routes/lab-app' }
+    - id: open-networkpolicies
+      title: Look at the NetworkPolicies
+      description: >-
+        NetworkPolicies decide which traffic is allowed to reach the pods in a project. On
+        DCS you read them, you do not write them: the platform team owns them and a change
+        goes through an ITSM request. Knowing where they are is how you explain a
+        connection that fails while the Service and Route both look correct.
+      target: { type: consoleElement, id: navigationLink, value: NetworkPolicies }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/networking.k8s.io~v1~NetworkPolicy' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/networking.k8s.io~v1~NetworkPolicy' }

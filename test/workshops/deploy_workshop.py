@@ -2,8 +2,8 @@
 """Deploy a DCS workshop to the local CRC cluster, portal-less, from git.
 
 Creates the three CRs (Workshop + WorkshopEnvironment + WorkshopSession) that
-session-manager reconciles directly (the portal SIGILLs on CRC arm64 — see
-README.md). Files are pulled from the repo's git remote using the monorepo
+session-manager reconciles directly (portal-less is a speed/isolation choice, not a
+CRC limitation — see README.md). Files are pulled from the repo's git remote using the monorepo
 `newRootPath` pattern, so no image publish is needed.
 
 By default the workshop container image override is DROPPED (uses the default

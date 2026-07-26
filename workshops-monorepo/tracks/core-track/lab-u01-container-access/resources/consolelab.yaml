@@ -1,0 +1,96 @@
+# Hidden lab: needs a namespace containing the named pod, so it is only launched from the
+# academy portal, which provisions that namespace and passes it in the URL:
+#   /academy/lessons/lab-u01-container-access/start?ns=<namespace>&podName=<pod>
+# Launch parameters use the <<name>> form. This file is rendered by Helm (tpl) at deploy
+# time, so the Helm and Educates delimiters are already taken; only <<...>> survives to
+# the browser, where the console plugin substitutes it from the launch URL.
+apiVersion: academy.dcs/v1alpha1
+kind: ConsoleLab
+metadata:
+  name: lab-u01-container-access
+  annotations:
+    # The CRD is owned by the console plugin's deployment, not this chart.
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Inspect and enter a running container
+  description: >-
+    You already inspected workloads from the terminal in Deploy Your First App and
+    Configure & Troubleshoot Your App, using oc get pods, oc logs and oc rsh. This lab
+    walks the same investigation through the OpenShift web console, so you can recognise
+    each command's equivalent on screen and pick whichever tool is faster for the job.
+  completionText: >-
+    Done. You located a pod, read its logs, and opened a shell inside its container without
+    typing a command — the console equivalent of oc get pods, oc logs and oc rsh.
+  visibility: hidden
+  mode: assisted
+  context:
+    primaryResource: labPod
+    resources:
+      labPod:
+        apiVersion: v1
+        kind: Pod
+        label: Lab pod
+        name: '<<podName>>'
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/core~v1~Pod'
+        consolePath: '/k8s/ns/<<namespace>>/pods/<<podName>>'
+        tabs:
+          logs: '/k8s/ns/<<namespace>>/pods/<<podName>>/logs'
+          terminal: '/k8s/ns/<<namespace>>/pods/<<podName>>/terminal'
+  steps:
+    - id: open-workloads
+      title: Open Workloads
+      description: >-
+        Everything that runs your application lives under Workloads: Pods and the
+        controllers that create them. This is where you land when you want to answer
+        "is it running?" — the console's counterpart to oc get pods.
+      target: { type: quickStartId, value: qs-nav-workloads }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-pods
+      title: Open Pods
+      description: >-
+        The Pods list is scoped to one project, exactly as oc get pods is scoped to your
+        current project. The Status column carries what you previously read from the CLI
+        output, and it refreshes on its own — no repeated command, no watch flag.
+      target: { type: consoleElement, id: navigationLink, value: Pods }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~Pod' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~Pod' }
+    - id: open-pod
+      title: Open the lab pod
+      description: >-
+        Open <<podName>>. From the terminal, understanding one pod took several commands:
+        oc describe pod for events and configuration, oc get pod -o yaml for the whole
+        object. The details page puts that on one screen — status, containers, volumes,
+        labels and recent events, each on its own tab.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/pods/<<podName>>' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/<<podName>>' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/<<podName>>' }
+    - id: open-logs
+      title: Read the logs
+      description: >-
+        This tab is oc logs, streaming live. Logs are the first place to look when a
+        workload misbehaves, and the safest: reading them changes nothing about the running
+        application. When a pod runs more than one container, the selector at the top of
+        the tab chooses between them — the console's version of the -c flag.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/pods/<<podName>>/logs' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/<<podName>>/logs' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/<<podName>>/logs' }
+    - id: open-terminal
+      title: Open a shell in the container
+      description: >-
+        The Terminal tab is oc rsh: a shell inside the running container. Use it to look —
+        at config files, environment variables, what the process can reach over the
+        network. Do not use it to repair anything. A container is recreated from its image
+        on every restart, so edits made in here vanish and the next pod starts broken
+        again. Fixes belong in the image or the manifest, as you saw in Configure &
+        Troubleshoot Your App.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/pods/<<podName>>/terminal' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/<<podName>>/terminal' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/<<podName>>/terminal' }

@@ -1,0 +1,116 @@
+# Hidden lab: needs a namespace holding the ConfigMap, the Secret and the Deployment that
+# consumes them, so it is launched from the academy portal:
+#   /academy/lessons/lab-u04-config-and-secrets/start?ns=<namespace>
+# Only <<namespace>> is templated; the object names are owned by the paired workshop.yaml
+# in this folder and written out literally.
+apiVersion: academy.dcs/v1alpha1
+kind: ConsoleLab
+metadata:
+  name: lab-u04-config-and-secrets
+  annotations:
+    # The CRD is owned by the console plugin's deployment, not this chart.
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Find an application's configuration
+  description: >-
+    Locate the ConfigMap and the Secret an application runs on, and the place that shows
+    which workload consumes them.
+  completionText: >-
+    Done. You read a ConfigMap and a Secret in the console and found the workload that
+    consumes them — the equivalent of oc get cm/secret -o yaml and oc set env --from.
+  visibility: hidden
+  mode: assisted
+  context:
+    primaryResource: appConfig
+    resources:
+      appConfig:
+        apiVersion: v1
+        kind: ConfigMap
+        label: Application config
+        name: app-config
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/core~v1~ConfigMap'
+        consolePath: '/k8s/ns/<<namespace>>/configmaps/app-config'
+      appSecret:
+        apiVersion: v1
+        kind: Secret
+        label: Application secret
+        name: app-secret
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/core~v1~Secret'
+        consolePath: '/k8s/ns/<<namespace>>/secrets/app-secret'
+  steps:
+    - id: open-workloads
+      title: Open Workloads
+      description: >-
+        ConfigMaps and Secrets sit under Workloads, next to the objects that consume them.
+        That grouping matches how you use them: configuration is not a thing of its own,
+        it is an input to a workload.
+      target: { type: quickStartId, value: qs-nav-workloads }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-configmaps
+      title: Open ConfigMaps
+      description: >-
+        The list is scoped to one project, exactly as oc get configmap is. Alongside your
+        own entries you will see objects the platform put there, such as the cluster trust
+        bundle — a project always contains more than what you created.
+      target: { type: consoleElement, id: navigationLink, value: ConfigMaps }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~ConfigMap' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~ConfigMap' }
+    - id: open-configmap
+      title: Open the application config
+      description: >-
+        Each key and its value, as oc get configmap app-config -o yaml would print them.
+        Editing a value here saves immediately, but running containers keep the values they
+        started with — the workload still has to be rolled out, exactly as in Configure &
+        Troubleshoot Your App.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/configmaps/app-config' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/configmaps/app-config' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/configmaps/app-config' }
+    - id: open-secrets
+      title: Open Secrets
+      description: >-
+        Secrets hold the values you keep out of a manifest — tokens, passwords, certificates.
+        The list looks like the ConfigMap list because a Secret is the same shape of object;
+        what differs is who may read it and how it is handled.
+      target: { type: consoleElement, id: navigationLink, value: Secrets }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~Secret' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~Secret' }
+    - id: open-secret
+      title: Open the application secret
+      description: >-
+        Values are hidden until you press Reveal values. That button is the whole security
+        model in one place: a Secret is base64-encoded, not encrypted, so anyone allowed to
+        read it in this project reads it in full. The boundary is the namespace and its
+        permissions, not the encoding.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/secrets/app-secret' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/secrets/app-secret' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/secrets/app-secret' }
+    - id: open-deployments
+      title: Open Deployments
+      description: >-
+        A ConfigMap or a Secret does nothing on its own. Go back to the workload to see the
+        other half of the wiring — which object it reads, and under which environment
+        variable names.
+      target: { type: consoleElement, id: navigationLink, value: Deployments }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/apps~v1~Deployment' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/apps~v1~Deployment' }
+    - id: open-deployment
+      title: Open the consuming workload
+      description: >-
+        The Environment tab on this page lists the ConfigMap and the Secret this Deployment
+        pulls its environment from, and lets you attach another — the console's form for
+        oc set env --from. Changing it here writes a new pod template, so the change also
+        starts a rollout.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app' }

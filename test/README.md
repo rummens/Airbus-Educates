@@ -80,5 +80,5 @@ test/ci/run-workshops.sh --changed --smoke   # + cluster smoke (needs oc)
 python3 test/ci/changed.py             # what changed → PYTHON=… WORKSHOPS="…"
 ```
 
-CRC notes (portal SIGILLs on arm64, self-signed cert, push-before-redeploy) are in
+CRC notes (why portal-less, self-signed cert, push-before-redeploy) are in
 [workshops/README.md](workshops/README.md).

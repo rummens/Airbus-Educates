@@ -32,6 +32,53 @@
   <p class="help-note">Your progress is tied to your login, so trophies and the
      “Continue where you left off” shortcut follow you across visits and devices.</p>
 
+  <!-- ─────────────────────────  Lab formats  ────────────────────────────── -->
+  <span class="eyebrow">Two kinds of lab</span>
+  <h2>Terminal labs and console labs</h2>
+  <p>Every lab teaches with one of two formats. The catalog tile tells you which before you
+     start, and the two are meant to be used in that order: you learn a concept on the command
+     line, then you apply it in the graphical console.</p>
+  <div class="help-grid">
+    <div class="help-card"><span class="tile-icon">{{ icon('terminal')|safe }}</span>
+      <h3>Terminal lab</h3>
+      <p>The classic format, and where the teaching happens. Instructions on the left, a
+         terminal, editor and console on the right. You read <em>what</em> a Deployment is and
+         <em>why</em> it exists, then create one yourself with <code>oc</code>. Most labs are
+         this kind.</p></div>
+    <div class="help-card"><span class="tile-icon">{{ icon('monitor')|safe }}</span>
+      <h3>Console lab</h3>
+      <p>A guided tour of the real OpenShift web console. There are no instruction pages: the
+         next step is highlighted directly on the page you are looking at, with a short
+         explanation beside it. These assume you already met the concepts in a terminal lab —
+         they show you where the same things live in the graphical interface.</p></div>
+  </div>
+  <p class="help-note">A console lab opens the OpenShift console rather than the lab window, so
+     it looks different from the screenshots further down this page. Your project and its
+     resources are created for you before it starts.</p>
+
+  <!-- ─────────────────────────  Environments  ──────────────────────────── -->
+  <span class="eyebrow">Where your lab runs</span>
+  <h2>Namespaces and virtual clusters</h2>
+  <p>Whichever format a lab uses, it gets a private, throwaway environment on the shared
+     cluster. Labs differ in how much of a cluster they need, which is shown as a badge on the
+     lab's page.</p>
+  <div class="help-grid">
+    <div class="help-card"><span class="tile-icon">{{ icon('box')|safe }}</span>
+      <h3>Namespace</h3>
+      <p>A dedicated <b>project</b> (Kubernetes calls it a namespace) on the shared cluster —
+         the same unit of isolation you get on the real platform. You can create anything a
+         normal user may create inside it, and nothing you do is visible to other learners.
+         This mirrors how you work on DCS day to day.</p></div>
+    <div class="help-card"><span class="tile-icon">{{ icon('layers')|safe }}</span>
+      <h3>Virtual cluster</h3>
+      <p>A whole Kubernetes control plane of your own, running inside the shared cluster. Labs
+         use this when the exercise needs cluster-wide rights — installing an operator, editing
+         cluster-scoped objects — that nobody can safely be given on a shared cluster. It takes
+         a little longer to start.</p></div>
+  </div>
+  <p class="help-note">Both are deleted when your session ends. Nothing you build in a lab
+     survives, and nothing you break there can affect anyone else.</p>
+
   <!-- ─────────────────────────────  Starting  ───────────────────────────── -->
   <span class="eyebrow">Getting started</span>
   <h2>From catalog to running lab</h2>
@@ -110,6 +157,27 @@
          alt="Editor tab showing the VS Code editor with the exercises folder">
     <figcaption>The <b>Editor</b> tab — VS Code on your <code>~/exercises</code> folder.</figcaption>
   </figure>
+
+  <!-- ──────────────────────────  Console labs  ─────────────────────────── -->
+  <span class="eyebrow">Inside a console lab</span>
+  <h2>Guided tours of the OpenShift console</h2>
+  <p>A console lab has none of the tabs above. Instead the OpenShift web console opens with your
+     project already selected, and two boxes appear on top of it.</p>
+  <ul class="help-tips">
+    <li>{{ icon('circle-check')|safe }} <b>The step box</b> sits next to whatever you should look
+        at, which is outlined on the page. It says what to do and why it matters.</li>
+    <li>{{ icon('arrow-right')|safe }} <b>Continue</b> moves to the next step. You do not need it
+        when you perform the step yourself — the lab notices and moves on — but it is always
+        there, so a step can never trap you.</li>
+    <li>{{ icon('chevron')|safe }} <b>Back</b> returns to the previous step if you want to read
+        it again.</li>
+    <li>{{ icon('list-checks')|safe }} <b>The progress box</b> in the corner shows the step count
+        and the state of your project. <b>Stop</b> ends the tour but leaves your environment
+        running.</li>
+  </ul>
+  <p class="help-note">Finish the last step and press <b>Finish</b>: that records your completion
+     and shuts the environment down. Everything you see is the real console acting on real
+     objects, so anything you learn here transfers directly to your own projects.</p>
 
   <!-- ─────────────────────────────  Actions  ────────────────────────────── -->
   <span class="eyebrow">You rarely type</span>

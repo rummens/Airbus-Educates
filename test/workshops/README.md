@@ -85,21 +85,17 @@ Two fixes:
 
 ## Why portal-less
 
-The `educates-training-portal` image SIGILLs (`Illegal instruction`, exit 132)
-on CRC's Apple-Silicon guest CPU — its Python stack uses instructions the
-vfkit/QEMU guest doesn't expose. Everything else runs fine natively on arm64:
+Not because the portal is broken — **it runs on CRC**. The old SIGILL (exit 132,
+OpenSSL's aarch64 capability probe inside cryptography's Rust extension, which
+Apple Virtualization does not emulate) is fixed by `OPENSSL_armcap=0`, enabled on
+CRC in `argocd/envs/platform-crc.yaml`: `openssl.armcap` for the custom portal pod,
+`crcWorkaround.enabled` for the operator-owned Educates `training-portal` pod
+(PostSync Job, `workshops-monorepo/templates/crc-armcap-job.yaml`).
 
-- `session-manager` / `secrets-manager` (Go) — fine.
-- `educates-base-environment` (the workshop **session/dashboard** pod) — fine.
-- loft-sh vcluster — fine.
-
-So only the portal (a catalog/session broker UI) is broken. `session-manager`
-reconciles `WorkshopSession` CRs directly, so you can create sessions yourself
-and skip the portal entirely. You lose the catalog page — nothing else.
-
-> The portal images ARE multi-arch (amd64 + arm64); the arm64 variant just
-> can't execute under CRC's restricted guest CPU. Same image runs fine under
-> Docker Desktop / kind (fuller CPU passthrough), and on any amd64 OpenShift.
+Portal-less is a **testing choice**: `session-manager` reconciles `WorkshopSession`
+CRs directly, so one lab comes up in seconds without a catalog, a login, or the
+capacity limits of a TrainingPortal, and tearing it down touches nothing else. Use
+the portal when the thing under test *is* the portal path (catalog, launch, oauth).
 
 ## Prerequisites
 
@@ -288,9 +284,10 @@ Durable fix (regenerates certs + restarts the network stack): `crc stop && crc s
 
 ## Gotchas
 
-- **Only the portal is broken on CRC arm64** (SIGILL). Everything a session needs
-  — dashboard (`base-environment`), vcluster, session-manager — runs natively.
-  Never reintroduce the `training-portal` pod on CRC.
+- **Everything runs natively on CRC arm64** — dashboard (`base-environment`),
+  vcluster, session-manager, and the portal itself (with `OPENSSL_armcap=0`, see
+  "Why portal-less"). The old "portal is broken on arm64" note was wrong; do not
+  reintroduce it.
 - vcluster needs `budget: large` + the `educates-privileged-scc` RoleBinding on
   the `-vc` namespace (in the template). Without it coredns CrashLoops.
 - New session but old URL still 404s? Check `phase` is `Running` and the route

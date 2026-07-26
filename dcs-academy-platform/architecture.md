@@ -138,9 +138,9 @@ Key points:
 The `argocd/envs/platform-crc.yaml` values file (shared by the platform and portal apps
 via `$values`) points ingress at `apps-crc.testing` and the CRC router cert, and enables
 two CRC-only workarounds: `openssl.armcap: "0"` and a `crcWorkaround` PostSync job, both
-because the cryptography Rust extension SIGILLs on Apple-Silicon CRC. The Educates portal
-itself is unusable on arm64 CRC — workshop **content** is tested portal-less against CRC
-(see `crc-local-testing/`), while the full portal path is validated on amd64.
+because the cryptography Rust extension would otherwise SIGILL on Apple-Silicon CRC. With
+both in place the portal runs on CRC. Workshop **content** is still tested portal-less
+(faster, one lab at a time) — see `test/workshops/`.
 
 ## See also
 
