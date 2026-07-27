@@ -13,13 +13,15 @@ name: Slides
 url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/isolation
 ```
 
-Confirm they exist. This command uses two shell features: `$(oc project -q)` runs
-`oc project -q` first and substitutes its output (your active namespace, with `-q` for the
-quiet, name-only form), and the pipe `|` sends the full namespace list into `grep`, which
-keeps only the lines that match your two peer namespaces:
+Confirm they exist. `oc get projects` lists the namespaces **you** may see — on {{< param product_name >}}
+that is your own, never the whole cluster, so it is the command to reach for instead of
+`oc get namespaces` (which needs cluster-wide rights nobody gets here). Two shell features
+appear as well: `$(oc project -q)` runs `oc project -q` first and substitutes its output
+(your active namespace, with `-q` for the quiet, name-only form), and the pipe `|` sends
+that list into `grep`, which keeps only the lines matching your two peer namespaces:
 
 ```terminal:execute
-command: oc get namespaces | grep "$(oc project -q)-app-"
+command: oc get projects | grep "$(oc project -q)-app-"
 ```
 
 ```examiner:execute-test

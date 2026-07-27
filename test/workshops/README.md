@@ -101,6 +101,33 @@ the portal when the thing under test *is* the portal path (catalog, launch, oaut
 
 - CRC running; platform (`dcs-academy-platform`) + `kapp-controller` synced.
 - The `Workshop` CR you want exists: `oc get workshops.training.educates.dev`.
+- Optional: Kyverno, if you want to test labs under the DCS namespace-visibility
+  RBAC (`sessionNamespaceRbac`, see below).
+
+## Optional: Kyverno (namespace-scoped session RBAC)
+
+`dcs-academy-portal/chart/templates/73-kyverno-session-namespace-rbac.yaml` takes
+away the cluster-wide `namespaces list` Educates grants every session SA, so labs
+behave like they will on DCS (`oc get namespaces` Forbidden, `oc get projects`
+self-filtered). It needs Kyverno, which CRC doesn't ship — hence the chart flag
+defaults to `false`. To test with it:
+
+```bash
+helm install kyverno kyverno/kyverno -n kyverno --create-namespace --version 3.8.2
+```
+
+Kyverno pins `runAsUser: 65534`, which no default SCC allows, so the pods stay
+`FailedCreate` until its ServiceAccounts get `nonroot-v2`:
+
+```bash
+for sa in admission background cleanup reports; do oc adm policy add-scc-to-user nonroot-v2 -z kyverno-$sa-controller -n kyverno; done
+```
+
+Then restart the four `kyverno-*-controller` deployments, render the policies with
+`--set sessionNamespaceRbac.enabled=true`, apply the aggregated ClusterRole first
+(Kyverno's policy validation rejects the generate rules until the background
+controller can create ClusterRoles), and run the one-time strip command in the
+template's header comment for environments that already exist.
 
 ## 1. Point the platform at the CRC domain (one-time, cluster-only override)
 

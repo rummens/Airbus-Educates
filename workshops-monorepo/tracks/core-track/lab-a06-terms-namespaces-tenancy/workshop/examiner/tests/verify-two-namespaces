@@ -1,8 +1,8 @@
 #!/bin/bash
 # Verify both pre-provisioned peer namespaces exist and are accessible.
-# We can't `oc get namespace <name>` (cluster-scoped get the session SA lacks), so we
-# list a namespaced resource in each — succeeds only if the namespace exists AND the
-# session's edit RoleBinding is in place.
+# We list a namespaced resource in each instead of `oc get namespace <name>` — that
+# succeeds only if the namespace exists AND the session's edit RoleBinding is in place,
+# and it does not depend on how namespace get is scoped for the session SA.
 base=$(oc project -q 2>/dev/null)
 for s in app-a app-b; do
   if ! oc get deployments -n "$base-$s" >/dev/null 2>&1; then

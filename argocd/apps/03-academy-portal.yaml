@@ -27,6 +27,9 @@ spec:
       kind: ClusterPolicy
       jqPathExpressions:
         - .spec.rules[].context[].apiCall.method
+        # Multi-rule policies (73-kyverno-session-namespace-rbac) get the same
+        # Kyverno-side default on every rule, not just rule 0.
+        - .spec.rules[].skipBackgroundRequests
   sources:
     - repoURL: https://github.com/rummens/Airbus-Educates
       targetRevision: main

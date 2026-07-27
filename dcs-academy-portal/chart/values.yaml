@@ -293,3 +293,16 @@ workshopEnvLabel:
   sourceLabel: "dcs.airbus.com/lifecycle"  # read from the Workshop CR
   targetLabel: "dcs.airbus.com/lifecycle"  # written onto the session namespace (same key)
   default: "dev"                           # workshops that expose a Route/Ingress set "prod"
+
+# Stop a workshop session from seeing every namespace in the cluster. Educates
+# binds each session's ServiceAccount to a ClusterRole with cluster-wide
+# namespaces get/list/watch (for the Kubernetes Dashboard's namespace switcher),
+# which on a shared multi-tenant DCS cluster leaks every tenant's namespace names.
+# Enabling this empties that rule and hands each session a resourceNames-scoped
+# ClusterRole covering only its own namespaces. Needs Kyverno. Trade-off:
+# `oc get namespaces` with no name is Forbidden afterwards (`oc get projects`
+# still works and is self-filtered) — see templates/73-kyverno-session-namespace-rbac.yaml.
+# Default off like workshopEnvLabel: CRC has no Kyverno, so the ClusterPolicy would
+# fail to sync there. TURN THIS ON for any shared/multi-tenant cluster (DCS).
+sessionNamespaceRbac:
+  enabled: false

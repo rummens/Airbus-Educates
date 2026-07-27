@@ -19,3 +19,10 @@ openssl:
   armcap: "0"
 crcWorkaround:
   enabled: true
+
+# Take away the cluster-wide `namespaces list` Educates grants every session SA, so
+# labs are tested under the same namespace visibility they get on DCS. PREREQUISITE:
+# Kyverno must be installed in the cluster (CRC does not ship it — see
+# test/workshops/README.md); without it this app's sync fails on the ClusterPolicies.
+sessionNamespaceRbac:
+  enabled: true

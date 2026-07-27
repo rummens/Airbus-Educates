@@ -1,0 +1,229 @@
+# Scope a workshop session's namespace visibility to its OWN namespaces.
+#
+# THE PROBLEM (upstream Educates design, not a bug)
+#   For every WorkshopEnvironment, the session manager creates a ClusterRole
+#   `educates-web-console-<workshop-namespace>` with
+#       apiGroups: [""] resources: [namespaces] verbs: [get,list,watch]
+#   and for every session a ClusterRoleBinding
+#   `educates-web-console-<session-namespace>` binding that ClusterRole to the
+#   session's ServiceAccount (session-manager/handlers/workshopenvironment.py and
+#   workshopsession.py, both unconditional — not gated on the console app being
+#   enabled). Upstream's own comment gives the reason: the Kubernetes Dashboard
+#   ("Console" tab) is built for a whole cluster; without namespace get/list it
+#   emits an endless stream of "cannot read namespaces" events, hangs sooner, and
+#   its namespace switcher stays empty.
+#   Consequence on DCS: the learner's terminal SA can `oc get namespaces` and
+#   `oc get projects` for the ENTIRE cluster — every tenant's namespace names.
+#   Unacceptable for a multi-national shared platform.
+#
+# WHY THIS SHAPE OF FIX
+#   * RBAC cannot scope a `list` of a cluster-scoped resource — list is all or
+#     nothing. So the cluster-wide rule must go, and cluster-wide `oc get ns`
+#     goes with it (see "what changes for labs" below).
+#   * `get` CAN be scoped: a ClusterRole with resourceNames: [<ns>] grants get on
+#     exactly those namespaces. A namespaced RoleBinding cannot do it — the API
+#     server evaluates any request on a namespace object as cluster-scoped, so
+#     the `namespaces` rule already present in educates-{view,edit,admin}-session-role
+#     (bound per session namespace with a RoleBinding) is inert. Verified on CRC.
+#   * Denying the create of either object is not an option: session-manager turns
+#     the failure into a kopf PermanentError and the environment/session goes
+#     Failed. Mutating at admission keeps both objects, just empties the rules.
+#
+# RESULT per session: get on its own session namespace + every extra namespace
+# Educates makes for it (secondary namespaces, session.objects Namespaces, the
+# `-vc` vcluster namespace), and nothing else. `oc get projects` — OpenShift's
+# self-filtered projects list — then shows exactly those.
+#
+# WHAT CHANGES FOR LABS
+#   * `oc get namespaces` / `oc get ns` with no name: Forbidden. Use
+#     `oc get projects`, or name the namespaces explicitly.
+#   * `oc get namespace <own-or-peer>`: still works (examiners rely on this).
+#   * Console (Kubernetes Dashboard) tab: its namespace dropdown no longer lists
+#     the cluster and it will log namespace-list denials. It still renders the
+#     session namespace it is pointed at. Labs that don't need it should set
+#     session.applications.console.enabled: false anyway.
+#   * vcluster labs are unaffected — inside the vcluster the learner is admin of
+#     a separate API server.
+#
+# ROLLOUT NOTES  (verified end-to-end on CRC 4.22 / k8s 1.35 with Kyverno v1.18.2)
+#   * generateExisting handles sessions that are already running; ClusterRoles
+#     created BEFORE this policy landed keep their rules — strip them once with:
+#       oc get clusterrole -o name | grep educates-web-console- \
+#         | xargs -n1 -I{} oc patch {} --type=json -p '[{"op":"replace","path":"/rules","value":[]}]'
+#   * Kyverno rejects edits to an existing generate rule ("changes of immutable
+#     fields of a rule spec in a generate rule is disallowed"). To change the
+#     generate rules, DELETE grant-session-namespace-get and re-apply. Deleting
+#     it also deletes the downstream RBAC; recreation can race with that delete
+#     and lose some downstream objects — retrigger with
+#       oc get ns -l training.educates.dev/component=session -o name | cut -d/ -f2 \
+#         | xargs -I{} oc annotate ns {} kyverno-retrigger="$(date +%s)" --overwrite
+#   * The mutate lives in its OWN ClusterPolicy so its
+#     webhookConfiguration.matchConditions (a CEL name test, evaluated by the API
+#     server) keeps every unrelated ClusterRole out of Kyverno's webhook — a
+#     name match in `match.resources` alone would not, because admission webhook
+#     rules can only select by group/version/resource. Splitting also stops that
+#     CEL condition applying to the Namespace-triggered generate rules, which
+#     would otherwise never fire. Kyverno puts this policy in its own
+#     fine-grained webhook entry
+#     (mutate.kyverno.svc-fail-finegrained-strip-educates-web-console-cluster-role),
+#     so the condition cannot affect any other policy either.
+#   * With Kyverno's default failurePolicy=Fail, a Kyverno outage blocks creates
+#     of ClusterRoles WHOSE NAME MATCHES — that is deliberate: failing loudly on
+#     educates-web-console-* beats silently re-opening the leak, and nothing else
+#     in the cluster is affected.
+{{- if and .Values.enabled .Values.sessionNamespaceRbac.enabled }}
+{{- $nsName := `{{ request.object.metadata.name }}` }}
+{{- /* Extra session namespaces are adopted by the PRIMARY session namespace, and
+       Educates names the session ServiceAccount exactly after that primary
+       namespace (service_account = session_namespace). The primary namespace is
+       owned by the WorkshopSession CR instead, so the fallback is its own name.
+       The fallback MUST be context.variable.default, not `expr || fallback`:
+       everything after a JMESPath pipe is evaluated against the piped value, so
+       `... | [0].name || request.object.metadata.name` resolves the right-hand
+       side against the filtered array and yields nothing (Kyverno then rejects
+       the ClusterRoleBinding: "subjects[0].name: Required value"). */}}
+{{- $saOwner := `request.object.metadata.ownerReferences[?kind=='Namespace'].name | [0]` }}
+{{- $saName := `{{ sessionServiceAccount }}` }}
+{{- /* workshop_namespace == environment_name in Educates; that is where the SA lives. */}}
+{{- $saNamespace := `{{ request.object.metadata.labels."training.educates.dev/environment.name" }}` }}
+# Kyverno's background controller creates the per-session RBAC below. Aggregated
+# so it works whatever the controller ServiceAccount is called. escalate/bind are
+# what the API server's privilege-escalation checks ask for when a controller
+# creates a ClusterRole/ClusterRoleBinding.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Chart.Name }}-kyverno-session-rbac
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+    rbac.kyverno.io/aggregate-to-background-controller: "true"
+    rbac.kyverno.io/aggregate-to-reports-controller: "true"
+  annotations:
+    # Earlier wave than the policies: Kyverno's own policy-validation webhook
+    # REJECTS a generate rule whose target the background controller cannot yet
+    # create ("requires permissions get,create,update,delete for resource
+    # ClusterRole"). ArgoCD retries cover the seconds RBAC aggregation needs.
+    argocd.argoproj.io/sync-wave: "9"
+rules:
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterroles", "clusterrolebindings"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["rbac.authorization.k8s.io"]
+    resources: ["clusterroles"]
+    verbs: ["escalate", "bind"]
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: strip-educates-web-console-cluster-role
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    policies.kyverno.io/title: Strip Educates Web Console ClusterRole
+    policies.kyverno.io/category: Educates Academy
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/description: >-
+      Empties the cluster-wide namespaces get/list/watch rule Educates puts in
+      its educates-web-console-* ClusterRoles, so a session ServiceAccount can
+      no longer enumerate the cluster's namespaces.
+spec:
+  # Only ClusterRoles whose name starts with the Educates prefix ever reach
+  # Kyverno; the API server drops the rest before the webhook call.
+  webhookConfiguration:
+    matchConditions:
+      - name: only-educates-web-console
+        expression: >-
+          object != null && object.metadata.name.startsWith('educates-web-console-')
+  rules:
+    # The ClusterRole and the ClusterRoleBinding Educates makes still exist —
+    # they just grant nothing.
+    - name: strip-web-console-cluster-role
+      match:
+        any:
+          - resources:
+              kinds:
+                - ClusterRole
+              names:
+                - educates-web-console-*
+      mutate:
+        patchesJson6902: |-
+          - op: replace
+            path: /rules
+            value: []
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: grant-session-namespace-get
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+    policies.kyverno.io/title: Grant Session Namespace Get
+    policies.kyverno.io/category: Educates Academy
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/description: >-
+      Gives each workshop session `get` on its own namespaces only, via a
+      resourceNames-scoped ClusterRole per session namespace.
+spec:
+  generateExisting: true
+  rules:
+    # 1. Per-namespace ClusterRole: get on THAT namespace, by name.
+    - name: session-namespace-get-role
+      match:
+        any:
+          - resources:
+              kinds:
+                - Namespace
+              selector:
+                matchLabels:
+                  training.educates.dev/component: session
+      generate:
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRole
+        name: "dcs-session-namespace-get-{{ $nsName }}"
+        synchronize: true
+        data:
+          metadata:
+            labels:
+              {{- include "portal.labels" . | nindent 14 }}
+          rules:
+            - apiGroups: [""]
+              resources: ["namespaces"]
+              resourceNames: ["{{ $nsName }}"]
+              verbs: ["get"]
+
+    # 2. Bind it to the session's ServiceAccount.
+    - name: session-namespace-get-binding
+      match:
+        any:
+          - resources:
+              kinds:
+                - Namespace
+              selector:
+                matchLabels:
+                  training.educates.dev/component: session
+      context:
+        - name: sessionServiceAccount
+          variable:
+            jmesPath: {{ $saOwner | quote }}
+            default: "{{ `{{ request.object.metadata.name }}` }}"
+      generate:
+        apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        name: "dcs-session-namespace-get-{{ $nsName }}"
+        synchronize: true
+        data:
+          metadata:
+            labels:
+              {{- include "portal.labels" . | nindent 14 }}
+          roleRef:
+            apiGroup: rbac.authorization.k8s.io
+            kind: ClusterRole
+            name: "dcs-session-namespace-get-{{ $nsName }}"
+          subjects:
+            - kind: ServiceAccount
+              name: "{{ $saName }}"
+              namespace: '{{ $saNamespace }}'
+{{- end }}
