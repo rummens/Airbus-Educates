@@ -1,0 +1,12 @@
+{{- $redirectUri := printf "%s://%s/dashboard/" .Site.Params.ingress_protocol .Site.Params.session_hostname -}}
+<form action="https://console-openshift-console.{{ .Site.Params.ingress_domain }}/academy/lessons/educates-session-pods/start" method="get" target="_top">
+  <input type="hidden" name="namespace" value="{{ .Site.Params.session_namespace }}">
+  <input type="hidden" name="redirectUri" value="{{ $redirectUri }}">
+  <input type="hidden" name="returnHistoryLength">
+  <button class="btn btn-primary" type="submit">Open the native OpenShift console tour</button>
+</form>
+<script>
+  document.currentScript.previousElementSibling.addEventListener("submit", function () {
+    this.elements.returnHistoryLength.value = String(window.top.history.length);
+  });
+</script>

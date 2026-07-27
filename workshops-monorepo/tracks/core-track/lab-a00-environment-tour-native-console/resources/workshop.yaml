@@ -1,0 +1,92 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-a00-environment-tour-native-console
+  # --- DCS portal catalog metadata (this file is emitted verbatim; the portal
+  #     reads these academy.dcs/* labels+annotations off metadata, NOT spec) ----
+  labels:
+    # REQUIRED: which track this lab appears under (must equal a Track's id) and
+    # its sort order within that track (string value; low = first). A00 sorts
+    # before A01 (order "10") without renumbering the rest.
+    academy.dcs/track: core
+    academy.dcs/order: "6"
+    # This lab creates no Route/Ingress → a plain dev namespace is fine.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    # Lets ArgoCD apply this CR before the Educates Workshop CRD is dry-run-checked.
+    # Keep this wave well BELOW the TrainingPortal's (100) so the workshop exists first.
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Your Workshop Environment — Native OpenShift Console
+  description: An alternative to A00 that opens the native OpenShift console in the same tab and starts a session-scoped Academy guidance tour.
+  duration: 5m
+  difficulty: beginner
+  labels:
+    - name: module
+      value: "A-Foundations"
+  publish:
+    image: "$(image_repository)/lab-a00-environment-tour-native-console-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a00-environment-tour-native-console/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a00-environment-tour-native-console/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a00-environment-tour-native-console/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/core-track/lab-a00-environment-tour-native-console"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-a00-environment-tour-native-console-files:$(workshop_version)"
+    {{- end }}
+  request:
+    objects:
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: academy-console-user
+        namespace: $(session_namespace)
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: educates-admin-session-role
+      subjects:
+      - apiGroup: rbac.authorization.k8s.io
+        kind: User
+        name: $(username)
+  session:
+    namespaces:
+      security:
+        token:
+          # Enabled because the Console (Kubernetes Dashboard) tab is enabled below
+          # and talks to the cluster API as the session service account.
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      # The Console tab is the generic Kubernetes Dashboard (a read-only visual view
+      # of the session namespace) — NOT the OpenShift web console, which is toured
+      # separately in A08 and cannot be embedded here.
+      console:
+        enabled: true
+      examiner:
+        enabled: true
+      # vcluster decision (house standard: always record it explicitly). This lab
+      # runs in a NATIVE OpenShift session namespace — no per-session vcluster. It is
+      # a UI orientation tour with no cluster-scoped work.
+      vcluster:
+        enabled: false
