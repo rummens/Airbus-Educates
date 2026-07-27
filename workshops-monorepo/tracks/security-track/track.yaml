@@ -5,3 +5,7 @@ title: "Security & Compliance — Secure on DCS"
 description: "Scan and gate images, meet pod security, handle secrets, trust your supply chain, and satisfy EU data-residency and governance on DCS."
 order: 30            # after the core foundations + developer tracks
 icon: shield         # FA-style icon name the portal vendors
+
+# Not published yet: the labs exist but are untested, so the catalog greys the track
+# out and refuses to start a session. Flip to `available` when they are ready.
+availability: disabled

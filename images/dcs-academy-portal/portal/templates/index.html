@@ -52,18 +52,28 @@
     <button class="chip" data-diff="intermediate">Intermediate</button>
     <button class="chip" data-diff="advanced">Advanced</button>
   </div>
+  {# Which interface the lab runs in — a terminal lab teaches the concept in the Educates
+     dashboard, a console lab applies it in the OpenShift web console. #}
+  <div class="filters" id="format">
+    <button class="chip active" data-format="">All formats</button>
+    <button class="chip" data-format="terminal">{{ icon('terminal')|safe }}Terminal</button>
+    <button class="chip" data-format="console">{{ icon('monitor')|safe }}Console</button>
+  </div>
 </div>
 
 <div id="catalog">
 {% for s in sections %}
   {% if s.courses %}
-  <details class="track" {% if loop.first %}open{% endif %} data-track="{{ s.name }}">
+  {% set closed = (s.availability or 'available') != 'available' %}
+  <details class="track{% if closed %} track-closed{% endif %}"
+           {% if loop.first and not closed %}open{% endif %} data-track="{{ s.name }}">
     <summary>
       <span class="track-head">
         <span class="track-icon">{{ icon(s.icon)|safe }}</span>
         <span>
           <span class="eyebrow">Track · {{ s.courses|length }} labs</span>
-          <span class="track-title">{{ s.title }}</span>
+          <span class="track-title">{{ s.title }}
+            {%- if closed %} <span class="track-badge">{{ track_badge.get(s.availability, 'Not available') }}</span>{% endif %}</span>
         </span>
       </span>
       <span class="track-toggle">{{ icon('chevron')|safe }}</span>
@@ -86,8 +96,10 @@
 (function(){
   const q = document.getElementById('q');
   const chips = document.querySelectorAll('#difficulty .chip');
+  const formatChips = document.querySelectorAll('#format .chip');
   const tracks = document.querySelectorAll('#catalog .track');
   let diff = '';
+  let format = '';
   function apply(){
     const term = (q.value || '').trim().toLowerCase();
     let anyVisible = false;
@@ -96,12 +108,13 @@
       tr.querySelectorAll('.tile').forEach(t => {
         const okText = !term || t.dataset.title.includes(term);
         const okDiff = !diff || t.dataset.difficulty === diff;
-        const vis = okText && okDiff;
+        const okFormat = !format || t.dataset.format === format;
+        const vis = okText && okDiff && okFormat;
         t.style.display = vis ? '' : 'none';
         if (vis) shown++;
       });
       tr.style.display = shown ? '' : 'none';
-      if (shown){ anyVisible = true; if (term || diff) tr.open = true; }
+      if (shown){ anyVisible = true; if (term || diff || format) tr.open = true; }
     });
     document.getElementById('noresults').classList.toggle('hidden', anyVisible);
   }
@@ -110,6 +123,26 @@
     chips.forEach(x => x.classList.remove('active'));
     c.classList.add('active'); diff = c.dataset.diff; apply();
   }));
+  formatChips.forEach(c => c.addEventListener('click', () => {
+    formatChips.forEach(x => x.classList.remove('active'));
+    c.classList.add('active'); format = c.dataset.format; apply();
+  }));
+
+  // Deep-link from the console plugin: ?format=console preselects the format chip, so
+  // "Want more labs?" inside the OpenShift console lands on the console labs only.
+  // Same shape for ?difficulty=<level>.
+  const params = new URLSearchParams(location.search);
+  const preselect = (chipSet, value, assign) => {
+    if (!value) return;
+    const hit = Array.from(chipSet).find(c => (c.dataset.format ?? c.dataset.diff) === value);
+    if (!hit) return;            // unknown value: leave the default "All" chip selected
+    chipSet.forEach(c => c.classList.remove('active'));
+    hit.classList.add('active');
+    assign(value);
+  };
+  preselect(formatChips, (params.get('format') || '').trim().toLowerCase(), v => { format = v; });
+  preselect(chips, (params.get('difficulty') || '').trim().toLowerCase(), v => { diff = v; });
+  if (format || diff) apply();
 
   // Deep-link from the docs: ?track=<slug> opens just that track (others closed)
   // and scrolls to it. Slug = the Track CR name (the data-track value).

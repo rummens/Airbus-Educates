@@ -21,5 +21,6 @@ spec:
   description: {{ $t.description | default "" | quote }}
   order: {{ $t.order | default 100 }}
   icon: {{ $t.icon | default "layers" | quote }}
+  availability: {{ $t.availability | default "available" | quote }}
 {{- end }}
 {{- end }}

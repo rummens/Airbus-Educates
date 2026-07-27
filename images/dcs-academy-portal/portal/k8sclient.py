@@ -209,6 +209,9 @@ def _list_tracks_live():
             "description": spec.get("description", ""),
             "order": int(spec.get("order", 100)),
             "icon": spec.get("icon", "layers"),
+            # available | coming-soon | disabled. Anything unknown is treated as
+            # unavailable by is_track_open(): a typo must not publish a track.
+            "availability": spec.get("availability", "available"),
         })
     out.sort(key=lambda x: (x["order"], x["title"]))
     return out
@@ -593,9 +596,15 @@ def user_can_admin(user_token):
 # --- demo catalog (PORTAL_DEMO=1, no cluster) -------------------------------
 _DEMO_TRACKS = [
     {"name": "developer-basics", "title": "Developer — Basics", "order": 10,
-     "icon": "code", "description": "Get productive on DCS: namespaces, workloads, registry."},
+     "icon": "code", "description": "Get productive on DCS: namespaces, workloads, registry.",
+     "availability": "available"},
     {"name": "platform", "title": "Platform & Operations", "order": 20,
-     "icon": "cog", "description": "Run and observe workloads on the shared platform."},
+     "icon": "cog", "description": "Run and observe workloads on the shared platform.",
+     "availability": "available"},
+    # A closed track, so the demo catalog shows the greyed-out state too.
+    {"name": "coming-soon", "title": "Security & Compliance", "order": 30,
+     "icon": "shield", "description": "Scanning, SCCs and supply chain — in preparation.",
+     "availability": "coming-soon"},
 ]
 _DEMO_COURSES = [
     {"name": "lab-a01-what-is-dcs", "title": "What is DCS?", "track": "developer-basics",
@@ -616,4 +625,15 @@ _DEMO_COURSES = [
      "details_md": "", "difficulty": "intermediate", "duration": "40 min", "author": "DCS Team",
      "source_url": "https://github.com/rummens/Airbus-Educates/tree/main/dcs-academy/workshops/lab-a04-harbor-registry",
      "vcluster": True, "module": "", "readme_url": "", "icon": "database"},
+    # One console lab, so the demo catalog exercises the lab-format filter and the
+    # console-lab launch path the same way the real catalog does.
+    {"name": "lab-u01-container-access", "title": "Inspect a running container (console)",
+     "track": "platform", "order": 20,
+     "summary": "Do the pod investigation you know from the terminal in the web console.",
+     "description": "A guided tour of pod inspection in the OpenShift web console.",
+     "details_md": "", "difficulty": "beginner", "duration": "10 min", "author": "DCS Team",
+     "source_url": "https://github.com/rummens/Airbus-Educates/tree/main/workshops-monorepo/tracks/core-track/lab-u01-container-access",
+     "vcluster": False, "module": "", "readme_url": "", "icon": "monitor",
+     "lab_format": "console", "console_lab": "lab-u01-container-access",
+     "console_lab_params": "podName=lab-app"},
 ]

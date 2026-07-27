@@ -84,7 +84,8 @@ a{color:inherit;text-decoration:none}
 .search input{border:0;background:transparent;font:inherit;color:var(--text);width:100%;outline:none}
 .filters{display:flex;gap:.4rem;flex-wrap:wrap}
 .chip{font:inherit;font-size:.85rem;font-weight:600;cursor:pointer;padding:.5rem .9rem;border-radius:999px;
-  border:1px solid var(--border);background:var(--card);color:var(--muted)}
+  border:1px solid var(--border);background:var(--card);color:var(--muted);
+  display:inline-flex;align-items:center;gap:.35rem}
 .chip:hover{border-color:var(--tint-border)}
 .chip.active{background:var(--secondary);color:#fff;border-color:var(--secondary)}
 
@@ -320,3 +321,13 @@ code{background:var(--card-2);border-radius:5px;padding:.06em .35em;font-size:.9
 .nav-user{display:inline-flex;align-items:center;gap:.4rem;font-size:.86rem;font-weight:600;color:var(--muted);
   padding:.35rem .7rem;border:1px solid var(--border);border-radius:999px}
 .nav-user svg{width:16px;height:16px}
+
+/* closed track (availability: coming-soon | disabled) — greyed in the catalog, and its
+   labs refuse to start. Pointer events stay on so the learner can still read a lab. */
+.track-closed{opacity:.55;filter:grayscale(.85)}
+.track-closed .tile:hover{transform:none}
+.track-badge{display:inline-block;margin-left:.5rem;padding:.15rem .55rem;border-radius:999px;
+  font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  background:var(--border);color:var(--muted);vertical-align:middle}
+.btn.is-disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
+.detail-unavailable{margin:.6rem 0 0;font-size:.9rem;color:var(--muted)}

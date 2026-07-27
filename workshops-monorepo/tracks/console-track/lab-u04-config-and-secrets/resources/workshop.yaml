@@ -1,10 +1,10 @@
 apiVersion: training.educates.dev/v1beta1
 kind: Workshop
 metadata:
-  name: lab-u03-deployments-rollouts
+  name: lab-u04-config-and-secrets
   labels:
-    academy.dcs/track: core
-    academy.dcs/order: "100"
+    academy.dcs/track: console
+    academy.dcs/order: "40"
     # Console lab: the portal allocates this session for the namespace + objects
     # below, then redirects the learner into the OpenShift console instead of the
     # workshop dashboard. The academy console plugin guides them from there.
@@ -13,13 +13,13 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-    academy.dcs/display-name: "Deployments & rollouts (console)"
+    academy.dcs/display-name: "Config & secrets (console)"
     academy.dcs/duration: "10 min"
     academy.dcs/difficulty: beginner
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
-      Read replicas, rollout history and events for a running Deployment in the
-      OpenShift web console, guided step by step.
+      Find the ConfigMap and Secret an application runs on in the OpenShift web
+      console, and the workload that consumes them.
     # A console lab has no workshop content, so there is no README for the portal to
     # fetch: this annotation is the course page's prospectus. Markdown, rendered.
     academy.dcs/details: |
@@ -29,33 +29,33 @@ metadata:
       OpenShift web console and walks you through it: the step you are on is highlighted
       on the real page, and the guidance box follows you as you navigate.
 
-      Your own project is created before the lab starts, with a Deployment already
-      running two replicas, so every screen shows live data.
+      Your own project is created before the lab starts, holding a ConfigMap, a Secret and
+      a Deployment that reads both — the same arrangement you built from the terminal.
 
       ### What you should already know
 
       This lab assumes the concepts, not the clicks. You should have finished
-      **Deploy Your First App**, where you created a Deployment and watched a rollout
-      with `oc rollout status`. No new Kubernetes concepts are introduced here.
+      **Configure & Troubleshoot Your App**, where you moved configuration into a
+      ConfigMap and a Secret and rolled the change out. No new Kubernetes concepts are
+      introduced here.
 
       ### What you will do
 
       You will not type any commands — this lab is entirely in the console. Each screen names
       the command it replaces, so you can map one onto the other afterwards.
 
-      - Read desired versus available replicas where `oc get deployment` would report them
-      - Find the replica control and the strategy, selector and status behind `oc describe`
-      - List the pods this Deployment owns, already filtered by its own selector
-      - Look at the ReplicaSet per revision — what `oc rollout history` and `undo` work on
-      - Read the events, and the live YAML, and see why editing it here is not the same as
-        changing the manifest in git
-      - Open the Actions menu and the edit form behind it, the console's `oc set`
+      - Read the application config, values and YAML, where `oc get cm -o yaml` would print it
+      - Reveal a Secret's values in one click, instead of decoding each key with `base64 -d`
+      - See what that implies: base64 is encoding, not encryption
+      - Find both objects named on the Deployment's Environment tab, the screen behind
+        `oc set env --from`
+      - Open the form the console edits that wiring in, and see why the change starts a rollout
 
       ### When to reach for the console
 
-      The console wins when you want the rollout state and the objects underneath it on one
-      screen, updating on their own. The CLI still wins for anything you need to repeat,
-      script, or review — which is why the terminal labs come first.
+      The console wins when you want to see configuration and the workload that reads it
+      side by side, without printing YAML. The CLI still wins for anything you need to
+      repeat, script, or review — which is why the terminal labs come first.
 
       ### Cleaning up
 
@@ -65,7 +65,7 @@ metadata:
     # The ConsoleLab CR (academy.dcs/v1alpha1, shipped by the console plugin repo)
     # this session drives. It templates only <<namespace>>, which the portal always
     # injects from the allocated session namespace, so there are no extra params.
-    academy.dcs/console-lab: lab-u03-deployments-rollouts
+    academy.dcs/console-lab: lab-u04-config-and-secrets
     # A console-lab learner never opens the workshop dashboard, so Educates would
     # see the session as orphaned and reclaim it out from under them. A zero
     # duration disables that timer; `expires` remains the real lifetime bound.
@@ -73,12 +73,12 @@ metadata:
     academy.dcs/orphaned: "0s"
     academy.dcs/expires: 60m
 spec:
-  title: "Deployments & rollouts (console)"
+  title: "Config & secrets (console)"
   description: >-
-    You created a Deployment and watched it roll out from the terminal in Deploy Your
-    First App. This lab walks the same object through the OpenShift web console —
-    replicas, owned pods, revision history, events and live YAML — so you can recognise
-    each command's equivalent on screen.
+    You moved an application's configuration into a ConfigMap and a Secret from the
+    terminal in Configure & Troubleshoot Your App. This lab finds the same objects in the
+    OpenShift web console, shows what Reveal values really means, and ends on the
+    Deployment tab that wires configuration into a workload.
   duration: 10m
   difficulty: beginner
   labels:
@@ -106,16 +106,30 @@ spec:
       slides:
         enabled: false
     objects:
-      # A Deployment (not a bare Pod) is the subject of this tour, and its own name is
-      # stable, so the lab can path-target it. Two replicas so the Pods tab and the
-      # replica ring have something to show.
+      - apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: app-config
+          namespace: $(session_namespace)
+        data:
+          GREETING: "Hello from a ConfigMap"
+          MODE: "demo"
+      # A demo value only. Educates renders this into the session namespace as written,
+      # so nothing here may be a real credential.
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: app-secret
+          namespace: $(session_namespace)
+        stringData:
+          API_TOKEN: "not-a-real-token"
       - apiVersion: apps/v1
         kind: Deployment
         metadata:
           name: lab-app
           namespace: $(session_namespace)
         spec:
-          replicas: 2
+          replicas: 1
           selector:
             matchLabels:
               app: lab-app
@@ -131,6 +145,13 @@ spec:
               containers:
                 - name: app
                   image: "{{ .Values.workshopImages.sample }}"
+                  # envFrom, not individual env entries: the Environment tab is the last
+                  # step of the tour and it must show both objects attached as a whole.
+                  envFrom:
+                    - configMapRef:
+                        name: app-config
+                    - secretRef:
+                        name: app-secret
                   ports:
                     - containerPort: 8080
                   resources:
@@ -139,14 +160,3 @@ spec:
                       memory: 64Mi
                     limits:
                       memory: 128Mi
-      - apiVersion: v1
-        kind: Service
-        metadata:
-          name: lab-app
-          namespace: $(session_namespace)
-        spec:
-          selector:
-            app: lab-app
-          ports:
-            - port: 8080
-              targetPort: 8080

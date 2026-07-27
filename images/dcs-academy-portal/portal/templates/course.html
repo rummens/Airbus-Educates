@@ -34,9 +34,19 @@
     </div>
     {% if c.author %}<p class="detail-author">{{ icon('user')|safe }} {{ c.author }}</p>{% endif %}
     <div class="detail-actions">
+      {% if track_open %}
       <a class="btn btn-primary btn-lg" href="{{ url_for('launch', name=c.name) }}"
          target="_blank" rel="noopener">
         {{ icon('rocket')|safe }} Start session</a>
+      {% else %}
+      {# The track is still being worked on. The launch route refuses these too, so this
+         is the explanation rather than the enforcement. #}
+      <span class="btn btn-primary btn-lg is-disabled" aria-disabled="true"
+            title="This track is not published yet.">
+        {{ icon('rocket')|safe }} Start session</span>
+      <p class="detail-unavailable">{{ track_badge or 'Not available yet' }} — this lab is
+         part of a track we are still working on. It will start once the track is published.</p>
+      {% endif %}
       {% if has_slides %}
       <a class="btn btn-ghost btn-lg" href="{{ url_for('slides.deck', name=c.name) }}"
          target="_blank" rel="noopener"

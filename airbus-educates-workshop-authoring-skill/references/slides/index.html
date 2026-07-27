@@ -56,6 +56,9 @@
       .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2">')
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      // Italics must run after bold: bold consumes its own pair of asterisks first, so
+      // what is left for this rule is a genuine single-asterisk span.
+      .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
       .replace(/`([^`]+)`/g, '<code>$1</code>');
   }
   function renderSlide(md){

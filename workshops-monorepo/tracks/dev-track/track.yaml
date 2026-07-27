@@ -5,3 +5,7 @@ title: "Developer — Build on DCS"
 description: "Deploy, configure, scale, debug, persist and develop your apps on DCS."
 order: 20            # after the core foundations track
 icon: rocket         # FA-style icon name the portal vendors
+
+# Not published yet: the labs exist but are untested, so the catalog greys the track
+# out and refuses to start a session. Flip to `available` when they are ready.
+availability: disabled

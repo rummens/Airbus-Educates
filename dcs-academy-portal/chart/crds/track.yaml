@@ -30,6 +30,14 @@ spec:
                 description: { type: string }
                 order:       { type: integer, default: 100 }
                 icon:        { type: string, default: layers }
+                # Whether learners may start the track's labs. `coming-soon` and
+                # `disabled` both grey the track out in the catalog and refuse a launch;
+                # they differ only in what the badge tells the learner. Use this to show
+                # planned work without publishing untested labs.
+                availability:
+                  type: string
+                  enum: [available, coming-soon, disabled]
+                  default: available
       additionalPrinterColumns:
         - name: Title
           type: string
@@ -37,3 +45,6 @@ spec:
         - name: Order
           type: integer
           jsonPath: .spec.order
+        - name: Availability
+          type: string
+          jsonPath: .spec.availability

@@ -25,10 +25,18 @@
          later labs build on earlier ones.</p></div>
     <div class="help-card"><span class="tile-icon">{{ icon('trophy')|safe }}</span>
       <h3>Trophies</h3>
-      <p>Finish a lab and you earn its <b>trophy</b>. A lab counts as complete when you submit
-         the short feedback form at the end. Your <a href="{{ url_for('trophies') }}">Trophies</a>
+      <p>Finish a lab and you earn its <b>trophy</b>. Finishing has to be <em>recorded</em> —
+         see the note below for what does that. Your <a href="{{ url_for('trophies') }}">Trophies</a>
          page shows what you've earned and what's left in each track.</p></div>
   </div>
+  <div class="banner" role="note">{{ icon('info')|safe }} <div class="banner-body">
+    <p><b>A terminal lab is only marked complete when you submit its feedback form.</b>
+       Working through every page does not record it, and neither does closing the session
+       window — the trophy appears when the form is submitted. The <b>Feedback</b> tab is
+       always there in the lab window; it takes about fifteen seconds.</p>
+    <p>A <b>console lab</b> is the exception: pressing <b>Finish</b> in the guidance box records
+       your completion, and the feedback form that follows is optional (but still welcome).</p>
+  </div></div>
   <p class="help-note">Your progress is tied to your login, so trophies and the
      “Continue where you left off” shortcut follow you across visits and devices.</p>
 
@@ -220,7 +228,8 @@
         Console when a step points there.</li>
     <li><b>Take your time.</b> Read the <em>why</em>, not just the <em>what</em>.</li>
     <li><b>Stuck?</b> Re-read the last expected output, confirm the right tab is visible, and re-run the action.</li>
-    <li><b>Tell us how it went.</b> The feedback form at the end takes 15 seconds, earns your trophy,
+    <li><b>Tell us how it went.</b> The feedback form at the end takes 15 seconds, is what earns
+        your trophy on a terminal lab,
         and shapes the next labs.</li>
   </ul>
 

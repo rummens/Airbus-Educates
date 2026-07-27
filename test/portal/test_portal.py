@@ -300,6 +300,49 @@ def test_landing_and_course(client):
     assert client.get("/totally/unknown").status_code == 404     # not a route nor proxied
 
 
+def test_closed_track_is_greyed_out_and_refuses_to_launch(client, monkeypatch):
+    tracks = [dict(t) for t in k8sclient.list_tracks()]
+    tracks[0]["availability"] = "disabled"
+    closed_id = tracks[0]["name"]
+    monkeypatch.setattr(k8sclient, "list_tracks", lambda: tracks)
+    lab = next(c for c in k8sclient.list_courses() if c["track"] == closed_id)
+
+    body = client.get("/").data.decode()
+    assert "track-closed" in body and "Not available yet" in body
+
+    page = client.get(f"/course/{lab['name']}").data.decode()
+    assert "is-disabled" in page                       # the button is not a link
+    assert f"/launch/{lab['name']}" not in page
+
+    # …and the URL is refused even when typed by hand, or the track is only closed to
+    # people who do not read the address bar.
+    refused = client.get(f"/launch/{lab['name']}")
+    assert refused.status_code == 403
+    assert b"not published yet" in refused.data
+
+    # A lab in an open track is unaffected.
+    open_lab = next(c for c in k8sclient.list_courses() if c["track"] != closed_id)
+    assert f"/launch/{open_lab['name']}" in client.get(f"/course/{open_lab['name']}").data.decode()
+
+
+def test_catalog_format_filter_preselected_by_query_param(client):
+    # The console plugin links here with ?format=console so a learner already in the
+    # OpenShift console sees console labs, not the whole catalogue.
+    body = client.get("/").data.decode()
+    assert "params.get('format')" in body and "preselect(formatChips" in body
+
+
+def test_catalog_filters_by_lab_format(client):
+    body = client.get("/").data.decode()
+    toolbar, catalog = body.split('id="catalog"', 1)
+    # The chips the learner clicks…
+    assert 'data-format="terminal"' in toolbar and 'data-format="console"' in toolbar
+    # …filter on an attribute every tile carries, defaulting to terminal for a course
+    # with no lab-format label, so no tile can be invisible to both chips.
+    assert catalog.count('class="tile"') == catalog.count("data-format=")
+    assert 'data-format="console"' in catalog and 'data-format="terminal"' in catalog
+
+
 def test_banner_renders_on_landing(client):
     feedback.set_setting("banner", "Scheduled maintenance tonight")
     assert b"Scheduled maintenance tonight" in client.get("/").data
@@ -460,7 +503,10 @@ def test_list_tracks_live(monkeypatch):
     item = {"metadata": {"name": "core"}, "spec": {"title": "Core", "order": 5, "icon": "layers"}}
     monkeypatch.setattr(k8sclient, "_co", lambda: _FakeCO(listing={"items": [item]}))
     out = k8sclient._list_tracks_live()
-    assert out == [{"name": "core", "title": "Core", "description": "", "order": 5, "icon": "layers"}]
+    # A track with no availability in its CR is open — the field was added later, and an
+    # older Track CR must not silently close its labs.
+    assert out == [{"name": "core", "title": "Core", "description": "", "order": 5,
+                    "icon": "layers", "availability": "available"}]
 
 
 def test_portal_status_and_service_base(monkeypatch):
@@ -711,6 +757,11 @@ def test_form_and_feedback_flow(client, monkeypatch):
 
 def test_help_and_readyz(client, monkeypatch):
     assert client.get("/help").status_code == 200
+    # The trophy only lands when the lab is recorded complete, and for a terminal lab that
+    # is the feedback form — a learner who skips it sees no trophy and no reason why.
+    help_page = client.get("/help").data.decode()
+    assert "only marked complete when you submit its feedback form" in help_page
+    assert "pressing <b>Finish</b> in the guidance box records" in help_page
     monkeypatch.setattr(k8sclient, "ping", lambda: None)
     assert client.get("/readyz").status_code == 200
     monkeypatch.setattr(k8sclient, "ping", lambda: (_ for _ in ()).throw(RuntimeError("no api")))

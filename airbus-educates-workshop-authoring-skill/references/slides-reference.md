@@ -30,7 +30,14 @@ slides:
 - Give a slide a stable **id** with an id-comment on its own line: `<!-- id: images -->`.
   The id is how a content page deep-links to the slide (below). Use short, stable ids.
 - Supported markdown: `#`/`##` headings, paragraphs, `-` bullet lists, `**bold**`,
-  `` `code` ``, ```` ``` ```` fenced code blocks, `![alt](image.svg)`, `[text](url)`.
+  `*italic*`, `` `code` ``, ```` ``` ```` fenced code blocks, `![alt](image.svg)`,
+  `[text](url)`. **That list is exhaustive** — the renderer is ~40 lines of regex, and
+  anything outside it is printed as the literal characters you typed. Tables, blockquotes,
+  numbered lists and nested bullets all come out as plain text.
+- **No `{{< param … >}}` in a slide.** Educates templates the *content pages*; `slides.md`
+  is fetched as a static file by the renderer, so a param survives to the screen as its own
+  source text. Write the value out (`Digital Container Service (DCS)`, not
+  `{{< param product_name >}}`) and leave the params to the pages.
 - First slide: a title slide with the lab name and a one-line "In this lab: …" overview.
 - Last slide: a short "what's next" close.
 

@@ -212,7 +212,7 @@ The referenced `ConsoleLab` CR (the step-by-step guidance) lives in the **consol
 plugin repo** (`labs/`), not here. Both must be synced for the lab to run; the
 plugin refuses to start a lab whose parameters are missing rather than half-running.
 
-Example: `tracks/core-track/lab-u01-container-access/resources/workshop.yaml`.
+Example: `tracks/console-track/lab-u01-container-access/resources/workshop.yaml`.
 
 ## vcluster note (the one duplication cost)
 

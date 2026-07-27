@@ -48,7 +48,8 @@
 {% macro tile(c, ratings, min_reviews, difficulty_icon, sicon, status, idx, total) -%}
 <a class="tile" href="{{ url_for('course', name=c.name) }}"
    data-title="{{ c.title|lower }}" data-difficulty="{{ c.difficulty }}"
-   data-track="{{ c.track }}" data-mins="{{ c.duration }}">
+   data-track="{{ c.track }}" data-mins="{{ c.duration }}"
+   data-format="{{ c.lab_format or 'terminal' }}">
   <div class="tile-top">
     <span class="tile-icon">{{ icon(c.icon or sicon or 'book')|safe }}</span>
     {{ status_badge(status) }}

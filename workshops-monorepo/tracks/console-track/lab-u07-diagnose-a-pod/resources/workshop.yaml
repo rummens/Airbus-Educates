@@ -3,8 +3,8 @@ kind: Workshop
 metadata:
   name: lab-u07-diagnose-a-pod
   labels:
-    academy.dcs/track: core
-    academy.dcs/order: "140"
+    academy.dcs/track: console
+    academy.dcs/order: "70"
     # Console lab: the portal allocates this session for the namespace + objects
     # below, then redirects the learner into the OpenShift console instead of the
     # workshop dashboard. The academy console plugin guides them from there.

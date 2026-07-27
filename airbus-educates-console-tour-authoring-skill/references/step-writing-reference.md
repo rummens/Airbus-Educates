@@ -191,7 +191,7 @@ a direct CLI equivalent. Do not reference a lab that comes *later* in the track.
 ## A worked step set
 
 `lab-u01-container-access` is the reference implementation:
-`workshops-monorepo/tracks/core-track/lab-u01-container-access/resources/consolelab.yaml`.
+`workshops-monorepo/tracks/console-track/lab-u01-container-access/resources/consolelab.yaml`.
 Note in particular the terminal step, which uses its two sentences of "why" to teach a real
 operational rule (a container is recreated from its image, so repairs made in a shell disappear)
 rather than describing the button.

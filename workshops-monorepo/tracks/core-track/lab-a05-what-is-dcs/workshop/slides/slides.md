@@ -14,7 +14,7 @@ Digital Container Service · DCS Academy
 <!-- id: platform -->
 ## An air-gapped, on-prem container platform
 
-**{{< param product_name >}}** is Airbus Defence and Space's own container platform, built on Red Hat OpenShift and run **on-premises and air-gapped** — nothing comes from the public internet.
+**Digital Container Service (DCS)** is Airbus Defence and Space's own container platform, built on Red Hat OpenShift and run **on-premises and air-gapped** — nothing comes from the public internet.
 
 - **Namespace as a Service** — you request namespaces and ship apps; the platform team runs the clusters, security, and compliance.
 - **Air-gapped & sovereign** — your workloads and data stay inside the platform.

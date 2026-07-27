@@ -36,4 +36,4 @@ lab; a step that says "click here" and nothing more is not worth a step.
 | [references/testing-reference.md](references/testing-reference.md) | Verifying a lab on CRC before shipping |
 
 Reference implementation:
-`workshops-monorepo/tracks/core-track/lab-u01-container-access/`.
+`workshops-monorepo/tracks/console-track/lab-u01-container-access/`.

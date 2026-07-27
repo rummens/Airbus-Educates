@@ -160,6 +160,18 @@ def create_app():
                 f'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">{svg}</svg>')
 
     # --- catalog ------------------------------------------------------------
+    # A track can be closed while its labs are still being written: the catalog greys
+    # it out and a launch is refused. Anything other than an explicit "available" is
+    # closed, so a typo in the CR keeps labs unpublished rather than publishing them.
+    TRACK_BADGE = {"coming-soon": "In preparation", "disabled": "Not available yet"}
+
+    def _track_availability(track_id):
+        track = next((t for t in k8sclient.list_tracks() if t["name"] == track_id), None)
+        return (track or {}).get("availability", "available")
+
+    def _track_open(track_id):
+        return _track_availability(track_id) == "available"
+
     @app.route("/")
     def index():
         tracks = k8sclient.list_tracks()
@@ -178,6 +190,7 @@ def create_app():
         cont = feedback.last_in_progress(_user()) if not cfg.DEMO else None
         cont_course = next((c for c in courses if c["name"] == cont), None)
         return render_template("index.html", sections=sections, ratings=ratings,
+                               track_badge=TRACK_BADGE,
                                min_reviews=cfg.FEEDBACK_MIN_REVIEWS, is_admin=_is_admin(),
                                difficulty_icon=DIFFICULTY_ICON, progress=progress,
                                stats=_catalog_stats(courses, tracks), hidden=hidden,
@@ -208,7 +221,10 @@ def create_app():
         # Drop the README's own leading H1 — the view already prints the course title
         # as the page <h1> from the CR, so keeping the README title double-headlines it.
         readme = re.sub(r"^#\s+.*$\n?", "", readme, count=1, flags=re.M)
+        availability = _track_availability(c.get("track"))
         return render_template("course.html", c=c, ratings=ratings,
+                               track_open=(availability == "available"),
+                               track_badge=TRACK_BADGE.get(availability, ""),
                                min_reviews=cfg.FEEDBACK_MIN_REVIEWS, is_admin=_is_admin(),
                                difficulty_icon=DIFFICULTY_ICON, readme_html=_render_md(readme),
                                # academy.dcs/details is markdown (hence details_md) and was
@@ -225,6 +241,15 @@ def create_app():
         if not c:
             abort(404)
         steps = _steps_for(c.get("vcluster"))
+        # The button is disabled in the UI, but the URL is guessable — refuse here too,
+        # or a closed track is only closed to people who do not type URLs.
+        if not _track_open(c.get("track")):
+            log.info("LAUNCH %s refused: track %r is %s", name, c.get("track"),
+                     _track_availability(c.get("track")))
+            return render_template(
+                "launch.html", course=c,
+                error="This track is not published yet, so its labs cannot be started.",
+                session_name="", target="", steps=steps, t0=0), 403
         try:
             sess = educates.request_session(name, _user())
             metrics.REQUESTS.labels(name, "ok").inc()
