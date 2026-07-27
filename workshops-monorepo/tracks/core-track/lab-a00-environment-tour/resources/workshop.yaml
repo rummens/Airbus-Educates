@@ -71,7 +71,7 @@ spec:
         enabled: true
       # The Console tab is the generic Kubernetes Dashboard (a read-only visual view
       # of the session namespace) — NOT the OpenShift web console, which is toured
-      # separately in A08 and cannot be embedded here.
+      # separately in the Console track and cannot be embedded here.
       console:
         enabled: true
       examiner:

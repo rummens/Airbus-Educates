@@ -70,7 +70,7 @@ spec:
       examiner:
         enabled: true
       # A single-app deploy needs nothing cluster-scoped; the session namespace
-      # IS the learner's workspace. Console tour is A08.
+      # IS the learner's workspace. The console tour is its own track (Console).
       vcluster:
         enabled: false
     # Feedback tab is pre-declared so it is ALWAYS visible, not created only on the

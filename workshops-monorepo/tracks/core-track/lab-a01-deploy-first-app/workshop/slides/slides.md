@@ -87,5 +87,5 @@ You worked **imperatively** (`oc create`, `oc set env`). Underneath, DCS turned 
 ![Deployment creates a ReplicaSet, which creates the Pod](deployment-chain.svg)
 
 ```
-oc get all -l app=hello-dcs
+oc get deploy,rs,pod -l app=hello-dcs
 ```

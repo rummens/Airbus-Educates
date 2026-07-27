@@ -1,9 +1,0 @@
-#!/bin/bash
-# Verify the Networking CLI view runs (Services) — the oc twin of the console view.
-# (Routes need the PROD-namespace RBAC you used in A04; this tour lists Services.)
-if oc get svc >/dev/null 2>&1; then
-  echo "OK: 'oc get svc' ran — the CLI twin of the console Networking view."
-  exit 0
-fi
-echo "'oc get svc' failed to run." >&2
-exit 1

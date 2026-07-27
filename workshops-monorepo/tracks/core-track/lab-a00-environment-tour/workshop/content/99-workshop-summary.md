@@ -39,8 +39,8 @@ the default); the lower pane is `execute-2` (session 2). A "run a command" actio
 
 {{< note >}}
 **Answer:** It's the **Kubernetes Dashboard**, a visual view of the resources in your
-namespace. It is **not** the OpenShift web console — that's a separate, richer tool you
-tour in **A08**.
+namespace. It is **not** the OpenShift web console — that's a separate, richer tool
+toured in the **Console track**.
 {{< /note >}}
 
 ## Next Steps

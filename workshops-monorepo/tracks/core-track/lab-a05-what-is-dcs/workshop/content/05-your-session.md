@@ -83,7 +83,6 @@ timeout: 10
 ```
 
 {{< note >}}
-Prefer a visual view? {{< param product_short >}} has a web console too — you'll get a
-full guided tour of it in **A08: The OpenShift Console**. For now, the terminal is all
-you need.
+Prefer a visual view? {{< param product_short >}} has a web console too — the whole
+**Console track** is a guided tour of it. For now, the terminal is all you need.
 {{< /note >}}

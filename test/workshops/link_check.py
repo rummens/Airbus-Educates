@@ -1,18 +1,34 @@
 #!/usr/bin/env python3
-"""Verify every link in a workshop's description resolves — no cluster needed.
+"""Verify every link a learner can click resolves — no cluster needed.
 
-House requirement: all links in the workshop content must respond 200. This checks each
-link found in `workshop/content/**.md` (+ the workshop README):
+House requirement: all links in the workshop must respond 200. Everything a learner
+reads is scanned, not just the instructions:
+
+  * `workshop/content/**.md`   — the instructions
+  * `workshop/slides/**.md`    — the slide decks
+  * `exercises/**.md`          — files the learner opens in the editor
+  * `README.md`                — the lab's own readme
+  * `resources/consolelab.yaml` — console labs (guided console tours) keep their
+    learner-facing text in the CR, so they have no content/ dir at all
+
+Link kinds:
 
   * external public (https://kubernetes.io/..., docs.openshift.com/...) → HTTP GET, must
     be 2xx after redirects. A dead upstream doc = a learner clicking into a 404.
   * relative (`foo.svg`, `../bar.md`, `#anchor`) → the target file must exist in the repo.
   * internal / air-gapped (`{{< param dcs_docs_base_url >}}/...`, or any link resolving to
-    a placeholder `example.*` host) → reported but NOT fetched: the DCS docs are unreachable
-    from CI by default. On the real network, pass `--param dcs_docs_base_url=https://real`
-    (and --check-internal) to verify them too.
+    a placeholder `example.*` host) → reported but NOT fetched by default: the DCS docs are
+    unreachable from a public runner. Give the real host to check them too — see below.
 
-Exit 0 when no reachable link is broken; exit 1 otherwise.
+The base URL for internal docs comes from the shared chart values
+(`workshops-monorepo/values.yaml` → `params.dcsDocsBaseUrl`, the same value the
+TrainingPortal injects into every session), then each lab's `workshop/config.yaml`
+param as a fallback, then `--param` which always wins. Since the committed value is
+the placeholder `https://docs.example.dcs`, internal links are only really fetched
+when a real host is supplied:
+
+Exit 0 when no reachable link is broken; exit 1 otherwise. Every failure is repeated
+in one flat `file:line` list at the end.
 
   ./link_check.py lab-a02-kubernetes-essentials
   ./link_check.py --all
@@ -30,6 +46,9 @@ GREEN, RED, YEL, DIM, RST = "\033[32m", "\033[31m", "\033[33m", "\033[2m", "\033
 PLACEHOLDER_HOSTS = ("example.dcs", "example.com", ".svc", "localhost", "apps-crc.testing", "127.0.0.1")
 LINK_RE = re.compile(r"\]\(\s*<?([^)]+?)>?\s*\)")       # ](url) / ](<url>) / ](url "title")
 PARAM_RE = re.compile(r"\{\{<\s*param\s+(\w+)\s*>\}\}")
+# Authoring comments explain the markdown syntax with literal `[text](url)` samples —
+# those are documentation, not links. Drop HTML comments before scanning.
+COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
 
 
 def clean_target(g):
@@ -56,6 +75,45 @@ def load_params(subpath):
                 out[name] = m.group(1).strip().strip("\"'")
                 name = None
     return out
+
+
+def load_shared_params():
+    """workshops-monorepo/values.yaml `params:` → {snake_case_name: value}.
+
+    That block is the single source of truth for the author params (the chart injects
+    them as session env on every workshop, each lab's config.yaml param only carries
+    the same value as an offline fallback). camelCase there, snake_case in content:
+    dcsDocsBaseUrl → dcs_docs_base_url. Tiny parser, no PyYAML — same reason as above.
+    """
+    vals = dw.REPO_ROOT / "workshops-monorepo" / "values.yaml"
+    out, inside = {}, False
+    if not vals.exists():
+        return out
+    for ln in vals.read_text().splitlines():
+        if re.match(r"^params:\s*$", ln):
+            inside = True
+            continue
+        if inside:
+            m = re.match(r"^  (\w+):\s*(.+?)\s*$", ln)
+            if not m:
+                if ln.strip() and not ln.startswith((" ", "\t")):
+                    break                       # next top-level key ends the block
+                continue
+            snake = re.sub(r"(?<!^)(?=[A-Z])", "_", m.group(1)).lower()
+            out[snake] = m.group(2).strip().strip("\"'")
+    return out
+
+
+def learner_facing_files(subpath):
+    """Every file whose links a learner can click, in reading order."""
+    root = dw.REPO_ROOT / subpath
+    files = []
+    for pattern in ("workshop/content/**/*.md", "workshop/slides/**/*.md", "exercises/**/*.md"):
+        files += sorted(root.glob(pattern))
+    for extra in ("README.md", "resources/consolelab.yaml"):
+        if (root / extra).exists():
+            files.append(root / extra)
+    return files
 
 
 def resolve_params(url, params):
@@ -106,56 +164,54 @@ def classify(raw, params):
 
 
 def check_workshop(name, subpath, params, cache, check_internal):
-    cdir = dw.REPO_ROOT / subpath / "workshop" / "content"
-    files = []
-    if cdir.exists():
-        files += sorted(cdir.rglob("*.md"))
-    readme = dw.REPO_ROOT / subpath / "README.md"
-    if readme.exists():
-        files.append(readme)
+    files = learner_facing_files(subpath)
     if not files:
-        return None, [f"{YEL}skip{RST} {name}: no content/README"]
+        return None, [f"{YEL}skip{RST} {name}: no content/slides/README"], []
 
     bad, soft, n_ext, n_int, n_rel = [], [], 0, 0, 0
     lines = []
     for f in files:
-        for m in LINK_RE.finditer(f.read_text()):
+        text = f.read_text()
+        # Blank out comments in place so match offsets still map to real line numbers.
+        text = COMMENT_RE.sub(lambda m: re.sub(r"[^\n]", " ", m.group(0)), text)
+        for m in LINK_RE.finditer(text):
             raw = clean_target(m.group(1))
             if not raw:
                 continue
             kind, url = classify(raw, params)
             if kind == "skip":
                 continue
+            where = (f, text.count("\n", 0, m.start()) + 1)
             if kind == "relative":
                 n_rel += 1
                 target = (f.parent / url.split("#", 1)[0]).resolve()
                 if not target.exists():
-                    bad.append((f, raw, "relative target missing"))
+                    bad.append((where, raw, "relative target missing"))
             elif kind == "internal":
                 n_int += 1
                 if check_internal and url.startswith(("http://", "https://")) and "__UNRESOLVED_" not in url:
                     v = code_verdict(cache.setdefault(url, curl_code(url)))
                     if v == "bad":
-                        bad.append((f, url, f"internal link HTTP {cache[url] or 'ERR'}"))
+                        bad.append((where, url, f"internal link HTTP {cache[url] or 'ERR'}"))
             else:  # external
                 n_ext += 1
                 code = cache.setdefault(url, curl_code(url))
                 v = code_verdict(code)
                 if v == "bad":
-                    bad.append((f, url, f"HTTP {code or 'ERR'}"))
+                    bad.append((where, url, f"HTTP {code or 'ERR'}"))
                 elif v == "soft":
-                    soft.append((f, url, code))
+                    soft.append((where, url, code))
 
     ok = not bad
     head = f"{GREEN if ok else RED}{'PASS' if ok else 'FAIL'}{RST}"
     intnote = f", {n_int} internal {'(checked)' if check_internal else '(air-gapped, not fetched)'}"
     softnote = f", {len(set(u for _, u, _ in soft))} bot-blocked" if soft else ""
-    lines.append(f"{head} {name}: {n_ext} external, {n_rel} relative{intnote}{softnote}")
-    for f, url, why in bad:
-        lines.append(f"     {RED}{why}{RST}  {url}  {DIM}({f.relative_to(dw.REPO_ROOT)}){RST}")
-    for f, url, code in soft:
+    lines.append(f"{head} {name}: {len(files)} files, {n_ext} external, {n_rel} relative{intnote}{softnote}")
+    for (f, ln), url, why in bad:
+        lines.append(f"     {RED}{why}{RST}  {url}  {DIM}({f.relative_to(dw.REPO_ROOT)}:{ln}){RST}")
+    for (f, ln), url, code in soft:
         lines.append(f"     {DIM}{code} (server blocks automated fetch, link assumed valid)  {url}{RST}")
-    return ok, lines
+    return ok, lines, [(name, f, ln, url, why) for (f, ln), url, why in bad]
 
 
 def main():
@@ -176,23 +232,31 @@ def main():
     else:
         p.error("a workshop name or --all is required")
 
-    cache, any_fail = {}, False
+    shared = load_shared_params()
+    cache, failures = {}, []
     print("=== workshop link check (external links must be 2xx; relative targets must exist) ===")
+    docs_base = overrides.get("dcs_docs_base_url", shared.get("dcs_docs_base_url", "(unset)"))
+    print(f"    content + slides + exercises + README + consolelab.yaml")
+    print(f"    dcs_docs_base_url={docs_base}"
+          f"{'  (fetched)' if args.check_internal else '  (not fetched; pass --check-internal)'}")
     for nm in names:
         subpath = dw.find_subpath(nm) or f"{dw.DEFAULT_BASE}/{nm}"
         params = load_params(subpath)
-        params.update(overrides)             # --param wins over the workshop's config
-        ok, report = check_workshop(nm, subpath, params, cache, args.check_internal)
+        params.update(shared)                # shared chart values beat the lab's offline default
+        params.update(overrides)             # --param wins over everything
+        ok, report, bad = check_workshop(nm, subpath, params, cache, args.check_internal)
         for ln in report:
             print(ln)
-        if ok is False:
-            any_fail = True
+        failures += bad
 
-    if any_fail:
-        print(f"\n{RED}BROKEN LINKS{RST}: a learner following these would hit a 404 / missing image.")
+    if failures:
+        # One flat list at the end: the per-lab output above scrolls away in a CI log.
+        print(f"\n{RED}BROKEN LINKS ({len(failures)}){RST} — a learner following these hits a 404 / missing image:")
+        for nm, f, ln, url, why in failures:
+            print(f"  {f.relative_to(dw.REPO_ROOT)}:{ln}  {RED}{why}{RST}  {url}  {DIM}[{nm}]{RST}")
     else:
         print(f"\n{GREEN}all reachable links resolve.{RST}")
-    sys.exit(1 if any_fail else 0)
+    sys.exit(1 if failures else 0)
 
 
 if __name__ == "__main__":

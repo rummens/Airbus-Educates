@@ -66,7 +66,7 @@ Expected: the Editor tab switches into view showing `README.md`.
 The Console tab is a visual view of your namespace — the **Kubernetes Dashboard**. When a lab creates something from the terminal, you can switch here to see it laid out visually.
 
 - It shows **your** namespace only; it is empty until you deploy something (from A01).
-- It is **not** the OpenShift web console — that refuses to embed and is toured in A08.
+- It is **not** the OpenShift web console — that refuses to embed and is toured in the Console track.
 - The tab runs as your session service account, enough for a quick visual check.
 
 Open it pointed at your own namespace with a `reload-dashboard` action; no login needed.

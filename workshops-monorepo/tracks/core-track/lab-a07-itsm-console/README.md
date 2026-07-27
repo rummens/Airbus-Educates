@@ -1,23 +1,28 @@
-# The ITSM Console — Self-Service on DCS
+# Requesting a Tenant & Namespace via ITSM
 
-**Some things you just do. Some things you request. This lab draws the line — and shows you where the requests happen.**
+**Every namespace you have used so far was simply there. This lab shows where it comes from — and what the request form actually asks you.**
 
-> **Rough draft.** Screenshot-driven tour; the ITSM-console-in-session embedding spike is
-> still open, and screenshots are placeholders. Content is complete enough to review.
+DCS is multi-national, so there is no single ITSM portal: each location (DIV, DE, ES, …)
+has its own myITSM, and a Tenant must be requested in the portal of its own location — it
+cannot be moved afterwards. This lab finds the right portal, walks the **New tenant**
+request and the **New namespace for existing tenant** request field by field, explains the
+basic / DevSpace / customized fork and every resource quota behind it, and closes with the
+self-service vs request line.
 
-On DCS you deploy, scale, and configure your own apps with `oc` — but some actions (more
-quota, mirroring an image, a new repo, an S3 bucket, a security exception) go through an
-**ITSM request**. This short lab names that split, sorts a handful of tasks into the right
-bucket, and walks one request — a quota increase — from form to provisioned change.
+The forms are long because DCS onboarding is **automated on the DCS side** — ITSM is
+currently the input form for that pipeline; the missing piece is the self-service
+frontend, not the provisioning.
 
 - **Track:** Core / Fundamentals · Lab 7
-- **Audience:** Beginner — you've done A05
-- **Duration:** ~10 min
-- **Format:** Guided tour + knowledge check (screenshot-driven)
-- **Prerequisites:** A05 (What is DCS?).
+- **Audience:** Beginner — you've done A06
+- **Duration:** ~20 min
+- **Format:** Guided walkthrough of the two request forms + sorting worksheet + knowledge check
+- **Prerequisites:** A06 (Terms — Namespaces & Tenancy).
 
 ## By the end of this lab you'll be able to
 
-- Explain that DCS self-service runs through ITSM requests, and where the console is.
-- Tell which actions need a ticket vs which are self-service `oc`.
-- Describe the request → approval → provisioning loop.
+- Find your own myITSM portal and explain why a Tenant is per location and non-movable.
+- Fill in a New tenant request: owner, name, members, siglum, purpose, location, billing, export control.
+- Fill in a New namespace request and choose between basic, DevSpace and customized (expert) — including what every quota field means.
+- Explain why the form asks so much: the onboarding is automated and the fields feed it.
+- Tell which actions are self-service with `oc` and which need a request.

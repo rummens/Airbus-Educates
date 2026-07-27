@@ -34,8 +34,16 @@ echo "########## coverage: smoke plans vs workshop content ##########"
 python3 "$W/coverage_check.py" --all || fail=1
 
 echo
-echo "########## links: workshop descriptions ##########"
-python3 "$W/link_check.py" --all || fail=1
+echo "########## links: content + slides + exercises + console labs ##########"
+# The committed dcs_docs_base_url is the placeholder https://docs.example.dcs, so the
+# internal DCS doc links can only be fetched when a runner that can actually reach the
+# docs supplies the real host. Set DCS_DOCS_BASE_URL as a CI variable (or export it
+# locally) and they are checked too; without it they are listed but not fetched.
+LINK_ARGS=(--all)
+if [ -n "${DCS_DOCS_BASE_URL:-}" ]; then
+  LINK_ARGS+=(--param "dcs_docs_base_url=$DCS_DOCS_BASE_URL" --check-internal)
+fi
+python3 "$W/link_check.py" "${LINK_ARGS[@]}" || fail=1
 
 echo
 echo "########## lifecycle labels: dev/prod matches Route usage ##########"

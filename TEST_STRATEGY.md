@@ -59,10 +59,18 @@ parses each workshop's `examiner:execute-test` blocks and fails if any isn't exe
 content → coverage goes red until the plan catches up. `--scaffold` bootstraps a plan from
 content. Plans support `expect_fail` (CRC-can't, platform-can) and `exclude` (with reason).
 
-**Links** (your requirement: all descriptions 200). `link_check.py` checks external (2xx),
-relative (target exists), and air-gapped `dcs_docs_base_url` links (reported; `--check-internal`
-+ `--param` to verify on the real network). Bot-blocked 401/403 (docs.openshift.com) are
-tolerated, not failed.
+**Links** (your requirement: all descriptions 200). `link_check.py` covers everything a
+learner can click — `workshop/content/**.md`, `workshop/slides/**.md`, `exercises/**.md`,
+the lab `README.md`, and `resources/consolelab.yaml` (console labs keep their text in the
+CR, so they have no content dir). It checks external (2xx), relative (target exists), and
+air-gapped `dcs_docs_base_url` links. That base URL comes from the shared chart values
+(`workshops-monorepo/values.yaml` → `params.dcsDocsBaseUrl`), overridable with `--param`;
+since the committed value is the `docs.example.dcs` placeholder those links are only
+fetched when a real host is given plus `--check-internal`. In CI, set the
+`DCS_DOCS_BASE_URL` variable and `run-workshops.sh` passes both. Bot-blocked 401/403
+(docs.openshift.com) are tolerated, not failed. Every failure is repeated in one flat
+`file:line  reason  url  [lab]` list at the end of the run, so a CI log is readable
+without scrolling back through the per-lab output.
 
 ```bash
 test/workshops/coverage_check.py --all

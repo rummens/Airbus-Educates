@@ -34,7 +34,7 @@ browser won't render it inside this dashboard's tab), and it wouldn't share your
 login anyway. So the in-session Console tab is the generic **Kubernetes Dashboard**, which
 *does* embed and runs as your session account — enough for a quick visual check.
 {{< param product_short >}}'s richer **OpenShift web console** is a separate tool you open
-in its own browser tab; you get a guided tour of it in **A08: The OpenShift Console**.
+in its own browser tab; the **Console track** is a guided tour of it.
 {{< /note >}}
 
 When you've had a look, switch back to the terminal:

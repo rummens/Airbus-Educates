@@ -65,7 +65,7 @@ and the ReplicaSet created the Pod.
 See all three at once:
 
 ```terminal:execute
-command: oc get all -l app=hello-dcs
+command: oc get deploy,rs,pod -l app=hello-dcs
 ```
 
 ```examiner:execute-test

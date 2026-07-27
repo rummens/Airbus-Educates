@@ -42,7 +42,11 @@ workshop-static:
         - test/ci/**/*
   script:
     # coverage: every workshop command has a smoke test (or an explicit exclude);
-    # links: every workshop description link resolves (200 / reachable);
+    # links: every link a learner can click — content, slides, exercises, README and
+    #        console-lab CRs — resolves (200 / reachable). Failures are repeated as one
+    #        flat file:line list at the end of the job log. Set the CI variable
+    #        DCS_DOCS_BASE_URL to the real internal docs host to fetch the
+    #        {{< param dcs_docs_base_url >}} links too (placeholder host = listed only);
     # labels: each lab's dev/prod lifecycle label matches its Route usage.
     - bash test/ci/run-workshops.sh
 
