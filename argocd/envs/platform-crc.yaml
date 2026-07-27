@@ -19,3 +19,11 @@ openssl:
   armcap: "0"
 crcWorkaround:
   enabled: true
+
+# Local lab snapshots are published to the in-cluster Gitea service. Point
+# Educates workshop content at the same revision as Argo so uncommitted PoCs and
+# local fixes are available when a session is allocated.
+workshopContent:
+  useGit: true
+  gitUrl: http://gitea.airbus-educates-lab.svc.cluster.local:3000/lab/Airbus-Educates.git
+  gitRef: origin/lab/deploy
