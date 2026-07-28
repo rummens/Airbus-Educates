@@ -89,12 +89,27 @@ portal:
   registration:
     type: anonymous            # portal auth.py is the sole gate; no Educates signup
   sessions:
-    maximum: 3
+    # THREE different caps — mixing them up locks the whole academy out (it did):
+    #   maximum    — sessions across the WHOLE portal (all users, all labs). This is a
+    #                cluster-capacity budget, never a per-learner rule. It also becomes
+    #                the default per-workshop-environment capacity, so keep it > 0
+    #                (0 means "unlimited portal-wide" but leaves env capacity at 0 =
+    #                nothing can start).
+    #   registered — max concurrent sessions ONE registered user may hold.
+    #   anonymous  — max concurrent sessions ONE anonymous user may hold. THIS is the
+    #                one that applies to us: sessions come from the portal's REST
+    #                request (robot-authed, ?user=<SSO name>), and Educates puts every
+    #                user it creates that way in its 'anonymous' group — regardless of
+    #                registration.type. Set both so the rule holds either way.
+    # 0 = no limit for that dimension.
+    maximum: 30
+    registered: 3
+    anonymous: 3
   workshop:
     # reserved:0 — no warm spare pool. A spare's expires/orphaned clocks run from
     # session CREATION, so a spare sitting > orphaned goes stale and is orphan-reaped
     # the instant it's allocated (→ dead oauth client → "400 Invalid client_id" on
-    # rewarm). With maximum:3 a warm pool buys little; pay the ~30-60s cold start.
+    # rewarm). With a 3-per-user cap a warm pool buys little; pay the ~30-60s cold start.
     reserved: 0
     initial: 0
   # Default per-workshop session lifecycle for the TrainingPortal list. Override

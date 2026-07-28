@@ -10,13 +10,12 @@ those forms is for.
 
 - Found **your** myITSM portal — one per location, a Tenant requested in its own location
   and **not movable** afterwards.
-- Walked the **New tenant** request: owner, name, members, siglum, purpose, default
-  namespace name, location, billing, export control.
-- Walked the **New namespace** request: general options, then **basic** vs **DevSpace** vs
-  **customized (expert)**, features, DEV/PROD usage, operators, capacity tiers and the
-  resource quotas.
-- Learned why the forms are long: onboarding is **automated on the DCS side**, and ITSM is
-  the input form for that automation until the self-service frontend exists.
+- Walked the **New tenant** request: the seven fields, then billing (only if recharging
+  applies) and the export-control declaration.
+- Walked the **New namespace** request: three fields, **basic** over DevSpace or expert
+  mode, DEV/PROD usage, optional features.
+- Learned why the form has so many options: onboarding is **automated on the DCS side**,
+  and ITSM is the input form for that automation until the self-service frontend exists.
 - Sorted everyday tasks into **self-service `oc`** vs **ITSM request**.
 
 ## Check Your Understanding
@@ -39,8 +38,7 @@ own portal, and cannot be moved later.
 
 {{< note >}}
 **Answer:** Choose **basic standard namespace** — pre-configured and standard-sized. Raise
-the limits later with a *Modify namespace* request. (In expert mode the advice is the
-same: keep the defaults.)
+the limits later with a *Modify namespace* request. You never have to touch expert mode.
 {{< /note >}}
 
 4. Is **scaling a Deployment** a request?

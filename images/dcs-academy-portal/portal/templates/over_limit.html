@@ -2,15 +2,26 @@
 {% block title %}Session limit reached — {{ product }}{% endblock %}
 {% block content %}
 <section class="launch">
+  {# Educates 503s for two different reasons. `mine` (the caller's own running sessions)
+     tells them apart: their own limit vs the academy being full. #}
+  {% if mine %}
   <span class="eyebrow">Session limit reached</span>
   <h1>{{ course.title }}</h1>
-  <p class="launch-msg">You already have the maximum number of running sessions, so a new
-    one can't start. Open <strong>My Sessions</strong> to jump back into a running lab, or
-    end one to free a slot — then start this workshop again.</p>
+  <p class="launch-msg">You already have the maximum number of running sessions
+    ({{ mine|length }}), so a new one can't start. Open <strong>My Sessions</strong> to jump
+    back into a running lab, or end one to free a slot — then start this workshop again.</p>
+  {% else %}
+  <span class="eyebrow">Academy at capacity</span>
+  <h1>{{ course.title }}</h1>
+  <p class="launch-msg">The academy is running as many lab sessions as it can right now —
+    none of them are yours, so there is nothing for you to end. Please try again in a few
+    minutes; sessions are freed as other learners finish.</p>
+  {% endif %}
 
   <div class="detail-actions">
-    <a class="btn btn-primary" href="{{ url_for('my_sessions') }}">My Sessions</a>
-    <a class="btn btn-ghost" href="{{ url_for('launch', name=course.name) }}">Try again</a>
+    {% if mine %}<a class="btn btn-primary" href="{{ url_for('my_sessions') }}">My Sessions</a>{% endif %}
+    <a class="btn {{ 'btn-ghost' if mine else 'btn-primary' }}"
+       href="{{ url_for('launch', name=course.name) }}">Try again</a>
     <a class="btn btn-ghost" href="{{ url_for('index') }}">Back to catalog</a>
   </div>
 </section>

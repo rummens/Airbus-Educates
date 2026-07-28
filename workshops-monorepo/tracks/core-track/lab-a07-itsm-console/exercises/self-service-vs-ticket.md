@@ -17,4 +17,4 @@ Put each task in the right column.
 | Add a colleague to your namespace       |                       |                       |
 | Request a security exception            |                       |                       |
 
-(Answers on page 04.)
+(Answers on the "Self-Service vs Requests" page.)

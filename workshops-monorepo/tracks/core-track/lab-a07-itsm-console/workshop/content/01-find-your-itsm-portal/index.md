@@ -62,12 +62,13 @@ Then {{< param product_short >}} takes over: the onboarding itself is **automate
 DCS side** — no human hand-provisions your namespace.
 
 {{< note >}}
-**Then why does the form ask so much?** Because the automation is already there but the
-**self-service frontend is not** — ITSM is currently the input form for that pipeline.
-Every field you fill in is a parameter the automation consumes directly, which is why it
-wants exact values instead of prose. Once the frontend lands, these same questions become
-a UI. In the meantime: things go quickly, and unclear fields can be left at their
-defaults with a question in **"Further details"** at the end of the form.
+**Then why does the form offer so many options?** Because the automation is already there
+but the **self-service frontend is not** — ITSM is currently the input form for that
+pipeline, so every option the platform supports shows up as a field.
+
+**Don't let that put you off.** Most of it is optional or has a default. Leave what you
+don't recognise alone, ask in **"Further details"** at the end of the form, and things go
+quickly.
 {{< /note >}}
 
 ## Every request starts the same way
@@ -82,4 +83,5 @@ The rest of the list tells you what else runs through the same request: *Modify 
 *Delete tenant*, *Modify / Delete namespace*, *User management*, *General inquiry*,
 *Feature request*, *Networking whitelist*, *Consultancy support*.
 
-Pick one, and the form shows the fields for that choice — those are the next two pages.
+Pick one, and the form shows only the fields for that choice. The next pages walk those
+fields — first the tenant request, then the namespace one.

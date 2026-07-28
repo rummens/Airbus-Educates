@@ -4,8 +4,14 @@ title: "Requesting a Tenant & Namespace via ITSM"
 
 Six labs in, you have deployed, configured, exposed and persisted — always inside a
 namespace that was simply *there*. This lab, part of **{{< param product_name >}}**, shows
-where that namespace comes from: you **request** it through ITSM, and this is what the
-form asks you.
+where that namespace comes from: you **request** it through ITSM.
+
+{{< note >}}
+**The short version, in case you only read this page:** find your national myITSM portal →
+request a **Tenant** (about seven fields) → request a **Namespace** if you need a second
+one (three fields, then pick *basic*). {{< param product_short >}} provisions the rest
+automatically. The pages below just walk those fields one by one.
+{{< /note >}}
 
 {{< note >}}
 **First time in one of these labs?** See the
@@ -18,11 +24,9 @@ By the end of this workshop you will be able to:
 
 - Find **your** myITSM portal — there is one per location (DIV, DE, ES, …), and a Tenant
   must be requested in the portal of its own location.
-- Fill in a **New tenant** request: owner, name, members, siglum, location, billing and
-  the export-control declaration.
-- Fill in a **New namespace** request, and choose between **basic**, **DevSpace** and
-  **customized (expert)** — including what every resource field means.
-- Explain **why the form asks so much**: {{< param product_short >}} onboarding is
+- Fill in a **New tenant** request: the seven fields, plus billing and export control.
+- Fill in a **New namespace** request and know why **basic** is the right default.
+- Explain **why the form has so many options**: {{< param product_short >}} onboarding is
   automated, and ITSM is currently the input form for that automation.
 - Tell which actions are **self-service with `oc`** and which need a request.
 

@@ -325,6 +325,44 @@ def test_closed_track_is_greyed_out_and_refuses_to_launch(client, monkeypatch):
     assert f"/launch/{open_lab['name']}" in client.get(f"/course/{open_lab['name']}").data.decode()
 
 
+def test_admin_preview_launches_closed_track(client, monkeypatch):
+    """The admin preview switch lets us review an unpublished track's labs; it is
+    admin-only, opt-in, and changes nothing for anyone else."""
+    tracks = [dict(t) for t in k8sclient.list_tracks()]
+    tracks[0]["availability"] = "disabled"
+    monkeypatch.setattr(k8sclient, "list_tracks", lambda: tracks)
+    lab = next(c for c in k8sclient.list_courses() if c["track"] == tracks[0]["name"])
+
+    # Non-admin: no switch in the nav, and the toggle route is refused.
+    monkeypatch.setattr(k8sclient, "user_can_admin", lambda tok: False)
+    assert "Preview off" not in client.get("/").data.decode()
+    assert client.post("/admin/preview").status_code == 403
+
+    monkeypatch.setattr(k8sclient, "user_can_admin", lambda tok: True)
+    # Off by default: an admin sees the same closed track a learner does.
+    assert "Preview off" in client.get("/").data.decode()
+    assert client.get(f"/launch/{lab['name']}").status_code == 403
+
+    r = client.post("/admin/preview", data={"next": "/"}, follow_redirects=False)
+    assert r.status_code == 302 and r.headers["Location"] == "/"
+    assert "Preview on" in client.get("/").data.decode()
+    page = client.get(f"/course/{lab['name']}").data.decode()
+    assert f"/launch/{lab['name']}" in page and "Admin preview" in page   # startable + labelled
+    # The launch is no longer refused — it now really asks Educates for a session.
+    monkeypatch.setattr(educates, "request_session",
+                        lambda name, user: {"name": "s-preview", "url": "/workshops/s-preview/"})
+    assert client.get(f"/launch/{lab['name']}").status_code == 200
+
+    # Toggling off restores the learner view.
+    client.post("/admin/preview", data={"next": "/"})
+    assert client.get(f"/launch/{lab['name']}").status_code == 403
+
+    # The cookie flag alone grants nothing — losing admin rights closes it again.
+    client.post("/admin/preview", data={"next": "/"})
+    monkeypatch.setattr(k8sclient, "user_can_admin", lambda tok: False)
+    assert client.get(f"/launch/{lab['name']}").status_code == 403
+
+
 def test_catalog_format_filter_preselected_by_query_param(client):
     # The console plugin links here with ?format=console so a learner already in the
     # OpenShift console sees console labs, not the whole catalogue.
@@ -371,11 +409,23 @@ def test_trophies_render_for_dev_user(client, monkeypatch):
 
 
 def test_launch_over_limit_page(client, monkeypatch):
+    """Educates 503s both when the caller is at their own cap and when the portal is
+    full. Those need different advice — telling someone to end a session they don't
+    have (and linking an empty My Sessions) is the bug this branch fixes."""
     monkeypatch.setattr(educates, "request_session",
                         lambda name, user: (_ for _ in ()).throw(educates.CapacityError(name)))
+
+    # Caller holds sessions → their own limit; offer My Sessions.
+    monkeypatch.setattr(appmod, "_my_sessions", lambda user: [{"name": "s1", "workshop": "w"}])
     r = client.get("/launch/lab-a01-what-is-dcs")
     assert r.status_code == 503
     assert b"Session limit reached" in r.data and b"My Sessions" in r.data
+
+    # Caller holds none → the academy is full; don't send them to an empty list.
+    monkeypatch.setattr(appmod, "_my_sessions", lambda user: [])
+    r = client.get("/launch/lab-a01-what-is-dcs")
+    assert r.status_code == 503
+    assert b"Academy at capacity" in r.data and b"My Sessions" not in r.data
 
 
 def test_session_end_route(client, monkeypatch):

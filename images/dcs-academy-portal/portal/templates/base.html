@@ -26,7 +26,15 @@
     <a href="{{ url_for('index') }}" class="nav-link">{{ icon('grid')|safe }} Catalog</a>
     {% if current_user %}<a href="{{ url_for('my_sessions') }}" class="nav-link">{{ icon('layers')|safe }} My sessions</a>{% endif %}
     <a href="{{ url_for('trophies') }}" class="nav-link">{{ icon('trophy')|safe }} Trophies</a>
-    {% if is_admin %}<a href="{{ url_for('admin') }}" class="nav-link">{{ icon('shield')|safe }} Admin</a>{% endif %}
+    {% if is_admin %}<a href="{{ url_for('admin') }}" class="nav-link">{{ icon('shield')|safe }} Admin</a>
+    {# Admin-only switch: start labs of tracks that are not published yet, to review
+       them before publishing. Learners never see this and are never affected. #}
+    <form class="nav-form" method="post" action="{{ url_for('admin_preview') }}">
+      <input type="hidden" name="next" value="{{ request.full_path }}">
+      <button type="submit" class="nav-link nav-toggle{% if preview %} is-on{% endif %}"
+              title="{% if preview %}Preview is ON — you can start labs of unpublished tracks. Click to turn off.{% else %}Turn on preview to start labs of tracks that are not published yet.{% endif %}">
+        {{ icon('eye')|safe }} Preview {{ 'on' if preview else 'off' }}</button>
+    </form>{% endif %}
     {% if current_user %}
     <span class="nav-user">{{ icon('user')|safe }} {{ current_user }}</span>
     <a href="{{ url_for('auth.logout') }}" class="nav-link" title="Sign out">{{ icon('logout')|safe }}</a>

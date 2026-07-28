@@ -14,7 +14,7 @@ metadata:
     # per location, so this is a documented walkthrough, not a live embed.
 spec:
   title: "Requesting a Tenant & Namespace via ITSM"
-  description: Get yourself onto DCS from nothing — find your national myITSM portal, request a Tenant, then request the namespaces it owns, with every input on both forms explained, and learn which everyday actions stay self-service with oc.
+  description: Get yourself onto DCS from nothing — find your national myITSM portal, request a Tenant, then request the namespaces it owns. A quick start through both forms, field by field, plus which everyday actions stay self-service with oc.
   duration: 20m
   difficulty: beginner
   labels:

@@ -26,7 +26,12 @@ spec:
     updates:
       workshop: true
     sessions:
+      # maximum = portal-wide budget; registered/anonymous = PER USER (see values.yaml).
+      # Without the per-user caps, `maximum` is the only limit and the Nth session in
+      # the cluster blocks everyone else, not just its owner.
       maximum: {{ .Values.portal.sessions.maximum }}
+      registered: {{ .Values.portal.sessions.registered }}
+      anonymous: {{ .Values.portal.sessions.anonymous }}
     workshop:
       defaults:
         reserved: {{ .Values.portal.workshop.reserved }}

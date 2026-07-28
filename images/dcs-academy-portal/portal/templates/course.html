@@ -38,6 +38,12 @@
       <a class="btn btn-primary btn-lg" href="{{ url_for('launch', name=c.name) }}"
          target="_blank" rel="noopener">
         {{ icon('rocket')|safe }} Start session</a>
+      {% if track_badge %}
+      {# Startable only because admin preview is on — say so, or a reviewer mistakes an
+         unpublished track for a published one. #}
+      <p class="detail-unavailable">Admin preview — this track is not published
+         ({{ track_badge }}). Learners cannot start this lab yet.</p>
+      {% endif %}
       {% else %}
       {# The track is still being worked on. The launch route refuses these too, so this
          is the explanation rather than the enforcement. #}

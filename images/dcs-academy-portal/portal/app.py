@@ -12,7 +12,7 @@ import time
 
 import markdown as md
 from flask import (Flask, render_template, request, redirect, abort, jsonify,
-                   Response, url_for)
+                   Response, url_for, session, g)
 from markupsafe import Markup
 
 from urllib.parse import urljoin, urlsplit
@@ -128,7 +128,7 @@ def create_app():
     @app.context_processor
     def _inject():
         return {"theme": cfg.THEME, "icon": _icon, "product": cfg.THEME["product_name"],
-                "current_user": _user()}
+                "current_user": _user(), "preview": _preview()}
 
     @app.template_filter("firstname")
     def _firstname(user):
@@ -170,7 +170,10 @@ def create_app():
         return (track or {}).get("availability", "available")
 
     def _track_open(track_id):
-        return _track_availability(track_id) == "available"
+        # Admin preview overrides a closed track so we can review an unpublished
+        # track's labs end-to-end before publishing it. Learners are unaffected —
+        # the flag only exists in an admin's own signed session cookie.
+        return _track_availability(track_id) == "available" or _preview()
 
     @app.route("/")
     def index():
@@ -223,7 +226,7 @@ def create_app():
         readme = re.sub(r"^#\s+.*$\n?", "", readme, count=1, flags=re.M)
         availability = _track_availability(c.get("track"))
         return render_template("course.html", c=c, ratings=ratings,
-                               track_open=(availability == "available"),
+                               track_open=_track_open(c.get("track")),
                                track_badge=TRACK_BADGE.get(availability, ""),
                                min_reviews=cfg.FEEDBACK_MIN_REVIEWS, is_admin=_is_admin(),
                                difficulty_icon=DIFFICULTY_ICON, readme_html=_render_md(readme),
@@ -255,10 +258,16 @@ def create_app():
             metrics.REQUESTS.labels(name, "ok").inc()
             _safe(lambda: feedback.mark_progress(_user(), name, "started"))
         except educates.CapacityError:
-            # Portal is at its session limit → don't dump a raw 503. Point the user at
-            # My Sessions (authoritative session list) to free a slot themselves.
+            # Educates returns the same 503 whether the CALLER is at their per-user cap
+            # or the whole portal is full. Those need different advice, so look at the
+            # caller's own sessions: none of their own → the academy is full and sending
+            # them to an empty My Sessions is just confusing.
+            mine = _my_sessions(_user())
+            log.info("LAUNCH %s refused: no capacity (user %r holds %d session(s))",
+                     name, _user(), len(mine))
             metrics.REQUESTS.labels(name, "error").inc()
-            return render_template("over_limit.html", course=c, is_admin=_is_admin()), 503
+            return render_template("over_limit.html", course=c, is_admin=_is_admin(),
+                                   mine=mine), 503
         except Exception as e:        # noqa: BLE001
             metrics.REQUESTS.labels(name, "error").inc()
             metrics.ERRORS.labels("session_request").inc()
@@ -390,6 +399,20 @@ def create_app():
             abort(403)
         _safe(lambda: feedback.set_setting("banner", request.form.get("banner", "").strip()[:2000]))
         return redirect(url_for("admin"))
+
+    @app.route("/admin/preview", methods=["POST"])
+    def admin_preview():
+        """Toggle admin preview: start labs of tracks that are not published yet.
+
+        Per-admin and per-session (a flag in the signed session cookie, cleared on
+        logout), so turning it on never changes what a learner sees. The flag alone
+        grants nothing — _preview() re-checks admin rights on every use."""
+        if not _is_admin():
+            abort(403)
+        session["preview"] = not session.get("preview")
+        log.info("PREVIEW %s -> %s", _user(), session["preview"])
+        nxt = request.form.get("next", "")
+        return redirect(nxt if nxt.startswith("/") else url_for("index"))
 
     @app.route("/admin/rescan", methods=["POST"])
     def admin_rescan():
@@ -531,6 +554,19 @@ def _catalog_stats(courses, tracks):
 
 def _is_admin():
     return k8sclient.user_can_admin(_token())
+
+
+def _preview():
+    """True when an admin has switched preview on (see /admin/preview).
+
+    Cookie flag first: for everyone else this is a dict lookup, so no extra SSAR
+    call per request. The admin check is memoised per request (g) because the
+    context processor and the launch route both ask."""
+    if not session.get("preview"):
+        return False
+    if not hasattr(g, "preview_admin"):
+        g.preview_admin = _is_admin()
+    return g.preview_admin
 
 
 def _abs_session_url(path):
