@@ -29,6 +29,13 @@ SCHEMA_SQLITE = [
       username TEXT NOT NULL, workshop TEXT NOT NULL, status TEXT NOT NULL,
       ts TEXT NOT NULL, UNIQUE(username, workshop))""",
     "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)",
+    # One row per launch (progress is one row per user+lab, so it can neither
+    # accumulate repeat runs nor time them). This is the usage-stats source.
+    """CREATE TABLE IF NOT EXISTS runs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL, workshop TEXT NOT NULL, session TEXT,
+      started_at TEXT NOT NULL, finished_at TEXT, feedback_at TEXT)""",
+    "CREATE INDEX IF NOT EXISTS idx_runs_workshop ON runs(workshop)",
 ]
 SCHEMA_PG = [
     """CREATE TABLE IF NOT EXISTS feedback (
@@ -40,6 +47,11 @@ SCHEMA_PG = [
       username TEXT NOT NULL, workshop TEXT NOT NULL, status TEXT NOT NULL,
       ts TIMESTAMPTZ NOT NULL, UNIQUE(username, workshop))""",
     "CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)",
+    """CREATE TABLE IF NOT EXISTS runs (
+      id BIGSERIAL PRIMARY KEY,
+      username TEXT NOT NULL, workshop TEXT NOT NULL, session TEXT,
+      started_at TIMESTAMPTZ NOT NULL, finished_at TIMESTAMPTZ, feedback_at TIMESTAMPTZ)""",
+    "CREATE INDEX IF NOT EXISTS idx_runs_workshop ON runs(workshop)",
 ]
 
 
@@ -202,6 +214,57 @@ def last_in_progress(username):
                 f"ORDER BY ts DESC LIMIT 1", (username,))
     rows = _rows(cur)
     return rows[0]["workshop"] if rows else None
+
+
+# --- lab runs (accumulating usage + timing) ---------------------------------
+
+def _now():
+    """Now, in whatever the driver wants: datetime for psycopg, ISO text for sqlite."""
+    from datetime import datetime, timezone
+    n = datetime.now(timezone.utc)
+    return n if _IS_PG else n.isoformat(timespec="seconds")
+
+
+def start_run(username, workshop, session):
+    """One row per launch — the accumulating count of lab runs, and the clock start."""
+    username = (username or "").strip()
+    workshop = (workshop or "").strip()
+    if not username or not workshop:
+        return
+    _exec(f"INSERT INTO runs(username,workshop,session,started_at) "
+          f"VALUES({_PH},{_PH},{_PH},{_PH})",
+          (username, workshop, (session or "").strip()[:200] or None, _now()))
+
+
+def finish_run(username, workshop, with_feedback=False):
+    """Stamp the user's newest run of this lab as finished (and optionally as
+    feedback-given). Targets the newest run rather than the newest *unstamped* one:
+    a console lab stamps finished_at at /lab/<n>/complete and then feedback_at from
+    the form — both belong on the same row, and picking 'newest unstamped' would
+    put the second stamp on an older abandoned run. Both columns are COALESCEd, so
+    the first stamp of each wins and re-posting the form changes nothing."""
+    username = (username or "").strip()
+    workshop = (workshop or "").strip()
+    if not username or not workshop:
+        return
+    now = _now()
+    sets, args = f"finished_at=COALESCE(finished_at,{_PH})", [now]
+    if with_feedback:
+        sets += f", feedback_at=COALESCE(feedback_at,{_PH})"
+        args.append(now)
+    _exec(f"UPDATE runs SET {sets} WHERE id=(SELECT id FROM runs "
+          f"WHERE username={_PH} AND workshop={_PH} ORDER BY id DESC LIMIT 1)",
+          (*args, username, workshop))
+
+
+def runs():
+    """All runs, raw. Rollups happen in the caller (app._run_stats) because the
+    duration maths differs per dialect and the per-lab view also needs the CRs'
+    planned durations.
+    ponytail: full scan — fine for thousands of runs; push to SQL if it ever isn't."""
+    cur = _exec("SELECT username, workshop, session, started_at, finished_at, feedback_at "
+                "FROM runs ORDER BY id")
+    return _rows(cur)
 
 
 # --- settings (admin-set banner, etc.) --------------------------------------

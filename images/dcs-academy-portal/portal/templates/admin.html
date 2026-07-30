@@ -8,6 +8,60 @@
   <p class="muted"><strong>{{ overall.n }}</strong> responses · avg rating {{ avg(overall.avg_rating) }}
      · avg clarity {{ avg(overall.avg_clarity) }} · {{ overall.n_comment }} comments</p>
 
+  <div class="statbar">
+    <div class="stat"><span class="stat-n">{{ usage.started }}</span><span class="stat-l">runs started</span></div>
+    <div class="stat"><span class="stat-n">{{ usage.finished }}</span><span class="stat-l">finished</span></div>
+    <div class="stat"><span class="stat-n">{{ usage.with_feedback }}</span><span class="stat-l">with feedback</span></div>
+    <div class="stat"><span class="stat-n">{{ usage.users }}</span><span class="stat-l">learners</span></div>
+    <div class="stat"><span class="stat-n">{{ usage.total_min|mins }}</span><span class="stat-l">time spent</span></div>
+    <div class="stat"><span class="stat-n">{{ usage.avg_per_user_min|mins }}</span><span class="stat-l">avg / learner</span></div>
+  </div>
+
+  <h2>Usage</h2>
+  <table class="tbl">
+    <tr><th>Metric</th><th>Value</th><th>What it means</th></tr>
+    <tr><td>Runs started</td><td>{{ usage.started }}</td>
+        <td>Every launch, all time — a learner repeating a lab counts again.</td></tr>
+    <tr><td>Runs finished</td><td>{{ usage.finished }} ({{ usage.completion|pct }})</td>
+        <td>Reached the end of the lab (feedback form / console Finish).</td></tr>
+    <tr><td>Finished with feedback</td><td>{{ usage.with_feedback }} ({{ usage.feedback_rate|pct }} of finished)</td>
+        <td>Actually submitted the end-of-lab form.</td></tr>
+    <tr><td>Not finished</td><td>{{ usage.abandoned }}</td>
+        <td>Started, never completed — still running, or dropped out.</td></tr>
+    <tr><td>Individual learners</td><td>{{ usage.users }}</td>
+        <td>Distinct identities that ever started a lab.</td></tr>
+    <tr><td>Active in last {{ usage.recent_days }} days</td><td>{{ usage.recent_users }}</td>
+        <td>Distinct learners who started a lab recently.</td></tr>
+    <tr><td>Runs per learner</td><td>{{ '%.1f'|format(usage.runs_per_user) if usage.runs_per_user else '—' }}</td>
+        <td>How many labs (or repeats) the average learner starts.</td></tr>
+    <tr><td>Total time spent</td><td>{{ usage.total_min|mins }}</td>
+        <td>Sum over all finished, timed runs of all learners.</td></tr>
+    <tr><td>Average per learner</td><td>{{ usage.avg_per_user_min|mins }}</td>
+        <td>Over learners with at least one timed run.</td></tr>
+    <tr><td>Average per run</td><td>{{ usage.avg_per_run_min|mins }}</td>
+        <td>Across all labs — per-lab figures below.</td></tr>
+    <tr><td>Timed runs</td><td>{{ usage.timed }}{% if usage.outliers %}, {{ usage.outliers }} excluded{% endif %}</td>
+        <td>Runs with a start and an end. Runs over {{ usage.max_run_hours }} h are
+            excluded from all durations (tab left open, not lab time).</td></tr>
+  </table>
+
+  <h2>Time per lab</h2>
+  <p class="muted">Median is the one to plan with — the average is pulled up by
+     learners who wander off mid-lab. <strong>Δ</strong> = median minus the duration the
+     lab advertises; positive means the lab takes longer than we promise.</p>
+  <table class="tbl">
+    <tr><th>Lab</th><th>Started</th><th>Finished</th><th>Compl.</th><th>Timed</th>
+        <th>Median</th><th>Avg</th><th>Fastest</th><th>Slowest</th><th>Planned</th><th>Δ</th></tr>
+    {% for l in usage.labs %}
+    <tr><td>{{ l.title }}</td><td>{{ l.started }}</td><td>{{ l.finished }}</td>
+      <td>{{ l.completion|pct }}</td><td>{{ l.n }}</td>
+      <td><strong>{{ l.median_min|mins }}</strong></td><td>{{ l.avg_min|mins }}</td>
+      <td>{{ l.min_min|mins }}</td><td>{{ l.max_min|mins }}</td>
+      <td>{{ l.planned_min|mins }}</td>
+      <td>{% if l.delta_min is none %}—{% else %}{{ '+' if l.delta_min > 0 }}{{ l.delta_min|round|int }} min{% endif %}</td></tr>
+    {% else %}<tr><td colspan="11" class="muted">No runs recorded yet.</td></tr>{% endfor %}
+  </table>
+
   <h2>Site banner</h2>
   <p class="muted">Shown to everyone on the landing page (maintenance notices, announcements). Empty = hidden. Markdown supported (bold, lists, links); blank lines separate paragraphs.</p>
   <form method="post" action="{{ url_for('admin_banner') }}" class="banner-form">

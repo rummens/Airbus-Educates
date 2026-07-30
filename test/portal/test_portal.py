@@ -73,6 +73,61 @@ def test_progress(db):
     assert feedback.user_progress("") == {}                  # anon → empty
 
 
+def test_runs_accumulate_and_stamp_once(db):
+    feedback.start_run("alice", "lab-a01", "s1")
+    feedback.start_run("alice", "lab-a01", "s2")            # repeat → second row
+    feedback.start_run("bob", "lab-a02", "s3")
+    feedback.finish_run("alice", "lab-a01")                  # console-lab Finish
+    feedback.finish_run("alice", "lab-a01", with_feedback=True)   # then the form
+    feedback.start_run("", "lab-a01", "")                    # anon → not recorded
+    rows = feedback.runs()
+    assert len(rows) == 3
+    # Both stamps land on the SAME (newest) run, not on the older abandoned one.
+    newest = [r for r in rows if r["session"] == "s2"][0]
+    older = [r for r in rows if r["session"] == "s1"][0]
+    assert newest["finished_at"] and newest["feedback_at"]
+    assert older["finished_at"] is None and older["feedback_at"] is None
+    assert [r for r in rows if r["username"] == "bob"][0]["finished_at"] is None
+
+
+def test_run_stats_rollup(db, monkeypatch):
+    from datetime import datetime, timedelta, timezone
+
+    def run(user, ws, start_min_ago, dur_min=None, fb=False):
+        t0 = datetime.now(timezone.utc) - timedelta(minutes=start_min_ago)
+        feedback._exec("INSERT INTO runs(username,workshop,session,started_at,finished_at,"
+                       "feedback_at) VALUES(?,?,?,?,?,?)",
+                       (user, ws, None, t0.isoformat(timespec="seconds"),
+                        (t0 + timedelta(minutes=dur_min)).isoformat(timespec="seconds")
+                        if dur_min else None,
+                        (t0 + timedelta(minutes=dur_min)).isoformat(timespec="seconds")
+                        if (dur_min and fb) else None))
+
+    run("alice", "l1", 100, 40, fb=True)
+    run("alice", "l1", 60, 60)                 # same lab again, slower, no feedback
+    run("bob", "l1", 50, 20, fb=True)
+    run("bob", "l2", 30, None)                 # still running / abandoned
+    run("carol", "l1", 60 * 24 * 30, 700)      # 11h+ → outlier, and >7 days ago
+    courses = [{"name": "l1", "title": "Lab One", "duration": "30 min"},
+               {"name": "l2", "title": "Lab Two", "duration": "1 h"}]
+    st = appmod._run_stats(courses)
+
+    assert (st["started"], st["finished"], st["with_feedback"]) == (5, 4, 2)
+    assert st["abandoned"] == 1
+    assert st["users"] == 3 and st["recent_users"] == 2      # carol is 30 days old
+    assert st["timed"] == 3 and st["outliers"] == 1          # carol's 700 min dropped
+    assert abs(st["total_min"] - 120) < 0.5                  # 40 + 60 + 20
+    assert abs(st["avg_per_user_min"] - 60) < 0.5            # alice 100, bob 20
+    l1 = [l for l in st["labs"] if l["workshop"] == "l1"][0]
+    assert l1["title"] == "Lab One" and l1["started"] == 4 and l1["n"] == 3
+    assert abs(l1["median_min"] - 40) < 0.5                  # 20, 40, 60
+    assert abs(l1["avg_min"] - 40) < 0.5
+    assert l1["min_min"] < l1["max_min"]
+    assert l1["planned_min"] == 30 and abs(l1["delta_min"] - 10) < 0.5   # 10 min over
+    l2 = [l for l in st["labs"] if l["workshop"] == "l2"][0]
+    assert l2["n"] == 0 and l2["median_min"] is None and l2["completion"] == 0.0
+
+
 def test_settings_banner(db):
     assert feedback.get_setting("banner", "") == ""          # unset → default
     feedback.set_setting("banner", "Maintenance Sat 20:00")
@@ -452,6 +507,20 @@ def test_admin_can_set_banner(client, monkeypatch):
     assert r.status_code == 302
     assert feedback.get_setting("banner") == "Hello from admin"
     assert b"Hello from admin" in client.get("/").data
+
+
+def test_admin_renders_usage_stats(client, monkeypatch):
+    monkeypatch.setattr(k8sclient, "user_can_admin", lambda tok: True)
+    monkeypatch.setattr(k8sclient, "list_sessions", lambda: [])
+    ws = k8sclient.list_courses()[0]["name"]
+    feedback.start_run("alice", ws, "s1")
+    feedback.finish_run("alice", ws, with_feedback=True)
+    feedback.start_run("bob", ws, "s2")               # started, never finished
+    body = client.get("/admin").data.decode()
+    assert "runs started" in body and "Time per lab" in body
+    assert ">2</span><span class=\"stat-l\">runs started" in body
+    assert ">1</span><span class=\"stat-l\">learners" not in body      # two learners
+    assert "0 min" in body or "min" in body           # duration column rendered
 
 
 # --- /admin/rescan (PostSync hook trigger) ----------------------------------

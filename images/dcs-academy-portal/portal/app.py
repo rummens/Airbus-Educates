@@ -154,6 +154,18 @@ def create_app():
             dt = dt.replace(tzinfo=timezone.utc)
         return dt.astimezone(tz).strftime("%d.%m.%Y %H:%M")
 
+    @app.template_filter("mins")
+    def _mins(v):
+        """Minutes (float) → '42 min' / '3 h 07 min'. '—' when unknown."""
+        if v is None:
+            return "—"
+        m = int(round(v))
+        return f"{m // 60} h {m % 60:02d} min" if m >= 60 else f"{m} min"
+
+    @app.template_filter("pct")
+    def _pct(v):
+        return "—" if v is None else f"{v:.0f}%"
+
     def _icon(name, cls="ic"):
         svg = ICONS.get(name) or ICONS.get(resolve_icon(name, "dot"), ICONS["dot"])
         return (f'<svg class="{cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
@@ -274,6 +286,7 @@ def create_app():
             return render_template("launch.html", course=c, error=str(e),
                                    session_name="", target="", steps=steps, t0=0), 502
         session_name = sess.get("name", "")
+        _safe(lambda: feedback.start_run(_user(), name, session_name))
         target = _abs_session_url(sess.get("url", ""))
         if consolelab.is_console_lab(c):
             # The console lab runs in the OpenShift console, not the Educates
@@ -315,6 +328,7 @@ def create_app():
         if not c:
             abort(404)
         _safe(lambda: feedback.mark_progress(_user(), name, "completed"))
+        _safe(lambda: feedback.finish_run(_user(), name))
         session_name = request.args.get("session", "")
         if session_name:
             mine = {s["name"] for s in _my_sessions(_user())}
@@ -372,6 +386,9 @@ def create_app():
                         f.get("rating"), f.get("clarity"), f.get("comment"))
         # Submitting end-of-lab feedback marks the workshop completed for the user.
         _safe(lambda: feedback.mark_progress(_user(), f.get("workshop"), "completed"))
+        # Terminal labs reach the form directly, so this is also where their run
+        # gets its finished_at (console labs already have one — COALESCE keeps it).
+        _safe(lambda: feedback.finish_run(_user(), f.get("workshop"), with_feedback=True))
         return render_template("thanks.html")
 
     @app.route("/analytics", methods=["POST"])
@@ -390,6 +407,7 @@ def create_app():
         rows, overall = feedback.aggregates()
         return render_template("admin.html", rows=rows, overall=overall,
                                comments=feedback.comments(), sessions=_usage(),
+                               usage=_run_stats(_safe(k8sclient.list_courses) or []),
                                banner=_banner(), is_admin=True)
 
     @app.route("/admin/banner", methods=["POST"])
@@ -544,6 +562,100 @@ def _parse_minutes(text):
     val = float(m.group(1))
     unit = (m.group(2) or "min").lower()
     return int(val * 60) if unit.startswith("h") else int(val)
+
+
+def _ts(v):
+    """Stored timestamp → aware datetime (psycopg hands back datetime, sqlite ISO text)."""
+    from datetime import datetime, timezone
+    if not v:
+        return None
+    try:
+        dt = v if isinstance(v, datetime) else datetime.fromisoformat(str(v))
+    except ValueError:
+        return None
+    return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt
+
+
+# A run open longer than this is a tab left open overnight, not lab time — counted
+# as a run, excluded from the duration stats (and reported, so the number is honest).
+MAX_RUN_SECONDS = 8 * 3600
+RECENT_DAYS = 7
+
+
+def _run_stats(courses):
+    """Accumulating usage rollup from the runs table: funnel (started → finished →
+    with feedback), distinct learners, time spent, and per-lab timings — the last
+    being the number that should inform each lab's planned duration."""
+    from datetime import datetime, timedelta, timezone
+    rows = _safe(feedback.runs) or []
+    titles = {c["name"]: c.get("title") or c["name"] for c in courses}
+    planned = {c["name"]: _parse_minutes(c.get("duration")) for c in courses}
+    cutoff = datetime.now(timezone.utc) - timedelta(days=RECENT_DAYS)
+
+    per_ws, per_user, users, recent = {}, {}, set(), set()
+    started = finished = with_fb = outliers = 0
+    for r in rows:
+        ws = per_ws.setdefault(r["workshop"],
+                               {"started": 0, "finished": 0, "fb": 0, "times": []})
+        ws["started"] += 1
+        started += 1
+        users.add(r["username"])
+        if r["finished_at"]:
+            ws["finished"] += 1
+            finished += 1
+        if r["feedback_at"]:
+            ws["fb"] += 1
+            with_fb += 1
+        t0, t1 = _ts(r["started_at"]), _ts(r["finished_at"] or r["feedback_at"])
+        if t0 and t0 >= cutoff:
+            recent.add(r["username"])
+        if not (t0 and t1):
+            continue                  # still running or abandoned — no duration to count
+        secs = (t1 - t0).total_seconds()
+        if secs <= 0:
+            continue
+        if secs > MAX_RUN_SECONDS:
+            outliers += 1
+            continue
+        ws["times"].append(secs)
+        per_user[r["username"]] = per_user.get(r["username"], 0) + secs
+
+    labs = []
+    for name, d in per_ws.items():
+        xs = sorted(d["times"])
+        n = len(xs)
+        med = (xs[n // 2] if n % 2 else (xs[n // 2 - 1] + xs[n // 2]) / 2) / 60 if n else None
+        plan = planned.get(name) or 0
+        labs.append({
+            "workshop": name, "title": titles.get(name, name),
+            "started": d["started"], "finished": d["finished"], "fb": d["fb"],
+            "completion": (100.0 * d["finished"] / d["started"]) if d["started"] else None,
+            "n": n,
+            "median_min": med,
+            "avg_min": (sum(xs) / n / 60) if n else None,
+            "min_min": (xs[0] / 60) if n else None,
+            "max_min": (xs[-1] / 60) if n else None,
+            "planned_min": plan or None,
+            # Median vs the CR's advertised duration: positive = the lab takes
+            # longer than we tell learners it will.
+            "delta_min": (med - plan) if (med is not None and plan) else None,
+        })
+    labs.sort(key=lambda r: (-r["started"], r["title"]))
+    total_min = sum(per_user.values()) / 60
+    return {
+        "started": started, "finished": finished, "with_feedback": with_fb,
+        "abandoned": started - finished,
+        "users": len(users), "recent_users": len(recent), "recent_days": RECENT_DAYS,
+        "runs_per_user": (started / len(users)) if users else None,
+        "completion": (100.0 * finished / started) if started else None,
+        "feedback_rate": (100.0 * with_fb / finished) if finished else None,
+        "total_min": total_min,
+        "avg_per_user_min": (total_min / len(per_user)) if per_user else None,
+        "avg_per_run_min": (total_min / sum(l["n"] for l in labs)) if total_min else None,
+        "timed": sum(l["n"] for l in labs), "outliers": outliers,
+        "max_run_hours": MAX_RUN_SECONDS // 3600,
+        "labs": labs,
+    }
 
 
 def _catalog_stats(courses, tracks):
