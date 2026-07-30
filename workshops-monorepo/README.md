@@ -251,3 +251,7 @@ Keep these in sync between the two: `educates.portalName` and the academy
 ```bash
 helm template dcs-workshops .
 ```
+
+## Examiner Permission fix
+Windows removes the execution permission from linux files. This causes examiner scripts to fail in the sessions.
+To fix this, we can use this command: `git ls-files -z 'tracks/*/*/workshop/examiner/tests/*' | xargs -0 git update-index --chmod=+x`
