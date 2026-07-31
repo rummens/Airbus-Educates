@@ -10,7 +10,7 @@
 # Selective triggering is done with `rules: changes:` (per-job) plus, for the cluster smoke
 # job, test/ci/changed.py (only re-smokes the workshops whose files actually changed).
 
-stages: [test, e2e]
+stages: [test, e2e, fix-perms]
 
 variables:
   COVERAGE_MIN: "90"
@@ -49,6 +49,48 @@ workshop-static:
     #        {{< param dcs_docs_base_url >}} links too (placeholder host = listed only);
     # labels: each lab's dev/prod lifecycle label matches its Route usage.
     - bash test/ci/run-workshops.sh
+
+
+fix-examiner-perms:
+  stage: fix-perms
+  # Air-gapped: swap for a git-capable image you have mirrored internally.
+  image: ${HARBOR_HOST}/${HARBOR_IMAGES_PROJECT}/${RELEASE_IMAGE}
+  tags:
+    - ${RUNNER_TAG}
+  rules:
+    # Branch pushes only. Our own fix commit carries [skip ci] so GitLab won't create
+    # a pipeline for it (no recursion); excluding tags/MRs here is belt-and-suspenders.
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH'
+  variables:
+    GIT_STRATEGY: clone
+    GIT_DEPTH: "0"                 # full clone — clean push of the new commit
+    BOT_NAME: "DCS CI perm-fixer"
+    BOT_EMAIL: "ci-bot@dcs.local"
+  script:
+    - set -eu
+    - |
+      # examiner test files whose git-tracked mode is not 100755. Anchored on
+      # /examiner/tests/ so it works at any nesting (tracks/ at root or deeper) and
+      # catches subdir-prefixed tests too.
+      bad=$(git ls-files -s | awk '$4 ~ /\/examiner\/tests\// && $1 != "100755" { print $4 }')
+      if [ -z "$bad" ]; then
+        echo "OK: every examiner test file is executable (100755). Nothing to fix."
+        exit 0
+      fi
+      echo "Non-executable examiner tests (mode != 100755):"
+      printf '  %s\n' $bad
+      printf '%s\n' $bad | xargs git update-index --chmod=+x
+      echo "Re-asserted +x on $(printf '%s\n' $bad | wc -l | tr -d ' ') file(s)."
+    - |
+      # Commit + push the mode fix back to the same branch. [skip ci] stops re-trigger.
+      test -n "${GIT_PUSH_TOKEN:-}" || { echo "ERROR: GIT_PUSH_TOKEN unset (need a write_repository token)"; exit 1; }
+      git config user.name  "$BOT_NAME"
+      git config user.email "$BOT_EMAIL"
+      git remote set-url origin "https://oauth2:${GIT_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+      git commit -m "ci: chmod +x examiner test scripts [skip ci]"
+      # HEAD:branch — CI runs on detached HEAD; push the new commit onto the branch ref.
+      # No --force: if the branch advanced meanwhile the job fails instead of clobbering.
+      git push origin "HEAD:${CI_COMMIT_BRANCH}"
 
 # ---------- CLUSTER TIER (needs a crc runner; does not block merges) ----------
 
