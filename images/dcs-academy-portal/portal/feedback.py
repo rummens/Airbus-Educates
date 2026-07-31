@@ -75,6 +75,27 @@ def _c():
         return _conn
 
 
+def _close_locked():
+    """Close and forget the pooled connection. Caller already holds _lock.
+
+    Dropping the reference alone leaks the handle (and trips ResourceWarning) — it matters
+    on the reconnect path, which runs for the lifetime of the pod."""
+    global _conn
+    c, _conn = _conn, None
+    if c is None:
+        return
+    try:
+        c.close()
+    except Exception:            # noqa: BLE001 — an already-dead link needs no closing
+        pass
+
+
+def close():
+    """Drop the pooled connection (re-init, reconnect, and test teardown)."""
+    with _lock:
+        _close_locked()
+
+
 def _rows(cur):
     """Normalise rows to dicts across sqlite (Row) and psycopg (tuple)."""
     cols = [d[0] for d in cur.description]
@@ -83,6 +104,7 @@ def _rows(cur):
 
 def init_db():
     with _lock:
+        _close_locked()          # re-init must not abandon the previous handle
         conn = _connect()
         globals()["_conn"] = conn
         for stmt in (SCHEMA_PG if _IS_PG else SCHEMA_SQLITE):
@@ -112,7 +134,7 @@ def _exec(sql, args=()):
             if attempt == 2:
                 raise
             with _lock:
-                _conn = None
+                _close_locked()
 
 
 def insert(workshop, session, source, rating, clarity, comment):

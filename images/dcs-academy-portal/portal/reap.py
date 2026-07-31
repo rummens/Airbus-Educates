@@ -24,7 +24,7 @@ Detection is deliberately conservative — it never touches a healthy, current s
 import logging
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 
 from . import config as cfg
 from . import k8sclient
@@ -268,7 +268,7 @@ def demo():
     def sess(name, env, phase, age):
         return {"metadata": {"name": name,
                              "creationTimestamp":
-                                 datetime.utcfromtimestamp(now - age).strftime("%Y-%m-%dT%H:%M:%SZ")},
+                                 datetime.fromtimestamp(now - age, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")},
                 "spec": {"environment": {"name": env}},
                 "status": {"educates": {"phase": phase}}}
     live = {"env-current"}
@@ -286,7 +286,7 @@ def demo():
     def env(name, ws, age):
         return {"metadata": {"name": name,
                              "creationTimestamp":
-                                 datetime.utcfromtimestamp(now - age).strftime("%Y-%m-%dT%H:%M:%SZ")},
+                                 datetime.fromtimestamp(now - age, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")},
                 "spec": {"workshop": {"name": ws}}}
     envs = [
         env("wcurrent", "lab-live", 5000),      # keep: current env for a live workshop

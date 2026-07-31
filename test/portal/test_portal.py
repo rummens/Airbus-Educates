@@ -37,9 +37,10 @@ from portal.app import create_app                # noqa: E402
 def db(tmp_path, monkeypatch):
     """Isolated sqlite DB per test (fresh connection + file)."""
     monkeypatch.setattr(cfg, "FEEDBACK_DB", str(tmp_path / "t.db"))
-    monkeypatch.setattr(feedback, "_conn", None)
+    feedback.close()          # hand back the previous test's handle instead of leaking it
     feedback.init_db()
     yield
+    feedback.close()
 
 
 @pytest.fixture
@@ -178,11 +179,11 @@ def test_trophies_bound_to_identity(db):
     assert appmod._trophies("", _TROPHY_COURSES)["done"] == 0        # anon → nothing
 
 
-def test_trophies_persist_across_reconnect(db, monkeypatch):
+def test_trophies_persist_across_reconnect(db):
     feedback.mark_progress("alice", "l1", "completed")
     # Simulate a restart / new session: drop the connection, reconnect to the same
     # file. Progress (and therefore trophies) must survive.
-    monkeypatch.setattr(feedback, "_conn", None)
+    feedback.close()
     assert feedback.user_progress("alice") == {"l1": "completed"}
     assert appmod._trophies("alice", _TROPHY_COURSES)["done"] == 1
 
@@ -998,7 +999,11 @@ def test_route_http_ok(monkeypatch):
 
     def _raise_http(code):
         def _f(*a, **k):
-            raise urllib.error.HTTPError("u", code, "m", {}, None)
+            # HTTPError is itself a response object; closing it releases the temp file
+            # urllib gives it when fp is None (otherwise the GC reports a ResourceWarning).
+            err = urllib.error.HTTPError("u", code, "m", {}, None)
+            err.close()
+            raise err
         return _f
     monkeypatch.setattr(urllib.request, "urlopen", _raise_http(401))
     assert k8sclient._route_http_ok("https://s.apps.test/") is True   # oauth handshake = serving
@@ -1013,11 +1018,11 @@ def test_route_http_ok(monkeypatch):
 
 
 def test_reap_find_orphans():
-    from datetime import datetime
+    from datetime import datetime, timezone
     now = 1_000_000.0
 
     def sess(name, env, phase, age):
-        ts = datetime.utcfromtimestamp(now - age).strftime("%Y-%m-%dT%H:%M:%SZ")
+        ts = datetime.fromtimestamp(now - age, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         return {"metadata": {"name": name, "creationTimestamp": ts},
                 "spec": {"environment": {"name": env}},
                 "status": {"educates": {"phase": phase}}}

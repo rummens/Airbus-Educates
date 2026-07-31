@@ -54,14 +54,23 @@ def test_slides_off_when_root_unset(monkeypatch):
 
 def test_routes(checkout):
     c = create_app().test_client()
+
+    def get(path, **kw):
+        """Close each response: a slide file is served with send_file, so an unclosed
+        response leaves the file handle to the garbage collector (ResourceWarning)."""
+        r = c.get(path, **kw)
+        r.get_data()          # buffer the body first, then release the handle
+        r.close()
+        return r
+
     # trailing-slash canonical form serves the deck; bare form redirects to it
-    assert c.get(f"/slides/{LAB}/").status_code == 200
-    assert c.get(f"/slides/{LAB}", follow_redirects=False).status_code in (301, 308)
-    assert b"deck" in c.get(f"/slides/{LAB}/").data
-    assert c.get(f"/slides/{LAB}/slides.md").status_code == 200
-    assert c.get("/slides/lab-nope/").status_code == 404
+    assert get(f"/slides/{LAB}/").status_code == 200
+    assert get(f"/slides/{LAB}", follow_redirects=False).status_code in (301, 308)
+    assert b"deck" in get(f"/slides/{LAB}/").data
+    assert get(f"/slides/{LAB}/slides.md").status_code == 200
+    assert get("/slides/lab-nope/").status_code == 404
     # traversal is blocked by werkzeug safe_join
-    assert c.get(f"/slides/{LAB}/../../../../etc/passwd").status_code in (400, 404)
+    assert get(f"/slides/{LAB}/../../../../etc/passwd").status_code in (400, 404)
 
 
 if __name__ == "__main__":

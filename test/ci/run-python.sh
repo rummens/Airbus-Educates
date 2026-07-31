@@ -10,7 +10,9 @@ echo "=== portal unit tests (pytest, coverage gate ${MIN}%) ==="
 # The whole directory, not just test_portal.py — test_slides.py and
 # test_reap_validate.py used to be collected by nobody, so their modules counted as
 # uncovered and the gate failed on code that IS tested.
-python3 -m pytest test/portal \
+# -W error::ResourceWarning — a leaked DB connection / file handle is a real defect in a
+# long-lived pod, and as a mere warning it was 80 lines of noise nobody read. Errors now.
+python3 -m pytest test/portal -W error::ResourceWarning \
     --cov=portal --cov-report=term-missing "--cov-fail-under=${MIN}" -q
 rc=$?
 
