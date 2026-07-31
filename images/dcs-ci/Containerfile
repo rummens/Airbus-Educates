@@ -9,8 +9,11 @@
 # NOT for the cluster tier (stage `e2e`): those jobs run on the `crc`-tagged
 # runner, which owns `oc` and a kubeconfig — no image pin, nothing to bake here.
 #
-# Deliberately does NOT pip-install the portal requirements: they change with the
-# portal and are installed per-job (pip install -r ...) so this image stays stable.
+# Bakes the portal's python requirements + pytest-cov as well. The target CI runners are
+# AIR-GAPPED: a per-job `pip install -r requirements.txt` needs a package index they do not
+# have, so the deps must ship in the image. requirements.txt is read from the portal dir
+# (build context is images/, see build.sh) — no second copy of the pin list to drift.
+# Consequence: rebuild + re-mirror this image when requirements.txt changes.
 #
 # Pinned to Debian 12 (bookworm), NOT the bare `3.13-slim` tag: that now tracks
 # Debian 13 (trixie), whose glibc uses instructions Docker's bundled QEMU mishandles,
@@ -27,3 +30,10 @@ RUN set -eux; \
     apt-get install -y -qq --no-install-recommends git curl ca-certificates; \
     rm -rf /var/lib/apt/lists/*; \
     git --version; curl --version | head -1
+
+# Path is relative to the images/ build context, not to this file.
+COPY dcs-academy-portal/requirements.txt /tmp/requirements.txt
+RUN set -eux; \
+    pip install --no-cache-dir -r /tmp/requirements.txt pytest-cov; \
+    rm /tmp/requirements.txt; \
+    python -c "import flask, pytest, pytest_cov, kubernetes, psycopg, markdown"

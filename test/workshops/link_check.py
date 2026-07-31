@@ -163,7 +163,7 @@ def classify(raw, params):
     return "relative", url
 
 
-def check_workshop(name, subpath, params, cache, check_internal):
+def check_workshop(name, subpath, params, cache, check_internal, skip_external=False):
     files = learner_facing_files(subpath)
     if not files:
         return None, [f"{YEL}skip{RST} {name}: no content/slides/README"], []
@@ -195,6 +195,8 @@ def check_workshop(name, subpath, params, cache, check_internal):
                         bad.append((where, url, f"internal link HTTP {cache[url] or 'ERR'}"))
             else:  # external
                 n_ext += 1
+                if skip_external:
+                    continue          # air-gapped runner: counted + reported, not fetched
                 code = cache.setdefault(url, curl_code(url))
                 v = code_verdict(code)
                 if v == "bad":
@@ -206,7 +208,9 @@ def check_workshop(name, subpath, params, cache, check_internal):
     head = f"{GREEN if ok else RED}{'PASS' if ok else 'FAIL'}{RST}"
     intnote = f", {n_int} internal {'(checked)' if check_internal else '(air-gapped, not fetched)'}"
     softnote = f", {len(set(u for _, u, _ in soft))} bot-blocked" if soft else ""
-    lines.append(f"{head} {name}: {len(files)} files, {n_ext} external, {n_rel} relative{intnote}{softnote}")
+    extnote = " (offline, not fetched)" if skip_external else ""
+    lines.append(f"{head} {name}: {len(files)} files, {n_ext} external{extnote}, "
+                 f"{n_rel} relative{intnote}{softnote}")
     for (f, ln), url, why in bad:
         lines.append(f"     {RED}{why}{RST}  {url}  {DIM}({f.relative_to(dw.REPO_ROOT)}:{ln}){RST}")
     for (f, ln), url, code in soft:
@@ -222,6 +226,9 @@ def main():
                    help="override a config param (e.g. dcs_docs_base_url=https://docs.internal)")
     p.add_argument("--check-internal", action="store_true",
                    help="also fetch internal/param links (only works on a network that can reach them)")
+    p.add_argument("--skip-external", action="store_true",
+                   help="don't fetch public links (air-gapped runner has no internet). They are "
+                        "still counted and the relative/internal checks still run.")
     p.add_argument("--require-real-docs-url", action="store_true",
                    help="fail if the effective dcs_docs_base_url is still a placeholder host "
                         "(those links ship as 404s; CI uses this so a placeholder can't pass silently)")
@@ -247,7 +254,8 @@ def main():
         params = load_params(subpath)
         params.update(shared)                # shared chart values beat the lab's offline default
         params.update(overrides)             # --param wins over everything
-        ok, report, bad = check_workshop(nm, subpath, params, cache, args.check_internal)
+        ok, report, bad = check_workshop(nm, subpath, params, cache, args.check_internal,
+                                         args.skip_external)
         for ln in report:
             print(ln)
         failures += bad
@@ -257,6 +265,9 @@ def main():
         print(f"\n{RED}BROKEN LINKS ({len(failures)}){RST} — a learner following these hits a 404 / missing image:")
         for nm, f, ln, url, why in failures:
             print(f"  {f.relative_to(dw.REPO_ROOT)}:{ln}  {RED}{why}{RST}  {url}  {DIM}[{nm}]{RST}")
+    elif args.skip_external:
+        print(f"\n{GREEN}all relative + internal links resolve{RST} "
+              f"{YEL}(public links not fetched — offline mode){RST}")
     else:
         print(f"\n{GREEN}all reachable links resolve.{RST}")
 

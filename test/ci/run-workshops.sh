@@ -44,6 +44,10 @@ echo "########## links: content + slides + exercises + console labs ##########"
 #   DCS_DOCS_CHECK_INTERNAL true only on a runner that can actually reach that host; then
 #                           the links are fetched as well, not just accepted as real.
 LINK_ARGS=(--all)
+# Air-gapped runner: no route to docs.openshift.com / kubernetes.io. Fetching them would
+# fail every public link for a network reason, which says nothing about the content — so
+# count and list them instead. Everything else (relative targets, the docs-URL guard) runs.
+case "${LINK_CHECK_SKIP_EXTERNAL:-}" in 1|true|yes) LINK_ARGS+=(--skip-external) ;; esac
 if [ -n "${DCS_DOCS_BASE_URL:-}" ]; then
   LINK_ARGS+=(--param "dcs_docs_base_url=$DCS_DOCS_BASE_URL")
   case "${DCS_DOCS_CHECK_INTERNAL:-}" in 1|true|yes) LINK_ARGS+=(--check-internal) ;; esac

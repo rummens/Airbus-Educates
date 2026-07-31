@@ -12,15 +12,15 @@ REG="${REG:-ghcr.io/rummens}"
 MULTIARCH="${MULTIARCH:-1}"
 cd "$(dirname "$0")"
 
-build_push() {           # <dir> <image> [extra_tag]
-  local dir="$1" img="$2" extra="${3:-}"
+build_push() {           # <dir> <image> [extra_tag] [context]
+  local dir="$1" img="$2" extra="${3:-}" ctx="${4:-$1}"
   if [ -n "${MULTIARCH:-}" ]; then
     echo "Building Multiarch"
     docker buildx build --platform linux/amd64,linux/arm64 \
-      -f "$dir/Containerfile" -t "$REG/$img" ${extra:+-t "$REG/$extra"} --push "$dir"
+      -f "$dir/Containerfile" -t "$REG/$img" ${extra:+-t "$REG/$extra"} --push "$ctx"
   else
     echo "Buidling ARM only"
-    docker build --platform linux/arm64 -f "$dir/Containerfile" -t "$REG/$img" "$dir"
+    docker build --platform linux/arm64 -f "$dir/Containerfile" -t "$REG/$img" "$ctx"
     docker push "$REG/$img"
     if [ -n "$extra" ]; then docker tag "$REG/$img" "$REG/$extra"; docker push "$REG/$extra"; fi
   fi
@@ -30,5 +30,7 @@ build_push dcs-workshop-base dcs-workshop-base:develop
 build_push hello-dcs hello-dcs:dev samples/hello-dcs:1.0
 build_push dcs-academy-portal dcs-academy-portal:dev
 build_push educates-mirror educates-mirror:dev
-build_push dcs-ci dcs-ci:dev
+# Context is images/ (not images/dcs-ci): the CI image bakes the portal's
+# requirements.txt so air-gapped runners pip-install nothing.
+build_push dcs-ci dcs-ci:dev "" .
 echo "done -> $REG/{dcs-workshop-base:develop, hello-dcs:dev, samples/hello-dcs:1.0, dcs-academy-portal:dev, educates-mirror:dev, dcs-ci:dev}"

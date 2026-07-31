@@ -1,60 +1,83 @@
 # DCS Academy test pipeline.
 #
 # Two tiers, split by whether they need a cluster:
-#   FAST (stage: test)     — no cluster; runs on plain python; blocks merges. Path-gated so a
-#                            python-only change skips workshop jobs and vice-versa.
+#   FAST (stage: test)     — no cluster; blocks merges. Every job carries `needs: []` so
+#                            they all start at once instead of waiting on a stage boundary.
 #   CLUSTER (stage: e2e)   — needs a live OpenShift/CRC runner (tag: crc); manual on MRs,
 #                            automatic on scheduled pipelines. Does NOT block merges (cluster
 #                            flakiness is not a code defect) — read its report before release.
 #
 # Selective triggering is done with `rules: changes:` (per-job) plus, for the cluster smoke
 # job, test/ci/changed.py (only re-smokes the workshops whose files actually changed).
+#
+# AIR-GAPPED INSTALLS — three CI variables, no YAML edits:
+#   CI_BASE_IMAGE   Harbor mirror of images/dcs-ci (python + git + curl + the portal's
+#                   python deps, all baked — the jobs pip-install nothing at runtime).
+#   LINK_CHECK_SKIP_EXTERNAL=true
+#                   the runner cannot reach docs.openshift.com / kubernetes.io, so those
+#                   links are counted and listed but not fetched. Everything else (relative
+#                   targets, the placeholder-docs-URL guard) still runs.
+#   DCS_DOCS_BASE_URL
+#                   the real internal docs host. Without it the link check FAILS: a
+#                   placeholder host means every DCS doc link ships as a 404.
+#                   Add DCS_DOCS_CHECK_INTERNAL=true on a runner that can reach that host
+#                   to fetch those links as well.
+# If your runners only take tagged jobs, add `tags: [$RUNNER_TAG]` to `.fast` below —
+# that is the one place the whole fast tier reads.
 
-stages: [test, e2e, fix-perms]
+stages: [test, e2e]
 
 variables:
   COVERAGE_MIN: "90"
   GIT_DEPTH: "0"                     # full history so changed.py can diff against the base
+  # Single knob for the fast tier's image. Override as a CI variable to point at Harbor.
+  CI_BASE_IMAGE: "ghcr.io/rummens/dcs-ci:dev"
+  RUNNER_TAG: "saas-linux-small-amd64"   # only used by jobs that opt into tags
+
+# `needs: []` = start immediately, in parallel with every other fast job. Without it a job
+# waits for its whole stage predecessor set, which serialises the tier for no reason.
+.fast:
+  stage: test
+  image: $CI_BASE_IMAGE
+  needs: []
 
 # ---------- FAST TIER (no cluster, blocks merges) ----------
 
 portal-tests:
-  stage: test
-  image: ghcr.io/rummens/dcs-ci:dev     # python + git + curl baked (images/dcs-ci)
+  extends: .fast
   rules:
     - changes:
         - images/dcs-academy-portal/**/*
         - test/portal/**/*
         - test/ci/**/*
+        - .gitlab-ci.yml
   before_script:
-    - pip install --quiet -r images/dcs-academy-portal/requirements.txt pytest-cov
+    # Baked into CI_BASE_IMAGE. The fallback only fires on an older image and needs a
+    # package index — air-gapped it fails loudly, which is the correct signal (rebuild
+    # and re-mirror images/dcs-ci) rather than a silent skip.
+    - python -c "import pytest_cov, flask" 2>/dev/null
+      || pip install --quiet -r images/dcs-academy-portal/requirements.txt pytest-cov
   script:
     - bash test/ci/run-python.sh
   coverage: '/^TOTAL\s+.*\s+(\d+%)$/'
 
 workshop-static:
-  stage: test
-  image: ghcr.io/rummens/dcs-ci:dev     # python + git + curl baked (images/dcs-ci)
+  extends: .fast
   rules:
     - changes:
         - workshops-monorepo/**/*
         - test/workshops/**/*
         - test/ci/**/*
+        - .gitlab-ci.yml
   script:
     # coverage: every workshop command has a smoke test (or an explicit exclude);
     # links: every link a learner can click — content, slides, exercises, README and
-    #        console-lab CRs — resolves (200 / reachable). Failures are repeated as one
-    #        flat file:line list at the end of the job log. Set the CI variable
-    #        DCS_DOCS_BASE_URL to the real internal docs host to fetch the
-    #        {{< param dcs_docs_base_url >}} links too (placeholder host = listed only);
+    #        console-lab CRs — resolves (200 / reachable / real docs host);
     # labels: each lab's dev/prod lifecycle label matches its Route usage.
     - bash test/ci/run-workshops.sh
 
-
 fix-examiner-perms:
-  stage: fix-perms
-  # Air-gapped: swap for a git-capable image you have mirrored internally.
-  image: ${HARBOR_HOST}/${HARBOR_IMAGES_PROJECT}/${RELEASE_IMAGE}
+  extends: .fast
   tags:
     - ${RUNNER_TAG}
   rules:
@@ -97,6 +120,7 @@ fix-examiner-perms:
 .cluster:
   stage: e2e
   tags: [crc]                        # a runner with `oc` logged in to the CRC/OpenShift test cluster
+  needs: []                          # cluster tier doesn't consume the fast tier's output
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
