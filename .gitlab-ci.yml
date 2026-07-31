@@ -52,11 +52,11 @@ portal-tests:
         - test/ci/**/*
         - .gitlab-ci.yml
   before_script:
-    # Baked into CI_BASE_IMAGE. The fallback only fires on an older image and needs a
-    # package index — air-gapped it fails loudly, which is the correct signal (rebuild
-    # and re-mirror images/dcs-ci) rather than a silent skip.
-    - python -c "import pytest_cov, flask" 2>/dev/null
-      || pip install --quiet -r images/dcs-academy-portal/requirements.txt pytest-cov
+    # NO install step: the runner has no package index. Every dependency is baked into
+    # CI_BASE_IMAGE (images/dcs-ci). This only asserts they are there, so a stale image
+    # says so in one line instead of failing later as "unrecognized arguments: --cov".
+    - python -c "import pytest_cov, flask, kubernetes, psycopg, markdown"
+      || { echo "CI_BASE_IMAGE ($CI_BASE_IMAGE) is missing test deps — rebuild images/dcs-ci (images/build.sh) and re-mirror it to Harbor."; exit 1; }
   script:
     - bash test/ci/run-python.sh
   coverage: '/^TOTAL\s+.*\s+(\d+%)$/'
