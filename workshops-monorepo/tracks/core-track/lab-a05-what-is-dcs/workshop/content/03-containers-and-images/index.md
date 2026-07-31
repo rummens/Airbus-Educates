@@ -15,7 +15,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/im
 
 ## From Virtual Machines to Containers
 
-A **virtual machine** carries a full operating system of its own, which makes it powerful
+A **virtual machine** carries a full operating system of its own, which makes it self-contained
 but heavy — it takes minutes to boot and gigabytes of disk. A
 [container](https://kubernetes.io/docs/concepts/containers/) carries only your application
 and the few libraries it needs, and shares the host's operating system kernel. The result:

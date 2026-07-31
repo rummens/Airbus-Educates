@@ -99,9 +99,36 @@
   </table>
 </section>
 
-<div id="modal" onclick="this.classList.remove('open')"><div id="modalbox"></div></div>
+<div id="modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div id="modalbox">
+    <div id="modaltext"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="copybtn" type="button" onclick="copyComment()">Copy</button>
+      <button class="btn btn-ghost" type="button"
+              onclick="document.getElementById('modal').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
 <script>
-function showComment(td){document.getElementById('modalbox').textContent=td.getAttribute('data-full');
+function showComment(td){document.getElementById('modaltext').textContent=td.getAttribute('data-full');
+  document.getElementById('copybtn').textContent='Copy';
   document.getElementById('modal').classList.add('open');}
+
+// Clipboard API needs a secure context; the academy route is https, but a plain-http
+// preview (port-forward) falls back to the old execCommand path.
+function copyComment(){
+  const txt = document.getElementById('modaltext').textContent, btn = document.getElementById('copybtn');
+  const done = ok => { btn.textContent = ok ? 'Copied' : 'Copy failed — select the text'; };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(txt).then(() => done(true), () => done(false));
+    return;
+  }
+  const ta = document.createElement('textarea');
+  ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  ta.remove(); done(ok);
+}
 </script>
 {% endblock %}

@@ -70,10 +70,10 @@ in the {{< param product_short >}} tenancy model — that is still just **Tenant
 Namespaces**, as A06 said.
 {{< /warning >}}
 
-## And that's it
+## The whole request, start to finish
 
-Basic path, start to finish: three fields, one usage choice, zero or more features,
-submit. Everything after that is automated.
+Three fields, one usage choice, zero or more features, submit. Everything after that is
+automated.
 
 {{< note >}}
 **Going further later.** Expert mode adds operators, capacity tiers (16 / 32 / 48 CPU) and

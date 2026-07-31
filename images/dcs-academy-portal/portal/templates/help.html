@@ -107,7 +107,9 @@
   <span class="eyebrow">Inside a lab</span>
   <h2>The session window</h2>
   <p>The screen is split in two: <b>instructions on the left</b>, your <b>work area on the
-     right</b>. You read a step on the left and carry it out on the right.</p>
+     right</b>. You read a step on the left and carry it out on the right — usually by clicking
+     the coloured boxes in the instructions rather than typing (see
+     <a href="#quick-actions">quick actions</a>).</p>
 
   <figure class="help-fig">
     <img class="help-shot" src="{{ url_for('static', filename='help-page/workshop-terminal.jpg') }}"
@@ -189,16 +191,20 @@
 
   <!-- ─────────────────────────────  Actions  ────────────────────────────── -->
   <span class="eyebrow">You rarely type</span>
-  <h2>Clickable actions</h2>
-  <p>Wherever the instructions show a coloured box, you can click it instead of typing:</p>
+  <h2 id="quick-actions">Quick actions — the clickable boxes</h2>
+  <p>Wherever the instructions show a coloured box, it is a button: click it instead of typing.
+     This is how a lab is meant to be worked through — read the step, click the box.</p>
   <div class="help-grid">
     <div class="help-card"><span class="tile-icon">{{ icon('terminal')|safe }}</span>
       <h3>Run a command</h3><p>Click a command box and it types and runs in the terminal for you.</p></div>
     <div class="help-card"><span class="tile-icon">{{ icon('edit')|safe }}</span>
-      <h3>Edit a file</h3><p>Click to open a file in the editor and apply the change — you watch
-      it happen, no hand-editing.</p></div>
+      <h3>Open or edit a file</h3><p>Click to open a file in the editor and apply the change — you
+      watch it happen, no hand-editing.</p></div>
     <div class="help-card"><span class="tile-icon">{{ icon('list-checks')|safe }}</span>
       <h3>Verify</h3><p>A check box runs a test to confirm the step worked before you move on.</p></div>
+    <div class="help-card"><span class="tile-icon">{{ icon('grid')|safe }}</span>
+      <h3>Open a tab</h3><p>Switches the right-hand side to the Terminal, Console, Editor or
+      Slides. Only one tab shows at a time — click the <b>Terminal</b> tab header to come back.</p></div>
   </div>
   <p class="help-note">If a box doesn't seem to do anything, make sure the right tab (usually
      Terminal) is visible, then click again.</p>

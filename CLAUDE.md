@@ -69,6 +69,14 @@ The portal **does** run on CRC arm64 (`OPENSSL_armcap=0`, enabled in
 isolates one lab, not because the portal is broken. Editor/console tabs need the
 CRC self-signed cert trusted (see test/workshops/README). Full test strategy: `TEST_STRATEGY.md`.
 
+## Fix log (`FIXES.md`)
+
+Every learner-visible fix or improvement gets **one line** appended to `FIXES.md` under a
+`## YYYY-MM-DD` heading for today (newest day first; create the heading if missing). The
+author posts these into a chat group, so: plain language, what the learner notices, no file
+paths, no internals, no commit hashes. Purely internal work (refactors, tests, CI) is not
+logged.
+
 ## Deploy / git
 
 Platform changes sync to the cluster via ArgoCD on push to `main` (prune+selfHeal) — the

@@ -23,18 +23,15 @@ name: Console
 url: {{< param ingress_protocol >}}://console-{{< param session_hostname >}}/#/workloads?namespace={{< param session_namespace >}}
 ```
 
-It's **empty** right now — you haven't deployed anything yet. That's expected: from
-**A01** onwards you'll deploy apps and come back here to watch them appear. For now, just
-note that the tab exists and shows *your* namespace.
+It's **empty** right now — you haven't deployed anything yet. From **A01** onwards you'll
+deploy apps and come back here to watch them appear. It may also show a warning or two
+about resources it isn't allowed to list; that is the dashboard bumping into your
+namespace-scoped permissions, not a problem with your session.
 
 {{< note >}}
-**This is not the OpenShift web console — and here's why.** The full OpenShift console
-refuses to be embedded in another page (it sends a `frame-ancestors: 'none'` header, so a
-browser won't render it inside this dashboard's tab), and it wouldn't share your session
-login anyway. So the in-session Console tab is the generic **Kubernetes Dashboard**, which
-*does* embed and runs as your session account — enough for a quick visual check.
-{{< param product_short >}}'s richer **OpenShift web console** is a separate tool you open
-in its own browser tab; the **Console track** is a guided tour of it.
+**Not the OpenShift web console.** The real OpenShift console can't be embedded in a tab
+like this, so labs use the Kubernetes Dashboard for a quick visual check. The OpenShift
+console is a separate tool you open in its own browser tab — the **Console track** tours it.
 {{< /note >}}
 
 When you've had a look, switch back to the terminal:

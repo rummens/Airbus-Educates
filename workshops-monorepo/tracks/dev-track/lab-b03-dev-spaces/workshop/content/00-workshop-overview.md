@@ -12,7 +12,7 @@ workshop closes that gap, and answers one question: **how do I develop *on*
 
 {{< note >}}
 **First time in one of these labs?** Take two minutes to read the
-[DCS Academy environment guide]({{< param dcs_docs_base_url >}}/academy/environment-guide) —
+[DCS Academy help page]({{< param ingress_protocol >}}://academy.{{< param ingress_domain >}}/help) —
 it explains the terminal, editor, console, slides and the clickable actions you'll use here.
 {{< /note >}}
 

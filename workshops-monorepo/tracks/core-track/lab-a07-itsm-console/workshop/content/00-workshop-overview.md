@@ -15,7 +15,7 @@ automatically. The pages below just walk those fields one by one.
 
 {{< note >}}
 **First time in one of these labs?** See the
-[DCS Academy environment guide]({{< param dcs_docs_base_url >}}/academy/environment-guide).
+[DCS Academy help page]({{< param ingress_protocol >}}://academy.{{< param ingress_domain >}}/help).
 {{< /note >}}
 
 ## What You'll Learn

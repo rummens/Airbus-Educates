@@ -5,9 +5,23 @@
 
 A short tour of the environment every DCS Academy lab runs in, so the tools never get in the way of the learning.
 
-**In this lab:** the dashboard layout · the split terminal · the editor · the Console (Kubernetes Dashboard) · the feedback form.
+**In this lab:** the quick actions · the dashboard layout · the split terminal · the Console (Kubernetes Dashboard) · the editor · the feedback form.
 
 Digital Container Service · DCS Academy
+
+---
+
+<!-- id: quick-actions -->
+## Quick Actions
+
+The boxes in the instructions are buttons. Click one and it does the work for you — you rarely type anything by hand.
+
+- **Run a command** — types it into the terminal and runs it.
+- **Open or edit a file** — opens the file in the editor and makes the edit.
+- **Verify** — checks the cluster and turns green if the step worked.
+- **Open a tab** — switches the right-hand side to Terminal, Console, Editor or Slides.
+
+Everything a box does happens on the **right-hand side**, and only one tab is visible at a time — click the **Terminal** tab header to come back.
 
 ---
 
@@ -17,8 +31,7 @@ Digital Container Service · DCS Academy
 Every lab uses the same two-part screen: instructions on the left, a work area of tabs on the right. Learn it once and every lab looks the same.
 
 - **Left — Instructions.** The lab content you read and click through.
-- **Right — Work area.** Tabs (Terminal, Editor, Console); one visible at a time.
-- Three clickable actions: **run a command**, **edit a file**, **verify**.
+- **Right — Work area.** Tabs: **Terminal · Console · Editor · Slides · Feedback**; one visible at a time.
 - **Verify** boxes are examiner tests: they inspect the cluster and turn green only when a step really worked.
 - A red check means fix the step before moving on; the checks are safe to re-run.
 
@@ -43,6 +56,19 @@ Expected: your username. `oc status` (lower pane) shows your project is empty fo
 
 ---
 
+<!-- id: console -->
+## The Console
+
+The Console tab is a visual view of your namespace — the **Kubernetes Dashboard**. When a lab creates something from the terminal, you can switch here to see it laid out visually.
+
+- It shows **your** namespace only; it is empty until you deploy something (from A01).
+- It is **not** the OpenShift web console — that one can't be embedded, and the Console track tours it instead.
+- The tab runs as your session service account, enough for a quick visual check.
+
+Open it pointed at your own namespace with a `reload-dashboard` action; no login needed.
+
+---
+
 <!-- id: editor -->
 ## The Editor
 
@@ -60,22 +86,9 @@ Expected: the Editor tab switches into view showing `README.md`.
 
 ---
 
-<!-- id: console -->
-## The Console
-
-The Console tab is a visual view of your namespace — the **Kubernetes Dashboard**. When a lab creates something from the terminal, you can switch here to see it laid out visually.
-
-- It shows **your** namespace only; it is empty until you deploy something (from A01).
-- It is **not** the OpenShift web console — that refuses to embed and is toured in the Console track.
-- The tab runs as your session service account, enough for a quick visual check.
-
-Open it pointed at your own namespace with a `reload-dashboard` action; no login needed.
-
----
-
 <!-- id: close -->
 ## You're ready
 
-You now know the dashboard, the two terminal panes, the editor, the Console tab, and the feedback form — everything the real labs use.
+You now know the quick actions, the dashboard, the two terminal panes, the Console tab, the editor, and the feedback form — everything the real labs use.
 
 **Next:** *What is DCS?* — the first concept lab, before you deploy your first app.

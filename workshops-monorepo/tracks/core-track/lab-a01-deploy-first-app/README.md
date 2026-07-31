@@ -1,6 +1,6 @@
 # Deploy Your First App
 
-**Your own app running on DCS in a few minutes — then a look under the hood at the YAML that made it happen.**
+**Your own app running on DCS in a few minutes — then a look at the YAML behind it.**
 
 This is the quick win. You take a ready-made image from the DCS registry, turn it into a
 running Deployment with a single command, customise it, reach it, change it and watch DCS

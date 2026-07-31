@@ -1,7 +1,9 @@
 {
   "workshop": "lab-a00-environment-tour",
-  "_note": "Environment-tour lab: only two oc identity/reachability checks run in the split terminals. No app, no setup.",
+  "_note": "Environment-tour lab: the Quick Actions page writes one file, the rest are oc identity/reachability checks. No app, no setup.",
   "steps": [
+    {"run": "mkdir -p ~/exercises && echo \"quick actions work\" > ~/exercises/quick-actions.txt"},
+    {"check": "verify-quick-action"},
     {"check": "verify-whoami"},
     {"check": "verify-status"}
   ]

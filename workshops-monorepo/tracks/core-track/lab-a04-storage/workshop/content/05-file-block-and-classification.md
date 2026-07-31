@@ -34,8 +34,8 @@ On a multi-national platform, **data and security classification** can *mandate*
 particular storage class. It's less about which country and more about the **classification
 level**: some data — for example **NATO** or otherwise international-restricted material —
 must sit on **physically separated** disks, kept apart from national data, which means its
-own dedicated StorageClass. Picking the wrong class isn't just slow, it can be a
-**compliance breach**. So on {{< param product_short >}}, the storage class you name is a
+own dedicated StorageClass. Picking the wrong class can be a **compliance breach**, not
+merely slow. So on {{< param product_short >}}, the storage class you name is a
 governance decision, not only a technical one. See the
 [{{< param product_short >}} storage concepts]({{< param dcs_docs_base_url >}}/concepts/storage).
 

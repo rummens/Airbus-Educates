@@ -42,9 +42,61 @@
     {% else %}
     <div class="tcard-prog"><span>Not yet</span><span>0 / 1</span></div>
     {% endif %}
+    {# Earned only: a badge image for a locked trophy would be a certificate for
+       something you haven't done. #}
+    {% if t.earned %}
+    <button class="btn btn-ghost tcard-dl" type="button" data-title="{{ t.title }}"
+            data-slug="{{ t.key|replace(':','-') }}">{{ icon('file-check')|safe }} Download PNG</button>
+    {% endif %}
   </article>
   {% endfor %}
 </div>
+
+<script>
+// Badge PNG for a mail signature / chat profile. Rendered client-side: the trophy icon
+// already sits in the card as inline SVG, so we re-wrap it into a standalone 512px SVG
+// and rasterise it through a canvas. No server route, no image library to mirror.
+// ponytail: fixed 512px square; add a size picker only if someone asks.
+(function(){
+  const S = 512, esc = s => s.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+  document.querySelectorAll('.tcard-dl').forEach(btn => btn.addEventListener('click', () => {
+    const card = btn.closest('.tcard');
+    const src = card.querySelector('.tcard-badge svg');
+    if (!src) return;
+    const glyph = src.innerHTML;                        // icon paths, 24x24 viewBox
+    const title = btn.dataset.title || 'Trophy';
+    const teal = css('--secondary') || '#00a4a6';
+    const size = title.length > 20 ? 26 : 34;
+    const svg =
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 512 512">` +
+      `<rect width="512" height="512" rx="56" fill="#0b1f30"/>` +
+      `<circle cx="256" cy="196" r="112" fill="#12384d"/>` +
+      `<g transform="translate(184 124) scale(6)" fill="none" stroke="${teal}" stroke-width="1.6"` +
+      ` stroke-linecap="round" stroke-linejoin="round">${glyph}</g>` +
+      `<text x="256" y="382" text-anchor="middle" font-family="Helvetica,Arial,sans-serif"` +
+      ` font-size="${size}" font-weight="700" fill="#ffffff">${esc(title)}</text>` +
+      `<text x="256" y="428" text-anchor="middle" font-family="Helvetica,Arial,sans-serif"` +
+      ` font-size="20" letter-spacing="2" fill="${teal}">DCS ACADEMY</text></svg>`;
+
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = c.height = S;
+      c.getContext('2d').drawImage(img, 0, 0);
+      c.toBlob(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'dcs-academy-' + (btn.dataset.slug || 'trophy') + '.png';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      }, 'image/png');
+    };
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }));
+})();
+</script>
 {% else %}
 <p class="muted">No workshops in the catalog yet — trophies appear as labs are added.</p>
 {% endif %}

@@ -8,8 +8,10 @@ feedback form — everything the real labs use.
 
 ## What You Did
 
+- Used the **quick actions** — the clickable boxes that run a command, open or edit a file,
+  verify your work, and switch tabs.
 - Saw the two halves of the dashboard — **instructions** (left) and the **work area** tabs
-  (right) — and the three clickable-action types: run a command, edit a file, verify.
+  (right).
 - Ran a command in the **upper** terminal pane (`oc whoami`) and the **lower** pane
   (`oc status`).
 - Opened a file in the **editor**.
@@ -21,9 +23,9 @@ feedback form — everything the real labs use.
 1. The dashboard is split in two. What's on the **left**, and what's on the **right**?
 
 {{< note >}}
-**Answer:** The **left** shows the step-by-step **instructions** (the content you read and
-click). The **right** is the **work area** — a set of tabs (Terminal, Editor, Console)
-where the work happens, one visible at a time.
+**Answer:** The **left** shows the step-by-step **instructions** — including the quick
+action boxes you click. The **right** is the **work area** — a set of tabs (Terminal,
+Console, Editor, Slides, Feedback), one visible at a time.
 {{< /note >}}
 
 2. The terminal is split into two panes. How does a clickable action send a command to the

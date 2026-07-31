@@ -15,7 +15,7 @@ inside the platform — nothing comes from the public internet. More on the regi
 
 {{< note >}}
 **First time in one of these labs?** See the
-[DCS Academy environment guide]({{< param dcs_docs_base_url >}}/academy/environment-guide)
+[DCS Academy help page]({{< param ingress_protocol >}}://academy.{{< param ingress_domain >}}/help)
 for the terminal, editor and clickable actions.
 {{< /note >}}
 
