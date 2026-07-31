@@ -226,6 +226,10 @@ def main():
                    help="override a config param (e.g. dcs_docs_base_url=https://docs.internal)")
     p.add_argument("--check-internal", action="store_true",
                    help="also fetch internal/param links (only works on a network that can reach them)")
+    p.add_argument("--summary-file", metavar="PATH",
+                   help="also write the broken-link list to PATH, plain text, one per line "
+                        "(lab · file:line · reason · url). Written only when something failed, "
+                        "so CI can re-print it as the last thing in the job log.")
     p.add_argument("--skip-external", action="store_true",
                    help="don't fetch public links (air-gapped runner has no internet). They are "
                         "still counted and the relative/internal checks still run.")
@@ -260,6 +264,11 @@ def main():
             print(ln)
         failures += bad
 
+    # lab · file:line · reason · url — everything needed to open the page and fix it, with
+    # no colour codes so it survives being written to a file and pasted elsewhere.
+    fix_lines = [f"{nm}  {f.relative_to(dw.REPO_ROOT)}:{ln}  {why}  {url}"
+                 for nm, f, ln, url, why in failures]
+
     if failures:
         # One flat list at the end: the per-lab output above scrolls away in a CI log.
         print(f"\n{RED}BROKEN LINKS ({len(failures)}){RST} — a learner following these hits a 404 / missing image:")
@@ -284,6 +293,12 @@ def main():
         print("  so they all 404 for learners. Set the real host and re-run:")
         print("    workshops-monorepo/values.yaml → params.dcsDocsBaseUrl (or the per-cluster")
         print("    argocd/envs/*.yaml), and the CI variable DCS_DOCS_BASE_URL for this check.")
+        fix_lines.append(f"(all labs)  workshops-monorepo/values.yaml  dcs_docs_base_url is the "
+                         f"placeholder {docs_base} — every DCS doc link 404s")
+
+    if args.summary_file and fix_lines:
+        pathlib.Path(args.summary_file).write_text("\n".join(fix_lines) + "\n")
+
     sys.exit(1 if (failures or placeholder_docs) else 0)
 
 

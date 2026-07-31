@@ -54,6 +54,12 @@ if [ -n "${DCS_DOCS_BASE_URL:-}" ]; then
 else
   LINK_ARGS+=(--require-real-docs-url)
 fi
+# The fix list is re-printed at the very END of the job (see below): the label check and,
+# on the cluster tier, the smoke runs push it out of view, and the last screen of the log is
+# the one anybody actually reads. Kept as a file so CI can also publish it as an artifact.
+LINK_FIXLIST="${LINK_FIXLIST:-link-failures.txt}"
+rm -f "$LINK_FIXLIST"
+LINK_ARGS+=(--summary-file "$LINK_FIXLIST")
 python3 "$W/link_check.py" "${LINK_ARGS[@]}" || fail=1
 
 echo
@@ -81,5 +87,15 @@ else
   echo "  - broken link   → a learner clicks into a 404 / missing diagram."
   echo "  - label problem → a lab's dev/prod lifecycle label doesn't match its Route usage."
   echo "  - smoke failure → the workshop does not actually work on the platform (examiner red)."
+fi
+
+# LAST thing in the log, always, whichever check failed: the copy-paste fix list.
+# lab · file:line · reason · url — open that file at that line and fix that link.
+if [ -s "$LINK_FIXLIST" ]; then
+  echo
+  echo "################ LINKS TO FIX ($(wc -l < "$LINK_FIXLIST" | tr -d ' ')) ################"
+  echo "lab                              file:line                                   reason  url"
+  cat "$LINK_FIXLIST"
+  echo "################ end links to fix ################"
 fi
 exit $fail

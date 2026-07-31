@@ -38,7 +38,14 @@ variables:
 # waits for its whole stage predecessor set, which serialises the tier for no reason.
 .fast:
   stage: test
-  image: $CI_BASE_IMAGE
+  image:
+    name: $CI_BASE_IMAGE
+    # Runners cache a mutable tag like :dev forever, so a rebuilt image is never picked up
+    # (that is how a stale image without the baked deps keeps failing). Two entries: the
+    # runner takes `always` when its allowed_pull_policies permit it, and falls back to
+    # `if-not-present` instead of erroring "pull_policy not allowed" when it doesn't.
+    # A runner that refuses `always` needs `pull_policy = "always"` in its config.toml.
+    pull_policy: [always, if-not-present]
   needs: []
 
 # ---------- FAST TIER (no cluster, blocks merges) ----------
@@ -75,6 +82,11 @@ workshop-static:
     #        console-lab CRs — resolves (200 / reachable / real docs host);
     # labels: each lab's dev/prod lifecycle label matches its Route usage.
     - bash test/ci/run-workshops.sh
+  artifacts:
+    # The same fix list the job prints last, downloadable: lab · file:line · reason · url.
+    when: on_failure
+    expire_in: 30 days
+    paths: [link-failures.txt]
 
 fix-examiner-perms:
   extends: .fast
