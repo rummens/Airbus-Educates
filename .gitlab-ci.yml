@@ -66,7 +66,19 @@ portal-tests:
       || { echo "CI_BASE_IMAGE ($CI_BASE_IMAGE) is missing test deps — rebuild images/dcs-ci (images/build.sh) and re-mirror it to Harbor."; exit 1; }
   script:
     - bash test/ci/run-python.sh
+  # Two separate mechanisms, both needed:
+  #   coverage:        scrapes the number out of the log → the job's coverage value, which is
+  #                    what the README badge reads. Needs a pipeline that RAN this job.
+  #   coverage_report: the cobertura XML → per-line coverage marks in merge request diffs.
   coverage: '/^TOTAL\s+.*\s+(\d+%)$/'
+  artifacts:
+    when: always                    # a failed run's numbers are the interesting ones
+    expire_in: 30 days
+    paths: [coverage.xml]
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
 
 workshop-static:
   extends: .fast

@@ -5,7 +5,7 @@
      project path (e.g. git.dcs.aircloud.common.airbusds.corp/dcs-public/dcs-academy).
      Coverage comes from the `coverage:` regex on the portal-tests job in .gitlab-ci.yml. -->
 [![pipeline status](https://gitlab.com/bvlgtyi4-group/airbus-educates/badges/main/pipeline.svg)](https://gitlab.com/bvlgtyi4-group/airbus-educates/-/pipelines)
-[![coverage report](https://gitlab.com/bvlgtyi4-group/airbus-educates/badges/main/coverage.svg?min_good=90)](https://gitlab.com/bvlgtyi4-group/airbus-educates/-/jobs)
+[![coverage report](https://gitlab.com/bvlgtyi4-group/airbus-educates/badges/main/coverage.svg?job=portal-tests&min_good=90)](https://gitlab.com/bvlgtyi4-group/airbus-educates/-/jobs)
 [![latest release](https://gitlab.com/bvlgtyi4-group/airbus-educates/-/badges/release.svg)](https://gitlab.com/bvlgtyi4-group/airbus-educates/-/releases)
 
 GitOps-deployable [Educates](https://educates.dev) training platform for OpenShift,

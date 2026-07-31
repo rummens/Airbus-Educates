@@ -12,8 +12,12 @@ echo "=== portal unit tests (pytest, coverage gate ${MIN}%) ==="
 # uncovered and the gate failed on code that IS tested.
 # -W error::ResourceWarning — a leaked DB connection / file handle is a real defect in a
 # long-lived pod, and as a mere warning it was 80 lines of noise nobody read. Errors now.
+# term-missing = the human view + the TOTAL line GitLab's `coverage:` regex scrapes for the
+# badge. xml = cobertura, which GitLab reads as a coverage report (per-line marks in MR
+# diffs). Both come from the same run, so they can't disagree.
 python3 -m pytest test/portal -W error::ResourceWarning \
-    --cov=portal --cov-report=term-missing "--cov-fail-under=${MIN}" -q
+    --cov=portal --cov-report=term-missing --cov-report="xml:${COVERAGE_XML:-coverage.xml}" \
+    "--cov-fail-under=${MIN}" -q
 rc=$?
 
 echo
