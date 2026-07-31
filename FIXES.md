@@ -14,3 +14,4 @@ synced `main`; workshop content is live on the next session start.
 - All labs: the "first time here?" link on page 1 now points at the Academy **Help** page instead of a DCS docs URL that did not resolve.
 - Wording pass across A00–A07 to drop stock phrasing.
 - Admin: the comment pop-up has a **Copy** button.
+- Catalog repo: the README is now a plain map of the labs for readers; the chart/deploy detail moved to a separate developer page.

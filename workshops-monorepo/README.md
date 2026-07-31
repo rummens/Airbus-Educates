@@ -1,257 +1,62 @@
-# dcs-academy-workshops (monorepo + chart)
+# DCS Academy — lab catalog
 
-This repo **is** the DCS Academy catalog. The Helm chart at the root discovers
-every workshop/track from the folder tree — there is no catalog list to edit.
+This repo holds the **content of every DCS Academy lab**: the pages you read, the slides,
+the exercise files and the checks that confirm a step worked.
+
+You do **not** need this repo to take a lab. Labs run in your browser from the
+**DCS Academy portal** (`academy.<your cluster domain>`) — pick a lab, press *Start
+session*, and a private environment is created for you. The portal's **Help** page explains
+the lab window, the clickable quick actions, tracks and trophies.
+
+Read this repo when you want to see what a lab teaches without starting it, review the
+wording of a page, or check which labs exist.
+
+## How it is organised
 
 ```
-<repo root>/            <- chart lives here (Chart.yaml, templates/, values.yaml)
-  tracks/
-    core-track/         <- a TRACK folder (name is free; the id is in track.yaml)
-      track.yaml        <- track metadata incl. explicit `id` → one Track CR
-      lab-a05-what-is-dcs/
-        resources/
-          workshop.yaml <- a complete Educates Workshop CR (emitted verbatim)
-        workshop/ …     <- lab content (built to an OCI files-image by CI; chart ignores it)
-    advanced-track/
-      track.yaml
-      lab-b01-…/
-        resources/workshop.yaml
+tracks/
+  core-track/                          <- a TRACK: one learning path
+    track.yaml                         <- the track's title, order and description
+    lab-a00-environment-tour/          <- a LAB
+      README.md                        <- what this lab is about, in one paragraph
+      workshop/
+        content/                       <- the pages a learner reads, in page order
+          00-workshop-overview.md      <- what you'll learn, prerequisites, duration
+          01-quick-actions.md
+          …
+          98-your-feedback.md          <- the feedback form page
+          99-workshop-summary.md       <- recap + knowledge check
+        slides/slides.md               <- the slide deck, one slide per lab page
+        examiner/tests/                <- the "Verify" checks the lab runs for you
+        config.yaml                    <- text substitutions (product name, doc links)
+      exercises/                       <- files the lab opens in the editor
+      resources/workshop.yaml          <- the lab's technical definition
+  dev-track/ · security-track/ · console-track/
 ```
 
-## Adding or changing content — use the skills
+## Finding your way
 
-Don't hand-write workshops. The DCS Academy is authored with three **Claude Code
-skills** that encode every house standard (OpenShift `oc`, air-gapped Harbor images,
-the param trio, examiner checks, split terminal, the README/overview/feedback
-contracts, …). **The skills live in a separate repo** (`airbus-educates-*-skill`) and
-are installed into Claude Code — they are not part of this catalog repo.
+- **Tracks** are the learning paths: `core-track` (start here), `dev-track`,
+  `security-track`, `console-track`.
+- **Lab codes** carry the order: `a00`–`a07` are the Core labs in sequence, `b*` the
+  Developer labs, `c*` the Security labs, `u*` the guided console tours. The number in a
+  lab folder name is the order it is meant to be taken in.
+- **Lab pages** are the numbered files under `workshop/content/`. They are shown in that
+  numeric order, `00-workshop-overview.md` first. A page with its own folder (e.g.
+  `02-the-dashboard-layout/index.md`) simply keeps an image next to it.
+- **Start with a lab's `README.md`** for the summary, then `workshop/content/00-workshop-overview.md`
+  for what it teaches and how long it takes.
+- **Two kinds of lab.** A *terminal lab* has `workshop/content/` pages and runs in the lab
+  window. A *console lab* has no content pages — it is a guided tour of the OpenShift web
+  console, and its steps live outside this repo.
 
-| I want to… | Invoke the skill | It produces |
-|---|---|---|
-| Create or edit a single workshop | **airbus-educates-workshop-authoring** | a complete workshop folder — `resources/workshop.yaml` (CR + catalog metadata), `workshop/content/*.md`, `README.md`, `exercises/` |
-| Plan a multi-workshop course / module | **airbus-educates-course-design** | a course brief, topic/module map, and per-workshop plans |
-| Review / QA a workshop or course | **airbus-educates-course-review** | a findings + suggestions report against the house standards (advises, doesn't rewrite) |
+## Found a mistake, or something unclear?
 
-Typical flow for a new lab:
+Use the **Feedback** tab inside the lab — that is where a rating and a comment reach the
+team fastest. A pull request against the page in question works too; wording fixes are
+welcome.
 
-1. **Design** (if it's a new course/module) — run *course-design* to get the plan and
-   per-workshop briefs.
-2. **Author** — run *workshop-authoring* against a brief. It writes the folder under
-   `tracks/<track-folder>/<lab-name>/` following the layout below, filling in the
-   `academy.dcs/*` catalog metadata the chart needs.
-3. **Review** — run *course-review* and apply its findings.
-4. **Test** — deploy portal-less to a local CRC cluster and run the examiner
-   smoke test (see `crc-local-testing/` in the skills/tooling repo).
-5. **Push** — merging to `main` deploys via ArgoCD (see deploy order below).
+## Working on the catalog itself?
 
-The "Add a track" and "Add a workshop" sections further down document the *mechanical*
-contract the skill output must satisfy — read them to review or hand-fix generated
-files, but let the skill generate the first draft.
-
-> ## ⚠️ DEPLOY ORDER — READ THIS ⚠️
->
-> This chart is **downstream of the `dcs-academy-portal` chart**. It must sync
-> **after** it. The dependency:
->
-> 1. **Track CRD** (`tracks.academy.dcs`) is owned by the **portal chart**, not
->    this one. If this chart syncs first, the Track CRs have no CRD → sync fails.
-> 2. The **portal app Service** is the target of the TrainingPortal's analytics
->    webhook. It must exist first or analytics events 404.
-> 3. The **Educates `Workshop`/`TrainingPortal` CRDs** (platform chart) must exist.
->
-> **Enforcement:**
-> - **Cross-app**: the app-of-apps orders the portal app (and platform) before
->   this workshops app. Keep it that way.
-> - **In-app**: the TrainingPortal CR carries **`argocd.argoproj.io/sync-wave: "100"`**
->   so it settles dead last — after the Workshop CRs it names and after the CRD.
->   `SkipDryRunOnMissingResource=true` covers the first-ever apply.
->
-> If you ever see the workshops app sync before the portal, the fix is app-of-apps
-> ordering, **not** a bigger wave — sync-waves only order resources *within one
-> Application*.
-
-## What the chart emits
-
-| Template | Source (globbed) | Output |
-|---|---|---|
-| `templates/tracks.yaml` | `tracks/*/track.yaml` | one **Track** CR per track folder (name = its `id`) |
-| `templates/workshops.yaml` | `tracks/*/*/resources/workshop.yaml` | each **Workshop** CR **verbatim** |
-| `templates/trainingportal.yaml` | `tracks/*/*/resources/workshop.yaml` (re-parsed for names) | one **TrainingPortal** listing all (wave 100) |
-
-The Track **CRD** itself is shipped by the `dcs-academy-portal` chart. This chart
-only fills it with instances. One ArgoCD Application points at this repo (prune +
-selfHeal). Add a lab = add a folder with a `workshop.yaml` + push. Remove = delete
-the folder + push.
-
-## PostSync hooks (rescan, memory-limit, env-guard)
-
-The chart emits ArgoCD **PostSync** hook Jobs that run after each sync:
-
-| Hook (`templates/…`) | sync-wave | Does |
-|---|---|---|
-| `memory-limit-job.yaml` | 0 | patches the operator-owned `training-portal` Deployment to 512Mi |
-| `catalog-rescan-job.yaml` | 0 | `POST /admin/rescan` so the custom portal refreshes its catalog now, not after TTL |
-| `env-guard.yaml` → `env-reconcile` | 1 | `portal.reap` — drains stale/duplicate WorkshopEnvironments (+ orphan sessions) |
-| `env-guard.yaml` → `env-validate` | 2 | `portal.validate` — **gate**: fails the sync if any catalog workshop has no Running env |
-
-### Why env-guard exists
-
-The Educates CR chain: **Workshop** + **TrainingPortal** (both synced by Argo) → the
-training-portal pod creates a **WorkshopEnvironment** per catalog workshop → a
-**WorkshopSession** per learner. The portal reconciles environments by **create/delete
-only — never an in-place update**, so when a workshop rolls (new content image, edited
-spec) the old env can linger while the new one never appears. A `start` then has no
-environment to allocate → **403**. And because WorkshopEnvironment/WorkshopSession are
-portal-created, they're **invisible to Argo's health** — the app stays "Synced + Healthy"
-while a lab is broken.
-
-env-guard closes both gaps:
-- **reconcile** deletes the stale/duplicate env (drain-safe: only envs with 0 Allocated
-  sessions, past grace, scoped to this portal + the current catalog) → the portal rebuilds
-  it on its working create path, on *every* sync.
-- **validate** polls until every `TrainingPortal.spec.workshops` entry has a Running env;
-  if not, exits non-zero → the hook fails → Argo goes **Degraded** and retries. Set
-  `envGuard.mode: warn` to log-only. Ready = phase `Running` **or** already backing a live
-  session (avoids a false fail on an unrecognised phase string).
-
-Steady-state cleanup **between** syncs is the `dcs-academy-portal` chart's
-`sessionReaper` CronJob (`reapEnvironments: true` — same `portal.reap` logic, every
-15 min). Argo can't see envs, but it *can* see the TrainingPortal: apply
-[`argocd/trainingportal-health.yaml`](../argocd/trainingportal-health.yaml) (cluster-admin,
-one-off) so the portal's own rollout reports Healthy only when Running.
-
-> **Toggles** (`values.yaml → envGuard`): `enabled`, `mode` (fail|warn), `dryRun`,
-> `settleSeconds`, `readyPhases`. First rollout: run `dryRun: true` + `mode: warn`, confirm
-> the reconcile logs target only real stale/orphan envs, then flip to act. The Jobs run
-> from the **portal image** (`envGuard.image`) — rebuild+push it before syncing chart
-> changes that touch `portal.reap`/`portal.validate`.
-
-## Add a track
-
-`tracks/<any-folder>/track.yaml`:
-```yaml
-id: core                          # required — the track id (NOT the folder name)
-title: "Core — DCS Foundations"   # required
-description: "…"                  # optional
-order: 10                         # optional (default 100; low = first)
-icon: code                        # optional (default "layers")
-```
-
-## Add a workshop
-
-Drop a full Educates Workshop CR at `tracks/<track-folder>/<lab>/resources/workshop.yaml`
-(Educates requires the CR under `resources/`). The chart emits it **unchanged**, so
-it must carry the portal metadata itself:
-
-**Required labels** (portal catalog grouping):
-- `academy.dcs/track: <track-id>` — must equal a track's `id`
-- `academy.dcs/order: "10"` — sort within the track (string)
-
-**Optional annotations** (display + session lifetime; all have fallbacks):
-- `academy.dcs/summary`, `academy.dcs/duration`, `academy.dcs/difficulty`,
-  `academy.dcs/icon`, `academy.dcs/display-name`, `academy.dcs/author`,
-  `academy.dcs/details`
-- `academy.dcs/expires`, `academy.dcs/orphaned` — per-workshop session lifetime
-  in the TrainingPortal (else `values.portal.{expires,orphaned}`)
-
-**Recommended annotations** (GitOps):
-- `argocd.argoproj.io/sync-wave: "5"` and
-  `argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true` — so ArgoCD
-  can apply the CR before the Educates Workshop CRD is dry-run-checked. Keep the
-  workshop wave well **below** the TrainingPortal's 100.
-
-See `tracks/core-track/lab-a05-what-is-dcs/resources/workshop.yaml` for a filled, commented example.
-
-## Console labs (`lab-format: console`)
-
-Two lab formats share this catalog:
-
-| Format | Learner works in | Content |
-|---|---|---|
-| `terminal` (default) | the Educates dashboard — instructions, terminal, editor | `workshop/content/**` |
-| `console` | the OpenShift web console, guided by the academy console plugin | none — a `ConsoleLab` CR |
-
-A console lab still allocates a normal Educates session: the session namespace, its
-quota, `spec.session.objects`, capacity and the reaper are all unchanged. Only the
-final redirect differs — the portal sends the browser to the console instead of the
-workshop dashboard, and the learner never opens the dashboard at all.
-
-Mark one with:
-
-```yaml
-metadata:
-  labels:
-    academy.dcs/lab-format: console
-  annotations:
-    academy.dcs/console-lab: lab-container-access      # ConsoleLab CR name
-    academy.dcs/console-lab-params: podName=lab-app    # everything except ns
-    academy.dcs/orphaned: "0s"                         # see below
-```
-
-Rules that are easy to get wrong:
-
-- **`orphaned: "0s"` is required.** Orphan detection watches the workshop dashboard,
-  which a console-lab learner never opens — leave the default and Educates reclaims
-  the session out from under them mid-lab. `expires` remains the real bound. The CRD
-  pattern is `^\d+(s|m|h)$`, so the value needs its unit: `"0s"`, never `"0"`.
-- **`ns` is never declared.** The portal injects the allocated session namespace.
-  `console-lab-params` fills the lab's other `{{placeholders}}`.
-- **Pre-deploy with `spec.session.objects`.** The learner is dropped into a ready
-  environment; they do not build it by following instructions. Objects are created
-  with the session and deleted with it.
-- **Name pods explicitly.** A ConsoleLab navigates to exact paths like
-  `/k8s/ns/<ns>/pods/lab-app`, so use a bare Pod (or a fixed-name resource) — a
-  Deployment's generated pod suffix cannot be templated into the lab.
-- **Label lab pods** `training.educates.dev/session.name: $(session_name)` so the
-  portal's readiness feed waits for them before redirecting.
-- **Real images.** Unlike an image merely *named* in content, an image in
-  `session.objects` is actually pulled — take it from `values.workshopImages.*` so
-  air-gapped installs repoint it once.
-
-The referenced `ConsoleLab` CR (the step-by-step guidance) lives in the **console
-plugin repo** (`labs/`), not here. Both must be synced for the lab to run; the
-plugin refuses to start a lab whose parameters are missing rather than half-running.
-
-Example: `tracks/console-track/lab-u01-container-access/resources/workshop.yaml`.
-
-## vcluster note (the one duplication cost)
-
-Because workshops are emitted verbatim, per-session boilerplate lives in each
-lab's file — including the vcluster SCC workaround (coredns needs the
-`educates-privileged-scc` in `$(vcluster_namespace)`, or the vcluster hangs).
-For a vcluster lab, author it in that file's `spec.session`:
-```yaml
-    applications:
-      vcluster:
-        enabled: true
-    objects:
-      - apiVersion: rbac.authorization.k8s.io/v1
-        kind: RoleBinding
-        metadata: { name: educates-vcluster-scc, namespace: $(vcluster_namespace) }
-        roleRef: { apiGroup: rbac.authorization.k8s.io, kind: ClusterRole, name: educates-privileged-scc }
-        subjects:
-          - kind: Group
-            apiGroup: rbac.authorization.k8s.io
-            name: system:serviceaccounts:$(vcluster_namespace)
-```
-If this repeats too much, switch `templates/workshops.yaml` from verbatim to
-`fromYaml` + merge so the chart injects it — costs central logic, buys DRY.
-
-## Ownership split (two charts)
-
-| Chart | Owns |
-|---|---|
-| `dcs-academy-portal` | portal app, oauth gate, CNPG/feedback, **Track CRD** |
-| `dcs-academy-workshops` (this) | **Track CRs, Workshop CRs, TrainingPortal** |
-
-Keep these in sync between the two: `educates.portalName` and the academy
-`hostname` (`portal.hostname` here == `auth.hostname` in the portal chart).
-
-## Render locally
-```bash
-helm template dcs-workshops .
-```
-
-## Examiner Permission fix
-Windows removes the execution permission from linux files. This causes examiner scripts to fail in the sessions.
-To fix this, we can use this command: `git ls-files -z 'tracks/*/*/workshop/examiner/tests/*' | xargs -0 git update-index --chmod=+x`
+Chart, deploy order, authoring standards and the contract a new lab has to satisfy:
+**[DEVELOPING.md](DEVELOPING.md)**.

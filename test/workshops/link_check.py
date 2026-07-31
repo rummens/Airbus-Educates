@@ -222,6 +222,9 @@ def main():
                    help="override a config param (e.g. dcs_docs_base_url=https://docs.internal)")
     p.add_argument("--check-internal", action="store_true",
                    help="also fetch internal/param links (only works on a network that can reach them)")
+    p.add_argument("--require-real-docs-url", action="store_true",
+                   help="fail if the effective dcs_docs_base_url is still a placeholder host "
+                        "(those links ship as 404s; CI uses this so a placeholder can't pass silently)")
     args = p.parse_args()
 
     overrides = dict(kv.split("=", 1) for kv in args.param)
@@ -256,7 +259,21 @@ def main():
             print(f"  {f.relative_to(dw.REPO_ROOT)}:{ln}  {RED}{why}{RST}  {url}  {DIM}[{nm}]{RST}")
     else:
         print(f"\n{GREEN}all reachable links resolve.{RST}")
-    sys.exit(1 if failures else 0)
+
+    # A placeholder docs host is the one broken-link class this check used to miss: those
+    # links are skipped as "internal, not fetched", so the job stayed green while every DCS
+    # doc link shipped as a 404 (that is exactly how the A00 environment-guide link reached
+    # learners). Fetching them needs a runner that can reach the docs; knowing the value is
+    # still a placeholder needs no network at all — so check that unconditionally in CI.
+    placeholder_docs = args.require_real_docs_url and (
+        docs_base == "(unset)" or any(h in docs_base for h in PLACEHOLDER_HOSTS))
+    if placeholder_docs:
+        print(f"\n{RED}PLACEHOLDER DOCS URL{RST} — dcs_docs_base_url is {docs_base!r}.")
+        print("  Every {{< param dcs_docs_base_url >}} link in the catalog resolves to that host,")
+        print("  so they all 404 for learners. Set the real host and re-run:")
+        print("    workshops-monorepo/values.yaml → params.dcsDocsBaseUrl (or the per-cluster")
+        print("    argocd/envs/*.yaml), and the CI variable DCS_DOCS_BASE_URL for this check.")
+    sys.exit(1 if (failures or placeholder_docs) else 0)
 
 
 if __name__ == "__main__":

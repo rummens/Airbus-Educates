@@ -147,5 +147,5 @@ both in place the portal runs on CRC. Workshop **content** is still tested porta
 - [security.md](security.md) — trust boundaries, RBAC judgment per chart, and the vCluster-vs-namespace rule.
 - `dcs-academy-platform/README.md` — how Educates is installed (kapp-controller App, ytt/kbld/kapp), values, air-gap, security grants.
 - `dcs-academy-portal/` — portal app, OAuth gate, feedback, Track CRD.
-- `workshops-monorepo/README.md` — the catalog contract (add a track/workshop) and deploy order.
+- `workshops-monorepo/DEVELOPING.md` — the catalog contract (add a track/workshop) and deploy order (`README.md` there is the learner-facing map).
 - `argocd/` — the four ArgoCD Applications and per-cluster env values.

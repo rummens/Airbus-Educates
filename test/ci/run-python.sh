@@ -7,7 +7,10 @@ cd "$(git rev-parse --show-toplevel)"
 MIN=${COVERAGE_MIN:-90}
 echo "=== portal unit tests (pytest, coverage gate ${MIN}%) ==="
 
-python3 -m pytest test/portal/test_portal.py \
+# The whole directory, not just test_portal.py — test_slides.py and
+# test_reap_validate.py used to be collected by nobody, so their modules counted as
+# uncovered and the gate failed on code that IS tested.
+python3 -m pytest test/portal \
     --cov=portal --cov-report=term-missing "--cov-fail-under=${MIN}" -q
 rc=$?
 

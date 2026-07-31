@@ -35,13 +35,20 @@ python3 "$W/coverage_check.py" --all || fail=1
 
 echo
 echo "########## links: content + slides + exercises + console labs ##########"
-# The committed dcs_docs_base_url is the placeholder https://docs.example.dcs, so the
-# internal DCS doc links can only be fetched when a runner that can actually reach the
-# docs supplies the real host. Set DCS_DOCS_BASE_URL as a CI variable (or export it
-# locally) and they are checked too; without it they are listed but not fetched.
+# The committed dcs_docs_base_url is a placeholder, so DCS doc links can't be fetched from
+# a runner that can't reach the docs. Two separate switches, because "is the value real"
+# and "can this runner fetch it" are different questions:
+#   DCS_DOCS_BASE_URL       the real docs host. Without it the check FAILS (a placeholder
+#                           means every DCS doc link ships as a 404 — that is a defect, not
+#                           a skip, and silence here is how it reached learners).
+#   DCS_DOCS_CHECK_INTERNAL true only on a runner that can actually reach that host; then
+#                           the links are fetched as well, not just accepted as real.
 LINK_ARGS=(--all)
 if [ -n "${DCS_DOCS_BASE_URL:-}" ]; then
-  LINK_ARGS+=(--param "dcs_docs_base_url=$DCS_DOCS_BASE_URL" --check-internal)
+  LINK_ARGS+=(--param "dcs_docs_base_url=$DCS_DOCS_BASE_URL")
+  case "${DCS_DOCS_CHECK_INTERNAL:-}" in 1|true|yes) LINK_ARGS+=(--check-internal) ;; esac
+else
+  LINK_ARGS+=(--require-real-docs-url)
 fi
 python3 "$W/link_check.py" "${LINK_ARGS[@]}" || fail=1
 
