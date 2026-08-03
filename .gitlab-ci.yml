@@ -40,6 +40,12 @@ variables:
   stage: test
   image:
     name: $CI_BASE_IMAGE
+    # Runners cache a mutable tag like :dev forever, so a rebuilt image is never picked up
+    # (that is how a stale image without the baked deps keeps failing). Two entries: the
+    # runner takes `always` when its allowed_pull_policies permit it, and falls back to
+    # `if-not-present` instead of erroring "pull_policy not allowed" when it doesn't.
+    # A runner that refuses `always` needs `pull_policy = "always"` in its config.toml.
+    pull_policy: [always, if-not-present]
   needs: []
 
 # ---------- FAST TIER (no cluster, blocks merges) ----------
