@@ -85,6 +85,6 @@ oc get namespace "$(oc project -q)" -o jsonpath='{.metadata.labels}'
 
 You now have the vocabulary and have seen isolation for real.
 
-- The **deep access model** is Developer **B05** (RBAC, Tenancy & Namespaces in full).
-- **DEV vs PROD by policy** — how PROD is enforced with Kyverno — is Developer **B06**.
+- The **deep access model** is the Developer-track lab **RBAC, Tenancy & Namespaces**.
+- **DEV vs PROD by policy** — how PROD is enforced with Kyverno — is the Developer-track lab **DEV vs PROD Namespaces & Policies**.
 - Leave feedback in the **Feedback** tab before you finish.

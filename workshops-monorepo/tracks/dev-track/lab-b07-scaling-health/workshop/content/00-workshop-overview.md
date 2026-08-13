@@ -25,13 +25,13 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- **A01 — Deploy Your First App.** You know Deployments, `oc scale`, and the
+- **Deploy Your First App** You know Deployments, `oc scale`, and the
   Deployment → ReplicaSet → Pod chain.
-- **A02 — Configure & Troubleshoot Your App.** You know how to trigger a rollout and read
+- **Configure & Troubleshoot Your App** You know how to trigger a rollout and read
   `oc describe` / `oc get events` when something goes wrong.
 
 This lab does **not** re-teach `oc scale` mechanics or basic quota vocabulary — it assumes
-you have them and puts them to work. If you've also done **B05 — Tenancy & RBAC**, you've
+you have them and puts them to work. If you've also done **RBAC, Tenancy & Namespaces**, you've
 already read your namespace's `ResourceQuota` and `LimitRange` once; this lab is where that
 budget stops being an abstract reading exercise and starts rejecting things.
 

@@ -2,7 +2,7 @@
 title: Summary
 ---
 
-You went from "a gate can block an image" (A03) to reading the report behind the decision,
+You went from "a gate can block an image" (the **Expose Your App** lab) to reading the report behind the decision,
 understanding the policy that makes it, and remediating a flagged image — the everyday
 security loop on an air-gapped {{< param product_short >}}.
 
@@ -76,6 +76,6 @@ only if you must.
 
 ## Next Steps
 
-Later in the Security & Compliance track: **supply-chain security** (C04) builds directly on
+Later in the Security & Compliance track: **supply-chain security** (the **Supply Chain & Provenance** lab) builds directly on
 this — it assumes you can read a scan report and know what the gate does, and adds image
 signing and provenance on top.

@@ -49,8 +49,8 @@ A teammate says "I built my image, why do I need Dev Spaces at all?" What's the
 honest answer?
 
 {{< note >}}
-**Answer:** They don't need it for *that* build — BuildConfig (B02) already turned
-finished source into an image, and `oc apply` (A01/B01) already runs it. Dev
+**Answer:** They don't need it for *that* build — BuildConfig (the **Building Images with BuildConfigs** lab) already turned
+finished source into an image, and `oc apply` (the **Deploy Your First App** lab/the **From Docker to Kubernetes on DCS** lab) already runs it. Dev
 Spaces earns its keep **before** that point: while the code is still being
 written, it's the fastest way to edit-and-run without waiting on an image build
 for every change. Once the code is ready, the BuildConfig → `oc apply` path is

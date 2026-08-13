@@ -1,9 +1,29 @@
 {
   "workshop": "lab-a05-what-is-dcs",
   "steps": [
-    {"check": "verify-whoami"},
-    {"check": "verify-oc-version"},
-    {"check": "verify-project"},
-    {"check": "verify-status"}
+    {
+      "run": "oc whoami | tee ~/exercises/whoami.txt"
+    },
+    {
+      "check": "verify-whoami"
+    },
+    {
+      "run": "oc version | tee ~/exercises/version.txt"
+    },
+    {
+      "check": "verify-oc-version"
+    },
+    {
+      "run": "oc project -q | tee ~/exercises/project.txt"
+    },
+    {
+      "check": "verify-project"
+    },
+    {
+      "run": "oc status | tee ~/exercises/status.txt"
+    },
+    {
+      "check": "verify-status"
+    }
   ]
 }

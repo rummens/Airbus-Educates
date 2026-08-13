@@ -21,7 +21,7 @@ appear as well: `$(oc project -q)` runs `oc project -q` first and substitutes it
 that list into `grep`, which keeps only the lines matching your two peer namespaces:
 
 ```terminal:execute
-command: oc get projects | grep "$(oc project -q)-app-"
+command: oc get projects | grep "$(oc project -q)-app-" | tee ~/exercises/peers.txt
 ```
 
 ```examiner:execute-test
@@ -107,6 +107,8 @@ command: oc get deploy hello -n "$(oc project -q)-app-b"
 name: verify-same-name
 title: Verify the same name exists independently in both
 timeout: 10
+retries: 3
+delay: 2
 ```
 
 On a single cluster you have two Deployments both called `hello`, and neither knows the

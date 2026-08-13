@@ -88,7 +88,7 @@ has no storage class. File and Block are PVCs; S3 is a request.
 ## Next Steps
 
 That completes the Core basics: **what DCS is → deploy → configure & fix → expose →
-persist**. Next come the orientation labs — **A06** (the terms: namespaces & tenancy) and
-**A07** (requesting a Tenant and a Namespace through ITSM) — then the **Console track**
+persist**. Next come the orientation labs — **Terms — Namespaces & Tenancy** and
+**Requesting a Tenant & Namespace via ITSM** — then the **Console track**
 for the same work in the OpenShift web console, and the **Developer track** for the
 mechanisms behind everything you just did.

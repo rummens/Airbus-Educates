@@ -30,7 +30,7 @@ By the end of this workshop you will be able to:
 This workshop assumes familiarity with:
 
 - Deployments, labels and selectors, and the declarative apply/inspect loop (Core track).
-- Basic [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) and how a ServiceAccount's permissions scope what runs in your namespace (**RBAC, Tenancy & Namespaces**, B05) — an operator-managed instance runs with permissions in *your* namespace.
+- Basic [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) and how a ServiceAccount's permissions scope what runs in your namespace (**RBAC, Tenancy & Namespaces**, the **RBAC, Tenancy & Namespaces** lab) — an operator-managed instance runs with permissions in *your* namespace.
 - Comfortable reading YAML and `oc get`/`oc describe` output; no prior exposure to Operators or CRDs is assumed.
 
 ## Your Environment

@@ -11,7 +11,7 @@ over their API, so there's no daemon to run at all.
 
 ## Inspect the image
 
-Ask Harbor about `samples/hello-dcs:1.0` — the same image A01 deployed and B02 (re)builds —
+Ask Harbor about `samples/hello-dcs:1.0` — the same image the **Deploy Your First App** lab deployed and the **Building Images with BuildConfigs** lab (re)builds —
 using the read-only robot account already configured in your session:
 
 ```terminal:execute

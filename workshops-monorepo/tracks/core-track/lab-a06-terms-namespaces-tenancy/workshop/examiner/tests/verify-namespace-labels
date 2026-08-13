@@ -1,8 +1,14 @@
 #!/bin/bash
-# Verify the active namespace's labels are readable.
-lbl=$(oc get namespace "$(oc project -q 2>/dev/null)" -o jsonpath='{.metadata.labels}' 2>/dev/null)
-if [ -z "$lbl" ]; then
-  echo "No labels found on namespace '$(oc project -q 2>/dev/null)'." >&2
+# Verify the learner ran the command step and read its output.
+# Gated on the learner's own run: the underlying state is true from session start, so a
+# check that only asserts it goes green before the learner clicks anything.
+f="$HOME/exercises/ns-labels.txt"
+if ! [ -s "$f" ]; then
+  echo "Click the command step above first — $f is missing or empty." >&2
   exit 1
 fi
-echo "OK: namespace labels: $lbl"
+if ! grep -qE 'kubernetes.io/metadata.name' "$f"; then
+  echo "$f does not look like that command's output — re-run the step above." >&2
+  exit 1
+fi
+echo "OK: you read your namespace's labels"

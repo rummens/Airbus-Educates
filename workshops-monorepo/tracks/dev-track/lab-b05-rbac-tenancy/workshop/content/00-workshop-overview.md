@@ -2,7 +2,7 @@
 title: "RBAC, Tenancy & Namespaces"
 ---
 
-Welcome to this workshop, part of **{{< param product_name >}}**. In Core A06 you learned
+Welcome to this workshop, part of **{{< param product_name >}}**. In Core the **Terms — Namespaces & Tenancy** lab you learned
 the *words* — Tenant, Namespace, and that "project" is not a separate layer. Here you open
 up the *mechanism* behind them: the RBAC objects that actually decide who can do what, in
 which namespace, and why.
@@ -25,7 +25,7 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-This workshop assumes you've completed **Core A06 — Terms: Namespaces & Tenancy**, so you
+This workshop assumes you've completed **Core the **Terms — Namespaces & Tenancy** lab — Terms: Namespaces & Tenancy**, so you
 already know the *terms* Namespace and Tenant and that access is scoped to your tenant's
 namespaces. It also assumes basic comfort with
 [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)

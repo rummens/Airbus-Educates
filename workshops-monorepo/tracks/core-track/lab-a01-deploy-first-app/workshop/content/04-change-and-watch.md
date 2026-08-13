@@ -74,4 +74,6 @@ work.
 name: verify-new-greeting
 title: Verify the app serves the updated greeting
 timeout: 10
+retries: 3
+delay: 2
 ```

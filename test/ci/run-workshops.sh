@@ -60,6 +60,19 @@ configure_oc() {
   return 0
 }
 
+# A bad content sync once committed 492 zero-byte files — the labs deployed empty and no
+# check noticed, because an empty file has no commands to cover and no links to break.
+echo "########## sanity: no empty content files ##########"
+EMPTY=$(git ls-files 'workshops-monorepo/tracks/**' | while IFS= read -r f; do [ -s "$f" ] || printf '%s\n' "$f"; done)
+if [ -n "$EMPTY" ]; then
+  echo "FAIL: zero-byte tracked files under workshops-monorepo/tracks:"
+  echo "$EMPTY"
+  fail=1
+else
+  echo "OK: no zero-byte files under workshops-monorepo/tracks."
+fi
+
+echo
 echo "########## coverage: smoke plans vs workshop content ##########"
 python3 "$W/coverage_check.py" --all || fail=1
 

@@ -21,7 +21,7 @@ the `hello`-in-two-namespaces demo you ran, applied to a real delivery pipeline.
 {{< note >}}
 DEV and PROD aren't just naming conventions on {{< param product_short >}} — they're
 namespace **types** with different rules. You'll see how they're enforced in the
-Developer track (**B06**).
+Developer track (**DEV vs PROD Namespaces & Policies**).
 {{< /note >}}
 
 ## Team and blast-radius isolation
@@ -34,7 +34,7 @@ team's mistakes stay within their own namespace.
 
 Each namespace gets its **own** resource budget and its **own** access rules. One team's
 namespace can be generous and open; another's can be locked down and small — independently.
-(The deep dive on access is Developer **B05**.)
+(The deep dive on access is the Developer-track lab **RBAC, Tenancy & Namespaces**.)
 
 ## Naming freedom
 

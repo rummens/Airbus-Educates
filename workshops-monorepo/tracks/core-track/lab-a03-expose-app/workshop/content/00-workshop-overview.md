@@ -18,7 +18,7 @@ for the terminal, editor and clickable actions.
 
 By the end of this workshop you will be able to:
 
-- Explain the {{< param product_short >}} traffic chain: [Service](https://kubernetes.io/docs/concepts/services-networking/service/) → [Route](https://docs.openshift.com/container-platform/latest/networking/routes/route-configuration.html) → external load balancer, with managed DNS.
+- Explain the {{< param product_short >}} traffic chain: [Service](https://kubernetes.io/docs/concepts/services-networking/service/) → [Route](https://docs.openshift.com/container-platform/latest/networking/routes/route-configuration.html) (OpenShift docs) → external load balancer, with managed DNS.
 - Give the app a stable in-cluster address with a Service and reach it by DNS.
 - Expose the app externally with a real Route, reachable outside the session.
 - Surface the running app as a new in-session dashboard tab.
@@ -29,7 +29,7 @@ DCS networking is covered in the
 
 ## Prerequisites
 
-- **A01 — Deploy Your First App.** You know Deployments, Pods, and labels/selectors.
+- **Deploy Your First App.** You know Deployments, Pods, and labels/selectors.
 
 ## Your Environment
 

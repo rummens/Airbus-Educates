@@ -35,7 +35,7 @@ disk yourself.
 List the storage classes available to you:
 
 ```terminal:execute
-command: oc get storageclass
+command: oc get storageclass | tee ~/exercises/storageclasses.txt
 ```
 
 ```examiner:execute-test

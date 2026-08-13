@@ -67,7 +67,7 @@ Compare the two references — the digest (the part after the `@sha256:`) has ch
 tag `latest-built` still points at one image at a time, but which image it points to just
 moved. Redeploying now (`oc rollout restart deploy/hello-dcs-built`) would roll your
 running Pods onto this new build, exactly like the config-triggered rollout you saw in
-B01 — except this time a whole new image is behind it, not just a changed environment
+the **From Docker to Kubernetes on DCS** lab — except this time a whole new image is behind it, not just a changed environment
 variable.
 
 You've now driven the full loop this lab set out to teach: git source → on-cluster build

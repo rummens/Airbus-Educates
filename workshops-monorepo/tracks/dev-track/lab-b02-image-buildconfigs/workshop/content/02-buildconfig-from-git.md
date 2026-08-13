@@ -64,14 +64,14 @@ the pointer to the pushed image in Harbor.
 
 Note the two tags play different roles. The **builder** input is pinned (`python-311:1`) —
 you never want a build's toolchain shifting under you, the same "no floating `:latest`"
-rule you met in B01. The **output** tag `latest-built` is a moving pointer *you* own: each
+rule you met in the **From Docker to Kubernetes on DCS** lab. The **output** tag `latest-built` is a moving pointer *you* own: each
 successful build overwrites it so "the latest thing I built" always resolves, while the
 immutable, promotable identity of a specific build is its digest.
 
 ## Apply the BuildConfig and its ImageStream
 
 Both manifests reference `${DCS_REGISTRY}` or `${BUILD_SOURCE_REPO}`, so — carrying the
-rule forward from B01 — apply them with [`envsubst`](https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html),
+rule forward from the **From Docker to Kubernetes on DCS** lab — apply them with [`envsubst`](https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html),
 never a plain `oc apply`:
 
 ```terminal:execute

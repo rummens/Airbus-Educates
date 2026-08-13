@@ -20,7 +20,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/tr
 - **[Service](https://kubernetes.io/docs/concepts/services-networking/service/)** — a
   stable in-cluster address that load-balances across your Pods by label (you just created
   this).
-- **[Route](https://docs.openshift.com/container-platform/latest/networking/routes/route-configuration.html)** —
+- **[Route](https://docs.openshift.com/container-platform/latest/networking/routes/route-configuration.html)** (OpenShift docs) —
   publishes a Service on a public hostname. A Route is OpenShift's take on the upstream
   Kubernetes [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/);
   same idea, OpenShift-native.

@@ -1,8 +1,14 @@
 #!/bin/bash
-# Verify the pre-provisioned NetworkPolicy is present.
-if oc get networkpolicy allow-hello-dcs-ingress >/dev/null 2>&1; then
-  echo "OK: NetworkPolicy 'allow-hello-dcs-ingress' is present to inspect."
-  exit 0
+# Verify the learner inspected the pre-provisioned NetworkPolicy.
+# The policy is created by the session, so checking only that it EXISTS goes green before
+# the learner clicks anything. Gate on the output the describe step writes instead.
+f="$HOME/exercises/netpol.txt"
+if ! [ -s "$f" ]; then
+  echo "Run the describe command above first — $f is missing or empty." >&2
+  exit 1
 fi
-echo "NetworkPolicy 'allow-hello-dcs-ingress' not found." >&2
-exit 1
+if ! grep -q 'app=hello-dcs' "$f"; then
+  echo "$f does not show the PodSelector 'app=hello-dcs' — re-run the describe command above." >&2
+  exit 1
+fi
+echo "OK: you inspected 'allow-hello-dcs-ingress' — PodSelector app=hello-dcs, ingress TCP 8080."

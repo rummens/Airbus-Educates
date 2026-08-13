@@ -24,7 +24,7 @@ Click the box below. It types and runs the command for you in the **upper** term
 `oc whoami` prints the identity you're logged in as:
 
 ```terminal:execute
-command: oc whoami
+command: oc whoami | tee ~/exercises/whoami.txt
 ```
 
 You should see a username. That confirms your session is authenticated — you never had to
@@ -42,7 +42,7 @@ Now the **lower** pane. This box targets terminal session 2 — watch the bottom
 the terminal area:
 
 ```terminal:execute
-command: oc status
+command: oc status | tee ~/exercises/status.txt
 session: 2
 ```
 

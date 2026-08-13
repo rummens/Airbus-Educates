@@ -17,10 +17,14 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/di
 
 `oc describe` prints a long report about the Pod that ends with an **Events** list: a
 step-by-step record of what the platform tried and what failed. The output is long, so
-`| tail -n 30` keeps only the **last 30 lines** — where the events are:
+`| tail -n 30` keeps only the **last 30 lines** — where the events are.
+
+One detail matters here: a rolling update keeps the **old, healthy** Pod running while the
+new one fails, so `-l app=hello-dcs` would describe both and the failure could scroll past.
+The inner command picks the **newest** Pod — the broken one — and describes that:
 
 ```terminal:execute
-command: oc describe pod -l app=hello-dcs | tail -n 30
+command: oc describe pod $(oc get pod -l app=hello-dcs --sort-by=.metadata.creationTimestamp -o name | tail -1) | tail -n 30
 ```
 
 Look for a line naming what's missing. Here you'll see the container can't be configured
@@ -53,10 +57,17 @@ delay: 2
 command: oc logs -l app=hello-dcs --tail=20
 ```
 
-You'll likely see **no log lines at all** — and that absence is itself the clue: the
-container never started, so the app never got to print anything. The failure is **before**
-the app runs, which means configuration, not code. (For a crash *after* startup you'd add
-`--previous` to read the dead container's logs; here there's nothing to read.)
+You get **no log lines** — instead the server answers with something like:
+
+```
+Error from server (BadRequest): container "hello-dcs" in pod "hello-dcs-…" is waiting to start: CreateContainerConfigError
+```
+
+That is not a broken command: it is the clue. There are no logs *because the container
+never started*, and the message names the reason — the container's **config** could not be
+built. The failure is **before** the app runs, which means configuration, not code. (For a
+crash *after* startup you'd add `--previous` to read the dead container's logs; here there
+is nothing to read.)
 
 ## The diagnosis
 

@@ -23,7 +23,7 @@ name: Console
 url: {{< param ingress_protocol >}}://console-{{< param session_hostname >}}/#/workloads?namespace={{< param session_namespace >}}
 ```
 
-It's **empty** right now — you haven't deployed anything yet. From **A01** onwards you'll
+It's **empty** right now — you haven't deployed anything yet. From **Deploy Your First App** onwards you'll
 deploy apps and come back here to watch them appear. It may also show a warning or two
 about resources it isn't allowed to list; that is the dashboard bumping into your
 namespace-scoped permissions, not a problem with your session.

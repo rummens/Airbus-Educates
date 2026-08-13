@@ -49,6 +49,6 @@ subject for it.
 
 You've now covered *what* a namespace lets you do (RBAC) and *how much* (quota). The other
 half of "what your namespace can do" is its **lifecycle posture** — DEV vs PROD, and the
-different controls each enforces. That's **B06 — DEV vs PROD Namespaces**. The Role and
-RoleBinding skills from this lab are also the prerequisite for **B08 — Operators**, where
+different controls each enforces. That's **DEV vs PROD Namespaces & Policies**. The Role and
+RoleBinding skills from this lab are also the prerequisite for **Operators on DCS**, where
 what a ServiceAccount is (and isn't) allowed to do matters directly.

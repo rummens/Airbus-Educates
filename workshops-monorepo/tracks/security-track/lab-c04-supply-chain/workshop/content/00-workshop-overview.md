@@ -4,7 +4,7 @@ title: Workshop Overview
 
 Welcome back. In this workshop, part of **{{< param product_name >}}**, you'll answer a
 question every secure platform has to answer: **where did this image actually come from, and
-can I prove it?** In A03 you pulled images from Harbor; in C01 you saw Harbor scan and gate
+can I prove it?** In the **Expose Your App** lab you pulled images from Harbor; in the **Image Scanning & Harbor Gates** lab you saw Harbor scan and gate
 them. Now you'll follow the whole **software supply chain** — source, build, registry, run —
 and learn the controls that keep it trustworthy on an air-gapped platform: **digest pinning**,
 **provenance**, **signatures/attestations**, and **mirroring**.

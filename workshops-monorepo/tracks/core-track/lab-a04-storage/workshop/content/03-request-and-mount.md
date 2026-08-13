@@ -39,10 +39,15 @@ file: ~/exercises/hello-dcs-with-volume.yaml
 ```
 
 {{< note >}}
-**Why mount it there and not at `/data`?** This image runs as a **non-root** user, and a
-non-root process can only write where it owns the path. A volume mounted at a root-level
-path like `/data` stays root-owned, and the app hits **`Permission denied`** trying to
-write. Mounting inside the image's own writable home (`/opt/app-root/src`) avoids that.
+**Two details make the write work.** This image runs as a **non-root** user, and a non-root
+process can only write where it owns the path.
+
+1. **The mount path.** A volume mounted at a root-level path like `/data` stays root-owned
+   and the app hits **`Permission denied`**. Mounting inside the image's own writable home
+   (`/opt/app-root/src`) avoids that.
+2. **`securityContext.fsGroup: 1001`** in the manifest. A freshly provisioned volume arrives
+   root-owned whatever you mount it on; `fsGroup` tells the platform to hand the volume to
+   that group and make it group-writable, so the non-root app can write it.
 {{< /note >}}
 
 Applying it takes two steps. The manifest names its image as `${DCS_REGISTRY}/...` instead

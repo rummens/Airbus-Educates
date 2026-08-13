@@ -15,7 +15,7 @@ something a session does live.
 
 That governance is the point. Because mirroring is the *only* way an external image gets in,
 every image in Harbor has passed through it — and a mirrored image **inherits the platform's
-controls**: it is **scanned** and subject to the **gate** you saw in C01. There is no side door
+controls**: it is **scanned** and subject to the **gate** you saw in the **Image Scanning & Harbor Gates** lab. There is no side door
 that skips scanning. The supply chain has exactly one entrance, and that entrance enforces the
 rules.
 

@@ -82,7 +82,7 @@ there's plenty of scheduling headroom even though the limit side is maxed out.
 
 {{< note >}}
 This is exactly the [**ResourceQuota**](https://kubernetes.io/docs/concepts/policy/resource-quotas/)
-you read back in B05 — Tenancy & RBAC, if you did that lab — except this time your own
+you read back in the **RBAC, Tenancy & Namespaces** lab — Tenancy & RBAC, if you did that lab — except this time your own
 scaling decision is what filled it.
 {{< /note >}}
 

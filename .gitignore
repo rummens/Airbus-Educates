@@ -223,3 +223,7 @@ __marimo__/
 .DS_Store
 *.pdf
 /dcs-academy/planning/workshop-plans/Lightning Talk Demo_ OpenShift Storage 101 v2 .docx
+
+# CI artifacts from test/ci/run-workshops.sh (link fix list)
+link-failures.txt
+link-failures.csv

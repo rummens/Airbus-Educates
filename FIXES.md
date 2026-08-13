@@ -4,6 +4,20 @@ Copy-paste-into-chat log of learner-visible fixes and improvements. Newest day f
 one line per change, no internals. Platform/portal changes are live once ArgoCD has
 synced `main`; workshop content is live on the next session start.
 
+## 2026-08-13
+
+- Storage lab: writing the marker file into the mounted volume works now — it failed with "Permission denied" before.
+- All labs: cross-references use lab names ("the Expose Your App lab") instead of internal codes like A01 / B06, so they match what the catalog shows.
+- Verify buttons no longer turn green before you have done the step: the checks that used to pass on things the platform provides (your session, your namespace, the peer namespaces, the storage classes, the network policy, the blocked internet access) now check *your* command output.
+- Verify buttons: an amber button means it is queued behind another check, not broken — the first lab now says so. Checks that wait for a rollout retry by themselves instead of showing red.
+- Configure & Troubleshoot: the broken-Pod page now shows the failing Pod's events (the old one was hiding them), and the logs step tells you the error message you actually get.
+- What is DCS: says plainly that DCS is the platform of Airbus Defence and Space.
+- Terms — Namespaces & Tenancy: new office-building analogy for Tenant, Namespace, RBAC and PROD.
+- Expose Your App: links now say when they point at OpenShift documentation.
+- Catalog: a lab you rated shows your rating right away, marked "provisional" until enough people have rated it.
+- Console lab "Diagnose a broken pod": the lab starts again. The launch screen was waiting for the deliberately broken pod to become healthy — which it never does, because fixing it is the exercise.
+- Console labs: a new **Exit lab** button next to Stop takes you back to the Academy — before, stopping the guidance left you with no way out. The blue highlight pulses once instead of three times.
+
 ## 2026-07-31
 
 - Catalog: lab ratings now show the score as a number and the stars are filled in — you can actually see 4 stars vs 5.

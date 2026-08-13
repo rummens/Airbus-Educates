@@ -16,7 +16,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/re
 
 {{< note >}}
 This is a *local* tunnel, just for you, just while the command runs — not real exposure.
-Giving the app a proper external address (a **Route**) is the whole point of **A03**.
+Giving the app a proper external address (a **Route**) is the whole point of **Expose Your App**.
 {{< /note >}}
 
 ## Open the tunnel (lower terminal)
@@ -58,4 +58,6 @@ what comes back.
 name: verify-greeting
 title: Verify the app serves your greeting
 timeout: 10
+retries: 3
+delay: 2
 ```

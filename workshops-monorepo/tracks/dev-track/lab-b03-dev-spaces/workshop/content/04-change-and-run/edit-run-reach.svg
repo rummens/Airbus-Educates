@@ -27,5 +27,5 @@
   <text x="630" y="136" text-anchor="middle" font-size="10" fill="#5a6b7b">your edit, live in-cluster</text>
 
   <text x="380" y="200" text-anchor="middle" font-size="11" fill="#5a6b7b">No image build between step 1 and step 3 — the source runs directly.</text>
-  <text x="380" y="218" text-anchor="middle" font-size="11" fill="#5a6b7b">Compare B02, where the same edit only shows up after a new image is built.</text>
+  <text x="380" y="218" text-anchor="middle" font-size="11" fill="#5a6b7b">Compare the Images lab, where the same edit needs a new image build first.</text>
 </svg>

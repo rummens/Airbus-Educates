@@ -49,6 +49,12 @@ Green means the step really worked — not "the page scrolled past", but "the cl
 your session are in the state this step promised". If a check is ever **red**, fix the
 step above before moving on; checks are safe to click again.
 
+{{< note >}}
+**Amber means waiting, not broken.** Checks run one at a time. Click a second check while
+the first is still running and it turns amber until its turn comes — then it runs and shows
+its real result. Nothing is wrong; give it a moment.
+{{< /note >}}
+
 ## Try an "open a file" box
 
 Click below to open the file you just created in the editor:

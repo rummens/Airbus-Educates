@@ -24,12 +24,13 @@ yet — it's on the roadmap. So here you *inspect* one rather than author it.
 {{< /note >}}
 
 ```terminal:execute
-command: oc describe networkpolicy allow-hello-dcs-ingress
+command: oc describe networkpolicy allow-hello-dcs-ingress | tee ~/exercises/netpol.txt
 ```
 
 ```examiner:execute-test
 name: verify-networkpolicy
-title: Verify the NetworkPolicy is present
+prefix: After the describe
+title: Verify you inspected the NetworkPolicy
 timeout: 10
 ```
 
@@ -45,7 +46,7 @@ that Deployment; everything after `--` is the command to run in the container (h
 Python one-liner, where `-c` passes the code as a string):
 
 ```terminal:execute
-command: oc exec deploy/hello-dcs -- python3 -c "import urllib.request; urllib.request.urlopen('https://example.com', timeout=5)"
+command: oc exec deploy/hello-dcs -- python3 -c "import urllib.request; urllib.request.urlopen('https://example.com', timeout=5)" > ~/exercises/egress.txt 2>&1; echo "exit=$?" >> ~/exercises/egress.txt; cat ~/exercises/egress.txt
 ```
 
 It **fails** (it times out or is refused), which is the intended result. By default an app

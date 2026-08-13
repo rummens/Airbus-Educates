@@ -2,9 +2,23 @@
   "workshop": "lab-a00-environment-tour",
   "_note": "Environment-tour lab: the Quick Actions page writes one file, the rest are oc identity/reachability checks. No app, no setup.",
   "steps": [
-    {"run": "mkdir -p ~/exercises && echo \"quick actions work\" > ~/exercises/quick-actions.txt"},
-    {"check": "verify-quick-action"},
-    {"check": "verify-whoami"},
-    {"check": "verify-status"}
+    {
+      "run": "mkdir -p ~/exercises && echo \"quick actions work\" > ~/exercises/quick-actions.txt"
+    },
+    {
+      "check": "verify-quick-action"
+    },
+    {
+      "run": "oc whoami | tee ~/exercises/whoami.txt"
+    },
+    {
+      "check": "verify-whoami"
+    },
+    {
+      "run": "oc status | tee ~/exercises/status.txt"
+    },
+    {
+      "check": "verify-status"
+    }
   ]
 }

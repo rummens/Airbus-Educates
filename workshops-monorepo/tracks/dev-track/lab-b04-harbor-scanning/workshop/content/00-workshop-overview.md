@@ -3,7 +3,7 @@ title: "Harbor & Image Scanning"
 ---
 
 Welcome to this workshop, part of **{{< param product_name >}}**. You've built an image
-in B02 and deployed images before — now you'll go inside the registry they all live in.
+in the **Building Images with BuildConfigs** lab and deployed images before — now you'll go inside the registry they all live in.
 On {{< param product_short >}} that registry is [Harbor](https://goharbor.io/docs/): the
 platform's single, air-gapped source of images and the place where every image is
 **scanned** before it's trusted to run. More on how {{< param product_short >}} runs it in
@@ -27,7 +27,7 @@ By the end of this workshop you will be able to:
   Registries, the Proxy-Cached Catalog) and explain what a robot account is.
 - Pull and inspect an image with [`skopeo`](https://github.com/containers/skopeo) using a
   read-only robot account.
-- Explain how the image you built in B02 reaches Harbor, and confirm it landed in its
+- Explain how the image you built in the **Building Images with BuildConfigs** lab reaches Harbor, and confirm it landed in its
   project.
 - Distinguish **vulnerability** scanning from **compliance** scanning, and read a scan
   report — severities, CVE IDs, fixed-in versions — with
@@ -41,8 +41,8 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- **B02 — Building Images with BuildConfigs.** This workshop picks up the image built
-  there. If you haven't done B02, `samples/hello-dcs:1.0` — the same image A01 deployed —
+- **Building Images with BuildConfigs** This workshop picks up the image built
+  there. If you haven't done the **Building Images with BuildConfigs** lab, `samples/hello-dcs:1.0` — the same image the **Deploy Your First App** lab deployed —
   stands in for it throughout.
 - Familiarity with [container images](https://kubernetes.io/docs/concepts/containers/images/)
   and basic [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)

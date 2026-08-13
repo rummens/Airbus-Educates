@@ -48,7 +48,7 @@ delay: 2
 ## Front it with a Service
 
 Open the Service. Note the `selector: app: hello-dcs` — the same labels the Deployment
-puts on its Pods (from A01). That is how the Service finds them:
+puts on its Pods (from the **Deploy Your First App** lab). That is how the Service finds them:
 
 ```editor:open-file
 file: ~/exercises/service.yaml

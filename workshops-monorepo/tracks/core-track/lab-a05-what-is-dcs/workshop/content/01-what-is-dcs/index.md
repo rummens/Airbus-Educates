@@ -15,6 +15,13 @@ name: Slides
 url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/platform
 ```
 
+{{< note >}}
+**Who it is for.** {{< param product_short >}} is the container platform of **Airbus
+Defence and Space** — its tenants are D&S programmes and teams. Other Airbus divisions run
+their own platforms; the section below explains why D&S built its own rather than joining
+one of them.
+{{< /note >}}
+
 ## Why DCS?
 
 Airbus Commercial adopted OpenShift to modernise how applications are built and run.

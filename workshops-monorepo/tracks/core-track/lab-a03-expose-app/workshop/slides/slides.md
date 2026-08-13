@@ -107,6 +107,6 @@ oc exec deploy/hello-dcs -- \
 You gave the app a stable in-cluster address, a real external Route, an in-session tab, and saw how network policy and egress are restricted by default.
 
 - The app is reachable, but still forgets everything when a Pod restarts — no storage.
-- **A04 — Storage** gives it a persistent volume so its data survives restarts.
+- **Storage** gives it a persistent volume so its data survives restarts.
 
 Digital Container Service · DCS Academy

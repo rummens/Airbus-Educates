@@ -24,7 +24,7 @@ course, so it is worth defining them plainly:
   file, and the platform makes reality match it and keeps it that way. The YAML you are
   about to see is declarative.
 
-You just worked imperatively. From A02 on, you work declaratively.
+You just worked imperatively. From the **Configure & Troubleshoot Your App** lab on, you work declaratively.
 {{< /note >}}
 
 ## Save and open the generated YAML
@@ -75,5 +75,5 @@ timeout: 10
 ```
 
 **Deployment → ReplicaSet → Pod**, tied together by labels and selectors. Everything you
-did by hand is captured in that YAML — and from A02 on, you'll write it directly instead
+did by hand is captured in that YAML — and from the **Configure & Troubleshoot Your App** lab on, you'll write it directly instead
 of generating it.

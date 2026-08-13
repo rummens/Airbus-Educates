@@ -3,7 +3,7 @@ title: "Storage"
 ---
 
 Restart your app and everything it wrote is **gone**. That's by design — a container's
-filesystem is temporary, and A02 showed you Pods get replaced all the time. For anything
+filesystem is temporary, and the **Configure & Troubleshoot Your App** lab showed you Pods get replaced all the time. For anything
 worth keeping, you need storage that lives *outside* the Pod. This workshop on
 **{{< param product_name >}}** gives your app exactly that, and proves it survives a
 restart.
@@ -29,7 +29,7 @@ DCS storage is covered in the
 
 ## Prerequisites
 
-- **A01 — Deploy Your First App.** You know Deployments and restarts (A02 helps).
+- **Deploy Your First App.** You know Deployments and restarts (the **Configure & Troubleshoot Your App** lab helps).
 
 ## Your Environment
 

@@ -14,7 +14,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ro
 {{< note >}}
 **A Route requires a PROD-type namespace.** DCS only admits Routes in namespaces marked
 PROD; a DEV namespace cannot expose anything. Your session namespace is PROD-type for this
-lab, so this works. *Why* PROD enforces this, and how, is a Developer-track topic (**B06**).
+lab, so this works. *Why* PROD enforces this, and how, is a Developer-track topic (**DEV vs PROD Namespaces & Policies**).
 {{< /note >}}
 
 ## Create the Route
@@ -50,6 +50,8 @@ command: oc get route hello-dcs -o jsonpath='{.spec.host}{"\n"}'
 name: verify-route-admitted
 title: Confirm the Route host is set
 timeout: 10
+retries: 3
+delay: 2
 ```
 
 ## Reach it from outside the session

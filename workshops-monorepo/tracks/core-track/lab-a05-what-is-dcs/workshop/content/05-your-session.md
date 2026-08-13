@@ -24,7 +24,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/se
 First, confirm who you are logged in as:
 
 ```terminal:execute
-command: oc whoami
+command: oc whoami | tee ~/exercises/whoami.txt
 ```
 
 ```examiner:execute-test
@@ -38,7 +38,7 @@ timeout: 10
 Check that your `oc` client can talk to the {{< param product_short >}} cluster:
 
 ```terminal:execute
-command: oc version
+command: oc version | tee ~/exercises/version.txt
 ```
 
 ```examiner:execute-test
@@ -53,7 +53,7 @@ On {{< param product_short >}}, your work lives in a **project** (an OpenShift p
 wrapping a Kubernetes namespace). Yours is already selected. Show its name:
 
 ```terminal:execute
-command: oc project -q
+command: oc project -q | tee ~/exercises/project.txt
 ```
 
 ```examiner:execute-test
@@ -73,7 +73,7 @@ is already your default, most `oc` commands need no `-n` flag.
 its own fresh session namespace, so this one starts clean:
 
 ```terminal:execute
-command: oc status
+command: oc status | tee ~/exercises/status.txt
 ```
 
 ```examiner:execute-test

@@ -41,6 +41,6 @@ levels only: **Tenant → Namespaces**.
 
 ## Next Steps
 
-That's the *landscape*. The **deep model** is the Developer track: **B05** (RBAC, Tenancy
-& Namespaces — the access rules in full) and **B06** (DEV vs PROD by policy — how PROD is
-enforced with Kyverno and why only PROD can expose apps with a Route).
+That's the *landscape*. The **deep model** is the Developer track: **RBAC, Tenancy &
+Namespaces** (the access rules in full) and **DEV vs PROD Namespaces & Policies** (how PROD
+is enforced with Kyverno and why only PROD can expose apps with a Route).

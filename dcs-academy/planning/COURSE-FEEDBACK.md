@@ -79,3 +79,20 @@ real cluster after deploy.
 ## Skills / prevention (author + planning)
 - [x] Authoring skill: intro-page title = lab title; "show the change" (visible before/after) + explain flags on first use (content-depth); keep clickable commands simple (clickable-actions); session-proxy tab → Service needs `host:` (dashboard); non-root writable mount path + no hardcoded fsGroup (openshift); test-integrity / name-the-coverage-gap (local-cluster); egress-proxy + S3 + NATO classification accuracy (dcs-concepts); matching SKILL.md checklist lines.
 - [x] Planning skill: core/foundations track = `beginner` (difficulty tracks audience, not topic); a05 plan doc synced to the as-built pages.
+
+## Prod feedback round — 2026-08 (portal feedback form, ids 31–84)
+
+- [x] Verification "false green" (a01/a02/a03/a04/a06 reports) — root cause: 13 checks asserted platform facts that are true from session start (session auth, active namespace, pre-provisioned peer namespaces + NetworkPolicy, cluster storage classes, air-gap). Each terminal step now tees its output and the check grades the learner's own run, then re-asserts the state. Smoke plans updated to run the same commands.
+- [x] Verification "amber" on premature click — Educates runs examiner tests serially, so amber = queued, not error. Explained on the a00 Quick Actions page; async checks got `retries`/`delay` so timing alone no longer shows red.
+- [x] Internal lab codes (A01, B06) in learner text — replaced with lab titles across the Core track; catalog never showed those codes.
+- [x] a04 write "Permission denied" — `securityContext.fsGroup: 1001` in the workshop manifest (the fix was lost in the content wipe of commit a5bfd4c and re-applied), and the lab note now teaches mount path **and** fsGroup.
+- [x] a02 missing ConfigMap error in Pod events — a rolling update kept the old healthy Pod; the describe step now targets the newest Pod. The "no log lines at all" claim replaced with the actual `CreateContainerConfigError` message.
+- [x] a03 "Route link points to OpenShift docs" — correct target, unclear labelling; links now name their source.
+- [x] Catalog "Not yet rated" after rating — threshold behaviour (`FEEDBACK_MIN_REVIEWS`), not a lost rating. Ratings below the threshold now show as *provisional*; threshold 5 → 3.
+- [x] a05 division confusion — DCS is the Airbus **Defence and Space** platform (author correction; the reporter's "serves Commercial + Helicopters too" is wrong). Stated explicitly on the What is DCS page. Reordering a05 before a01: **declined for now**.
+- [x] a06 "add an analogy" — office building: Tenant = the org renting, Namespace = a room, RBAC = who holds the key, PROD = the rooms with the alarm on.
+- [x] Console lab: Stop Guidance stranded the learner — "Exit lab" control added (plugin repo). Spotlight pulse repeats once instead of three times.
+- [ ] a01 DCS registry docs link 404 (`/services/container-registry`) — needs the correct path from inside the network; run `link_check.py --check-internal` there.
+- [ ] u01 "Continue does not work on the first step" — not reproduced yet (plugin repo).
+- [ ] "Application is not available" after an idle/closed session — that is the OpenShift router's 503 page; per author, custom router error pages are not an option (shared cluster). Current behaviour kept.
+- [ ] **For the platform/ITSM team, not a lab change:** offer a default tenant covering ~80% of use cases (CPU, proxy config) instead of the learner raising several tickets (feedback id 63).

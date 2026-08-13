@@ -19,6 +19,15 @@ request namespaces and ship applications into them. That's what "Namespace as a 
 means — the namespace, not a server, is the thing you're given. Learn more in the
 [{{< param product_short >}} tenancy & access overview]({{< param dcs_docs_base_url >}}/concepts/tenancy-and-access).
 
+{{< note >}}
+**Think of an office building.** The **Tenant** is your organisation renting space in it:
+named on the contract, billed monthly, accountable for what happens inside. A **Namespace**
+is one room your organisation was given — your furniture, your mess, and nothing from the
+room next door leaks in. **RBAC** decides who holds a key to which room. And the **PROD**
+rooms are the ones with the alarm system switched on: same building, stricter house rules.
+The platform team runs the building; you decide what happens in your rooms.
+{{< /note >}}
+
 ## Your active namespace
 
 Your **active namespace** is the one your `oc` context points at right now — the default
@@ -26,7 +35,7 @@ for every command that does not name a different one. Show it with `oc project`,
 prints the active namespace and nothing else:
 
 ```terminal:execute
-command: oc project
+command: oc project | tee ~/exercises/project.txt
 ```
 
 ```examiner:execute-test
@@ -48,7 +57,7 @@ a comma-separated list of kinds (`deployments,pods,services`) asks `oc` for all 
 once, so you see the whole picture in a single command:
 
 ```terminal:execute
-command: oc get deployments,pods,services
+command: oc get deployments,pods,services | tee ~/exercises/workloads.txt
 ```
 
 ```examiner:execute-test

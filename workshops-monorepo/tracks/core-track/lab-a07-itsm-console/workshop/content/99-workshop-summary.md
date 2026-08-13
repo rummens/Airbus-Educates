@@ -59,5 +59,6 @@ provisioning.
 ## Next Steps
 
 That completes the Core track. The **Console track** does the same work in the OpenShift
-web console, and the **Developer track** goes into the mechanisms: **B05** (RBAC and
-tenancy in full) and **B06** (how DEV and PROD differ by policy).
+web console, and the **Developer track** goes into the mechanisms: **RBAC, Tenancy &
+Namespaces** (access in full) and **DEV vs PROD Namespaces & Policies** (how DEV and PROD
+differ by policy).

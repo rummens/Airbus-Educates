@@ -119,8 +119,8 @@ spec:
           namespace: $(session_namespace)
         stringData:
           API_TOKEN: "not-a-real-token"
-      # The healthy comparison, and the pod the portal's readiness feed waits for: it
-      # carries the Educates session label, so the redirect happens once THIS pod runs.
+      # The healthy comparison the learner comes back to. Nothing gates on it: the portal
+      # waits for Educates' own workshop pod, never for lab-created pods.
       - apiVersion: v1
         kind: Pod
         metadata:
@@ -145,9 +145,10 @@ spec:
       # the kubelet cannot build the container's environment and the pod stops at
       # CreateContainerConfigError — the same fault the terminal lab introduces.
       #
-      # NO training.educates.dev/session.name label here, deliberately: the portal waits
-      # for every pod carrying that label to become ready before it redirects, and this
-      # pod never will.
+      # This pod NEVER becomes Ready — that is the exercise. The portal's readiness gate
+      # therefore ignores lab-created pods and waits only for the workshop pod (see
+      # portal/app.py::_status_feed); dropping the session label from this pod used to be
+      # the workaround for that and is no longer what makes the launch work.
       - apiVersion: v1
         kind: Pod
         metadata:

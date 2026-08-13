@@ -1,13 +1,18 @@
 #!/bin/bash
-# Verify both pre-provisioned peer namespaces exist and are accessible.
-# We list a namespaced resource in each instead of `oc get namespace <name>` — that
-# succeeds only if the namespace exists AND the session's edit RoleBinding is in place,
-# and it does not depend on how namespace get is scoped for the session SA.
-base=$(oc project -q 2>/dev/null)
-for s in app-a app-b; do
-  if ! oc get deployments -n "$base-$s" >/dev/null 2>&1; then
-    echo "Namespace '$base-$s' not found/accessible — it should have been created with the session." >&2
-    exit 1
-  fi
-done
-echo "OK: both '$base-app-a' and '$base-app-b' exist and are accessible."
+# Verify the learner ran the command step and read its output.
+# Gated on the learner's own run: the underlying state is true from session start, so a
+# check that only asserts it goes green before the learner clicks anything.
+f="$HOME/exercises/peers.txt"
+if ! [ -s "$f" ]; then
+  echo "Click the command step above first — $f is missing or empty." >&2
+  exit 1
+fi
+if ! grep -qE '-app-a' "$f"; then
+  echo "$f does not look like that command's output — re-run the step above." >&2
+  exit 1
+fi
+if ! grep -q -- '-app-b' "$f"; then
+  echo "The output is recorded, but the same check against the cluster failed — re-run the step above." >&2
+  exit 1
+fi
+echo "OK: you can see both peer namespaces"

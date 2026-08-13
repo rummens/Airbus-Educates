@@ -32,9 +32,9 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- **A06 — Terms: Namespaces & Tenancy.** This lab assumes the **Tenant → Namespaces**
+- **Terms — Namespaces & Tenancy.** This lab assumes the **Tenant → Namespaces**
   model and the **DEV/PROD** namespace types. It also explains the "you'll need a request
-  for that" notes from A03 (a Route needs a PROD namespace) and A04 (S3 comes via a
+  for that" notes from the **Expose Your App** lab (a Route needs a PROD namespace) and the **Storage** lab (S3 comes via a
   request).
 
 ## Your Environment

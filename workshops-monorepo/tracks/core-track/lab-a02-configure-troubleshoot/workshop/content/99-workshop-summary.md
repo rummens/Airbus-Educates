@@ -62,5 +62,5 @@ the missing/blocked resource directly.
 ## Next Steps
 
 Your app still only answers a **local** tunnel — no stable in-cluster address, no external
-URL. **A03 — Expose Your App** gives it a Service and a real DCS Route, reachable from
+URL. **Expose Your App** gives it a Service and a real DCS Route, reachable from
 outside your session.

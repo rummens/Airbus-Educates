@@ -29,6 +29,8 @@ default.
 name: verify-ready
 title: Verify the Deployment is readable
 timeout: 10
+retries: 3
+delay: 2
 ```
 
 ## Set the greeting

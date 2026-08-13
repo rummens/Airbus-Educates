@@ -2,7 +2,7 @@
 title: Tenant to Namespaces, in Depth
 ---
 
-Core A06 gave you two words: **Tenant** and **Namespace**. Here's the model behind them, in
+Core the **Terms — Namespaces & Tenancy** lab gave you two words: **Tenant** and **Namespace**. Here's the model behind them, in
 full, because everything else in this lab builds on getting it exactly right.
 
 ## Two levels, not three

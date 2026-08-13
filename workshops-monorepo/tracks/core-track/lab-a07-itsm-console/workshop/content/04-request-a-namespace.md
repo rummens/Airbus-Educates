@@ -44,14 +44,14 @@ options open.
 
 ## Usage — DEV or PROD
 
-The distinction from A06, now as one radio button:
+The distinction from the **Terms — Namespaces & Tenancy** lab, now as one radio button:
 
 - **Development** — fewer policies, more tolerance for insecure images, **no service
   exposure**.
 - **Production** — stronger policies, less tolerance for insecure images, **service
   exposure allowed**.
 
-That is the rule behind A03: a Route needs a PROD namespace. More:
+That is the rule behind the **Expose Your App** lab: a Route needs a PROD namespace. More:
 [DEV and PROD namespaces]({{< param dcs_docs_base_url >}}/concepts/dev-and-prod-namespace).
 
 ## Features — optional checkboxes
@@ -67,7 +67,7 @@ Leave them all off if you don't know you need them; they can be added later.
 {{< warning >}}
 "Harbor **project**" is Harbor's own word for a registry namespace. It is **not** a layer
 in the {{< param product_short >}} tenancy model — that is still just **Tenant →
-Namespaces**, as A06 said.
+Namespaces**, as the **Terms — Namespaces & Tenancy** lab said.
 {{< /warning >}}
 
 ## The whole request, start to finish

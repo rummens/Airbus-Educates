@@ -990,6 +990,44 @@ def test_session_pods_merges_vcluster(monkeypatch):
     assert names["my-vcluster-0"]["vcluster"] is True and names["my-vcluster-0"]["ready"] == 1
 
 
+def test_session_pods_flags_the_workshop_pod(monkeypatch):
+    # The workshop pod is named after the session; a pod the lab created via
+    # session.objects is not, even though Educates labels it with the session name.
+    ws = _FakePod("sess", "sess-abc123", ready=1, total=1)
+    lab = _FakePod("sess", "lab-app-broken", ready=0, total=1)
+    monkeypatch.setattr(k8sclient, "_core", lambda: _FakeCore([ws, lab]))
+    pods = {p["name"]: p for p in k8sclient.session_pods("sess")}
+    assert pods["sess-abc123"]["workshop"] is True
+    assert pods["lab-app-broken"]["workshop"] is False
+
+
+def test_status_feed_ignores_a_deliberately_broken_lab_pod(monkeypatch):
+    # "Diagnose a broken pod" ships a pod stuck in CreateContainerConfigError on purpose.
+    # It must not hold the session at "Starting workshop pod" forever.
+    monkeypatch.setattr(k8sclient, "session_status",
+                        lambda n: {"phase": "Allocated", "url": "/u"})
+    monkeypatch.setattr(k8sclient, "session_pods", lambda n: [
+        {"name": "sess-abc", "namespace": "ns", "vcluster": False, "workshop": True,
+         "phase": "Running", "ready": 1, "total": 1},
+        {"name": "lab-app-broken", "namespace": "ns", "vcluster": False, "workshop": False,
+         "phase": "Pending", "ready": 0, "total": 1},
+    ])
+    monkeypatch.setattr(k8sclient, "session_route_ready", lambda n, u: True)
+    feed = appmod._status_feed("sess", 0)
+    assert feed["ready"] is True and feed["step"] == "Ready"
+
+
+def test_status_feed_still_waits_when_the_workshop_pod_is_not_ready(monkeypatch):
+    monkeypatch.setattr(k8sclient, "session_status",
+                        lambda n: {"phase": "Allocated", "url": "/u"})
+    monkeypatch.setattr(k8sclient, "session_pods", lambda n: [
+        {"name": "sess-abc", "namespace": "ns", "vcluster": False, "workshop": True,
+         "phase": "Pending", "ready": 0, "total": 1},
+    ])
+    monkeypatch.setattr(k8sclient, "session_route_ready", lambda n, u: True)
+    assert appmod._status_feed("sess", 0)["ready"] is False
+
+
 def test_session_route_ready_no_rbac_falls_through_to_probe(monkeypatch):
     # Without Routes RBAC we can't check admission, so we rely solely on the HTTP probe
     # (never fail open early — the probe is the source of truth).

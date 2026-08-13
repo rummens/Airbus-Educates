@@ -12,7 +12,7 @@ name: Slides
 url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/tenant
 ```
 
-Recall A06: **Tenant → Namespaces**. The Tenant is the accountable, recharged org unit;
+Recall the **Terms — Namespaces & Tenancy** lab: **Tenant → Namespaces**. The Tenant is the accountable, recharged org unit;
 the namespaces are where your workloads run.
 
 ## Seven fields, and you're through

@@ -1,8 +1,18 @@
 #!/bin/bash
-# Verify the session is authenticated (oc whoami returns a user).
-user=$(oc whoami 2>/dev/null)
-if [ -z "$user" ]; then
-  echo "Not authenticated: 'oc whoami' returned nothing. The session should already be logged in — try re-running the command." >&2
+# Verify the learner ran the command step and read its output.
+# Gated on the learner's own run: the underlying state is true from session start, so a
+# check that only asserts it goes green before the learner clicks anything.
+f="$HOME/exercises/whoami.txt"
+if ! [ -s "$f" ]; then
+  echo "Click the command step above first — $f is missing or empty." >&2
   exit 1
 fi
-echo "OK: authenticated as '$user'."
+if ! grep -qE '[a-z]' "$f"; then
+  echo "$f does not look like that command's output — re-run the step above." >&2
+  exit 1
+fi
+if ! oc whoami >/dev/null 2>&1; then
+  echo "The output is recorded, but the same check against the cluster failed — re-run the step above." >&2
+  exit 1
+fi
+echo "OK: you are authenticated as $(cat "$f")"

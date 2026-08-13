@@ -32,7 +32,7 @@ for {{< param product_short >}}.
 Namespaces come in **types** — most importantly **DEV** and **PROD** — and they behave
 differently: PROD is governed more strictly (policy enforcement, and it's where you're
 allowed to expose apps), DEV is looser for fast iteration. That the types *exist* is the
-point here; *how* the difference is enforced is a Developer-track topic (**B06**).
+point here; *how* the difference is enforced is a Developer-track topic (**DEV vs PROD Namespaces & Policies**).
 
 Look at the labels on your own namespace. The command reads them and formats them one per
 line. `-o jsonpath='{.metadata.labels}'` extracts just the labels field from the namespace
@@ -41,7 +41,7 @@ character with another — here a comma with a newline); the second `tr -d '{}"'
 braces and quotes so the output is easy to read:
 
 ```terminal:execute
-command: oc get namespace "$(oc project -q)" -o jsonpath='{.metadata.labels}' | tr ',' '\n' | tr -d '{}"'
+command: oc get namespace "$(oc project -q)" -o jsonpath='{.metadata.labels}' | tr ',' '\n' | tr -d '{}"' | tee ~/exercises/ns-labels.txt
 ```
 
 ```examiner:execute-test
@@ -54,7 +54,7 @@ The labels are how the platform tracks which Tenant a namespace belongs to and w
 it is.
 
 {{< note >}}
-Don't confuse a **cluster** with a **namespace type**. From A05: Sandbox and PROD are
+Don't confuse a **cluster** with a **namespace type**. From the **What is DCS?** lab: Sandbox and PROD are
 *clusters* — where the platform runs. DEV and PROD here are *namespace types* — how a
 namespace is governed. Different things that reuse the word "PROD".
 {{< /note >}}

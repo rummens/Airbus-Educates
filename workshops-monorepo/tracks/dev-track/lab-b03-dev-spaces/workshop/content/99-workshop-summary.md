@@ -20,9 +20,9 @@ loop from an edited line of code to that line running inside the cluster.
   Deployment has already shown you, triggered by the Che Operator instead of by
   `oc apply`.
 - **Traced** the edit → run → reach loop a workspace gives you, and why it skips
-  the image-build step that B02's BuildConfig deliberately has.
-- **Placed** Dev Spaces, the Educates editor, BuildConfig (B02), and `oc apply`
-  (A01/B01) on one timeline: write it, build it, run it — four tools, one job
+  the image-build step that the **Building Images with BuildConfigs** lab's BuildConfig deliberately has.
+- **Placed** Dev Spaces, the Educates editor, BuildConfig (the **Building Images with BuildConfigs** lab), and `oc apply`
+  (the **Deploy Your First App** lab/the **From Docker to Kubernetes on DCS** lab) on one timeline: write it, build it, run it — four tools, one job
   each, never substitutes for one another.
 
 ## Check Your Understanding
@@ -46,7 +46,7 @@ is `${DCS_REGISTRY}/devspaces/udi:latest`, never a hardcoded or public registry.
 {{< /note >}}
 
 3. Why doesn't editing code in a workspace require a new image build to see the
-   change run, the way B02's BuildConfig does?
+   change run, the way the **Building Images with BuildConfigs** lab's BuildConfig does?
 
 {{< note >}}
 **Answer:** A workspace runs the cloned source directly (`python3 server.py`)
@@ -60,7 +60,7 @@ iterating.
 
 {{< note >}}
 **Answer:** No — they solve different problems. Dev Spaces is where you *write
-and iterate on* code; `oc apply` (A01/B01) is how a *built* image ends up
+and iterate on* code; `oc apply` (the **Deploy Your First App** lab/the **From Docker to Kubernetes on DCS** lab) is how a *built* image ends up
 running in a real namespace. A workspace never deploys anything by itself.
 {{< /note >}}
 
@@ -89,7 +89,7 @@ instead of the provided sample repo used here.
 `${WORKSPACE_SOURCE_REPO}` — a small, in-platform git repository reachable
 without external egress. The concrete air-gapped hosting for that repo (a
 mirror into the tenant's GitLab vs. a small in-cluster git service) is the same
-open provisioning question tracked for B02's `${BUILD_SOURCE_REPO}`; both
+open provisioning question tracked for the **Building Images with BuildConfigs** lab's `${BUILD_SOURCE_REPO}`; both
 resolve to the same answer once that's settled. Likewise, whether the **Dev
 Spaces** dashboard tab shows a live instance depends on whether your cluster has
 Dev Spaces and a Harbor-mirrored UDI provisioned yet — the content here is

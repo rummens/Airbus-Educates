@@ -50,5 +50,5 @@
 
   <rect x="470" y="410" width="200" height="55" rx="8" fill="#fdeceb" stroke="#b23b3b" stroke-width="1.5"/>
   <text x="570" y="433" text-anchor="middle" font-size="13.5" font-weight="600" fill="#6b1f1f">Robot account</text>
-  <text x="570" y="452" text-anchor="middle" font-size="12" fill="#6b1f1f">push-capable (B02's build)</text>
+  <text x="570" y="452" text-anchor="middle" font-size="12" fill="#6b1f1f">push-capable (the build lab)</text>
 </svg>

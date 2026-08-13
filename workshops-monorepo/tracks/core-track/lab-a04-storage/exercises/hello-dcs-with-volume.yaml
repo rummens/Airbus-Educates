@@ -21,6 +21,11 @@ spec:
       labels:
         app: hello-dcs
     spec:
+      # The provisioned volume is root-owned, and hello-dcs runs non-root (UID 1001).
+      # fsGroup makes the kubelet chgrp the volume to 1001 and set g+w, so the app can
+      # write it — without this the marker write fails with "Permission denied".
+      securityContext:
+        fsGroup: 1001
       containers:
       - name: hello-dcs
         image: ${DCS_REGISTRY}/samples/hello-dcs:1.0

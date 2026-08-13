@@ -35,7 +35,7 @@ it. A Service alone is in-cluster only.
 {{< note >}}
 **Answer:** DCS policy only admits Routes in PROD-type namespaces — exposing a service is
 a production-grade action. DEV namespaces can't create Routes. (The enforcement mechanism
-is a Developer-track topic, B06.)
+is covered by the Developer-track lab **DEV vs PROD Namespaces & Policies**.)
 {{< /note >}}
 
 4. Why did the `example.com` call **fail**?
@@ -48,4 +48,4 @@ Everything comes from inside the platform (Harbor images, internal mirrors).
 ## Next Steps
 
 Your app is reachable, but it still forgets everything when a Pod restarts — no storage.
-**A04 — Storage** gives it a persistent volume so its data survives restarts.
+**Storage** gives it a persistent volume so its data survives restarts.

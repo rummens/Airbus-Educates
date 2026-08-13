@@ -13,7 +13,7 @@ watched a fresh image take over.
 - **Connected** a git repository as a build source in a BuildConfig, and compared the
   **S2I** and **Dockerfile** strategies.
 - **Built** an image with `oc start-build` and watched it push into Harbor.
-- **Deployed** the image you built, using the same Deployment skills from A01/B01.
+- **Deployed** the image you built, using the same Deployment skills from the **Deploy Your First App** lab/the **From Docker to Kubernetes on DCS** lab.
 - **Rebuilt** it and confirmed a fresh image — with a new digest — replaced the old one.
 
 ## Check Your Understanding
@@ -55,13 +55,12 @@ bootstrapping the first build when the BuildConfig is created.
 
 ## Next Steps
 
-You connected git as a **build source** — code in, image out. **B03 — Dev Spaces**
+You connected git as a **build source** — code in, image out. **Cloud Development with OpenShift Dev Spaces**
 connects git for a different purpose: an **in-cluster IDE**, so you can edit and run code
 directly against the cluster without a build at all. Same git repository model, opposite
 job.
 
-Where does the image you built here actually live, and is it safe to run? **B04 — Harbor
-& Image Scanning** picks up exactly there: inspecting the image you pushed today and the
+Where does the image you built here actually live, and is it safe to run? **Harbor & Image Scanning** picks up exactly there: inspecting the image you pushed today and the
 vulnerability scan gate it passes through before anything deploys it in PROD.
 
 <!--
@@ -69,8 +68,8 @@ DESIGN NOTE (not learner-visible): this workshop is authored assuming two pieces
 session-provisioned infrastructure that are UNCONFIRMED as of this writing — see
 dcs-academy/planning/tasks.md, "Module B — Developer restructure":
 
-1. A session-scoped, PUSH-CAPABLE Harbor project + robot account (tasks.md P1: "B02 has
-   no clean fallback for build-and-push" — unlike B04's read-only robot, this lab cannot
+1. A session-scoped, PUSH-CAPABLE Harbor project + robot account (tasks.md P1: "the **Building Images with BuildConfigs** lab has
+   no clean fallback for build-and-push" — unlike the **Harbor & Image Scanning** lab's read-only robot, this lab cannot
    degrade to inspect-only if the push credential isn't actually provisioned per session).
    This workshop assumes the BuildConfig's output push lands at
    {{< param dcs_registry >}}/{{ session_namespace }}/hello-dcs-built:latest-built via a

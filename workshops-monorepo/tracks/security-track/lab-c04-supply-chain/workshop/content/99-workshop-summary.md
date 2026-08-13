@@ -64,6 +64,6 @@ and the gate; there is no side door.
 
 ## Next Steps
 
-You've completed the "image trust" pair of the Security track (C01 scanning/gating + C04 supply
+You've completed the "image trust" pair of the Security track (the **Image Scanning & Harbor Gates** lab scanning/gating + the **Supply Chain & Provenance** lab supply
 chain). Next in Security & Compliance: applying these guarantees to **pod security and secrets**
 on {{< param product_short >}}.

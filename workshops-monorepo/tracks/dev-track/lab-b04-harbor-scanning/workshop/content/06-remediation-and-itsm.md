@@ -16,7 +16,7 @@ Both routes end the same way — a re-scanned artifact with the findings gone:
   rebuild needed.
 - **Rebuild on a patched base.** If no ready-made clean tag exists, rebuild on an updated
   base image — each finding's `FixedVersion` is your shopping list of package versions —
-  and push the result. This is exactly the loop B02 taught: a `BuildConfig` producing a new
+  and push the result. This is exactly the loop the **Building Images with BuildConfigs** lab taught: a `BuildConfig` producing a new
   image and pushing it to Harbor; only the trigger changes, from "the source changed" to
   "the base image needs patching."
 

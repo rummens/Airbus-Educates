@@ -2,7 +2,7 @@
 title: "Configure & Troubleshoot Your App"
 ---
 
-In A01 you customised your app with `oc set env` — one value, on the command line. That's
+In the **Deploy Your First App** lab you customised your app with `oc set env` — one value, on the command line. That's
 fine for one setting, but a real app on **{{< param product_name >}}** has many settings,
 and some of them are secret. This lab moves configuration to where it belongs — into
 dedicated objects — and then, because things break in the real world, hands you a broken
@@ -25,7 +25,7 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- **A01 — Deploy Your First App.** You know Deployments, rollouts, and the
+- **Deploy Your First App.** You know Deployments, rollouts, and the
   Deployment → ReplicaSet → Pod chain. This lab reuses the same `hello-dcs` app.
 
 {{< note >}}

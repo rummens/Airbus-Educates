@@ -41,6 +41,6 @@ manifest into PROD as a fresh apply. You don't edit the running PROD workload in
 ## Next Steps
 
 Now that a workload can actually land in PROD, the next question is whether it *stays*
-up under load and within its namespace's budget. **B07 — Scaling, Health & Resources**
-picks up right there. The policy mindset from this lab returns later too — **B08
+up under load and within its namespace's budget. **Scaling, Health & Resources**
+picks up right there. The policy mindset from this lab returns later too — **the **Operators on DCS** lab
 (Operators)** and the Security track both build on "PROD enforces more than DEV does."

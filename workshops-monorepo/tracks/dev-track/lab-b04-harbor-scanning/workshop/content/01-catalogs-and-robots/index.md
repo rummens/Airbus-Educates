@@ -49,7 +49,7 @@ A robot account is one of two shapes:
   session carries one of these, scoped to `samples`, for everything in this workshop up to
   the push step.
 - **Push-capable** — can also `push` new tags into its project. This is what a build
-  pipeline like B02's uses to land a freshly built image in Harbor.
+  pipeline like the **Building Images with BuildConfigs** lab's uses to land a freshly built image in Harbor.
 
 The diagram below shows how the three catalogs feed into Harbor, and how a project's robot
 accounts sit underneath it:

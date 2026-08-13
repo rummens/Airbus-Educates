@@ -2,13 +2,13 @@
 title: Push and Verify Your Image
 ---
 
-The image B02 built didn't just appear in Harbor — someone (B02's BuildConfig) **pushed**
+The image the **Building Images with BuildConfigs** lab built didn't just appear in Harbor — someone (the **Building Images with BuildConfigs** lab's BuildConfig) **pushed**
 it there. Pushing needs a different kind of robot account from the one you've used so far,
 and it's worth understanding the contrast even on the pages where you don't push yourself.
 
 ## Pull-only vs. push-capable
 
-Your session's robot account can only `pull`. B02's build pipeline uses a **second**,
+Your session's robot account can only `pull`. the **Building Images with BuildConfigs** lab's build pipeline uses a **second**,
 push-capable robot account — scoped to the same `samples` project, but with `push`
 permission added. Harbor's project permission model is what makes this safe: a robot
 account's rights are a project-scoped allow-list, not an all-or-nothing login. A pipeline
@@ -16,7 +16,7 @@ that can push a new `hello-dcs` tag still can't touch an unrelated project, and 
 compromised pull-only credential (like the one in this workshop's session) can never push
 anything at all.
 
-Pushing the image B02 built looks like this — shown here for shape, not run in this
+Pushing the image the **Building Images with BuildConfigs** lab built looks like this — shown here for shape, not run in this
 session (this session's robot account genuinely cannot push, matching the read-only
 posture you've used since page 2):
 
@@ -32,7 +32,7 @@ with the push-capable robot's credentials rather than a personal login.
 ## Confirm the image is there
 
 What you *can* do with a read-only robot account is confirm a push landed — which is
-exactly what you'd check after B02's build finishes. List every tag Harbor holds for
+exactly what you'd check after the **Building Images with BuildConfigs** lab's build finishes. List every tag Harbor holds for
 `samples/hello-dcs`:
 
 ```terminal:execute
@@ -52,7 +52,7 @@ asks "what tags exist here?" You should see a JSON list including `1.0`:
 }
 ```
 
-`1.0` is the tag B02's push-capable robot account landed. Its presence here — visible
+`1.0` is the tag the **Building Images with BuildConfigs** lab's push-capable robot account landed. Its presence here — visible
 through your pull-only credential — is the confirmation a push succeeded, without ever
 needing push rights yourself.
 

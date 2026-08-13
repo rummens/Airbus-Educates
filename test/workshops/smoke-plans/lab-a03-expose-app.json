@@ -10,7 +10,9 @@
     {"run": "oc apply -f route.yaml"},
     {"check": "verify-route-admitted"},
     {"check": "verify-route-reachable"},
+    {"run": "oc describe networkpolicy allow-hello-dcs-ingress | tee ~/exercises/netpol.txt"},
     {"check": "verify-networkpolicy"},
+    {"run": "oc exec deploy/hello-dcs -- python3 -c \"import urllib.request; urllib.request.urlopen('https://example.com', timeout=5)\" > ~/exercises/egress.txt 2>&1; echo \"exit=$?\" >> ~/exercises/egress.txt; cat ~/exercises/egress.txt"},
     {"check": "verify-egress-blocked"}
   ]
 }

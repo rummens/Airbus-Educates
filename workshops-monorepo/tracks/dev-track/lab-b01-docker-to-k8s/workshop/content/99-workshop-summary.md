@@ -58,6 +58,6 @@ already fixes. The point is that a *naive* lift-and-shift might assume root is a
 
 ## Next Steps
 
-You migrated an image someone else already built. **B02** picks up where this leaves off:
+You migrated an image someone else already built. **Building Images with BuildConfigs** picks up where this leaves off:
 building *your own* code into an image on-cluster with a BuildConfig, so the next thing you
 migrate is something you wrote yourself.

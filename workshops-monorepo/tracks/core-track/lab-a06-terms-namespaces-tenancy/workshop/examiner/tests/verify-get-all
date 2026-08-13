@@ -1,10 +1,14 @@
 #!/bin/bash
-# Verify the learner can list their workloads in the active namespace.
-# NB: not `oc get all` — that exits non-zero in a restricted namespace when the SA
-# can't list some built-in type. List the explicit namespaced kinds instead.
-if oc get deployments,pods,services >/dev/null 2>&1; then
-  echo "OK: listed workloads in '$(oc project -q 2>/dev/null)'."
-  exit 0
+# Verify the learner ran the command step and read its output.
+# Gated on the learner's own run: the underlying state is true from session start, so a
+# check that only asserts it goes green before the learner clicks anything.
+f="$HOME/exercises/workloads.txt"
+if ! [ -s "$f" ]; then
+  echo "Click the command step above first — $f is missing or empty." >&2
+  exit 1
 fi
-echo "Could not list deployments/pods/services in '$(oc project -q 2>/dev/null)'." >&2
-exit 1
+if ! grep -qE 'NAME|No resources found' "$f"; then
+  echo "$f does not look like that command's output — re-run the step above." >&2
+  exit 1
+fi
+echo "OK: you listed the workloads in your namespace"

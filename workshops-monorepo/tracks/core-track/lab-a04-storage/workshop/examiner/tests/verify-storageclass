@@ -1,9 +1,14 @@
 #!/bin/bash
-# Verify at least one StorageClass is available to request from.
-n=$(oc get storageclass -o name 2>/dev/null | wc -l | tr -d ' ')
-if [ "${n:-0}" -ge 1 ]; then
-  echo "OK: ${n} storage class(es) available."
-  exit 0
+# Verify the learner ran the command step and read its output.
+# Gated on the learner's own run: the underlying state is true from session start, so a
+# check that only asserts it goes green before the learner clicks anything.
+f="$HOME/exercises/storageclasses.txt"
+if ! [ -s "$f" ]; then
+  echo "Click the command step above first — $f is missing or empty." >&2
+  exit 1
 fi
-echo "No storage classes found — this cluster may not have dynamic provisioning configured." >&2
-exit 1
+if ! grep -qE 'PROVISIONER' "$f"; then
+  echo "$f does not look like that command's output — re-run the step above." >&2
+  exit 1
+fi
+echo "OK: you listed the storage classes you can request from"

@@ -29,7 +29,7 @@ DCS is multi-national: **each location has its own myITSM portal** (DIV, DE, ES,
 <!-- id: tenant -->
 ## Request a Tenant — the Fields
 
-Do this **once**. Tenant → Namespaces, the model from A06 — the Tenant is who is accountable and what gets recharged.
+Do this **once**. Tenant → Namespaces, the model from the **Terms — Namespaces & Tenancy** lab — the Tenant is who is accountable and what gets recharged.
 
 - **Tenant owner** — the person responsible for security, sizing and finance; not necessarily you.
 - **Tenant name** — lowercase, digits, `-` (Kubernetes naming convention).
@@ -64,7 +64,7 @@ Only needed from the **second** namespace onwards — your Tenant already came w
 - **Three fields:** existing tenant name (with its suffix) · namespace members, one per line · new namespace name.
 - ✅ **Pick "Basic standard namespace"** — pre-configured and standard-sized; you are then asked only for usage and features. Raise limits later with *Modify namespace*.
 - **DevSpace** is a personal environment for one person; **customized (expert)** means setting every quota by hand.
-- **Usage:** Development (fewer policies, no service exposure) or Production (stronger policies, exposure allowed — the reason A03's Route needs PROD).
+- **Usage:** Development (fewer policies, no service exposure) or Production (stronger policies, exposure allowed — the reason the **Expose Your App** lab's Route needs PROD).
 - **Features**, all optional: private Harbor registry · proxy access · EgressIP · custom robot account.
 
 ---
@@ -89,4 +89,4 @@ You can now onboard yourself onto DCS end to end and tell requests from self-ser
 - **Tenant first**, then namespaces; the Tenant brings one default namespace.
 - **Basic** unless you already know your numbers.
 
-The **Console track** does the same work in the OpenShift web console; the **Developer track** covers RBAC (**B05**) and DEV vs PROD by policy (**B06**).
+The **Console track** does the same work in the OpenShift web console; the **Developer track** covers **RBAC, Tenancy & Namespaces** and **DEV vs PROD Namespaces & Policies**.

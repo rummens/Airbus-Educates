@@ -56,7 +56,7 @@ curl -s localhost:8080
 ```
 
 - The tunnel is local and lasts only while the command runs — it is not real exposure.
-- A proper external address (a **Route**) is the subject of **A03**.
+- A proper external address (a **Route**) is the subject of **Expose Your App**.
 
 ---
 
@@ -78,7 +78,7 @@ curl -s localhost:8080
 <!-- id: behind -->
 ## What's behind it
 
-You worked **imperatively** (`oc create`, `oc set env`). Underneath, DCS turned every command into one **declarative desired-state document** — the YAML you write yourself from A02 on.
+You worked **imperatively** (`oc create`, `oc set env`). Underneath, DCS turned every command into one **declarative desired-state document** — the YAML you write yourself from the **Configure & Troubleshoot Your App** lab on.
 
 - **Imperative** — step-by-step commands; each does one thing, once.
 - **Declarative** — write down the desired end state; the platform keeps reality matching it.

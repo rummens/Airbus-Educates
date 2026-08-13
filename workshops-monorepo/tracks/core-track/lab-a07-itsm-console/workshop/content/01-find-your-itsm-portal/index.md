@@ -52,7 +52,7 @@ not possible.
 
 Two requests, in this order:
 
-1. **New tenant — do this first.** The Tenant is the org-level unit you met in A06: who is
+1. **New tenant — do this first.** The Tenant is the org-level unit you met in the **Terms — Namespaces & Tenancy** lab: who is
    accountable, and what gets recharged. You do this **once**.
 2. **New namespace for existing tenant.** A Tenant already comes with one **default
    namespace**, so you only come back here for the *second* namespace onwards — a separate

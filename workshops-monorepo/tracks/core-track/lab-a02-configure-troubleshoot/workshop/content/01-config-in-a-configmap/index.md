@@ -54,7 +54,7 @@ timeout: 10
 ## Wire it into the app
 
 Now open the Deployment. This is the declarative manifest behind the app you deployed in
-A01, written out in full. It consumes the ConfigMap **both ways**: `envFrom` turns every
+the **Deploy Your First App** lab, written out in full. It consumes the ConfigMap **both ways**: `envFrom` turns every
 key into an environment variable, and a volume mounts the same keys as files under
 `/etc/hello-dcs`.
 

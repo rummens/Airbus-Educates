@@ -48,6 +48,6 @@ Deployment's `selector.matchLabels` finds the Pods carrying the matching
 ## Next Steps
 
 You set config ad-hoc with `oc set env` — fine for one value, but real apps have many
-settings and secrets, and things go wrong. **A02 — Configure & Troubleshoot** gives you
+settings and secrets, and things go wrong. **Configure & Troubleshoot Your App** gives you
 ConfigMaps and Secrets, then breaks something on purpose so you learn to diagnose and fix
 it.

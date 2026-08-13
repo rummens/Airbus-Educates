@@ -60,7 +60,7 @@ continuous reconciliation loop did.
 ## Next Steps
 
 You've now taken an app from "it runs" to "it survives" within its own budget — the last
-piece of the developer-facing lifecycle. **B08 — Operators** picks up the advanced
+piece of the developer-facing lifecycle. **Operators on DCS** picks up the advanced
 capstone: managing a stateful workload (PostgreSQL) through a Kubernetes Operator instead
 of a plain Deployment. Observability and debugging basics for day-to-day operation now
 live back in the Core track, if you need a refresher.

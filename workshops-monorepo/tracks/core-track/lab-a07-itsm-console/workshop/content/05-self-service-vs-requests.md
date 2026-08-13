@@ -17,10 +17,10 @@ entitlements or the shared platform, you request.**
 
 ## You do it yourself (with `oc`)
 
-- **Deploy / scale / restart** workloads (A01).
-- **Configure** with ConfigMaps and Secrets (A02).
-- **Expose** an app with a Service and, in a PROD namespace, a Route (A03).
-- **Claim storage** with a PVC (A04).
+- **Deploy / scale / restart** workloads (the **Deploy Your First App** lab).
+- **Configure** with ConfigMaps and Secrets (the **Configure & Troubleshoot Your App** lab).
+- **Expose** an app with a Service and, in a PROD namespace, a Route (the **Expose Your App** lab).
+- **Claim storage** with a PVC (the **Storage** lab).
 
 Self-service, because these live *within* the rights and quota you already have.
 
@@ -30,8 +30,8 @@ Self-service, because these live *within* the rights and quota you already have.
 - **Modify or delete** a tenant or namespace, and **user management**.
 - **Quota increase** — more CPU/memory/storage than your namespace budget (a *Modify
   namespace* request).
-- **Image mirroring** — pulling an external image into Harbor (A04's air-gap).
-- **New repos / catalogs** in Harbor, and an **S3 bucket** (A04: not a PVC).
+- **Image mirroring** — pulling an external image into Harbor (the **Storage** lab's air-gap).
+- **New repos / catalogs** in Harbor, and an **S3 bucket** (the **Storage** lab: not a PVC).
 - **Networking whitelist** and **security exceptions**.
 
 These change entitlements, the shared registry, or governance — so they go through the

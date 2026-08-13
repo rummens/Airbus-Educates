@@ -13,7 +13,7 @@ does to every image on arrival, and what happens when an image fails that check.
   scoped to a project.
 - Inspected and pulled `samples/hello-dcs:1.0` with `skopeo`, using a read-only robot
   account — no `docker`/`podman` daemon needed.
-- Confirmed the image B02 builds and pushes actually lands in its Harbor project.
+- Confirmed the image the **Building Images with BuildConfigs** lab builds and pushes actually lands in its Harbor project.
 - Read a Harbor scan report with `jq` — the `severityCount` summary and the
   `vulnerabilities` findings (CVE `id`, `severity`, `package`, `FixedVersion`) — and told
   **vulnerability** scanning apart from **compliance** scanning.
@@ -80,6 +80,6 @@ timeout: 10
 
 ## Next Steps
 
-Later in the Developer track: **B05 — RBAC & Tenancy** moves on from "what can this image
+Later in the Developer track: **RBAC, Tenancy & Namespaces** moves on from "what can this image
 do" to "who can do what in your namespace" — a different angle on the same access-control
 thread you've now seen applied to Harbor's projects and robot accounts.
