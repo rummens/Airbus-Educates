@@ -22,4 +22,10 @@ A lab holding `resources/consolelab.yaml` is a **console lab** and is reviewed
 against dimension N instead of the workshop dimensions — its rules come from the
 `airbus-educates-console-tour-authoring` skill.
 
+Beyond the house standards it runs the **learner-facing consistency sweep**
+(dimension O) and the **first-cohort feedback regression list** (appendix) —
+false-green examiner checks, expected output the real run does not produce,
+internal lab codes in learner text, difficulty/duration disagreeing across files,
+stale screenshots, dead or mislabelled links.
+
 See `SKILL.md` for the review process, severity levels, and the full rubric.

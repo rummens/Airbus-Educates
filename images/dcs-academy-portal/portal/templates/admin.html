@@ -88,14 +88,22 @@
     {% else %}<tr><td colspan="5" class="muted">No feedback yet.</td></tr>{% endfor %}
   </table>
 
-  <h2>Comments</h2>
+  <h2 id="comments">Comments</h2>
+  <p><a class="btn btn-ghost" href="{{ url_for('admin_feedback_csv') }}">Export CSV</a></p>
   <table class="tbl">
-    <tr><th>When</th><th>Workshop</th><th>Rating</th><th>Comment</th></tr>
+    <tr><th>When</th><th>Workshop</th><th>Rating</th><th>Comment</th><th>Done</th></tr>
     {% for c in comments %}
-    <tr><td>{{ c.ts|de }}</td><td>{{ c.workshop }}</td><td>{{ c.rating }}</td>
+    <tr{% if c.done %} class="done"{% endif %}>
+      <td>{{ c.ts|de }}</td><td>{{ c.workshop }}</td><td>{{ c.rating }}</td>
       <td class="cmt" data-full="{{ c.comment }}" onclick="showComment(this)">
-        {{ c.comment if c.comment|length <= 80 else c.comment[:80] ~ '…' }}</td></tr>
-    {% else %}<tr><td colspan="4" class="muted">No comments yet.</td></tr>{% endfor %}
+        {{ c.comment if c.comment|length <= 80 else c.comment[:80] ~ '…' }}</td>
+      <td><form method="post" action="{{ url_for('admin_feedback_done', fid=c.id) }}"
+                onsubmit="return toggleDone(this)">
+        <input type="hidden" name="done" value="{{ '0' if c.done else '1' }}">
+        <button class="btn btn-ghost" type="submit"
+                title="{{ 'Mark as open' if c.done else 'Mark as implemented / fixed' }}"
+        >{{ '✓' if c.done else '—' }}</button></form></td></tr>
+    {% else %}<tr><td colspan="5" class="muted">No comments yet.</td></tr>{% endfor %}
   </table>
 </section>
 
@@ -110,6 +118,23 @@
   </div>
 </div>
 <script>
+// Toggle the done flag without navigating — the comments table sits at the bottom
+// of a long page and a reload would scroll back to the top.
+function toggleDone(f){
+  const btn = f.querySelector('button'), inp = f.querySelector('input[name=done]');
+  fetch(f.action, {method:'POST', headers:{'X-Requested-With':'fetch'}, body:new FormData(f)})
+    .then(r => {
+      if (!r.ok) throw new Error(r.status);
+      const on = inp.value === '1';                 // what we just set it to
+      inp.value = on ? '0' : '1';
+      btn.textContent = on ? '✓' : '—';
+      btn.title = on ? 'Mark as open' : 'Mark as implemented / fixed';
+      f.closest('tr').classList.toggle('done', on);
+    })
+    .catch(() => { btn.textContent = '!'; btn.title = 'Save failed — reload and retry'; });
+  return false;
+}
+
 function showComment(td){document.getElementById('modaltext').textContent=td.getAttribute('data-full');
   document.getElementById('copybtn').textContent='Copy';
   document.getElementById('modal').classList.add('open');}

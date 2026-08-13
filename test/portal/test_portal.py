@@ -510,6 +510,31 @@ def test_admin_can_set_banner(client, monkeypatch):
     assert b"Hello from admin" in client.get("/").data
 
 
+def test_admin_feedback_csv_and_done(client, monkeypatch):
+    """CSV carries every column; the done flag round-trips and is admin-only."""
+    monkeypatch.setattr(k8sclient, "user_can_admin", lambda tok: True)
+    monkeypatch.setattr(k8sclient, "list_sessions", lambda: [])
+    feedback.insert("lab-a01", "s1", "form", 5, 4, "needs a diagram")
+    fid = feedback.comments()[0]["id"]
+
+    body = client.get("/admin/feedback.csv").data.decode()
+    assert body.splitlines()[0] == ",".join(feedback.COMMENT_COLS)
+    assert "needs a diagram" in body
+
+    assert client.post(f"/admin/feedback/{fid}/done", data={"done": "1"}).status_code == 302
+    assert feedback.comments()[0]["done"]
+    # The button posts via fetch: 204, no redirect, so the page keeps its scroll position.
+    r = client.post(f"/admin/feedback/{fid}/done", data={"done": "0"},
+                    headers={"X-Requested-With": "fetch"})
+    assert r.status_code == 204 and not feedback.comments()[0]["done"]
+    client.post(f"/admin/feedback/{fid}/done", data={"done": "0"})
+    assert not feedback.comments()[0]["done"]
+
+    monkeypatch.setattr(k8sclient, "user_can_admin", lambda tok: False)
+    assert client.get("/admin/feedback.csv").status_code == 403
+    assert client.post(f"/admin/feedback/{fid}/done", data={"done": "1"}).status_code == 403
+
+
 def test_admin_renders_usage_stats(client, monkeypatch):
     monkeypatch.setattr(k8sclient, "user_can_admin", lambda tok: True)
     monkeypatch.setattr(k8sclient, "list_sessions", lambda: [])

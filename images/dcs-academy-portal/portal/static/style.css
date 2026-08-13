@@ -238,6 +238,7 @@ textarea{width:100%;min-height:6rem;font-family:inherit;border:1px solid var(--b
 .tbl th,.tbl td{border:1px solid var(--border);padding:.45rem .7rem;text-align:left;vertical-align:top}
 .tbl th{background:var(--card-2);font-weight:600}
 td.cmt{cursor:pointer;max-width:34rem} td.cmt:hover{background:var(--tint)}
+.tbl tr.done td{opacity:.55}                 /* comment marked implemented/fixed */
 #modal{display:none;position:fixed;inset:0;background:rgba(10,20,40,.5);align-items:center;justify-content:center;z-index:50}
 #modal.open{display:flex}
 #modalbox{background:var(--card);color:var(--text);max-width:640px;max-height:80vh;overflow:auto;padding:1.5rem;border-radius:14px}

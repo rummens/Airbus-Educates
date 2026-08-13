@@ -23,7 +23,8 @@ SCHEMA_SQLITE = [
     """CREATE TABLE IF NOT EXISTS feedback (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       ts TEXT NOT NULL, workshop TEXT NOT NULL, session TEXT,
-      source TEXT NOT NULL, rating INTEGER, clarity INTEGER, comment TEXT)""",
+      source TEXT NOT NULL, rating INTEGER, clarity INTEGER, comment TEXT,
+      done INTEGER NOT NULL DEFAULT 0)""",
     "CREATE INDEX IF NOT EXISTS idx_feedback_workshop ON feedback(workshop)",
     """CREATE TABLE IF NOT EXISTS progress (
       username TEXT NOT NULL, workshop TEXT NOT NULL, status TEXT NOT NULL,
@@ -41,7 +42,8 @@ SCHEMA_PG = [
     """CREATE TABLE IF NOT EXISTS feedback (
       id BIGSERIAL PRIMARY KEY,
       ts TIMESTAMPTZ NOT NULL DEFAULT now(), workshop TEXT NOT NULL, session TEXT,
-      source TEXT NOT NULL, rating INT, clarity INT, comment TEXT)""",
+      source TEXT NOT NULL, rating INT, clarity INT, comment TEXT,
+      done BOOLEAN NOT NULL DEFAULT false)""",
     "CREATE INDEX IF NOT EXISTS idx_feedback_workshop ON feedback(workshop)",
     """CREATE TABLE IF NOT EXISTS progress (
       username TEXT NOT NULL, workshop TEXT NOT NULL, status TEXT NOT NULL,
@@ -110,6 +112,16 @@ def init_db():
         for stmt in (SCHEMA_PG if _IS_PG else SCHEMA_SQLITE):
             cur = conn.cursor()
             cur.execute(stmt)
+        # Migration for DBs created before 'done' existed. CREATE TABLE IF NOT
+        # EXISTS won't add it; sqlite has no ADD COLUMN IF NOT EXISTS, so the
+        # duplicate-column error is the "already migrated" signal.
+        try:
+            conn.cursor().execute(
+                "ALTER TABLE feedback ADD COLUMN IF NOT EXISTS done BOOLEAN NOT NULL DEFAULT false"
+                if _IS_PG else
+                "ALTER TABLE feedback ADD COLUMN done INTEGER NOT NULL DEFAULT 0")
+        except Exception:            # noqa: BLE001 — column already there
+            pass
 
 
 def _clamp(v):
@@ -181,10 +193,23 @@ def ratings_by_workshop():
     return out
 
 
+COMMENT_COLS = ["id", "ts", "workshop", "session", "source", "rating", "clarity",
+                "comment", "done"]
+
+
 def comments(limit=200):
-    cur = _exec(f"SELECT ts, workshop, rating, clarity, comment FROM feedback "
-                f"WHERE comment IS NOT NULL ORDER BY id DESC LIMIT {_PH}", (limit,))
-    return _rows(cur)
+    """Newest comments first. limit=None → all of them (CSV export)."""
+    sql = (f"SELECT {', '.join(COMMENT_COLS)} FROM feedback "
+           f"WHERE comment IS NOT NULL ORDER BY id DESC")
+    if limit is None:
+        return _rows(_exec(sql))
+    return _rows(_exec(f"{sql} LIMIT {_PH}", (limit,)))
+
+
+def set_done(fid, done):
+    """Mark a comment implemented/fixed (or un-mark it)."""
+    _exec(f"UPDATE feedback SET done={_PH} WHERE id={_PH}",
+          (bool(done) if _IS_PG else int(bool(done)), int(fid)))
 
 
 # --- per-user progress ------------------------------------------------------

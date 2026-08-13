@@ -4,6 +4,8 @@ Custom routes own the landing experience; proxy.bp forwards the Educates session
 runtime paths. Order matters: custom routes are registered first, the proxy
 blueprint last (it only claims allowlisted prefixes, else 404).
 """
+import csv
+import io
 import logging
 import os
 import re
@@ -409,6 +411,32 @@ def create_app():
                                comments=feedback.comments(), sessions=_usage(),
                                usage=_run_stats(_safe(k8sclient.list_courses) or []),
                                banner=_banner(), is_admin=True)
+
+    @app.route("/admin/feedback.csv")
+    def admin_feedback_csv():
+        """All comment rows, all columns — for offline triage in a spreadsheet."""
+        if not _is_admin():
+            abort(403)
+        buf = io.StringIO()
+        w = csv.DictWriter(buf, fieldnames=feedback.COMMENT_COLS, extrasaction="ignore")
+        w.writeheader()
+        w.writerows(feedback.comments(limit=None))
+        return Response(buf.getvalue(), mimetype="text/csv", headers={
+            "Content-Disposition": 'attachment; filename="dcs-academy-feedback.csv"'})
+
+    @app.route("/admin/feedback/<int:fid>/done", methods=["POST"])
+    def admin_feedback_done(fid):
+        """Toggle the implemented/fixed flag on one comment.
+
+        The admin page is long, so the button posts via fetch and gets 204 — a
+        redirect would reload and throw the scroll position away. Plain form
+        posts (no JS) still get the redirect."""
+        if not _is_admin():
+            abort(403)
+        feedback.set_done(fid, request.form.get("done") == "1")
+        if request.headers.get("X-Requested-With") == "fetch":
+            return ("", 204)
+        return redirect(url_for("admin") + "#comments")
 
     @app.route("/admin/banner", methods=["POST"])
     def admin_banner():
