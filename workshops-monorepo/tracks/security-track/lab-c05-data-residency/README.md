@@ -4,7 +4,7 @@
 
 The Digital Container Service (DCS) runs on-prem and air-gapped across a multi-national European footprint (for example Germany and Spain) — which is exactly what makes a data-residency guarantee possible: if data physically cannot leave the platform, keeping it in a permitted region becomes a structural property, not a promise on paper. Where the earlier Security labs hardened the image and the runtime, this one places what you run inside the EU data-residency frame. It is mostly concept and observe: you'll read governance artefacts and inspect how placement is declared, rather than deploy anything.
 
-- **Track:** Security & Compliance — Secure on DCS · Lab 5 of 5
+- **Track:** Security & Compliance — Secure on DCS
 - **Audience:** Intermediate — know the Tenant → Namespaces model and comfortable with `oc get` and `jsonpath`
 - **Duration:** ~35 min
 - **Format:** Hands-on, guided — split terminal, runs in your OpenShift session namespace

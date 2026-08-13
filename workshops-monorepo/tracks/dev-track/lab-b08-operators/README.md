@@ -10,7 +10,7 @@ inspect the operator's CRDs, create a real instance, watch it reconcile, and the
 the DCS-specific split that matters most in practice — the platform owns the operator,
 you own the instance it manages.
 
-- **Track:** Developer · Lab 8 of 8 (capstone)
+- **Track:** Developer (capstone)
 - **Audience:** Advanced — you've completed the Developer track through RBAC & Tenancy
 - **Duration:** ~28 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace

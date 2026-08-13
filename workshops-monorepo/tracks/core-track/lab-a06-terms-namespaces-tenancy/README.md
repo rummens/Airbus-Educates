@@ -8,11 +8,11 @@ namespaces at once and watch identical names coexist and actions stay contained.
 places the namespace in the DCS **Tenant → Namespaces** model and names the DEV/PROD
 namespace types — the vocabulary the Developer track builds its deep model on.
 
-- **Track:** Core / Fundamentals · Lab 6
+- **Track:** Core / Fundamentals
 - **Audience:** Beginner — comfortable deploying with `oc`
 - **Duration:** ~20 min
 - **Format:** Hands-on, guided — split terminal, two pre-provisioned peer namespaces
-- **Prerequisites:** A01 (Deploy Your First App).
+- **Prerequisites:** the **Deploy Your First App** lab.
 
 ## By the end of this lab you'll be able to
 

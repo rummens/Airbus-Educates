@@ -6,9 +6,10 @@ Welcome to this workshop, part of **{{< param product_name >}}**. In it you will
 oriented on {{< param product_short >}} — what the platform is, how containers and
 images fit, and how to work in your environment using the `oc` command line.
 
-This is a **concept/orientation lab** — take it any time; it assumes **no prior container
-or Kubernetes knowledge**. If you'd rather start by *doing*, jump into **Deploy Your First
-App** and come back here for the background.
+This is the **concept/orientation lab** that opens the track, right after the environment
+tour. It assumes **no prior container or Kubernetes knowledge**. If you'd rather start by
+*doing*, skip ahead to **Deploy Your First App** and come back here for the background —
+nothing later depends on finishing this one first.
 
 {{< note >}}
 Prefer it visual? Open the **Slides** tab for a low-text overview of everything on these

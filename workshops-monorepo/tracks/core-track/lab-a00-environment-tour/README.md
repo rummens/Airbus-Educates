@@ -8,7 +8,7 @@ orientation lab walks you around each of them and shows you the *clickable actio
 labs use — you click, you rarely type. Once you've done this once, every later lab feels
 familiar.
 
-- **Track:** Core / Fundamentals · Lab 0
+- **Track:** Core / Fundamentals
 - **Audience:** Beginner — no container, Kubernetes, or DCS experience needed
 - **Duration:** ~10 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace

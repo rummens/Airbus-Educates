@@ -2,18 +2,18 @@
 
 **From a local-only tunnel to a real, external URL on DCS-managed DNS — and a live tab for it inside your session.**
 
-In A01 you could only reach your app through a `port-forward` tunnel, just for you, just
+In the **Deploy Your First App** lab you could only reach your app through a `port-forward` tunnel, just for you, just
 while the command ran. This lab gives it a proper front door: a **Service** for a stable
 in-cluster address, then a **Route** that exposes it externally on DCS DNS via the
 platform load balancer — reachable from a normal browser outside the session. You'll also
 pin the running app as a new dashboard tab, and see why a Route needs a PROD-type
 namespace.
 
-- **Track:** Core / Fundamentals · Lab 4
-- **Audience:** Intermediate — you've done A01 (A02 helpful)
+- **Track:** Core / Fundamentals
+- **Audience:** Beginner — you've done the **Deploy Your First App** lab (**Configure & Troubleshoot Your App** helps)
 - **Duration:** ~20 min
 - **Format:** Hands-on, guided — split terminal, runs in your own (PROD-type) OpenShift session namespace
-- **Prerequisites:** A01 (Deploy Your First App).
+- **Prerequisites:** the **Deploy Your First App** lab.
 
 ## By the end of this lab you'll be able to
 

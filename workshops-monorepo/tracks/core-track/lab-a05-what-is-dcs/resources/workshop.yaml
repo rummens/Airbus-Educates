@@ -8,9 +8,10 @@ metadata:
     # REQUIRED: which track this lab appears under (must equal a Track's id) and
     # its sort order within that track (string value; low = first).
     academy.dcs/track: core
-    # Sorts after the hands-on quick-win labs (A02–A05): action first, then this
-    # concept/orientation lab. Not a hard prereq for A02 anymore.
-    academy.dcs/order: "50"
+    # Second in the track, right after the environment tour: learners asked for the
+    # platform introduction before the hands-on labs. Still not a hard prereq — anyone
+    # who prefers to start by doing can skip ahead and come back.
+    academy.dcs/order: "7"
     # No Route/Ingress here (concept lab) → dev namespace, like the rest of Core.
     dcs.airbus.com/lifecycle: dev
   annotations:

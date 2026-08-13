@@ -9,11 +9,11 @@ persists independently of the container. Then it covers the choices that matter 
 **File vs Block**, why data classification drives the storage class, and how object (S3)
 storage is requested.
 
-- **Track:** Core / Fundamentals · Lab 5
-- **Audience:** Intermediate — you've done A01 (A02/A03 helpful)
+- **Track:** Core / Fundamentals
+- **Audience:** Beginner — you've done the **Deploy Your First App** lab (**Configure & Troubleshoot Your App** and **Expose Your App** help)
 - **Duration:** ~20 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
-- **Prerequisites:** A01 (Deploy Your First App).
+- **Prerequisites:** the **Deploy Your First App** lab.
 
 ## By the end of this lab you'll be able to
 

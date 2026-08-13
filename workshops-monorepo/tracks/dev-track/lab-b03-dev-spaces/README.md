@@ -11,7 +11,7 @@ edit, run, and reach a code change with no image build in between. It closes wit
 an explicit line between the Educates editor, Dev Spaces, a BuildConfig, and
 `oc apply` — four tools, one job each.
 
-- **Track:** Developer — Build on DCS · Lab 3
+- **Track:** Developer — Build on DCS
 - **Audience:** Intermediate — done "From Docker to Kubernetes on DCS"
 - **Duration:** ~18 min
 - **Format:** Hands-on, guided — terminal, runs in your own OpenShift session namespace

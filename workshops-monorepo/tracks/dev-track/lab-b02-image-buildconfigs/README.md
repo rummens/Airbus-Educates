@@ -10,7 +10,7 @@ result into Harbor, and you deploy it with the same skills you already have. The
 trigger a second build and see a fresh image land, the same way an automated pipeline
 would after a real commit.
 
-- **Track:** Developer — Build on DCS · Lab 2
+- **Track:** Developer — Build on DCS
 - **Audience:** Intermediate — comfortable with Deployments and `oc apply`
 - **Duration:** ~30 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace

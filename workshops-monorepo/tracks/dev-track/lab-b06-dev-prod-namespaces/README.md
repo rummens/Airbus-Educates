@@ -11,7 +11,7 @@ DEV and rejected in PROD until it declares proper resource requests and limits. 
 read the Kyverno policy that draws that line, and see why DCS has you promote a workload
 from DEV to PROD rather than edit PROD in place.
 
-- **Track:** Developer — Build on DCS · Lab 6
+- **Track:** Developer — Build on DCS
 - **Audience:** Intermediate — comfortable deploying and troubleshooting an app on DCS
 - **Duration:** ~20 min
 - **Format:** Hands-on, guided — terminal, runs in a per-session virtual cluster giving you two real namespaces to compare

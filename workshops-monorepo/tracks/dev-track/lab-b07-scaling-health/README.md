@@ -9,7 +9,7 @@ from a hung one, and finishes by deleting a Pod outright and watching the platfo
 back — proof that desired state, not the Pod you happen to be looking at, is what DCS
 actually guarantees.
 
-- **Track:** Developer — Build on DCS · Lab 7
+- **Track:** Developer — Build on DCS
 - **Audience:** Intermediate — comfortable with `oc scale` and Deployments from the Core track
 - **Duration:** ~28 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace

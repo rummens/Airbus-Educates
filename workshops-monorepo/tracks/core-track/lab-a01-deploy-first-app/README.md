@@ -8,11 +8,11 @@ roll out the new version — then reveal the YAML `oc` generated and read the
 Deployment → ReplicaSet → Pod chain behind it. Imperative first for speed, declarative
 last so the YAML makes sense once you've earned it.
 
-- **Track:** Core / Fundamentals · Lab 2
-- **Audience:** Beginner — you've done A05
+- **Track:** Core / Fundamentals
+- **Audience:** Beginner — no prior lab required
 - **Duration:** ~20 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
-- **Prerequisites:** A05 (What is DCS?).
+- **Prerequisites:** None. The **What is DCS?** lab gives the background, but this lab doesn't assume it.
 
 ## By the end of this lab you'll be able to
 

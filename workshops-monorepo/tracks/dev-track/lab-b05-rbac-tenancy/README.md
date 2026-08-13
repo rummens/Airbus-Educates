@@ -9,8 +9,8 @@ rule, then author a Role and RoleBinding of your own in your namespace and prove
 effect with impersonation. It closes with the namespace's resource quota and how an increase
 actually gets requested on DCS.
 
-- **Track:** Developer — Build on DCS · Lab 5
-- **Audience:** Intermediate — you've completed the Core track (Core A06 gave the vocabulary)
+- **Track:** Developer — Build on DCS
+- **Audience:** Intermediate — you've completed the Core track (Core the **Terms — Namespaces & Tenancy** lab gave the vocabulary)
 - **Duration:** ~25 min
 - **Format:** Hands-on, guided — terminal, editor, and console, runs in your own OpenShift session namespace
 - **Prerequisites:** lab-a06-terms-namespaces-tenancy; comfortable with basic `oc` usage and namespaces

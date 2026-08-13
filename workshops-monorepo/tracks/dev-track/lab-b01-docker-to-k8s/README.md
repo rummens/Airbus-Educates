@@ -9,8 +9,8 @@ Service and a ConfigMap on DCS. Then it walks the lines in that compose file tha
 *don't* survive the trip — a privileged container, a host bind mount, a root user,
 a `latest`-tagged Docker Hub image — and explains exactly why DCS rejects each one.
 
-- **Track:** Developer — Build on DCS · Lab 1
-- **Audience:** Intermediate — comfortable with Docker/docker-compose; done the Core track (especially A01, A02)
+- **Track:** Developer — Build on DCS
+- **Audience:** Intermediate — comfortable with Docker/docker-compose; done the Core track (especially the **Deploy Your First App** lab, the **Configure & Troubleshoot Your App** lab)
 - **Duration:** ~25 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
 - **Prerequisites:** lab-a01-deploy-first-app; lab-a02-configure-troubleshoot — comfortable with `docker run` / `docker-compose.yml`

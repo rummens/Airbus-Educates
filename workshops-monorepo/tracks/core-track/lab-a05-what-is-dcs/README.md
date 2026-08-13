@@ -3,11 +3,11 @@
 **The concepts behind everything you've been doing — no container experience needed.**
 
 The Digital Container Service (DCS) is Airbus Defence and Space's on-prem, air-gapped,
-OpenShift-based container platform. This is a concept/orientation lab: it names and
-explains what you've already been using in the hands-on labs — what the platform is and
-where it fits, what containers and images actually are, and how you get work done in your
+OpenShift-based container platform. This is the concept/orientation lab that opens the
+track, right after the environment tour: what the platform is and where it fits, what containers and images actually are, and how you get work done in your
 session with the `oc` command line. It assumes no prior container or Kubernetes knowledge
-— every term you need is introduced here, and it stands alone, so take it whenever suits.
+— every term you need is introduced here, and it stands alone, so you can also skip ahead
+and come back to it.
 
 - **Track:** Core / Fundamentals · Concept lab
 - **Audience:** Beginner — no container or Kubernetes experience needed

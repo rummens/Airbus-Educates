@@ -6,6 +6,8 @@ synced `main`; workshop content is live on the next session start.
 
 ## 2026-08-13
 
+- Core track order: **What is DCS?** now comes second, right after the environment tour, so you get the platform introduction before the hands-on labs. It is still optional — you can skip ahead to Deploy Your First App and come back.
+- Lab pages no longer carry fixed "Lab 4"-style numbers that disagreed with the catalog; the catalog does the numbering.
 - Storage lab: writing the marker file into the mounted volume works now — it failed with "Permission denied" before.
 - All labs: cross-references use lab names ("the Expose Your App lab") instead of internal codes like A01 / B06, so they match what the catalog shows.
 - Verify buttons no longer turn green before you have done the step: the checks that used to pass on things the platform provides (your session, your namespace, the peer namespaces, the storage classes, the network policy, the blocked internet access) now check *your* command output.

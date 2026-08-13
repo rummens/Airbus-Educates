@@ -14,11 +14,11 @@ pointer to the docs. The form has many options because DCS onboarding is **autom
 ITSM is currently the input form for that pipeline; the missing piece is the self-service
 frontend, not the provisioning.
 
-- **Track:** Core / Fundamentals · Lab 7
-- **Audience:** Beginner — you've done A06
+- **Track:** Core / Fundamentals
+- **Audience:** Beginner — you've done the **Terms — Namespaces & Tenancy** lab
 - **Duration:** ~20 min
 - **Format:** Quick-start walkthrough of the two request forms + sorting worksheet + knowledge check
-- **Prerequisites:** A06 (Terms — Namespaces & Tenancy).
+- **Prerequisites:** the **Terms — Namespaces & Tenancy** lab.
 
 ## By the end of this lab you'll be able to
 
