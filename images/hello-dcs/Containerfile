@@ -14,7 +14,7 @@ LABEL org.opencontainers.image.source="https://github.com/rummens/Airbus-Educate
 ENV GREETING="Hello from the Digital Container Service" \
     MODE="CLI" \
     PORT="8080" \
-    VERSION="1.0"
+    VERSION="1.1"
 
 COPY server.py /opt/app-root/src/server.py
 

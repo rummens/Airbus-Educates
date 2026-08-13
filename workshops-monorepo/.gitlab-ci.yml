@@ -1,0 +1,375 @@
+# DCS Academy test pipeline.
+#
+# Two tiers, split by whether they need a cluster:
+#   FAST (stage: test)     — no cluster; blocks merges. Every job carries `needs: []` so
+#                            they all start at once instead of waiting on a stage boundary.
+#   CLUSTER (stage: e2e)   — needs a live OpenShift runner (tag: dcs-cluster). Required on
+#                            MRs; manual on scheduled pipelines (nightly smoke for drift).
+#
+# Selective triggering is done with `rules: changes:` (per-job) plus, for the cluster smoke
+# job, test/ci/changed.py (only re-smokes the workshops whose files actually changed).
+#
+# AIR-GAPPED INSTALLS — three CI variables, no YAML edits:
+#   CI_BASE_IMAGE   Harbor mirror of images/dcs-ci (python + git + curl + the portal's
+#                   python deps, all baked — the jobs pip-install nothing at runtime).
+#   LINK_CHECK_SKIP_EXTERNAL=true
+#                   the runner cannot reach docs.openshift.com / kubernetes.io, so those
+#                   links are counted and listed but not fetched. Everything else (relative
+#                   targets, the placeholder-docs-URL guard) still runs.
+#   DCS_DOCS_BASE_URL
+#                   the real internal docs host. Without it the link check FAILS: a
+#                   placeholder host means every DCS doc link ships as a 404.
+#                   Add DCS_DOCS_CHECK_INTERNAL=true on a runner that can reach that host
+#                   to fetch those links as well.
+# CORP EGRESS PROXY — for runners behind the corporate proxy, the link check can reach
+# external URLs through it instead of skipping them. Supply (as CI/CD variables):
+#   HTTPS_PROXY       proxy URL, e.g. http://divproxy01.dsmain.ds.corp:8080
+#   PROXY_USER        proxy username (masked + protected variable)
+#   PROXY_PASSWORD    proxy password (masked + protected variable)
+# The job drives curl with --proxy-ntlm and keeps the internal docs host on NO_PROXY, so
+# internal links stay direct. No secret is committed to the repo or baked into the image.
+#
+# CLUSTER LOGIN — the e2e tier (`stage: e2e`) runs smoke tests + user-flow tests against
+# the real dev OpenShift cluster. The image carries `oc`; the credentials come from masked
+# + protected CI/CD variables. An inline helper in `.cluster`'s `before_script` logs into
+# the cluster and is idempotent (no-op if already logged in to the same host). No secret
+# is committed to the repo or baked into the image.
+#   CI_OC_HOST        OpenShift API URL. Required.
+#   CI_OC_TOKEN       long-lived auth token (service-account or user token). Required.
+#   CI_OC_USERNAME    username (optional; defaults to token subject).
+#   CA_BUNDLE         PEM CA bundle (file path) for the internal GitLab/OpenShift CA.
+#                     Used by git (pipeline-library clone) and `oc login`. Optional;
+#                     CI_OC_CA_BUNDLE kept as a legacy alias.
+#   CI_OC_INSECURE    set "true" to `oc login` with --insecure-skip-tls-verify (no
+#                     trusted CA / no bundle). For dev clusters only.
+#   CI_OC_CONTEXT     oc context name to create/use. Optional (defaults to "ci").
+
+stages: [build, test, e2e]
+
+# Container-image builds (BuildConfig-per-image under images/, pushed to the
+# internal registry). Defines the build-images + cleanup-orphans jobs, which
+# extend the .cluster hidden job below. See the image-builder fragment in the
+# pipeline-library repo (image-builder/gitlab-ci.yml).
+include:
+  - project: DCS/pipeline-library
+    file: image-builder/gitlab-ci.yml
+    ref: feat/image-builder-move
+
+variables:
+  COVERAGE_MIN: "90"
+  GIT_DEPTH: "0"                     # full history so changed.py can diff against the base
+  # Image-builder: the fragment above is fetched from DCS/pipeline-library at the
+  # feature ref, so the runtime clone of the image-builder scripts must use the SAME
+  # ref (default is main, which does not yet have image-builder/). Keep in sync with
+  # the `include: ref:` above; reset to main once the move is merged.
+  IMAGE_BUILDER_PROJECT: "DCS/pipeline-library"
+  IMAGE_BUILDER_REF: "feat/image-builder-move"
+  # Single knob for the fast tier's image. Override as a CI variable to point at Harbor.
+  CI_BASE_IMAGE: "ghcr.io/rummens/dcs-ci:dev"
+
+# Give the image builds their OWN stage, separate from the fast-tier `test` stage, and
+# make it the FIRST stage so the image spec generator (and thus the image build) starts
+# at the beginning of the pipeline. A main-file job of the same name overrides the
+# image-builder fragment's default `stage: test`; everything else comes from the include.
+generate-image-spec:
+  stage: build
+  needs: []
+
+# `needs: []` = start immediately, in parallel with every other fast job. Without it a job
+# waits for its whole stage predecessor set, which serialises the tier for no reason.
+.fast:
+  stage: test
+  image:
+    name: $CI_BASE_IMAGE
+    # Runners cache a mutable tag like :dev forever, so a rebuilt image is never picked up
+    # (that is how a stale image without the baked deps keeps failing). Two entries: the
+    # runner takes `always` when its allowed_pull_policies permit it, and falls back to
+    # `if-not-present` instead of erroring "pull_policy not allowed" when it doesn't.
+    # A runner that refuses `always` needs `pull_policy = "always"` in its config.toml.
+    pull_policy: [always, if-not-present]
+  needs: []
+
+# ---------- FAST TIER (no cluster, blocks merges) ----------
+
+portal-tests:
+  extends: .fast
+  rules:
+    - changes:
+        - images/dcs-academy-portal/**/*
+        - test/portal/**/*
+        - test/ci/**/*
+        - .gitlab-ci.yml
+  before_script:
+    # NO install step: the runner has no package index. Every dependency is baked into
+    # CI_BASE_IMAGE (images/dcs-ci). This only asserts they are there, so a stale image
+    # says so in one line instead of failing later as "unrecognized arguments: --cov".
+    - python -c "import pytest_cov, flask, kubernetes, psycopg, markdown"
+      || { echo "CI_BASE_IMAGE ($CI_BASE_IMAGE) is missing test deps — rebuild images/dcs-ci (images/build.sh) and re-mirror it to Harbor."; exit 1; }
+  script:
+    - bash test/ci/run-python.sh
+  # Two separate mechanisms, both needed:
+  #   coverage:        scrapes the number out of the log → the job's coverage value, which is
+  #                    what the README badge reads. Needs a pipeline that RAN this job.
+  #   coverage_report: the cobertura XML → per-line coverage marks in merge request diffs.
+  coverage: '/^TOTAL\s+.*\s+(\d+%)$/'
+  artifacts:
+    when: always                    # a failed run's numbers are the interesting ones
+    expire_in: 30 days
+    paths: [coverage.xml]
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+
+workshop-static:
+  extends: .fast
+  rules:
+    - changes:
+        - tracks/**/*
+        - test/workshops/**/*
+        - test/ci/**/*
+        - .gitlab-ci.yml
+  before_script:
+    # Corp egress proxy for the link check. Credentials come from masked, protected
+    # CI/CD variables (PROXY_USER / PROXY_PASSWORD) — never from the repo or the image.
+    # HTTPS_PROXY is the proxy URL; NO_PROXY keeps the internal docs host (and any
+    # *.corp / *.svc target) on a direct connection instead of over the proxy.
+    # The checker (link_check.py) reads these env vars and drives curl with --proxy-ntlm.
+    - |
+      if [ -n "${HTTPS_PROXY:-}" ]; then
+        echo "[proxy] HTTPS_PROXY is set: ${HTTPS_PROXY}"
+        if [ -n "${PROXY_USER:-}" ]; then
+          echo "[proxy] PROXY_USER is set (${#PROXY_USER} chars, value masked)."
+        else
+          echo "[proxy] WARNING: PROXY_USER is unset — proxy auth will fail."
+        fi
+        if [ -n "${PROXY_PASSWORD:-}" ]; then
+          echo "[proxy] PROXY_PASSWORD is set (${#PROXY_PASSWORD} chars, value masked)."
+        else
+          echo "[proxy] WARNING: PROXY_PASSWORD is unset — proxy auth will fail."
+        fi
+        # Compare this against a locally-known-good password to confirm the CI/CD variable
+        # holds the same value: run the same line with the working password and diff the hashes.
+        # NOTE: this masks the value but NOT against the runner log's masking rules — if
+        # PROXY_PASSWORD is a masked CI variable, GitLab redacts it in the log automatically.
+        echo "[proxy] PROXY_PASSWORD sha256=$(printf '%s' "${PROXY_PASSWORD:-}" | sha256sum | cut -d' ' -f1)"
+        export HTTPS_PROXY PROXY_USER PROXY_PASSWORD
+        # Everything goes through the proxy, including the internal docs host — so it is NOT
+        # added to NO_PROXY. Only local/no-route traffic stays direct.
+        export NO_PROXY="localhost,127.0.0.1${NO_PROXY:+,$NO_PROXY}"
+        echo "[proxy] NO_PROXY=${NO_PROXY}"
+        # Probe the proxy twice. -k tolerates the internal/proxy certs; stdout+stderr are
+        # fully thrown away so the ONLY output is the WORKED/FAILED line below (a corp proxy
+        # that rejects us returns an HTML error page — that noise must not reach the log).
+        # A FAILED probe means HTTPS_PROXY/PROXY_USER/PROXY_PASSWORD are wrong for the proxy,
+        # which is also why internal links report "HTTP 000" below.
+        proxy_probe() { curl -ksS -m 15 -o /dev/null --proxy-ntlm \
+            -U "${PROXY_USER}:${PROXY_PASSWORD}" "${HTTPS_PROXY}" "$1" >/dev/null 2>&1; }
+        echo -n "[proxy] google.com probe:       "
+        if proxy_probe https://www.google.com; then
+          echo "WORKED (proxy auth + external egress OK)"
+        else
+          rc=$?; echo "FAILED (rc=$rc) — proxy auth or egress to google.com rejected."
+        fi
+        if [ -n "${DCS_DOCS_BASE_URL:-}" ]; then
+          echo -n "[proxy] docs page probe ($DCS_DOCS_BASE_URL):  "
+          if proxy_probe "$DCS_DOCS_BASE_URL"; then
+            echo "WORKED (docs reachable via proxy)"
+          else
+            rc=$?; echo "FAILED (rc=$rc) — proxy auth rejected for the internal docs host too."
+          fi
+        else
+          echo "[proxy] docs page probe: skipped — DCS_DOCS_BASE_URL is unset."
+        fi
+      else
+        echo "[proxy] HTTPS_PROXY unset — no proxy auth vars applied; link check fetches external URLs directly (air-gapped runner: set LINK_CHECK_SKIP_EXTERNAL=true)."
+      fi
+  script:
+    # coverage: every workshop command has a smoke test (or an explicit exclude);
+    # links: every link a learner can click — content, slides, exercises, README and
+    #        console-lab CRs — resolves (200 / reachable / real docs host);
+    # labels: each lab's dev/prod lifecycle label matches its Route usage.
+    - bash test/ci/run-workshops.sh
+  artifacts:
+    # The same fix list the job prints last, downloadable: lab · file:line · reason · url.
+    when: on_failure
+    expire_in: 30 days
+    paths: [link-failures.txt, link-failures.csv]
+
+fix-examiner-perms:
+  extends: .fast
+  rules:
+    # Branch pushes only. Our own fix commit carries [skip ci] so GitLab won't create
+    # a pipeline for it (no recursion); excluding tags/MRs here is belt-and-suspenders.
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH'
+  variables:
+    GIT_STRATEGY: clone
+    GIT_DEPTH: "0"                 # full clone — clean push of the new commit
+    BOT_NAME: "DCS CI perm-fixer"
+    BOT_EMAIL: "ci-bot@dcs.local"
+  script:
+    - set -eu
+    - |
+      # examiner test files whose git-tracked mode is not 100755. Anchored on
+      # /examiner/tests/ so it works at any nesting (tracks/ at root or deeper) and
+      # catches subdir-prefixed tests too.
+      bad=$(git ls-files -s | awk '$4 ~ /\/examiner\/tests\// && $1 != "100755" { print $4 }')
+      if [ -z "$bad" ]; then
+        echo "OK: every examiner test file is executable (100755). Nothing to fix."
+        exit 0
+      fi
+      echo "Non-executable examiner tests (mode != 100755):"
+      printf '  %s\n' $bad
+      printf '%s\n' $bad | xargs git update-index --chmod=+x
+      echo "Re-asserted +x on $(printf '%s\n' $bad | wc -l | tr -d ' ') file(s)."
+    - |
+      # Commit + push the mode fix back to the same branch. [skip ci] stops re-trigger.
+      test -n "${GIT_PUSH_TOKEN:-}" || { echo "ERROR: GIT_PUSH_TOKEN unset (need a write_repository token)"; exit 1; }
+      git config user.name  "$BOT_NAME"
+      git config user.email "$BOT_EMAIL"
+      git remote set-url origin "https://oauth2:${GIT_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+      git commit -m "ci: chmod +x examiner test scripts [skip ci]"
+      # HEAD:branch — CI runs on detached HEAD; push the new commit onto the branch ref.
+      # No --force: if the branch advanced meanwhile the job fails instead of clobbering.
+      git push origin "HEAD:${CI_COMMIT_BRANCH}"
+
+# ---------- CLUSTER TIER (deploy + run examiner, blocks merges on MRs) ----------
+
+.cluster:
+  stage: e2e
+  # no `tags:` — jobs use $BUILDER_IMAGE (origin-cli, has oc/skopeo/jq) and log
+  # into the cluster via CI_OC_HOST/CI_OC_TOKEN, so any available runner works.
+  needs: []                          # cluster tier doesn't consume the fast tier's output
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes: [tracks/**/*, test/workshops/**/*]
+      # Required on MRs: a workshop that doesn't actually run on the platform is a defect.
+  before_script:
+    # Log into the dev OpenShift cluster so smoke_test.py / flow_test.py / deploy_workshop.py
+    # can drive `oc`. Idempotent: skips the login if the runner already has an active session
+    # to the same host. Fails the pipeline loudly if CI_OC_HOST / CI_OC_TOKEN are unset so
+    # a misconfigured runner is caught before any workshop resources are created.
+    - |
+      if [ -z "${CI_OC_HOST:-}" ] || [ -z "${CI_OC_TOKEN:-}" ]; then
+        echo "ERROR: CI_OC_HOST and CI_OC_TOKEN must be set for cluster-tier jobs."
+        exit 1
+      fi
+      if oc whoami >/dev/null 2>&1; then
+        echo "[oc] already logged in as $(oc whoami) to ${CI_OC_HOST}."
+      else
+        echo "[oc] logging into ${CI_OC_HOST}..."
+        OC_LOGIN_ARGS=(login "${CI_OC_HOST}" --token="${CI_OC_TOKEN}")
+        [ -n "${CA_BUNDLE:-}" ] && OC_LOGIN_ARGS+=(--certificate-authority="$CA_BUNDLE")
+        [ -n "${CI_OC_CA_BUNDLE:-}" ] && OC_LOGIN_ARGS+=(--certificate-authority="$CI_OC_CA_BUNDLE")
+        [ "${CI_OC_INSECURE:-}" = "true" ] && OC_LOGIN_ARGS+=(--insecure-skip-tls-verify=true)
+        [ -n "${CI_OC_CONTEXT:-}" ] && OC_LOGIN_ARGS+=(--context="${CI_OC_CONTEXT}")
+        [ -n "${CI_OC_USERNAME:-}" ] && OC_LOGIN_ARGS+=(--username="${CI_OC_USERNAME}")
+        if ! oc "${OC_LOGIN_ARGS[@]}"; then
+          echo "[oc] ERROR: login to ${CI_OC_HOST} failed — check CI_OC_TOKEN."
+          exit 1
+        fi
+        echo "[oc] logged in as $(oc whoami)."
+      fi
+
+generate-smoke-spec-all:
+  stage: test
+  image:
+    name: $CI_BASE_IMAGE
+    pull_policy: [always, if-not-present]
+  needs: []
+  rules:
+    # On an MR the full smoke is required — failing it fails the MR (no
+    # allow_failure). On other pipelines (push/schedule) it is an optional
+    # manual job: allow_failure lets the pipeline succeed when it's skipped.
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
+    - when: manual
+      allow_failure: true
+  script:
+    - python3 test/ci/gen-smoke-child.py child-smoke-all.yml --all
+  artifacts:
+    paths: [child-smoke-all.yml]
+    expire_in: 1 week
+
+cluster-smoke-manual:
+  stage: e2e
+  needs: [generate-smoke-spec-all]
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
+    - when: manual
+      allow_failure: true
+  trigger:
+    include:
+      - artifact: child-smoke-all.yml
+        job: generate-smoke-spec-all
+    strategy: depend
+    forward:
+      pipeline_variables: true
+
+# Workshop smoke — dynamic per-lab jobs.
+#
+# The cluster smoke tier used to loop every selected workshop through smoke_test.py inside
+# ONE job, so a whole track ran serially and a single slow lab dragged the MR pipeline.
+# Now each lab is its own GitLab job, run in parallel by a generated CHILD pipeline:
+#
+#   generate-smoke-spec   (parent, stage test)   — decides WHICH labs and writes one job
+#                                                  per lab into child-smoke.yml (artifact).
+#   run-workshops-smoke   (parent, stage e2e)    — triggers the child pipeline from that
+#                                                  spec (strategy: depend → child status is
+#                                                  the parent job's status).
+#
+# Which labs get a job is chosen by the generator (test/ci/gen-smoke-child.py):
+#   * on an MR   → only the labs whose files changed vs the base (changed.py), or ALL if the
+#                  shared test harness / a smoke plan changed;
+#   * scheduled / manual / no diff base → every lab with a smoke plan.
+# Every lab job extends a `.cluster-smoke` template embedded in the generated spec (oc-login +
+# --no-links --ref <branch> --throwaway), i.e. the same deploy→grade→teardown the old
+# workshop-smoke job ran, just split per lab.
+generate-smoke-spec:
+  stage: test
+  image:
+    name: $CI_BASE_IMAGE
+    pull_policy: [always, if-not-present]
+  needs: []
+  rules:
+    # SMOKE_ALL=true: run the full smoke on EVERY pipeline (all sources),
+    # regardless of which files changed. Otherwise only on MR-change/schedule.
+    - if: '$SMOKE_ALL == "true"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes: [tracks/**/*, test/workshops/**/*, test/ci/**/*, .gitlab-ci.yml]
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  before_script:
+    - python -c "import json"   # the generator only needs stdlib + git
+  script:
+    # `--changed` default picks the MR's changed labs (full set on schedule via fallback).
+    - python3 test/ci/gen-smoke-child.py child-smoke.yml ${GEN_SMOKE_FLAGS:-}
+  artifacts:
+    paths: [child-smoke.yml]
+    expire_in: 1 week
+
+run-workshops-smoke:
+  stage: e2e
+  needs:
+    - job: generate-smoke-spec
+      optional: true
+  rules:
+    - if: '$SMOKE_ALL == "true"'
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      changes: [tracks/**/*, test/workshops/**/*, test/ci/**/*, .gitlab-ci.yml]
+      when: on_success
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+  trigger:
+    include:
+      - artifact: child-smoke.yml
+        job: generate-smoke-spec
+    strategy: depend
+    forward:
+      pipeline_variables: true
+
+user-flow:
+  extends: .cluster
+  script:
+    - python3 test/workshops/flow_test.py --mode both

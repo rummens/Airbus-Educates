@@ -1,6 +1,6 @@
 {
   "workshop": "lab-a03-expose-app",
-  "_note": "Service + Route + netpol/egress. Routes RBAC + NetworkPolicy + app ingress are lifted from the workshop's session.objects by deploy_workshop (authored_session_extras). verify-egress-blocked is expect_fail on CRC (CRC has internet egress; real air-gapped DCS blocks it).",
+  "_note": "Service + Route + netpol/egress. Routes RBAC + NetworkPolicy + app ingress are lifted from the workshop's session.objects by deploy_workshop (authored_session_extras). verify-egress-blocked PASSES on the real air-gapped DCS platform (egress blocked). Only on a cluster with internet egress (e.g. local CRC) does it fail — the grader itself prints an environment-difference message in that case.",
   "steps": [
     {"run": "envsubst < deployment.yaml | oc apply -f - && oc patch deployment/hello-dcs --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/imagePullPolicy\",\"value\":\"Always\"}]' && oc rollout status deploy/hello-dcs --timeout=150s"},
     {"check": "verify-app-ready"},
@@ -11,6 +11,6 @@
     {"check": "verify-route-admitted"},
     {"check": "verify-route-reachable"},
     {"check": "verify-networkpolicy"},
-    {"check": "verify-egress-blocked", "expect_fail": true}
+    {"check": "verify-egress-blocked"}
   ]
 }

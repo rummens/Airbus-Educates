@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# Run the CRC smoke tests for a whole track/module in one go.
+# Run the OpenShift smoke tests for a whole track/module in one go.
 #
-#   ./run_track.sh workshops-monorepo/tracks/core-track      # a track folder
-#   ./run_track.sh workshops-monorepo/tracks/core-track/lab-a03-expose-app   # a single lab
-#   ./run_track.sh <folder> [<folder> ...]                   # several
+#   ./run_track.sh tracks/core-track                  # a track folder
+#   ./run_track.sh tracks/core-track/lab-a03-expose-app  # a single lab
+#   ./run_track.sh <folder> [<folder> ...]            # several
 #
 # Points at a folder, discovers every workshop under it (a dir with
 # resources/workshop.yaml), and runs smoke_test.py for each — one at a time
-# (CRC is small; parallel runs starve the node). It also handles the ArgoCD
+# (cluster is small; parallel runs starve the node). It also handles the ArgoCD
 # pause the portal-less deploy needs, and ALWAYS restores it on exit (even on
 # Ctrl-C or error).
 #
 # Env overrides:
-#   CTX=crc-admin                                   oc context
-#   ARGO_APP=dcs-academy-tracks-and-workshops       ArgoCD app managing the Workshop CRs
-#   ARGO_NS=openshift-gitops                        its namespace
+#   CTX=logged-user                                   oc context
+#   ARGO_APP=dcs-academy-tracks-and-workshops         ArgoCD app managing the Workshop CRs
+#   ARGO_NS=dcs-gitops                                its namespace
 #   SMOKE_ARGS="--no-links"                          extra args passed to smoke_test.py
 #   LOG_DIR=<path>                                   where per-lab logs go (default ./.logs/<ts>)
 # Flags:
@@ -23,9 +23,9 @@
 set -uo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-CTX="${CTX:-crc-admin}"
+CTX="${CTX:-$(oc config current-context 2>/dev/null || echo logged-user)}"
 ARGO_APP="${ARGO_APP:-dcs-academy-tracks-and-workshops}"
-ARGO_NS="${ARGO_NS:-openshift-gitops}"
+ARGO_NS="${ARGO_NS:-dcs-gitops}"
 SMOKE_ARGS="${SMOKE_ARGS:---no-links}"
 GREEN=$'\033[32m'; RED=$'\033[31m'; DIM=$'\033[2m'; RST=$'\033[0m'
 

@@ -1,7 +1,7 @@
 # Standalone Workshop CR template — apply this to define a NEW workshop directly
-# on the cluster (fastest for local CRC testing; no portal, no chart edit).
+# on the cluster (fastest for local testing; no portal, no chart edit).
 # Replace my-workshop / title / content source, then:
-#   oc --context crc-admin apply -f workshop-definition.yaml
+#   oc --context logged-user apply -f workshop-definition.yaml
 #
 # Content source: pick ONE of `git` or `image` under workshop.files[0]
 # (see the two variants below; delete the one you don't use).

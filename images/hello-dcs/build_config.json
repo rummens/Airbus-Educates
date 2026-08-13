@@ -1,0 +1,4 @@
+{
+  "_comment": "Sample app. In addition to the per-branch image under the base, it also publishes a stable '1.0' tag into the samples/ namespace. @REGISTRY_BASE@ is expanded from the CI REGISTRY_BASE variable so this stays registry-agnostic.",
+  "destinationRepo": "@REGISTRY_BASE@/samples/hello-dcs"
+}

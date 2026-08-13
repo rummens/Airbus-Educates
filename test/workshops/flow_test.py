@@ -27,7 +27,7 @@ Two variants, matching the two run-locations a workshop can choose (see the hous
   ./flow_test.py --keep                # leave sessions up to inspect
 
 The real portal fronts the same session mechanics with a login → catalog → launch flow
-(on CRC too); this script drives them directly instead.
+(upstream); this script drives them directly instead.
 """
 import argparse
 import sys
@@ -57,7 +57,7 @@ def http_code(url, ctx=None):
 
 
 def session_url(ctx, session_name):
-    r = st.sh(["oc", "--context", ctx, "get", "workshopsession", session_name,
+    r = st.sh(["oc", "--context", ctx, "get", "workshopsessions.training.educates.dev", session_name,
                "-o", "jsonpath={.status.educates.url}"])
     return r.stdout.strip()
 
@@ -133,7 +133,7 @@ def main():
     p.add_argument("--mode", choices=["namespace", "vcluster", "both"], default="both")
     p.add_argument("--workshop", default=None, help="override the lab for the chosen mode")
     p.add_argument("--id", default="90")            # high id to avoid clashing with manual sessions
-    p.add_argument("--context", default="crc-admin")
+    p.add_argument("--context", default=dw._default_context())
     p.add_argument("--timeout", type=int, default=300)
     p.add_argument("--keep", action="store_true", help="leave sessions running afterwards")
     args = p.parse_args()

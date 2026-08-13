@@ -21,7 +21,7 @@ Link kinds:
     unreachable from a public runner. Give the real host to check them too — see below.
 
 The base URL for internal docs comes from the shared chart values
-(`workshops-monorepo/values.yaml` → `params.dcsDocsBaseUrl`, the same value the
+(`values.yaml` → `params.dcsDocsBaseUrl`, the same value the
 TrainingPortal injects into every session), then each lab's `workshop/config.yaml`
 param as a fallback, then `--param` which always wins. Since the committed value is
 the placeholder `https://docs.example.dcs`, internal links are only really fetched
@@ -35,6 +35,7 @@ in one flat `file:line` list at the end.
   ./link_check.py --all --param dcs_docs_base_url=https://docs.internal.dcs --check-internal
 """
 import argparse
+import os
 import pathlib
 import re
 import subprocess
@@ -43,7 +44,7 @@ import sys
 import deploy_workshop as dw
 
 GREEN, RED, YEL, DIM, RST = "\033[32m", "\033[31m", "\033[33m", "\033[2m", "\033[0m"
-PLACEHOLDER_HOSTS = ("example.dcs", "example.com", ".svc", "localhost", "apps-crc.testing", "127.0.0.1")
+PLACEHOLDER_HOSTS = ("example.dcs", "example.com", ".svc", "localhost", "127.0.0.1")
 LINK_RE = re.compile(r"\]\(\s*<?([^)]+?)>?\s*\)")       # ](url) / ](<url>) / ](url "title")
 PARAM_RE = re.compile(r"\{\{<\s*param\s+(\w+)\s*>\}\}")
 # Authoring comments explain the markdown syntax with literal `[text](url)` samples —
@@ -78,14 +79,14 @@ def load_params(subpath):
 
 
 def load_shared_params():
-    """workshops-monorepo/values.yaml `params:` → {snake_case_name: value}.
+    """values.yaml `params:` → {snake_case_name: value}.
 
     That block is the single source of truth for the author params (the chart injects
     them as session env on every workshop, each lab's config.yaml param only carries
     the same value as an offline fallback). camelCase there, snake_case in content:
     dcsDocsBaseUrl → dcs_docs_base_url. Tiny parser, no PyYAML — same reason as above.
     """
-    vals = dw.REPO_ROOT / "workshops-monorepo" / "values.yaml"
+    vals = dw.REPO_ROOT / "values.yaml"
     out, inside = {}, False
     if not vals.exists():
         return out
@@ -121,14 +122,50 @@ def resolve_params(url, params):
 
 
 # Codes that mean "the URL is valid, the server just refuses an automated request"
-# (docs.openshift.com 403s any non-browser client). Reported, not failed.
+# (some sites 403/429 a non-browser client). Reported, not failed.
 SOFT_CODES = {"401", "403", "405", "429"}
-UA = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
+
+# Corp egress proxy config, supplied via env (gitlab-ci variables), never hardcoded.
+#   HTTPS_PROXY   e.g. http://divproxy01.dsmain.ds.corp:8080
+#   PROXY_USER / PROXY_PASSWORD   NTLM creds, masked in CI
+#   NO_PROXY      hosts fetched directly (e.g. the internal docs host). Semicolon or
+#                 comma separated; curl also still honours its own *_proxy env vars.
+# When present the proxy is used with --proxy-ntlm, which is what the corp proxy needs
+# (curl's automatic env-proxy only does Basic auth, so it would fail against NTLM).
+
+
+def proxy_args():
+    """curl flags for the corp proxy, or [] when no proxy is configured."""
+    proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("HTTPSproxy") \
+        or os.environ.get("https_proxy")
+    if not proxy:
+        return []
+    args = ["-x", proxy]
+    user, pw = os.environ.get("PROXY_USER"), os.environ.get("PROXY_PASSWORD")
+    if user:
+        args += ["--proxy-ntlm", "--proxy-user", f"{user}:{pw or ''}"]
+    # Hosts to fetch directly, bypassing the proxy (internal docs host among them).
+    no_proxy = os.environ.get("NO_PROXY") or os.environ.get("no_proxy") or ""
+    if no_proxy:
+        args += ["--noproxy", no_proxy.replace(";", ",")]
+    return args
 
 
 def curl_code(url):
-    r = subprocess.run(["curl", "-sSL", "-m", "20", "-A", UA,
+    # Follow redirects (-L) so a 301/302 landing on a 200 stays a pass. Send curl's
+    # genuine default user-agent: redhat.com's WAF (now the target of many
+    # docs.openshift.com redirects) blocks requests that fake a Chrome UA, but allows
+    # plain curl. A browser-like `Accept` header alone is enough elsewhere.
+    # -k: the internal docs / proxy hosts use self-signed or internal-CA certs the runner's
+    # bundle doesn't trust. Without -k, curl aborts on cert validation -> every internal link
+    # reports "000" (no HTTP status ever reached) even though the server is fine.
+    # NB: a 000 otherwise means curl never got an HTTP status from the server — the
+    # connection/CDN/proxy failed before anyone answered. The reason is intentionally
+    # not echoed here (a corp proxy's own error page only adds noise); the CI proxy
+    # probe explains the cause in one clear line instead.
+    r = subprocess.run(["curl", "-ksSL", "-m", "20",
                         "-H", "Accept: text/html,application/xhtml+xml",
+                        *proxy_args(),
                         "-o", "/dev/null", "-w", "%{http_code}", url],
                        capture_output=True, text=True)
     return r.stdout.strip()
@@ -163,7 +200,7 @@ def classify(raw, params):
     return "relative", url
 
 
-def check_workshop(name, subpath, params, cache, check_internal, skip_external=False):
+def check_workshop(name, subpath, params, cache, check_internal, skip_external=False, debug=False):
     files = learner_facing_files(subpath)
     if not files:
         return None, [f"{YEL}skip{RST} {name}: no content/slides/README"], []
@@ -180,27 +217,44 @@ def check_workshop(name, subpath, params, cache, check_internal, skip_external=F
                 continue
             kind, url = classify(raw, params)
             if kind == "skip":
+                if debug:
+                    lines.append(f"  SKIP    {f.relative_to(dw.REPO_ROOT)}:{text.count(chr(10), 0, m.start()) + 1}  {url}")
                 continue
             where = (f, text.count("\n", 0, m.start()) + 1)
             if kind == "relative":
                 n_rel += 1
                 target = (f.parent / url.split("#", 1)[0]).resolve()
                 if not target.exists():
-                    bad.append((where, raw, "relative target missing"))
+                    bad.append((where, raw, "relative target missing", ""))
+                    if debug:
+                        lines.append(f"  FAIL    {f.relative_to(dw.REPO_ROOT)}:{text.count(chr(10), 0, m.start()) + 1}  {raw}  → missing")
+                elif debug:
+                    lines.append(f"  OK      {f.relative_to(dw.REPO_ROOT)}:{text.count(chr(10), 0, m.start()) + 1}  {raw}  → exists")
             elif kind == "internal":
                 n_int += 1
                 if check_internal and url.startswith(("http://", "https://")) and "__UNRESOLVED_" not in url:
                     v = code_verdict(cache.setdefault(url, curl_code(url)))
+                    if debug:
+                        code = cache[url] or "ERR"
+                        lines.append(f"  {'OK' if v == 'ok' else 'SOFT' if v == 'soft' else 'FAIL'}  {f.relative_to(dw.REPO_ROOT)}:{text.count(chr(10), 0, m.start()) + 1}  {url}  → HTTP {code}")
                     if v == "bad":
-                        bad.append((where, url, f"internal link HTTP {cache[url] or 'ERR'}"))
+                        bad.append((where, url, f"internal link HTTP {cache[url] or 'ERR'}", cache[url] or ""))
+                    elif v == "soft" and debug:
+                        lines.append(f"        (server blocks automated fetch, link assumed valid)")
+                elif debug:
+                    lines.append(f"  SKIP    {f.relative_to(dw.REPO_ROOT)}:{text.count(chr(10), 0, m.start()) + 1}  {url}  → internal, not fetched (no --check-internal or non-http)")
             else:  # external
                 n_ext += 1
                 if skip_external:
-                    continue          # air-gapped runner: counted + reported, not fetched
+                    if debug:
+                        lines.append(f"  SKIP    {f.relative_to(dw.REPO_ROOT)}:{text.count(chr(10), 0, m.start()) + 1}  {url}  → external, not fetched (--skip-external)")
+                    continue
                 code = cache.setdefault(url, curl_code(url))
                 v = code_verdict(code)
+                if debug:
+                    lines.append(f"  {'OK' if v == 'ok' else 'SOFT' if v == 'soft' else 'FAIL'}  {f.relative_to(dw.REPO_ROOT)}:{text.count(chr(10), 0, m.start()) + 1}  {url}  → HTTP {code or 'ERR'}")
                 if v == "bad":
-                    bad.append((where, url, f"HTTP {code or 'ERR'}"))
+                    bad.append((where, url, f"HTTP {code or 'ERR'}", code))
                 elif v == "soft":
                     soft.append((where, url, code))
 
@@ -211,11 +265,11 @@ def check_workshop(name, subpath, params, cache, check_internal, skip_external=F
     extnote = " (offline, not fetched)" if skip_external else ""
     lines.append(f"{head} {name}: {len(files)} files, {n_ext} external{extnote}, "
                  f"{n_rel} relative{intnote}{softnote}")
-    for (f, ln), url, why in bad:
+    for (f, ln), url, why, _code in bad:
         lines.append(f"     {RED}{why}{RST}  {url}  {DIM}({f.relative_to(dw.REPO_ROOT)}:{ln}){RST}")
     for (f, ln), url, code in soft:
         lines.append(f"     {DIM}{code} (server blocks automated fetch, link assumed valid)  {url}{RST}")
-    return ok, lines, [(name, f, ln, url, why) for (f, ln), url, why in bad]
+    return ok, lines, [(name, f, ln, url, why, code) for (f, ln), url, why, code in bad]
 
 
 def main():
@@ -230,12 +284,19 @@ def main():
                    help="also write the broken-link list to PATH, plain text, one per line "
                         "(lab · file:line · reason · url). Written only when something failed, "
                         "so CI can re-print it as the last thing in the job log.")
+    p.add_argument("--summary-csv", metavar="PATH",
+                   help="also write the broken links to PATH as CSV with a header "
+                        "(lab,file,line,reason,url,http_code) for easy filtering/sorting in a "
+                        "spreadsheet. Written only when something failed.")
     p.add_argument("--skip-external", action="store_true",
                    help="don't fetch public links (air-gapped runner has no internet). They are "
                         "still counted and the relative/internal checks still run.")
     p.add_argument("--require-real-docs-url", action="store_true",
                    help="fail if the effective dcs_docs_base_url is still a placeholder host "
                         "(those links ship as 404s; CI uses this so a placeholder can't pass silently)")
+    p.add_argument("--debug", action="store_true",
+                   help="print every link with its classification (external/internal/"
+                        "relative/skip) and whether it was actually fetched + the HTTP code")
     args = p.parse_args()
 
     overrides = dict(kv.split("=", 1) for kv in args.param)
@@ -248,31 +309,36 @@ def main():
 
     shared = load_shared_params()
     cache, failures = {}, []
+    debug_lines = [] if args.debug else None
     print("=== workshop link check (external links must be 2xx; relative targets must exist) ===")
     docs_base = overrides.get("dcs_docs_base_url", shared.get("dcs_docs_base_url", "(unset)"))
     print(f"    content + slides + exercises + README + consolelab.yaml")
     print(f"    dcs_docs_base_url={docs_base}"
           f"{'  (fetched)' if args.check_internal else '  (not fetched; pass --check-internal)'}")
+    if args.debug:
+        print(f"\n=== DEBUG: every link found, its classification, and whether it was fetched ===")
     for nm in names:
         subpath = dw.find_subpath(nm) or f"{dw.DEFAULT_BASE}/{nm}"
         params = load_params(subpath)
         params.update(shared)                # shared chart values beat the lab's offline default
         params.update(overrides)             # --param wins over everything
         ok, report, bad = check_workshop(nm, subpath, params, cache, args.check_internal,
-                                         args.skip_external)
+                                          args.skip_external, args.debug)
         for ln in report:
             print(ln)
         failures += bad
+        if debug_lines is not None:
+            debug_lines += report
 
     # lab · file:line · reason · url — everything needed to open the page and fix it, with
     # no colour codes so it survives being written to a file and pasted elsewhere.
     fix_lines = [f"{nm}  {f.relative_to(dw.REPO_ROOT)}:{ln}  {why}  {url}"
-                 for nm, f, ln, url, why in failures]
+                 for nm, f, ln, url, why, _code in failures]
 
     if failures:
         # One flat list at the end: the per-lab output above scrolls away in a CI log.
         print(f"\n{RED}BROKEN LINKS ({len(failures)}){RST} — a learner following these hits a 404 / missing image:")
-        for nm, f, ln, url, why in failures:
+        for nm, f, ln, url, why, _code in failures:
             print(f"  {f.relative_to(dw.REPO_ROOT)}:{ln}  {RED}{why}{RST}  {url}  {DIM}[{nm}]{RST}")
     elif args.skip_external:
         print(f"\n{GREEN}all relative + internal links resolve{RST} "
@@ -291,13 +357,32 @@ def main():
         print(f"\n{RED}PLACEHOLDER DOCS URL{RST} — dcs_docs_base_url is {docs_base!r}.")
         print("  Every {{< param dcs_docs_base_url >}} link in the catalog resolves to that host,")
         print("  so they all 404 for learners. Set the real host and re-run:")
-        print("    workshops-monorepo/values.yaml → params.dcsDocsBaseUrl (or the per-cluster")
+        print("    values.yaml → params.dcsDocsBaseUrl (or the per-cluster")
         print("    argocd/envs/*.yaml), and the CI variable DCS_DOCS_BASE_URL for this check.")
-        fix_lines.append(f"(all labs)  workshops-monorepo/values.yaml  dcs_docs_base_url is the "
+        fix_lines.append(f"(all labs)  values.yaml  dcs_docs_base_url is the "
                          f"placeholder {docs_base} — every DCS doc link 404s")
 
     if args.summary_file and fix_lines:
         pathlib.Path(args.summary_file).write_text("\n".join(fix_lines) + "\n")
+
+    if args.summary_csv and failures:
+        import csv
+        with open(args.summary_csv, "w", newline="") as fh:
+            w = csv.writer(fh)
+            w.writerow(["lab", "file", "line", "reason", "url", "http_code"])
+            for nm, f, ln, url, why, code in failures:
+                w.writerow([nm, f.relative_to(dw.REPO_ROOT), ln, why, url, code])
+
+    if args.debug and debug_lines:
+        # Aggregate the per-link DEBUG output into counts so the user can see at a glance
+        # how many links were actually tested vs skipped.
+        from collections import Counter
+        tags = Counter(ln.split()[0] for ln in debug_lines if ln.strip() and ln[0] in " OSFK")
+        print(f"\n=== DEBUG SUMMARY ===")
+        print(f"  OK      = fetched and resolved  ({tags.get('OK', 0)})")
+        print(f"  SOFT    = fetched, server blocked automated access (401/403/405/429) ({tags.get('SOFT', 0)})")
+        print(f"  FAIL    = fetched and did NOT resolve                       ({tags.get('FAIL', 0)})")
+        print(f"  SKIP    = not fetched (classification or flag prevented it) ({tags.get('SKIP', 0)})")
 
     sys.exit(1 if (failures or placeholder_docs) else 0)
 

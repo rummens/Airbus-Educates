@@ -1,0 +1,136 @@
+id,ts,workshop,session,source,rating,clarity,comment,done
+84,2026-08-13 06:58:18.113066+00:00,lab-u02-namespace-scope,dcst-w37-pq4v,form,4,4,[Major] If i click on Stop Guidance there is no way to exit from lab session. Stopping the guidance lets you roam the OpenShift console. The only way to exit is terminated the lab session.,False
+79,2026-08-07 07:10:50.298088+00:00,lab-a07-itsm-console,dcst-w44-4x2n,form,4,5,"[Minor ] References to A06 looks like an internal identification. In the catalog are identified as Lab1, Lab2, .",False
+76,2026-08-06 12:45:53.022889+00:00,lab-u02-namespace-scope,dcst-w37-rf4s,form,4,4,"great interactive learning - maybe the animations (coloring the screen in blue) is a little bit distracting, if possible it could be good to shorten the animation",False
+75,2026-08-06 12:42:06.325437+00:00,lab-a06-terms-namespaces-tenancy,dcst-w33-swnz,form,4,4,"The rating isn’t applied—after rating a course from the catalog view, the “Not yet rated” message still appears.",True
+74,2026-08-06 12:40:30.239686+00:00,lab-a05-what-is-dcs,dcst-w29-p6gf,form,4,5,"The rating isn’t applied—after rating a course from the catalog view, the “Not yet rated” message still appears.",True
+73,2026-08-06 12:37:19.223193+00:00,lab-a06-terms-namespaces-tenancy,dcst-w33-llbm,form,4,4,"Minor:
+Lab IDs are shown as A01, B05 – these look like internal codes. In the catalog the labs are named Lab 1, Lab 2; use the same naming everywhere.
+
+Major:
+Amber default: Clicking a “Verify” button before the previous step is finished changes the new step to amber (processing) instead of showing an error. Once the earlier step is done, the state becomes green.
+Green default: In another flow the premature step turns green (OK) even though the prior step hasn’t been completed.",False
+72,2026-08-06 12:07:45.439598+00:00,lab-u01-container-access,dcst-w36-4d7j,form,5,5,Perfect tour!,True
+69,2026-08-06 09:34:43.251941+00:00,lab-a05-what-is-dcs,dcst-w29-kqbd,form,4,4,"Suggestion: Clarify that DCS serves Airbus Commercial, Defence, and Helicopter platforms—not only Commercial.  
+Suggestion: Move this lab before “Deploy Your First App,” since it provides the basic introduction to DCS.",False
+68,2026-08-06 08:44:03.186778+00:00,lab-a04-storage,dcst-w32-lvkp,form,4,4,"The rating isn’t applied—after rating a course from the catalog view, the “Not yet rated” message still appears.",False
+67,2026-08-06 07:48:21.325907+00:00,lab-a04-storage,dcst-w32-wz99,form,4,4,"[Critical]Writing to '/opt/app-root/src/data/marker' fails with Permission denied. The container user lacks write rights on the mounted volume; this must be fixed.
+
+[Major]Amber state: Clicking “Verify” before the previous step completes changes the new step to amber (processing) instead of showing an error.
+[Major]Green state: In another flow, the premature step turns green (OK) while earlier steps are still incomplete.
+
+[Minor]“Overview & Storage” tag says Beginner but the content is Intermediate.
+[Minor]Lab IDs are written as A01/A02; catalog uses. Lab 1/Lab 2 – make the naming consistent.",False
+66,2026-08-05 12:56:37.678521+00:00,lab-u01-container-access,dcst-w36-4g2k,form,4,4,"t seems there is a small bug, by default I'm not able to move on from the first step - the button ""Continue"" doesn't work. I insisted and played around and now seems to work.",False
+65,2026-08-05 12:01:44.094271+00:00,lab-a03-expose-app,dcst-w31-5jf5,form,4,5,"[Major] Verification Bug (Amber): In steps like Wait for rollout and Create the Route, clicking verification early triggers an ""amber"" state instead of an error, which then turns ""green"" once the previous task finishes.
+
+[Major] Verification Bug (Green): In Network policies and Air-gapped steps, clicking verification early triggers a ""green"" state even though previous actions are incomplete.
+
+[Minor] Audience mismatch: ""Intermediate"" description vs ""Beginner"" tag.
+
+[Minor] Naming: Replace internal ""A01"" references with ""Lab 1, Lab 2..."" to match the catalog.
+
+[Minor] Link error: ""Route Kubernetes Documentation"" (in Expose your app and Traffic Chain) incorrectly points to OpenShift docs.",False
+64,2026-08-05 09:48:31.862041+00:00,lab-a04-storage,dcst-w32-2q22,form,4,5,At 4. Request and Mount at the end of the page the action 'Write something to it' isn't working for me because permission is denied.,False
+63,2026-08-05 08:39:20.784519+00:00,lab-a07-itsm-console,dcst-w44-l7k4,form,5,5,"it could be interesting to give a basic tenant that will fit 80% of the use case (with the options needed for the use case like CPUs, Proxy config...) instead of having the user creating so many tickets",False
+61,2026-08-05 08:21:10.662437+00:00,lab-a06-terms-namespaces-tenancy,dcst-w33-cwqz,form,4,4,"could be good to add some analogy with building, family, rooms...",False
+59,2026-08-05 07:35:00.682546+00:00,lab-a04-storage,dcst-w32-swnz,form,5,5,nice & easy to understand,False
+57,2026-08-04 12:43:49.981509+00:00,lab-a00-environment-tour,dcst-w45-7n2p,form,5,5,"Nice tutorial :) During the first run, I had some ""Application is not available"" errors in the main (right) window after clicking on buttons in the right. This may have been due to a session loss.",False
+54,2026-08-04 12:29:45.435484+00:00,lab-a02-configure-troubleshoot,dcst-w27-9f67,form,4,5,All addtional comment: [Minor]. Overview. Audience: Intermediate mismatch with tag beginner,False
+53,2026-08-04 11:37:03.180314+00:00,lab-a02-configure-troubleshoot,dcst-w27-2r6p,form,4,5,On page 'Config in a ConfigMap' the code window is too narrow so you can't clearly read the line displayed there.,False
+51,2026-08-04 09:09:35.167998+00:00,lab-a02-configure-troubleshoot,dcst-w27-klsf,form,4,5,"[Major] Inconsistent Verification State Logic:
+There are two issues with how verification points handle concurrent or premature clicks:
+- Amber State Issue: In some steps (Step 2, Confirm injection, Roll the app, Apply broken version), clicking a verification action before the previous one finishes causes the state to turn amber (processing) instead of showing an error. Once the previous action completes, it turns green.
+- Green State Issue: In other steps (Apply the broken version), clicking a verification point before previous actions are completed causes the state to turn green (OK) immediately, even though the requirements haven't been met.
+
+[Major] Missing error message in Pod Events:
+After applying a broken deployment configuration, the error '""ConfigMap it references doesn’t exist""' does not appear in section ""1. Describe the Pod — its status and events"". However, section ""2. Cluster events"" works correctly and displays '""configmap 'hello-dcs-conf' not found""'.
+
+Observed Output:
+bash
+
+[~/exercises] $ envsubst < broken-deployment.yaml | oc apply -f -
+deployment.apps/hello-dcs configured
+[~/exercises] $ oc describe pod -l app=hello-dcs | tail -n 30
+...
+Events:
+  Type    Reason          Age   From               Message
+  ----    ------          ----  ----               -------
+  Normal  Scheduled       4m8s  default-scheduler  Successfully assigned ...
+  Normal  AddedInterface  4m8s  multus             Add eth0 ...
+  Normal  Pulled          4m5s  kubelet            Container image ...
+  Normal  Created         4m4s  kubelet            Created container: hello-dcs
+  Normal  Started         4m4s  kubelet            Started container hello-dcs
+(Note: The expected error message is missing from the Events section above).
+
+[Minor] Terminology inconsistency in Overview:
+The overview description refers to ""A01"" (e.g., ""In A01 you set one value..."", ""Audience: Intermediate — you've done A01"", and in section 1: Configure & Troubleshoot Your App). This is confusing; it should be updated to refer to ""Lab 2"" for better clarity.
+
+[Suggestion] Clarify ""no log line at all"" instruction
+In section ""3. Logs — when the container at least started"", the instruction implies that nothing should be printed. However, running the command results in an error: 'Error from serve'. The documentation should clarify this behavior.",False
+50,2026-08-04 06:18:53.927069+00:00,lab-a00-environment-tour,dcst-w45-m5dl,form,5,5,Easy to understand introduction into the available toolset,True
+37,2026-08-03 10:59:53.108917+00:00,lab-a01-deploy-first-app,dcst-w28-6gh8,form,4,5,"[Minor] Broken link to DCS registry documentation:
+Description: The link to the DCS registry docs is broken (at least within the National Network).
+Details: Clicking the link results in a 404 error when accessing: 'https://docs.dcs.common.airbusds.corp/services/container-registry'
+Location: Section 1: Deploy Your First App
+
+[Major] Inconsistent Verification state behavior:
+Description: Verification points do not handle concurrent actions correctly.
+Details: If a user triggers a new verification action before the previous one has finished, the state changes to amber (processing) instead of displaying an error. Once the previous action completes, the state incorrectly turns green.
+Note: This issue was not observed in sections 5 (Change It and Watch the Rollout) and 6 (What's Behind It), where it works as expected.
+
+[Major] Unhandled ""Application not Found"" error after Lab closure:
+Description: Potential internal error during lab termination.
+Details: After the terminal displays ""Closed,"" the rest of the web interface stops responding and shows an ""Application not Found"" error. This should be handled gracefully.
+Observation: This seems to happen after a long period of inactivity. When the timeout message appears asking to terminate the session, the process works correctly.
+
+[Suggestion] Display explicit error messages for failed verifications:
+Description: Currently, when a verification fails, the UI only changes to a red state without providing a specific warning or error message explaining why it failed.
+
+Suggestion] Enable ""Copy to Terminal"" functionality:
+Description: To improve the hands-on experience, users should be able to copy code directly into the terminal. Currently, users must manually type commands or navigate through command history, which is inefficient.",False
+36,2026-08-03 09:26:38.743149+00:00,lab-a00-environment-tour,dcst-w45-lzkz,form,4,5,"Workshop overview description indicates Lab 0, but the rest of workshop start from Lab2, 3, .. .
+Track: Core / Fundamentals · Lab 0",False
+35,2026-08-03 09:20:01.109368+00:00,lab-a00-environment-tour,dcst-w45-5j6t,form,4,5,"[Major] duration` mismatch:  README says “~5 min"", while the `Workshop` spec sets `duration: 10m",False
+34,2026-08-03 07:27:24.247834+00:00,lab-a01-deploy-first-app,dcst-w28-8rdt,form,4,4,Good Lab - I'm  just wondering if from time to time it could be interesting to type the command and not just execute them... because just typing them without understanding the full meaning may be too easy. I will also check how the Examiner is working (probably mentionned previously).,True
+33,2026-07-31 14:39:01.159836+00:00,lab-a00-environment-tour,dcst-w45-gvmt,form,5,5,great start so far ... :-),True
+32,2026-07-31 08:20:35.406614+00:00,lab-a00-environment-tour,dcst-w30-4tfc,form,4,5,"The workshop lesson for understanding the lab environment is very well-detailed and helpful. I have only identified a few technical inconsistencies and minor errors in the links, images, and documentation that should be addressed to improve the overall experience
+
+LABS:
+[Major] Your Workshop Environment: https://dcst-w30-jppc.apps.dev-ocp-rhosp.dcs.otn1-tnt.iaas.aircloud.common.airbusds.corp/workshop/content/00-workshop-overview/ | Link DCS Academy environment guide doesn't work.
+[Minor] The Dashboard Layout: https://dcst-w30-jppc.apps.dev-ocp-rhosp.dcs.otn1-tnt.iaas.aircloud.common.airbusds.corp/workshop/content/01-the-dashboard-layout/? | Update image: different to current dashboard, Feedback tab doesn't appear.
+[Major] The Console: https://dcst-w30-jppc.apps.dev-ocp-rhosp.dcs.otn1-tnt.iaas.aircloud.common.airbusds.corp/workshop/content/04-the-console/? | Warnings appear into the “empty” console, maybe could display sensitive information.
+
+SLIDES:
+URL: https://academy.apps.dev-ocp-rhosp.dcs.otn1-tnt.iaas.aircloud.common.airbusds.corp/slides/lab-a00-environment-tour/
+[Minor]: Dashboard Layout Slide is not the same like image, Feedback tab doesn't appear.
+[Minor]: Order slide should be: Terminal -> Console -> Editor. Now appear Editor before Console.
+
+SOURCE CODE:
+URL: https://git.dcs.aircloud.common.airbusds.corp/dcs-public/dcs-academy-workshops
+[Minor] README.md: Reference to Claude Code technology and its skills that are not part of the project. Suggested edit: ""The skills live in a separate repo ('airbus-educates-*-skill') and are installed into Claude Code — they are not part of this catalog repo.""",True
+31,2026-07-31 06:03:01.445478+00:00,lab-a00-environment-tour,dcst-w30-72kp,form,4,4,"It took me some time (like the two first chapters) to use the quick actions.
+I REALLY liked quick actions, but i think it should be more clear(?) im not sure.
+
+Content wise i have the following comments:
+
+	Feeling like Ai wrote some text:
+		- You get instant, honest feedback that a step worked, instead of guessing.
+	Chapter 5: I feel like you explain the OpenShift situation here in much more detail than needed (in the end, you can just say it's because OpenShift doesnt work, maybe AI aswell?)
+	
+Overall rating -> 4 because of the AI feeling
+Instructions clear ->4 Because of clicking the quick actions not being very intuitive",True
+11,2026-07-24 11:14:40.385373+00:00,lab-a01-deploy-first-app,dcst-w06-xwhr,form,4,3,"Folie 6: Bei oc get all -k app=hello dcs kommt ein Fehler:
+Error from server (Forbidden): virtualmachinesnapshotcontents.snapshot.kubevirt.io is forbidden: User ""system:serviceaccount:dcst-w06:dcst-w06-xwhr"" cannot list resource ""virtualmachinesnapshotcontents"" in API group ""snapshot.kubevirt.io"" in the namespace ""dcst-w06-xwhr""
+Error from server (Forbidden): virtualmachinesnapshots.snapshot.kubevirt.io is forbidden: User ""system:serviceaccount:dcst-w06:dcst-w06-xwhr"" cannot list resource ""virtualmachinesnapshots"" in API group ""snapshot.kubevirt.io"" in the namespace ""dcst-w06-xwhr""
+
+Jedoch beim näcshten Schritt (verify) wird als grün angezeigt --> falsch. 
+
+Wortwahl ist teilweise ungewohnt. Pane für Terminal z.B",True
+9,2026-07-23 14:56:36.225538+00:00,lab-a04-expose-app,dcst-w05-vncq,form,5,5,Favourite lesson so far,True
+7,2026-07-23 13:45:24.207028+00:00,lab-a03-configure-troubleshoot,dcst-w04-w7j4,form,4,3,"7: Auch ohne hello-dcs-conf in hello-dcs-config umzuändern, wird der Test als bestanden vermerkt",True
+6,2026-07-23 12:23:14.049509+00:00,lab-a02-deploy-first-app,dcst-w03-r9w9,form,4,3,Alles hat funktioniert. Jedoch sind die commands sehr kompakt und wenig erklärt,True
+4,2026-07-23 06:58:33.906305+00:00,lab-a00-environment-tour,dcst-w01-w7j4,form,5,5,"Sieht gut aus, hat alles Funktioniert.
+--> Mir ist aufgefallen, dass bei der Slide 6: Your Feedback im zweiten Absatz steht:
+""Open the Feedback tab and fill in the short form"". Feedback tab existiert erst, wenn man den ausführenden Button drückt.",True
+3,2026-07-23 06:33:34.224795+00:00,lab-a04-expose-app,dcst-w05-xnqq,form,5,5,cool,True

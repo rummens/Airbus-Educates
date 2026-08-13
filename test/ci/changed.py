@@ -25,7 +25,7 @@ PYTHON_GLOBS = (re.compile(r"^images/dcs-academy-portal/"),
                 re.compile(r"^test/portal/"),
                 re.compile(r"^test/workshops/.*\.py$"),
                 re.compile(r"^test/ci/"))
-WORKSHOP_RE = re.compile(r"^workshops-monorepo/tracks/[^/]+/(lab-[^/]+)/")
+WORKSHOP_RE = re.compile(r"^tracks/[^/]+/(lab-[^/]+)/")
 # a change to the shared harness or plans affects every workshop's tests
 HARNESS_RE = re.compile(r"^test/workshops/(.*\.py|smoke-plans/.*)$")
 

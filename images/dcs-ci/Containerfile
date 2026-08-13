@@ -1,35 +1,62 @@
-# DCS Academy CI base image for the FAST tier (.gitlab-ci.yml stage `test`).
+# DCS Academy CI base image for both tiers (.gitlab-ci.yml stages test + e2e).
 #
-# What the no-cluster jobs actually need on top of python: `git` (changed.py
-# diffs against the base ref; run-workshops.sh does `git rev-parse`) and `curl`
-# (link_check external HEAD probes). Baking them here removes the per-job
-# `apt-get update && install` from portal-tests + workshop-static — faster, and
+# Fast tier needs: git (changed.py diffs against the base ref; run-workshops.sh does
+# git rev-parse) and curl (link_check external HEAD probes). Baking them here removes
+# the per-job apt-get update && install from portal-tests + workshop-static — faster, and
 # it still works when the runner has no outbound apt mirror.
 #
-# NOT for the cluster tier (stage `e2e`): those jobs run on the `crc`-tagged
-# runner, which owns `oc` and a kubeconfig — no image pin, nothing to bake here.
+# Cluster tier needs: oc (smoke_test.py / flow_test.py / deploy_workshop.py all drive
+# oc directly). Pulled from the official OpenShift mirror and baked into this image so
+# every runner — air-gapped or not — gets the same binary.
+#
+# Image-builder jobs also run on this image: they need oc (login + BuildConfigs) plus
+# jq (build.sh renders BuildConfig JSON) and skopeo (verify_image / cleanup delete
+# inspect the external registry). All three are baked so the air-gapped runners can run
+# build.sh unchanged.
+#
+# A single image for both tiers keeps the matrix small and avoids a second set of deps
+# to keep in sync.
 #
 # Bakes the portal's python requirements + pytest-cov as well. The target CI runners are
-# AIR-GAPPED: a per-job `pip install -r requirements.txt` needs a package index they do not
+# AIR-GAPPED: a per-job pip install -r requirements.txt needs a package index they do not
 # have, so the deps must ship in the image. requirements.txt is read from the portal dir
 # (build context is images/, see build.sh) — no second copy of the pin list to drift.
 # Consequence: rebuild + re-mirror this image when requirements.txt changes.
 #
-# Pinned to Debian 12 (bookworm), NOT the bare `3.13-slim` tag: that now tracks
+# Pinned to Debian 12 (bookworm), NOT the bare 3.13-slim tag: that now tracks
 # Debian 13 (trixie), whose glibc uses instructions Docker's bundled QEMU mishandles,
-# so `apt-get` SIGBUSes ("Bus error", exit 135) during the emulated-arch leg of a
+# so apt-get SIGBUSes ("Bus error", exit 135) during the emulated-arch leg of a
 # multi-arch build. bookworm emulates cleanly. (Alternative: refresh the host's
-# emulators with `docker run --privileged tonistiigi/binfmt --install all`.)
+# emulators with docker run --privileged tonistiigi/binfmt --install all.)
 FROM python:3.13-slim-bookworm
 
 LABEL org.opencontainers.image.source="https://github.com/rummens/Airbus-Educates" \
-      org.opencontainers.image.description="DCS Academy CI base (python + git + curl) for the no-cluster test tier"
+      org.opencontainers.image.description="DCS Academy CI base (python + git + curl + oc) for the test + e2e tiers"
 
 RUN set -eux; \
     apt-get update -qq; \
-    apt-get install -y -qq --no-install-recommends git curl ca-certificates; \
+    apt-get install -y -qq --no-install-recommends git curl ca-certificates jq skopeo; \
     rm -rf /var/lib/apt/lists/*; \
-    git --version; curl --version | head -1
+    git --version; curl --version | head -1; jq --version; skopeo --version
+
+# oc CLI — needed by the e2e tier (smoke_test.py, flow_test.py, deploy_workshop.py all
+# drive oc directly against the dev OpenShift cluster). Pulled from the official
+# OpenShift mirror; the stable URL always resolves to the latest stable release.
+# TARGETARCH (set by buildx per platform) picks the matching tarball — the plain
+# openshift-client-linux.tar.gz is amd64-only, so the arm64 leg was pulling an x86_64
+# binary and crashing under Rosetta at runtime.
+ARG TARGETARCH
+RUN set -eux; \
+    case "$TARGETARCH" in \
+      amd64) OC_ARCH="" ;; \
+      arm64) OC_ARCH="-arm64" ;; \
+      *) echo "unsupported TARGETARCH: $TARGETARCH" >&2; exit 1 ;; \
+    esac; \
+    curl -sSL "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux${OC_ARCH}.tar.gz" \
+      -o /tmp/oc.tar.gz; \
+    tar -xzf /tmp/oc.tar.gz -C /usr/local/bin oc; \
+    rm /tmp/oc.tar.gz; \
+    oc version --client
 
 # Path is relative to the images/ build context, not to this file.
 COPY dcs-academy-portal/requirements.txt /tmp/requirements.txt

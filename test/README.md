@@ -28,7 +28,7 @@ lives under `images/`). Coverage gate is `COVERAGE_MIN` (default 90).
 | `coverage_check.py` | no | every content `examiner:execute-test` is exercised by the smoke plan (or explicitly `exclude`d). This is what keeps a plan honest when a workshop command changes. |
 | `link_check.py` | no | every link a learner can click resolves — content, slides, exercises, lab README and console-lab CRs (external 2xx; relative target exists; air-gapped `{{< param … >}}` links reported, checked with `--check-internal`). Broken ones are listed once per lab and again as one flat `file:line` list at the end. |
 | `label_check.py` | no | each lab's dev/prod lifecycle label matches its Route usage (a Route needs a PROD namespace). |
-| `deploy_workshop.py` | yes | deploy one workshop to CRC/OpenShift, portal-less, from git. |
+| `deploy_workshop.py` | yes | deploy one workshop to OpenShift, portal-less, from git. |
 | `smoke_test.py` | yes | deploy → run the examiner graders (`smoke-plans/<lab>.json`) → link-check → teardown. |
 | `flow_test.py` | yes | spin up a real session (namespace + vcluster variants), assert it's reachable + basic commands run, teardown. |
 

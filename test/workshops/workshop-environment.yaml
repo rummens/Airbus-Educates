@@ -1,6 +1,6 @@
-# Portal-less WorkshopEnvironment for local CRC testing.
+# Portal-less WorkshopEnvironment for local testing.
 # session-manager reconciles this directly — no TrainingPortal needed
-# (skipping it is faster and isolates one lab; the portal itself runs fine on CRC).
+# (skipping it is faster and isolates one lab; the portal itself runs fine).
 apiVersion: training.educates.dev/v1beta1
 kind: WorkshopEnvironment
 metadata:

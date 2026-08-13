@@ -1,0 +1,5 @@
+{
+  "_comment": "CI base image. Build context is the whole images/ tree: the Containerfile bakes the portal's requirements.txt via COPY dcs-academy-portal/requirements.txt (see images/build.sh). So contextDir is the scope root ('.'); the Dockerfile path is relative to that context.",
+  "contextDir": ".",
+  "dockerfilePath": "dcs-ci/Containerfile"
+}

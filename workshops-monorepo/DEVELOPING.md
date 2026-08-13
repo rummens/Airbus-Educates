@@ -44,8 +44,8 @@ Typical flow for a new lab:
 2. **Author** — build the folder under `tracks/<track-folder>/<lab-name>/` following the
    layout above, filling in the `academy.dcs/*` catalog metadata the chart needs.
 3. **Review** — check it against the rubric and apply the findings.
-4. **Test** — deploy portal-less to a local CRC cluster and run the examiner smoke test
-   (see the testing tooling in the platform repo).
+4. **Test** — deploy portal-less to a cluster with oc logged in and run the examiner smoke test
+    (see the testing tooling in the platform repo).
 5. **Push** — merging to `main` deploys via ArgoCD (see deploy order below).
 
 The "Add a track" and "Add a workshop" sections below document the *mechanical* contract
@@ -254,6 +254,92 @@ Keep these in sync between the two: `educates.portalName` and the academy
 ```bash
 helm template dcs-workshops .
 ```
+
+## CI pipeline overview
+
+The repo's `.gitlab-ci.yml` defines **two stages**, `test` and `e2e`, and uses
+per-job `rules: changes:` plus dynamic child pipelines to keep runs fast:
+
+- **Fast tier (`test`)** — no cluster, blocks merges, all start immediately (`needs: []`):
+  - `portal-tests` — portal pytest/coverage (fires when `images/dcs-academy-portal`,
+    `test/portal`, `test/ci`, or `.gitlab-ci.yml` change).
+  - `workshop-static` — link/coverage/label checks via `test/ci/run-workshops.sh` (fires on
+    `tracks/**`, `test/workshops/**`, `test/ci/**`, `.gitlab-ci.yml`). This is the job that
+    drives `curl --proxy-ntlm` through `link_check.py` when `HTTPS_PROXY` is set.
+  - `fix-examiner-perms` — on pushes, re-asserts `+x` on examiner test scripts and pushes a
+    `[skip ci]` fix commit.
+  - `generate-image-spec` — (see image-builder below; the fragment is imported from the
+    `pipeline-library` repo) decides which images changed and emits one `build-<img>` job
+    per image into a child spec.
+  - `generate-smoke-spec` — decides which labs changed and emits one `<lab>` smoke job per lab
+    into a child spec (all labs on `schedule`, or when `SMOKE_ALL=true`).
+  - `generate-smoke-spec-all` / `cluster-smoke-manual` — an optional **manual** full-tracks
+    smoke (all labs, `--all`), non-blocking outside MRs.
+- **e2e tier (`e2e`)** — cluster/OpenShift work, on `$CI_BASE_IMAGE` and logged in via the
+  `CI_OC_*` vars (no dedicated runner tag):
+  - `build-images` — triggers the generated image-build child pipeline (`strategy: depend`).
+  - `run-workshops-smoke` — triggers the generated smoke child pipeline.
+  - `user-flow` — `flow_test.py --mode both`.
+  - `cleanup-orphans` — (image-builder) deletes BuildConfigs/tags whose branch no longer exists.
+
+### Image builds (BuildConfig per image)
+
+Container-image builds are driven by the **image-builder component from the `pipeline-library`
+repo** (self-contained: `build.sh`, a `gitlab-ci.yml` fragment, a child-spec generator, and
+deploy manifests). This repo only keeps the images themselves under `images/`. Each pipeline,
+the imported fragment clones `pipeline-library` (so its jobs can run `build.sh` /
+`gen-image-child.py` / `version.sh`) and runs them against this repo's checkout as the working
+directory. `generate-image-spec` writes a child pipeline with one parallel job per changed/eligible
+image; `build-images` runs it. On the default branch (or git-tag pipelines) images are tagged
+`v<semver>` — computed from conventional commits by `version.sh` — plus `latest` and the branch
+name; on feature/MR branches they keep a branch-name tag. Details live in that component's
+`README.md` in the pipeline-library repo.
+
+### Workshop smoke (dynamic per-lab jobs)
+
+`generate-smoke-spec`'s child jobs each run `smoke_test.py <lab> --no-links --ref <branch>
+--throwaway` (deploy → run graders → tear down) in a portal-hidden throwaway Workshop. They use
+`$CI_BASE_IMAGE` and login via `CI_OC_*`; no runner tag is needed. `SMOKE_ALL=true` (CI var)
+forces the full suite on every pipeline instead of only changed labs / schedule.
+
+## GitLab CI — intended variables
+
+The pipeline needs a set of CI/CD variables to run the way it's written. Set them
+in **Settings → CI/CD → Variables** at the project (or group) level. Mark secrets
+**Masked** so they never appear in job logs, and **Protected** if you only want them on
+protected branches (`main`). Several (`BUILD_ALL`, `SMOKE_ALL`, `IMAGE_VERSION`, …) are
+opt-in tuning knobs the pipeline reads from the environment — set them only when you want
+that behaviour.
+
+| Variable | Example | Secret? | Where it's used |
+|---|---|---|---|
+| `CI_BASE_IMAGE` | `ghcr.io/rummens/dcs-ci:dev` | no | Image for every fast-cluster/fast-tier job; defaulted in `.gitlab-ci.yml` (`variables:`). Carries `python`, `git`, `curl`, `oc`, `jq`, `skopeo`. Point it at your Harbor mirror on an air-gapped runner. |
+| `REGISTRY_BASE` | `registry.../dcs-internal-images` | no | Image-build push base. Has **no** YAML default (a YAML default would override the CI var); required for image builds. Used by `build.sh`, the image-builder generator, and the registry SealedSecret. |
+| `REGISTRY_SERVER` / `REGISTRY_USER` / `REGISTRY_PASS` | registry host / robot user / token | user+pass yes | Registry login. `REGISTRY_USER`+`REGISTRY_PASS` back the out-of-cluster `skopeo` verify/cleanup and the push secret; the robot needs push+pull on the target project. |
+| `GIT_USER` / `GIT_TOKEN` | git user / deploy token | token yes | In-cluster git clone for BuildConfig source (`git-source` basic-auth secret). `GIT_TOKEN` must be durable, not `CI_JOB_TOKEN`. Only needed if the `git-source` secret isn't pre-provisioned. |
+| `CI_OC_HOST` / `CI_OC_TOKEN` | API URL / token | token yes | OpenShift login for every cluster/e2e job (and the child image/smoke jobs). |
+| `CI_OC_INSECURE` | `true` | no | Set to skip TLS verification on `oc login` (dev clusters with an untrusted CA). |
+| `CA_BUNDLE` / `CI_OC_CONTEXT` / `CI_OC_USERNAME` | — | no | Optional overrides. `CA_BUNDLE` (old alias `CI_OC_CA_BUNDLE`) is the internal-CA PEM file used by git (pipeline-library clone) and `oc login`; context/username are `oc login` overrides. |
+| `HTTPS_PROXY` / `PROXY_USER` / `PROXY_PASSWORD` | proxy URL / user / pass | user+pass yes | Corp egress proxy for the link check (`curl --proxy-ntlm`). See "Proxy behaviour". |
+| `LINK_CHECK_SKIP_EXTERNAL` | `true` | no | Air-gapped runner: count public links, don't fetch them. |
+| `DCS_DOCS_BASE_URL` / `DCS_DOCS_CHECK_INTERNAL` | docs host / `true` | no | Real internal docs host for the link check (and whether to fetch internal links). |
+| `GIT_PUSH_TOKEN` | scoped token | yes | Write-repo token for `fix-examiner-perms` to push its `chmod +x` fix. |
+| `SMOKE_ALL` | `true` | no | Run the **full** smoke suite on every pipeline (instead of only changed labs / schedule). |
+| `NO_PROXY` | hosts | no | Hosts the link check fetches directly (bypassing the proxy). |
+| `IMAGE_*` / `BUILD_*` / `SCOPE_DIR` | — | no | Tuning knobs for image builds: `IMAGE_VERSION`/`IMAGE_TAGS` (release versioning), `IMAGE_BUILD_TIMEOUT`, `BUILD_ALL`, `SCOPE_DIR`, `BUILD_NAMESPACE`, `PUSH_SECRET`/`GIT_SECRET`, `SOURCE_GIT_URI`, `VERIFY_RETRIES`/`VERIFY_WAIT`. Documented in the image-builder component's `README.md` (pipeline-library repo).
+
+### Proxy behaviour
+
+Only the `workshop-static` job carries the proxy `before_script`. When `HTTPS_PROXY` is set
+it exports the proxy vars and builds `NO_PROXY` to keep the internal docs host
+(`docs.dcs.common.airbusds.corp`) plus `.corp`, `.svc`, and loopback addresses on a direct
+connection — internal links must not go out through the NTLM proxy. `link_check.py` reads
+those env vars and adds `-x`/`--proxy-ntlm`/`--noproxy` to each `curl` call, because curl's
+automatic env-proxy only does Basic auth and would fail against the corp NTLM proxy.
+
+If the runner has **no** proxy but still cannot reach the internet, leave `HTTPS_PROXY`
+unset and set `LINK_CHECK_SKIP_EXTERNAL=true`: the link check counts public links and lists
+them without fetching, and the proxy path is simply not used.
 
 ## Examiner Permission fix
 Windows removes the execution permission from linux files. This causes examiner scripts to fail in the sessions.

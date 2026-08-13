@@ -4,7 +4,7 @@
 Unlike the old script (which assumed a pre-deployed pod and a fixed repo layout),
 this owns the whole lifecycle so a single command proves a workshop from scratch:
 
-  1. deploy the workshop to CRC (reuses deploy_workshop.py: git source, portal-less,
+  1. deploy the workshop to OpenShift (reuses deploy_workshop.py: git source, portal-less,
      waits for the session to reach Running),
   2. run its smoke plan inside the live session pod — `run` steps set up learner
      state, `check` steps invoke the Educates examiner graders,
@@ -35,16 +35,16 @@ import time
 import deploy_workshop as dw          # reuse resolver + deploy/teardown (same dir)
 
 HERE = pathlib.Path(__file__).resolve().parent
-DEPLOY_WAIT = 600          # CRC first-time image pull + git clone can exceed the old 300s
+DEPLOY_WAIT = 600          # first-time image pull + git clone can exceed the old 300s
 GREEN, RED, DIM, RST = "\033[32m", "\033[31m", "\033[2m", "\033[0m"
-LINK_SKIP = ("example.dcs", "example.com", "localhost", ".svc", "apps-crc.testing")
+LINK_SKIP = ("example.dcs", "example.com", "localhost", ".svc")
 
 
 def sh(args, **kw):
     return subprocess.run(args, capture_output=True, text=True, **kw)
 
 
-def run_deploy_tool(name, ctx, sid, vcluster, base=None, ref=None, delete=False):
+def run_deploy_tool(name, ctx, sid, vcluster, base=None, ref=None, delete=False, throwaway=False):
     """Invoke deploy_workshop.py for the real deploy/teardown (single source of truth)."""
     cmd = [sys.executable, str(HERE / "deploy_workshop.py"), name,
            "--context", ctx, "--id", sid, "--wait", str(DEPLOY_WAIT)]
@@ -54,6 +54,8 @@ def run_deploy_tool(name, ctx, sid, vcluster, base=None, ref=None, delete=False)
         cmd += ["--ref", ref]
     if vcluster:
         cmd.append("--vcluster")
+    if throwaway:
+        cmd.append("--throwaway")
     if delete:
         cmd.append("--delete")
     r = subprocess.run(cmd)
@@ -95,13 +97,13 @@ def dump_deploy_diagnostics(ctx, ns, session):
         print(f"  {DIM}$ oc {' '.join(args)}{RST}")
         for l in (out.splitlines() or ["(no output)"])[:25]:
             print(f"    {DIM}{l}{RST}")
-    show("session", ["get", "workshopsession", session,
+    show("session", ["get", "workshopsessions.training.educates.dev", session,
                      "-o", "jsonpath={.status.educates.phase}{\"  \"}{.status.educates.message}{\"\\n\"}"])
     show("pods", ["-n", ns, "get", "pods", "-o", "wide"])
     show("events", ["-n", ns, "get", "events", "--sort-by=.lastTimestamp"])
     print(f"  {DIM}tip: a session stuck Pending is usually a not-yet-cleared previous env "
           f"(`./deploy_workshop.py {session.rsplit('-', 1)[0]} --delete` then retry) or a stale "
-          f"CRC Multus token (see README).{RST}")
+          f"Multus token (see README).{RST}")
 
 
 def check_links(content_dir):
@@ -139,24 +141,16 @@ def _short(s, n=90):
     return s if len(s) <= n else s[:n - 1] + "…"
 
 
-def run_plan(ctx, ns, pod, steps, tests_dir, workdir, oc_shim, timeout):
+def run_plan(ctx, ns, pod, steps, tests_dir, workdir, timeout):
     """Execute the smoke plan in the pod. Returns (passed, failed)."""
-    prefix = ""
-    if oc_shim:
-        pod_exec(ctx, ns, pod,
-                 'mkdir -p $HOME/bin && printf \'#!/bin/sh\\nexec kubectl "$@"\\n\' '
-                 '> $HOME/bin/oc && chmod +x $HOME/bin/oc', timeout)
-        prefix = 'export PATH=$HOME/bin:$PATH; '
-        print(f"{DIM}oc->kubectl shim installed{RST}")
-
     total = len(steps)
     passed = failed = 0
     for i, step in enumerate(steps, 1):
         if "run" in step:
-            cmd, label = f'{prefix}cd {workdir}; {step["run"]}', f"run:   {step['run']}"
+            cmd, label = f'cd {workdir}; {step["run"]}', f"run:   {step['run']}"
         else:
             argstr = " ".join(f"'{a}'" for a in step.get("args", []))
-            cmd = f'{prefix}{tests_dir}/{step["check"]} {argstr}'
+            cmd = f'{tests_dir}/{step["check"]} {argstr}'
             label = f"check: {step['check']} {' '.join(step.get('args', []))}".rstrip()
         # Heartbeat BEFORE running — some steps (rollout status, polling checks with
         # retries: .INF) take a while; this line tells the user which one is in flight.
@@ -165,8 +159,8 @@ def run_plan(ctx, ns, pod, steps, tests_dir, workdir, oc_shim, timeout):
         r = pod_exec(ctx, ns, pod, cmd, timeout)
         dt = time.time() - t0
         # `expect_fail` steps invert the verdict: they only pass on the real DCS platform
-        # (e.g. Kyverno-enforced PROD deploys) and are EXPECTED to fail on CRC. Encoding it
-        # keeps the run green here while still catching a regression (an unexpected PASS).
+        # (e.g. Kyverno-enforced PROD deploys) and are EXPECTED to fail here. Encoding it
+        # keeps the run green while still catching a regression (an unexpected PASS).
         want_fail = bool(step.get("expect_fail"))
         raw_ok = r.returncode == 0
         ok = (not raw_ok) if want_fail else raw_ok
@@ -178,7 +172,7 @@ def run_plan(ctx, ns, pod, steps, tests_dir, workdir, oc_shim, timeout):
             # Show the FULL failure output (indented) so the reason is obvious without
             # re-running by hand: exit code, then stdout and stderr tails.
             print(f"        {RED}└─ exit {r.returncode}{RST}"
-                  + (f"  {DIM}(expected FAIL on CRC but it PASSED — platform regression?){RST}"
+                  + (f"  {DIM}(expected FAIL on cluster but it PASSED — platform regression?){RST}"
                      if want_fail else ""))
             for stream, text in (("stdout", r.stdout), ("stderr", r.stderr)):
                 lines = [l for l in text.splitlines() if l.strip()]
@@ -194,19 +188,22 @@ def main():
     p = argparse.ArgumentParser(description="Deploy a workshop, run its graders, tear it down.")
     p.add_argument("name", help="workshop dir name (e.g. lab-a02-kubernetes-essentials)")
     p.add_argument("--id", default="01")
-    p.add_argument("--context", default="crc-admin")
+    p.add_argument("--context", default=dw._default_context())
     p.add_argument("--base", default=dw.DEFAULT_BASE, help="repo path prefix of workshops")
-    p.add_argument("--ref", default="origin/main", help="git ref the session pulls content from")
+    p.add_argument("--ref", default=dw.default_git_ref(), help="git ref the session pulls content from")
     p.add_argument("--plan", default=None, help="default: smoke-plans/<name>.json")
     p.add_argument("--tests-dir", default="/opt/workshop/examiner/tests")
     p.add_argument("--workdir", default="/home/eduk8s/exercises")
-    p.add_argument("--oc-shim", action="store_true", help="alias oc->kubectl in the pod")
     p.add_argument("--timeout", type=int, default=180, help="per-step timeout (s)")
     p.add_argument("--deploy-timeout", type=int, default=300, help="wait for session Running (s)")
     p.add_argument("--no-deploy", action="store_true", help="use an already-deployed session")
     p.add_argument("--no-teardown", "--keep", dest="keep", action="store_true",
                    help="leave the workshop running afterwards")
     p.add_argument("--no-links", action="store_true", help="skip external link checking")
+    p.add_argument("--throwaway", action="store_true",
+                   help="deploy a throwaway Workshop (MR mode): hidden from the portal, "
+                        "pulls content from --ref, never touches the catalog Workshop. "
+                        "Use --ref=<MR branch> to test the MR's actual changes.")
     args = p.parse_args()
 
     # Resolve the workshop's repo subpath (no hard-coded layout). Search all tracks
@@ -220,7 +217,13 @@ def main():
         if not targets:
             sys.exit(f"could not resolve workshop {args.name!r} under {args.base}")
         name, subpath = targets[0]
-    ns = name                                    # portal-less deploy: env ns == name
+    # In MR/throwaway mode the deployed Workshop has its own hidden name; the smoke plan
+    # still resolves by the catalog name, but the namespace/pod/session use the throwaway name.
+    eff_name = dw.throwaway_name(name, args.ref) if args.throwaway else name
+    ns = eff_name                                # portal-less deploy: env ns == workshop name
+    # deploy_workshop.py names the session CR "<ws>-w<sid>"; keep the same spelling
+    # so diagnostics/pod-wait look up the CR that deploy actually created.
+    session = f"{eff_name}-w{args.id}"
     plan_path = pathlib.Path(args.plan) if args.plan else HERE / "smoke-plans" / f"{name}.json"
     if not plan_path.exists():
         sys.exit(f"no smoke plan: {plan_path}")
@@ -233,30 +236,35 @@ def main():
 
     # 1. deploy
     if not args.no_deploy:
-        print(f"\n=== [1/4] deploy {name} ===  {DIM}(first-time image pull + git clone can take "
+        print(f"\n=== [1/4] deploy {eff_name} ===  {DIM}(first-time image pull + git clone can take "
               f"several minutes){RST}")
-        if not run_deploy_tool(name, args.context, args.id, vcluster, args.base, args.ref):
+        if not run_deploy_tool(name, args.context, args.id, vcluster, args.base, args.ref,
+                               throwaway=args.throwaway):
             print(f"\n{RED}deploy failed{RST} — session did not reach Running. Diagnostics:")
-            dump_deploy_diagnostics(args.context, ns, f"{name}-{args.id}")
+            dump_deploy_diagnostics(args.context, ns, session)
             sys.exit("deploy failed")
     else:
         print(f"\n=== [1/4] deploy skipped (--no-deploy) ===")
 
     # 2. find the live session pod
     print(f"\n=== [2/4] wait for the session pod (Running) ===")
-    pod = wait_for_pod(args.context, ns, f"{name}-{args.id}", args.deploy_timeout)
+    # The session CR is "<ws>-w<sid>" but the Deployment/pod the controller creates is
+    # "<ws>-<sid>-<deployhash>-<podhash>" (no 'w'). Match the pod by that prefix.
+    pod_prefix = f"{eff_name}-{args.id}"
+    pod = wait_for_pod(args.context, ns, pod_prefix, args.deploy_timeout)
     if not pod:
-        print(f"\n{RED}no Running session pod for {name}-{args.id} in ns {ns}{RST} — diagnostics:")
-        dump_deploy_diagnostics(args.context, ns, f"{name}-{args.id}")
+        print(f"\n{RED}no Running session pod for {session} in ns {ns}{RST} — diagnostics:")
+        dump_deploy_diagnostics(args.context, ns, session)
         if not args.keep:
-            run_deploy_tool(name, args.context, args.id, vcluster, args.base, args.ref, delete=True)
-        sys.exit(f"no Running session pod for {name}-{args.id} in ns {ns}")
+            run_deploy_tool(name, args.context, args.id, vcluster, args.base, args.ref,
+                            delete=True, throwaway=args.throwaway)
+        sys.exit(f"no Running session pod for {session} in ns {ns}")
     print(f"session pod: {GREEN}{ns}/{pod}{RST}")
 
     # 3. run graders
     print(f"\n=== [3/4] run graders ({len(steps)} steps) ===")
     passed, failed = run_plan(args.context, ns, pod, steps, args.tests_dir,
-                              args.workdir, args.oc_shim, args.timeout)
+                              args.workdir, args.timeout)
 
     # 4. link check
     link_bad = 0
@@ -269,10 +277,11 @@ def main():
 
     # 5. teardown
     if not args.keep:
-        print(f"\n=== [4/4] tear down {name} ===")
-        run_deploy_tool(name, args.context, args.id, vcluster, args.base, args.ref, delete=True)
+        print(f"\n=== [4/4] tear down {eff_name} ===")
+        run_deploy_tool(name, args.context, args.id, vcluster, args.base, args.ref,
+                        delete=True, throwaway=args.throwaway)
     else:
-        print(f"\n(kept {name} running; remove with ./deploy_workshop.py {name} --delete)")
+        print(f"\n(kept {eff_name} running; remove with ./deploy_workshop.py {eff_name} --delete)")
 
     sys.exit(1 if (failed or link_bad) else 0)
 
