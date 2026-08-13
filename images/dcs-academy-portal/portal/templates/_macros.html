@@ -11,8 +11,11 @@
   {%- if r and r.n >= min_reviews -%}
     {#- The number first: counting solid stars at tile size is still guesswork. -#}
     <span class="rating"><b class="rating-avg">{{ '%.1f'|format(r.avg) }}</b>{{ stars(r.avg) }}<span class="rating-n">({{ r.n }})</span></span>
+  {#- Below the threshold the average is not representative yet, but "Not yet rated" made
+      learners who had just rated the lab report the rating as broken. Show their rating,
+      marked provisional. -#}
   {%- elif r and r.n > 0 -%}
-    <span class="rating-soft">Not yet rated</span>
+    <span class="rating-soft">{{ '%.1f'|format(r.avg) }}{{ stars(r.avg) }}<span class="rating-n">({{ r.n }}) provisional</span></span>
   {%- else -%}
     <span class="rating-soft new">New</span>
   {%- endif -%}

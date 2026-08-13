@@ -11,6 +11,8 @@
     {% set r = ratings.get(c.name) %}
     {% if r and r.n >= min_reviews %}
       <div class="detail-rating">{{ m.stars(r.avg) }}<span class="rating-n">{{ '%.1f'|format(r.avg) }} · {{ r.n }} reviews</span></div>
+    {% elif r and r.n > 0 %}
+      <div class="detail-rating">{{ m.stars(r.avg) }}<span class="rating-n">{{ '%.1f'|format(r.avg) }} · {{ r.n }} review{{ 's' if r.n > 1 }} · provisional</span></div>
     {% endif %}
 
     {% if readme_html %}

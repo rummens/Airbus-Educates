@@ -487,10 +487,16 @@ def session_pods(session_name):
     for p in pods:
         cs = p.status.container_statuses or []
         ready = sum(1 for c in cs if c.ready)
+        vcluster = p.metadata.namespace.endswith("-vc")
         out.append({
             "name": p.metadata.name,
             "namespace": p.metadata.namespace,
-            "vcluster": p.metadata.namespace.endswith("-vc"),
+            "vcluster": vcluster,
+            # Educates' own workshop pod, as opposed to a pod the LAB created via
+            # session.objects. Its Deployment is named after the session, so the pod name
+            # carries that prefix (the same rule test/workshops/smoke_test.py uses to find
+            # it). Readiness gates on this pod: lab content may be deliberately broken.
+            "workshop": (not vcluster) and p.metadata.name.startswith(session_name),
             "phase": p.status.phase,
             "ready": ready,
             "total": len(cs),

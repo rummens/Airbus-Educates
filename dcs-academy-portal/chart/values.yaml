@@ -148,7 +148,7 @@ theme:
 # secret. Fresh start — no SQLite migration.
 # -----------------------------------------------------------------------------
 feedback:
-  minReviews: 5                 # course view shows ratings only at/above this count
+  minReviews: 3                 # full rating shown at/above this count; below it the average shows as "provisional"
   # NOTE: the Educates analytics webhook URL is configured on the TrainingPortal,
   # which now lives in the dcs-academy-workshops chart (feedback.analyticsWebhookUrl there).
   cnpg:

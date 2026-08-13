@@ -767,7 +767,14 @@ def _status_feed(name, t0, expect_vc=False, console_lab=False, user=""):
         return bool(live) and all(p["ready"] == p["total"] and p["total"] for p in live)
 
     vc_ready = _grp_ready(vc)
-    ws_ready = _grp_ready(ws)
+    # Gate on Educates' own workshop pod, not on everything the lab deployed. A lab may
+    # ship a pod that is MEANT to stay broken — "Diagnose a broken pod" hands the learner a
+    # pod stuck in CreateContainerConfigError — and Educates labels session objects with
+    # the session name, so such a pod lands in this list and pinned the launch at
+    # "Starting workshop pod" forever. Fall back to every pod when none is identifiable,
+    # so an Educates naming change degrades to the old behaviour rather than reporting
+    # Ready while nothing runs.
+    ws_ready = _grp_ready([p for p in ws if p.get("workshop")] or ws)
     # A vcluster lab gates on a real vc-ready; a plain-namespace lab ignores vc.
     vc_ok = vc_ready if expect_vc else True
 
