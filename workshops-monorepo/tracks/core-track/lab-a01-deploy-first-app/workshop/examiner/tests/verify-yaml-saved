@@ -1,0 +1,9 @@
+#!/bin/bash
+# Verify the generated Deployment YAML was saved to exercises/.
+f="$HOME/exercises/deployment.yaml"
+if [ -s "$f" ] && grep -q '^kind: Deployment' "$f"; then
+  echo "OK: Deployment YAML saved to exercises/deployment.yaml."
+  exit 0
+fi
+echo "exercises/deployment.yaml is missing or is not a Deployment manifest." >&2
+exit 1

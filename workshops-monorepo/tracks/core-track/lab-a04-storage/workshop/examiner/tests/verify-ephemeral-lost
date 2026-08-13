@@ -1,0 +1,9 @@
+#!/bin/bash
+# Verify the note written into the container filesystem did NOT survive the new Pod.
+# The file lived on the container's ephemeral filesystem, so a fresh Pod must not have it.
+if oc exec deploy/hello-dcs -- test -f /opt/app-root/src/note 2>/dev/null; then
+  echo "The note still exists — expected it to be gone after the Pod was replaced." >&2
+  exit 1
+fi
+echo "OK: the note is gone — the container filesystem is ephemeral."
+exit 0

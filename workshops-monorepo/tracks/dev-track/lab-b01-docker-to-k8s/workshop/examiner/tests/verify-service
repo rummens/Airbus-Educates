@@ -1,0 +1,13 @@
+#!/bin/bash
+# Verify the migrated hello-dcs Service exists and has at least one endpoint.
+if ! oc get service hello-dcs >/dev/null 2>&1; then
+  echo "Service 'hello-dcs' not found. Did 'oc apply -f service.yaml' run?" >&2
+  exit 1
+fi
+count=$(oc get endpoints hello-dcs -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null | wc -w)
+if [ "${count:-0}" -ge 1 ] 2>/dev/null; then
+  echo "OK: Service hello-dcs has ${count} endpoint(s)."
+  exit 0
+fi
+echo "Service 'hello-dcs' exists but has no endpoints yet — its selector (app=hello-dcs) may not match a running Pod." >&2
+exit 1

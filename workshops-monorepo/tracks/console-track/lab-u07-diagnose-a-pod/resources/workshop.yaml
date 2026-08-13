@@ -1,0 +1,175 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-u07-diagnose-a-pod
+  labels:
+    academy.dcs/track: console
+    academy.dcs/order: "70"
+    # Console lab: the portal allocates this session for the namespace + objects
+    # below, then redirects the learner into the OpenShift console instead of the
+    # workshop dashboard. The academy console plugin guides them from there.
+    academy.dcs/lab-format: console
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/display-name: "Diagnose a broken pod (console)"
+    academy.dcs/duration: "10 min"
+    academy.dcs/difficulty: beginner
+    academy.dcs/icon: monitor
+    academy.dcs/summary: >-
+      Work a pod that will not start from status to events to manifest in the
+      OpenShift web console, and learn which screen answers which question.
+    # A console lab has no workshop content, so there is no README for the portal to
+    # fetch: this annotation is the course page's prospectus. Markdown, rendered.
+    academy.dcs/details: |
+      ### What this lab is
+
+      A **console lab**. Instead of a terminal and instruction pages, the lab opens the
+      OpenShift web console and walks you through it: the step you are on is highlighted
+      on the real page, and the guidance box follows you as you navigate.
+
+      Your own project is created before the lab starts, containing one healthy pod and
+      one that is deliberately broken. The fault is real and the cluster's own messages
+      explain it — nothing here is a screenshot.
+
+      ### What you should already know
+
+      This lab assumes the concepts, not the clicks. You should have finished
+      **Configure & Troubleshoot Your App**, where you diagnosed a broken application from
+      logs, events and `oc describe`. No new Kubernetes concepts are introduced here.
+
+      ### What you will do
+
+      You will not type any commands — this lab is entirely in the console. Each screen
+      names the command it replaces, so you can map one onto the other afterwards.
+
+      - Compare a healthy and a failing pod where `oc get pods` would list them, and read the
+        status word that decides what you open next
+      - Read the container's own state and reason, the part of `oc describe pod` that separates
+        a bad pod from a bad container
+      - Find the cause in the pod's events — the screen that ends most investigations
+      - See why a pod in this state has no logs at all, and why that emptiness is itself a
+        finding
+      - Confirm the cause in the manifest, as `oc get pod -o yaml` would show it, and decide
+        where the fix belongs
+
+      ### When to reach for the console
+
+      The console wins for triage: status, events, logs and manifest are tabs on one page,
+      so you stop guessing which command to run next. The CLI still wins for anything you
+      need to repeat, script, or review — which is why the terminal labs come first.
+
+      ### Cleaning up
+
+      Press **Finish** in the guidance box when you are done. That records your completion
+      and shuts the project down. Leaving the tab open just leaves it running until it
+      expires.
+    # The ConsoleLab CR (academy.dcs/v1alpha1, shipped by the console plugin repo)
+    # this session drives. It templates only <<namespace>>, which the portal always
+    # injects from the allocated session namespace, so there are no extra params.
+    academy.dcs/console-lab: lab-u07-diagnose-a-pod
+    # A console-lab learner never opens the workshop dashboard, so Educates would
+    # see the session as orphaned and reclaim it out from under them. A zero
+    # duration disables that timer; `expires` remains the real lifetime bound.
+    # The CRD pattern is ^\d+(s|m|h)$, so it must carry a unit: 0s, not 0.
+    academy.dcs/orphaned: "0s"
+    academy.dcs/expires: 60m
+spec:
+  title: "Diagnose a broken pod (console)"
+  description: >-
+    You diagnosed a broken application from logs, events and describe in Configure &
+    Troubleshoot Your App. This lab gives you a pod that will not start and walks the same
+    investigation through the OpenShift web console — status, events, an empty log, and the
+    manifest that caused it — so you know which tab answers which question.
+  duration: 10m
+  difficulty: beginner
+  labels:
+    - name: module
+      value: "A-Foundations"
+  workshop:
+    # No content files: nobody opens the dashboard for a console lab, so there are
+    # no instruction pages to fetch or publish. The session pod exists only to own
+    # the namespace and its objects.
+    image: "{{ .Values.workshopImages.base }}"
+  session:
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    # Nothing to click through in the dashboard — the lab happens in the console.
+    applications:
+      terminal:
+        enabled: false
+      editor:
+        enabled: false
+      console:
+        enabled: false
+      slides:
+        enabled: false
+    objects:
+      # A demo value only. Educates renders this into the session namespace as written,
+      # so nothing here may be a real credential. The broken pod below asks for a key
+      # this Secret does not have.
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: app-secret
+          namespace: $(session_namespace)
+        stringData:
+          API_TOKEN: "not-a-real-token"
+      # The healthy comparison, and the pod the portal's readiness feed waits for: it
+      # carries the Educates session label, so the redirect happens once THIS pod runs.
+      - apiVersion: v1
+        kind: Pod
+        metadata:
+          name: lab-app
+          namespace: $(session_namespace)
+          labels:
+            app: lab-app
+            training.educates.dev/session.name: $(session_name)
+        spec:
+          containers:
+            - name: app
+              image: "{{ .Values.workshopImages.sample }}"
+              ports:
+                - containerPort: 8080
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  memory: 128Mi
+      # The subject of the lab: secretKeyRef names a key the Secret does not contain, so
+      # the kubelet cannot build the container's environment and the pod stops at
+      # CreateContainerConfigError — the same fault the terminal lab introduces.
+      #
+      # NO training.educates.dev/session.name label here, deliberately: the portal waits
+      # for every pod carrying that label to become ready before it redirects, and this
+      # pod never will.
+      - apiVersion: v1
+        kind: Pod
+        metadata:
+          name: lab-app-broken
+          namespace: $(session_namespace)
+          labels:
+            app: lab-app-broken
+        spec:
+          containers:
+            - name: app
+              image: "{{ .Values.workshopImages.sample }}"
+              env:
+                - name: API_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: app-secret
+                      key: MISSING_KEY
+              ports:
+                - containerPort: 8080
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  memory: 128Mi

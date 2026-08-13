@@ -1,0 +1,10 @@
+#!/bin/bash
+# Verify the hello Deployment is available in the app-a namespace.
+ns="$(oc project -q 2>/dev/null)-app-a"
+ready=$(oc get deploy hello -n "$ns" -o jsonpath='{.status.availableReplicas}' 2>/dev/null)
+if [ "${ready:-0}" -ge 1 ] 2>/dev/null; then
+  echo "OK: 'hello' is available in '$ns'."
+  exit 0
+fi
+echo "Deployment 'hello' in '$ns' is not available yet (availableReplicas=${ready:-0})." >&2
+exit 1

@@ -1,0 +1,9 @@
+#!/bin/bash
+# Verify 'oc project' reports the current project.
+name=$(oc project -q 2>/dev/null)
+if [ -z "$name" ]; then
+  echo "Could not read the current project with 'oc project -q'. Run 'oc project' again." >&2
+  exit 1
+fi
+echo "OK: current project is '$name'."
+exit 0

@@ -1,0 +1,9 @@
+#!/bin/bash
+# Verify at least one StorageClass is available to request from.
+n=$(oc get storageclass -o name 2>/dev/null | wc -l | tr -d ' ')
+if [ "${n:-0}" -ge 1 ]; then
+  echo "OK: ${n} storage class(es) available."
+  exit 0
+fi
+echo "No storage classes found — this cluster may not have dynamic provisioning configured." >&2
+exit 1

@@ -1,0 +1,9 @@
+#!/bin/bash
+# Verify the migrated hello-dcs Deployment has 1 ready replica.
+ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+if [ "${ready:-0}" -ge 1 ] 2>/dev/null; then
+  echo "OK: hello-dcs Deployment has ${ready} ready replica(s)."
+  exit 0
+fi
+echo "hello-dcs Deployment is not ready yet (readyReplicas=${ready:-0}). Did 'envsubst < deployment.yaml | oc apply -f -' run, with the image placeholder filled in first?" >&2
+exit 1

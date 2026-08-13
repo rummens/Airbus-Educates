@@ -1,0 +1,9 @@
+#!/bin/bash
+# verify-fixed-running <deployment> — the deployment has an available replica (rollout complete).
+name="${1:?deployment name required}"
+avail=$(oc get deploy "$name" -o jsonpath='{.status.availableReplicas}' 2>/dev/null)
+if [ "${avail:-0}" -lt 1 ]; then
+  echo "Deployment '$name' has ${avail:-0} available replica(s), expected at least 1. Check 'oc rollout status deploy/$name' and 'oc get pods' — a missing Secret would leave the pod not ready (CreateContainerConfigError)." >&2
+  exit 1
+fi
+echo "OK: deployment '$name' has $avail available replica(s)."

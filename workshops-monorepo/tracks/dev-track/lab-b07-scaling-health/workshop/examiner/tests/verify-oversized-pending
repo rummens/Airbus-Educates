@@ -1,0 +1,14 @@
+#!/bin/bash
+# Verify the oversized rollout (page 02) cannot fully land — readyReplicas stays
+# below the desired count because the new ReplicaSet's bigger Pods exceed the quota.
+set -uo pipefail
+
+desired=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+
+if [ "${ready:-0}" -ge "${desired:-4}" ] 2>/dev/null; then
+  echo "hello-dcs shows ${ready:-0}/${desired:-4} ready — expected the oversized rollout to be stuck below desired. Did 'envsubst < deployment-oversized.yaml | oc apply -f -' run, and has it had a few seconds to try (and fail) scheduling the bigger Pods?" >&2
+  exit 1
+fi
+
+echo "OK: hello-dcs is stuck at ${ready:-0}/${desired:-4} ready — the oversized Pods are being rejected by the namespace quota, exactly as expected."

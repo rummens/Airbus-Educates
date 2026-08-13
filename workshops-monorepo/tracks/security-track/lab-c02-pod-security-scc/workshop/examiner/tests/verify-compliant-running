@@ -1,0 +1,9 @@
+#!/bin/bash
+# verify-compliant-running <pod> — the compliant pod was admitted and is Running.
+name="${1:?pod name required}"
+phase=$(oc get pod "$name" -o jsonpath='{.status.phase}' 2>/dev/null)
+if [ "$phase" != "Running" ]; then
+  echo "Pod '$name' is '${phase:-not found}', expected Running. A compliant restricted pod should be admitted and start — check 'oc describe pod $name' (image pull may still be in progress)." >&2
+  exit 1
+fi
+echo "OK: pod '$name' is Running."

@@ -1,0 +1,10 @@
+#!/bin/bash
+# Verify the learner can list their workloads in the active namespace.
+# NB: not `oc get all` — that exits non-zero in a restricted namespace when the SA
+# can't list some built-in type. List the explicit namespaced kinds instead.
+if oc get deployments,pods,services >/dev/null 2>&1; then
+  echo "OK: listed workloads in '$(oc project -q 2>/dev/null)'."
+  exit 0
+fi
+echo "Could not list deployments/pods/services in '$(oc project -q 2>/dev/null)'." >&2
+exit 1

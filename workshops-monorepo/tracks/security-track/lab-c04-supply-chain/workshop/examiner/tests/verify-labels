@@ -1,0 +1,10 @@
+#!/bin/bash
+# verify-labels <image-ref-without-transport>
+# The image carries a non-empty OCI labels object (provenance metadata).
+ref="${1:?image reference required (e.g. \$DCS_REGISTRY/samples/hello-dcs:1.0)}"
+labels=$(skopeo inspect "docker://${ref}" 2>/dev/null | jq -e '.Labels' 2>/dev/null)
+if [ $? -ne 0 ] || [ -z "$labels" ] || [ "$labels" = "null" ] || [ "$labels" = "{}" ]; then
+  echo "No labels object on 'docker://${ref}'. Is the image in Harbor and built with OCI labels? (Needs a real Harbor with the sample image.)" >&2
+  exit 1
+fi
+echo "OK: ${ref} carries a non-empty labels object."

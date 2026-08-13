@@ -1,0 +1,10 @@
+#!/bin/bash
+# Verify the Service responds over cluster DNS (same pattern as lab-a04).
+ns=$(oc project -q 2>/dev/null)
+code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 "http://hello-dcs.${ns}.svc:8080" 2>/dev/null)
+if [ "$code" = "200" ]; then
+  echo "OK: Service responded HTTP 200 over cluster DNS (hello-dcs.${ns}.svc:8080)."
+  exit 0
+fi
+echo "No HTTP 200 from hello-dcs.${ns}.svc:8080 (got '${code:-none}')." >&2
+exit 1

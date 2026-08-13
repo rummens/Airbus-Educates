@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-compliant
+  labels:
+    app: hello-compliant
+spec:
+  containers:
+  - name: hello-compliant
+    # Image pulled from the DCS Harbor registry via the DCS_REGISTRY env var.
+    image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+    ports:
+    - containerPort: 8080
+    # Restricted-compliant securityContext: the four controls the restricted
+    # Pod Security Standard / restricted-v2 SCC require.
+    securityContext:
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+      capabilities:
+        drop:
+        - ALL
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi

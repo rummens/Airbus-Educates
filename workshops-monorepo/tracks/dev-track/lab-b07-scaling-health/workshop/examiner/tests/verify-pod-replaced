@@ -1,0 +1,33 @@
+#!/bin/bash
+# Verify the specific Pod recorded during the delete step (page 05) is actually gone, and
+# the Deployment has reconciled back to its desired ready-replica count — proving a real
+# delete-and-replace cycle happened, not just a coincidental already-ready read.
+set -uo pipefail
+
+record="/tmp/deleted-pod.txt"
+if [ ! -f "$record" ]; then
+  echo "No record of a deleted Pod at $record — did the 'oc delete' step run yet?" >&2
+  exit 1
+fi
+
+deleted=$(cat "$record")
+name="${deleted#pod/}"
+
+if [ -z "$name" ]; then
+  echo "Recorded deleted-Pod name at $record is empty — did the delete step run cleanly?" >&2
+  exit 1
+fi
+
+if oc get pod "$name" >/dev/null 2>&1; then
+  echo "Pod '$name' still exists — expected it gone after 'oc delete $deleted'." >&2
+  exit 1
+fi
+
+desired=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+if [ "${ready:-0}" -lt "${desired:-4}" ] 2>/dev/null; then
+  echo "hello-dcs is at ${ready:-0}/${desired:-4} ready — waiting for the replacement Pod to reach Ready." >&2
+  exit 1
+fi
+
+echo "OK: deleted Pod '$name' is gone and hello-dcs is back to ${ready}/${desired} ready with a replacement Pod."

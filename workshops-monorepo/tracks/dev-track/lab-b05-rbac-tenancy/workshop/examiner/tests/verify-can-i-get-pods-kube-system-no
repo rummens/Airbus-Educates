@@ -1,0 +1,9 @@
+#!/bin/bash
+# Verify namespace isolation: the learner cannot read pods in kube-system.
+out=$(oc auth can-i get pods -n kube-system 2>/dev/null)
+if [ "$out" != "no" ]; then
+  echo "Expected 'no' from 'oc auth can-i get pods -n kube-system', got '$out'. Namespace isolation should deny this." >&2
+  exit 1
+fi
+echo "OK: 'oc auth can-i get pods -n kube-system' returned no, as expected."
+exit 0

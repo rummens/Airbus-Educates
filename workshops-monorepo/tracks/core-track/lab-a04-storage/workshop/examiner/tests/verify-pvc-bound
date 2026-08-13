@@ -1,0 +1,9 @@
+#!/bin/bash
+# Verify the File PVC is Bound.
+phase=$(oc get pvc hello-dcs-data -o jsonpath='{.status.phase}' 2>/dev/null)
+if [ "$phase" = "Bound" ]; then
+  echo "OK: PVC hello-dcs-data is Bound."
+  exit 0
+fi
+echo "PVC hello-dcs-data is '${phase:-not found}', not Bound yet." >&2
+exit 1

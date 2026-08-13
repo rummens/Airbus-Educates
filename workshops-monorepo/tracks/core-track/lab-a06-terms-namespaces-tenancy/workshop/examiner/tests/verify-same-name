@@ -1,0 +1,11 @@
+#!/bin/bash
+# Verify a Deployment named 'hello' exists independently in BOTH namespaces.
+base=$(oc project -q 2>/dev/null)
+a=$(oc get deploy hello -n "$base-app-a" -o name 2>/dev/null)
+b=$(oc get deploy hello -n "$base-app-b" -o name 2>/dev/null)
+if [ -n "$a" ] && [ -n "$b" ]; then
+  echo "OK: identical name 'hello' exists independently in '$base-app-a' and '$base-app-b'."
+  exit 0
+fi
+echo "Expected a Deployment named 'hello' in both namespaces (app-a='$a', app-b='$b')." >&2
+exit 1

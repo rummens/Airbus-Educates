@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: leaky-app
+  labels:
+    app: leaky-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: leaky-app
+  template:
+    metadata:
+      labels:
+        app: leaky-app
+    spec:
+      containers:
+      - name: leaky-app
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        ports:
+        - containerPort: 8080
+        env:
+        # BAD PATTERN: the credential is a plaintext literal baked into the manifest.
+        # Anyone who can 'oc get deploy' sees it, and it lands in git if committed.
+        - name: API_TOKEN
+          value: "s3cr3t-plaintext-token"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi

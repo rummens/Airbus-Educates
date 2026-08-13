@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 470" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="470" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">Docker world → Kubernetes objects on DCS</text>
+
+  <text x="185" y="52" text-anchor="middle" font-size="12" font-weight="bold" fill="#5a6b7b">Docker / Compose</text>
+  <text x="575" y="52" text-anchor="middle" font-size="12" font-weight="bold" fill="#5a6b7b">Kubernetes on DCS</text>
+
+  <!-- row template: left box x=40 w=290, right box x=430 w=290, arrow between -->
+
+  <!-- Row 1: container -> Pod -->
+  <rect x="40" y="62" width="290" height="60" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="185" y="87" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b4a86">a running container</text>
+  <text x="185" y="106" text-anchor="middle" font-size="11" fill="#5a6b7b">`docker run` / one compose service instance</text>
+
+  <line x1="330" y1="92" x2="425" y2="92" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="425,92 417,88 417,96" fill="#5a6b7b"/>
+
+  <rect x="430" y="62" width="290" height="60" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="575" y="87" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c6a3a">Pod</text>
+  <text x="575" y="106" text-anchor="middle" font-size="11" fill="#2c6a3a">the actual running instance</text>
+
+  <!-- Row 2: compose service -> Deployment -->
+  <rect x="40" y="132" width="290" height="60" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="185" y="157" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b4a86">a compose `services:` entry</text>
+  <text x="185" y="176" text-anchor="middle" font-size="11" fill="#5a6b7b">desired image, replicas implied as 1</text>
+
+  <line x1="330" y1="162" x2="425" y2="162" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="425,162 417,158 417,166" fill="#5a6b7b"/>
+
+  <rect x="430" y="132" width="290" height="60" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="575" y="157" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c6a3a">Deployment</text>
+  <text x="575" y="176" text-anchor="middle" font-size="11" fill="#2c6a3a">desired state: image, replicas, self-heals</text>
+
+  <!-- Row 3: ports -> Service -->
+  <rect x="40" y="202" width="290" height="60" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="185" y="227" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b4a86">`ports: "8080:8080"`</text>
+  <text x="185" y="246" text-anchor="middle" font-size="11" fill="#5a6b7b">publishes on the Docker host's port</text>
+
+  <line x1="330" y1="232" x2="425" y2="232" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="425,232 417,228 417,236" fill="#5a6b7b"/>
+
+  <rect x="430" y="202" width="290" height="60" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="575" y="227" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c6a3a">Service</text>
+  <text x="575" y="246" text-anchor="middle" font-size="11" fill="#2c6a3a">stable in-cluster name, load-balances to Pods</text>
+
+  <!-- Row 4: environment -> ConfigMap -->
+  <rect x="40" y="272" width="290" height="60" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="185" y="297" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b4a86">`environment:` / `-e KEY=value`</text>
+  <text x="185" y="316" text-anchor="middle" font-size="11" fill="#5a6b7b">config baked into the compose file</text>
+
+  <line x1="330" y1="302" x2="425" y2="302" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="425,302 417,298 417,306" fill="#5a6b7b"/>
+
+  <rect x="430" y="272" width="290" height="60" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="575" y="297" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c6a3a">ConfigMap + env</text>
+  <text x="575" y="316" text-anchor="middle" font-size="11" fill="#2c6a3a">config as its own object, referenced by the Pod</text>
+
+  <!-- Row 5: volumes -> Volume -->
+  <rect x="40" y="342" width="290" height="60" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="185" y="367" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b4a86">`volumes:` / `-v host:container`</text>
+  <text x="185" y="386" text-anchor="middle" font-size="11" fill="#5a6b7b">often a host-path bind mount</text>
+
+  <line x1="330" y1="372" x2="425" y2="372" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="425,372 417,368 417,376" fill="#5a6b7b"/>
+
+  <rect x="430" y="342" width="290" height="60" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="575" y="367" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c6a3a">Volume (PVC-backed)</text>
+  <text x="575" y="386" text-anchor="middle" font-size="11" fill="#2c6a3a">a namespace-scoped resource, no host paths</text>
+
+  <text x="380" y="425" text-anchor="middle" font-size="11" fill="#5a6b7b">Same ideas, different shape: everything above becomes one</text>
+  <text x="380" y="443" text-anchor="middle" font-size="11" fill="#5a6b7b">declarative YAML document instead of command-line flags.</text>
+</svg>

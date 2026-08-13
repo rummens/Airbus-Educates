@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-pinned
+  labels:
+    app: hello-pinned
+spec:
+  containers:
+  - name: hello-pinned
+    # Pinned by IMMUTABLE digest. ${DIGEST} is captured live from `skopeo inspect`
+    # (the instructions do this) and substituted with envsubst at apply time, so it is
+    # always the exact content hash for the image in *this* registry — a retag cannot
+    # change what runs here.
+    image: ${DCS_REGISTRY}/samples/hello-dcs@${DIGEST}
+    ports:
+    - containerPort: 8080
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi

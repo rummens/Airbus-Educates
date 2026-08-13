@@ -1,0 +1,9 @@
+# Track metadata → one Track CR. `id` is EXPLICIT (not the folder name), so the
+# folder can be renamed freely. A workshop joins this track with label
+# academy.dcs/track: <id>. Only `id` + `title` are required; the rest have
+# defaults (order 100, icon "layers").
+id: core             # track id — must equal the workshops' academy.dcs/track label
+title: "Core — DCS Foundations"
+description: "Get oriented on DCS: containers, images, namespaces, and working with oc."
+order: 10            # track sort order in the portal (low = first)
+icon: code           # FA-style icon name the portal vendors

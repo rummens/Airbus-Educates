@@ -1,0 +1,15 @@
+#!/bin/bash
+# Verify scaling hello in app-a to 0 did NOT affect app-b.
+base=$(oc project -q 2>/dev/null)
+ra=$(oc get deploy hello -n "$base-app-a" -o jsonpath='{.spec.replicas}' 2>/dev/null)
+rb=$(oc get deploy hello -n "$base-app-b" -o jsonpath='{.status.availableReplicas}' 2>/dev/null)
+if [ "${ra:-x}" != "0" ]; then
+  echo "Expected 'hello' in '$base-app-a' scaled to 0 (spec.replicas=${ra:-unset})." >&2
+  exit 1
+fi
+if [ "${rb:-0}" -ge 1 ] 2>/dev/null; then
+  echo "OK: app-a scaled to 0, app-b still available (${rb}) — actions are namespace-scoped."
+  exit 0
+fi
+echo "Expected 'hello' in '$base-app-b' to still be running (availableReplicas=${rb:-0})." >&2
+exit 1

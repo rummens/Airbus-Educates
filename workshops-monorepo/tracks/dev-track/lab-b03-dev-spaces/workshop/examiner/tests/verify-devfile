@@ -1,0 +1,22 @@
+#!/bin/bash
+# Verify devfile.yaml is present, sources its dev image from Harbor via the
+# ${DCS_REGISTRY} placeholder (never a hardcoded/external registry), and
+# defines the run command that starts hello-dcs.
+devfile=~/exercises/devfile.yaml
+
+if [ ! -f "$devfile" ]; then
+  echo "devfile.yaml not found at $devfile." >&2
+  exit 1
+fi
+
+if ! grep -q '\${DCS_REGISTRY}' "$devfile"; then
+  echo "devfile.yaml does not reference \${DCS_REGISTRY} — the dev component image must come from Harbor, not a hardcoded registry." >&2
+  exit 1
+fi
+
+if ! grep -q 'commandLine: python3 server.py' "$devfile"; then
+  echo "devfile.yaml is missing the 'run' command that starts hello-dcs (python3 server.py)." >&2
+  exit 1
+fi
+
+echo "OK: devfile.yaml is present, Harbor-parameterized, and defines the hello-dcs run command."

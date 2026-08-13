@@ -1,0 +1,14 @@
+# Educates workshop config. `params` is a LIST of {name, value} entries
+# (NOT a Hugo-style map) — each is rendered in content via {{< param name >}}.
+# The param trio is mandatory; values are placeholders, re-pointable without a rebuild.
+# NOTE: dcs_registry here (content rendering) must match DCS_REGISTRY in
+# resources/workshop.yaml (terminal/manifest use).
+params:
+- name: product_name
+  value: "Digital Container Service (DCS)"
+- name: product_short
+  value: "DCS"
+- name: dcs_registry
+  value: "harbor.example.dcs/dcs-academy"
+- name: dcs_docs_base_url
+  value: "https://docs.example.dcs"

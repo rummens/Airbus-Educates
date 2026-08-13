@@ -1,0 +1,35 @@
+# Dockerfile strategy: the escape hatch for teams that already maintain a
+# Dockerfile and don't want (or need) an S2I builder image. Same git source,
+# same output ImageStream — only the strategy block differs from
+# buildconfig-s2i.yaml. Read this one for contrast; the workshop actually runs
+# the S2I BuildConfig.
+#
+# Apply with: envsubst < buildconfig-dockerfile.yaml | oc apply -f -
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: hello-dcs-dockerfile
+  labels:
+    app: hello-dcs-built
+spec:
+  source:
+    type: Git
+    git:
+      uri: ${BUILD_SOURCE_REPO}
+      ref: main
+    # The Dockerfile lives in a subdirectory of the same repo used by the S2I
+    # build above.
+    contextDir: docker
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+      # Whatever base image the repo's Dockerfile names must itself resolve to
+      # Harbor (the air-gapped rule applies to build inputs too, not just this
+      # BuildConfig's own fields) — the provided repo's Dockerfile already does.
+  output:
+    to:
+      kind: ImageStreamTag
+      name: hello-dcs-built:latest-built-docker
+  successfulBuildsHistoryLimit: 2
+  failedBuildsHistoryLimit: 2

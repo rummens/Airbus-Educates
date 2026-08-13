@@ -1,0 +1,22 @@
+#!/bin/bash
+# Verify a second build of hello-dcs-s2i ran and completed. Every build produces
+# a genuinely new image (fresh layers/timestamp) regardless of whether the
+# source text changed, which is what "trigger a rebuild" demonstrates here.
+# Build object names are always <buildconfig-name>-<n>, so we match by name
+# prefix rather than relying on a specific label key.
+builds_json=$(oc get builds -o json 2>/dev/null)
+count=$(echo "$builds_json" | jq '[.items[] | select(.metadata.name | startswith("hello-dcs-s2i-"))] | length')
+if [ "${count:-0}" -lt 2 ]; then
+  echo "Expected at least 2 builds of hello-dcs-s2i, found ${count:-0}. Did you run 'oc start-build hello-dcs-s2i' again?" >&2
+  exit 1
+fi
+phase=$(echo "$builds_json" | jq -r '
+  [.items[] | select(.metadata.name | startswith("hello-dcs-s2i-"))]
+  | sort_by(.metadata.creationTimestamp) | last | .status.phase // empty
+')
+if [ "$phase" != "Complete" ]; then
+  echo "Latest build phase is '${phase:-none}', not yet Complete." >&2
+  exit 1
+fi
+echo "OK: ${count} builds of hello-dcs-s2i found, latest is Complete."
+exit 0

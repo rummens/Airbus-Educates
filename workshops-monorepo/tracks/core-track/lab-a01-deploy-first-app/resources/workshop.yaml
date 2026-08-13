@@ -1,0 +1,82 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-a01-deploy-first-app
+  labels:
+    academy.dcs/track: core
+    academy.dcs/order: "10"
+    # Reached only via a local port-forward tunnel — no Route/Ingress → dev namespace.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: "Deploy Your First App"
+  description: Get your own app running on DCS fast — create a Deployment from a Harbor image, customise it, reach it, change it and watch it roll out — then peek at the YAML behind it to see how Kubernetes really works.
+  duration: 20m
+  difficulty: beginner
+  labels:
+    - name: module
+      value: "A-Foundations"
+  publish:
+    image: "$(image_repository)/lab-a01-deploy-first-app-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a01-deploy-first-app/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a01-deploy-first-app/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/core-track/lab-a01-deploy-first-app/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/core-track/lab-a01-deploy-first-app"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-a01-deploy-first-app-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY: single terminal source for the sample-image registry (Plane 3).
+    # Keep in sync with dcs_registry in workshop/config.yaml.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      # A slide deck (workshop/slides/index.html renders workshop/slides/slides.md)
+      # gives a visual, one-slide-per-page overview. Each content page links to its
+      # slide with /slides/#<id>. The same files are served outside a session by the
+      # portal's Slides button.
+      slides:
+        enabled: true
+      examiner:
+        enabled: true
+      # A single-app deploy needs nothing cluster-scoped; the session namespace
+      # IS the learner's workspace. The console tour is its own track (Console).
+      vcluster:
+        enabled: false
+    # Feedback tab is pre-declared so it is ALWAYS visible, not created only on the
+    # last page. Completion/trophies still fire solely when the form is SUBMITTED
+    # (portal POST /feedback), so a permanently-visible tab does not mark the lab
+    # done early. Page 98 opens this tab; it no longer creates it.
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-a01-deploy-first-app&session=$(session_namespace)"

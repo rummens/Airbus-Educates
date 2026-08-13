@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="420" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">Where your development environment actually runs</text>
+
+  <text x="185" y="54" text-anchor="middle" font-size="12" font-weight="bold" fill="#5a6b7b">Laptop IDE (not this lab)</text>
+  <text x="575" y="54" text-anchor="middle" font-size="12" font-weight="bold" fill="#5a6b7b">OpenShift Dev Spaces (in-cluster)</text>
+
+  <!-- Left: laptop, greyed out -->
+  <rect x="55" y="72" width="260" height="130" rx="8" fill="#eceff2" stroke="#9aa7b3" stroke-width="2" stroke-dasharray="6,4"/>
+  <text x="185" y="100" text-anchor="middle" font-size="13" font-weight="bold" fill="#6b7b8b">Your laptop</text>
+  <text x="185" y="122" text-anchor="middle" font-size="11" fill="#6b7b8b">local IDE + local Docker</text>
+  <text x="185" y="140" text-anchor="middle" font-size="11" fill="#6b7b8b">whatever tool versions you installed</text>
+  <text x="185" y="158" text-anchor="middle" font-size="11" fill="#6b7b8b">needs a VPN / egress path to</text>
+  <text x="185" y="174" text-anchor="middle" font-size="11" fill="#6b7b8b">reach the cluster and Harbor</text>
+
+  <!-- Right: browser -> workspace pod -->
+  <rect x="450" y="72" width="90" height="34" rx="6" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="495" y="94" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b4a86">Browser</text>
+
+  <line x1="495" y1="106" x2="495" y2="128" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="495,128 491,120 499,120" fill="#5a6b7b"/>
+
+  <rect x="400" y="128" width="290" height="150" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="545" y="150" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c6a3a">Workspace (your namespace)</text>
+
+  <rect x="418" y="162" width="254" height="46" rx="6" fill="#ffffff" stroke="#4a9a5a"/>
+  <text x="545" y="180" text-anchor="middle" font-size="11" font-weight="bold" fill="#2c6a3a">dev container — Universal Developer Image</text>
+  <text x="545" y="196" text-anchor="middle" font-size="10" fill="#2c6a3a">pulled from Harbor, same for every workspace</text>
+
+  <rect x="418" y="214" width="254" height="30" rx="6" fill="#ffffff" stroke="#4a9a5a"/>
+  <text x="545" y="234" text-anchor="middle" font-size="10.5" fill="#2c6a3a">your project source (cloned in-cluster)</text>
+
+  <rect x="418" y="250" width="254" height="22" rx="5" fill="#ffffff" stroke="#4a9a5a"/>
+  <text x="545" y="266" text-anchor="middle" font-size="10" fill="#2c6a3a">endpoint :8080 — the app you run</text>
+
+  <text x="380" y="320" text-anchor="middle" font-size="11" fill="#5a6b7b">Same platform, same Harbor images, same network your app runs on —</text>
+  <text x="380" y="338" text-anchor="middle" font-size="11" fill="#5a6b7b">no laptop tool drift, no outbound path to the public internet required.</text>
+
+  <text x="380" y="374" text-anchor="middle" font-size="10.5" fill="#8a97a3">Installed and operated by the platform team via an Operator — you only consume it.</text>
+</svg>

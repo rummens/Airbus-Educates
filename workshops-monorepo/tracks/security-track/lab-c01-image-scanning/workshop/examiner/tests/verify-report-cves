@@ -1,0 +1,14 @@
+#!/bin/bash
+# verify-report-cves <report-filename> — the report lists at least one vulnerability (CVE).
+file="${1:?report filename required (e.g. scan-report.json)}"
+path="$HOME/exercises/$file"
+if [ ! -f "$path" ]; then
+  echo "Report '$path' not found. Is the fixture shipped in ~/exercises?" >&2
+  exit 1
+fi
+n=$(jq '[.vulnerabilities[]?] | length' "$path" 2>/dev/null)
+if [ -z "$n" ] || [ "$n" -lt 1 ]; then
+  echo "Expected at least one entry in .vulnerabilities of $file, found ${n:-none}." >&2
+  exit 1
+fi
+echo "OK: $file lists $n vulnerabilities."

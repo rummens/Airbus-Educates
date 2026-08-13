@@ -1,0 +1,13 @@
+#!/bin/bash
+# Verify the Route was admitted with a host in the PROD namespace — the
+# PROD-only capability, in direct contrast to the DEV rejection on page 2.
+set -uo pipefail
+
+ns="prod"
+host=$(oc get route hello-dcs -n "$ns" -o jsonpath='{.spec.host}' 2>/dev/null)
+if [ -z "$host" ]; then
+  echo "Route 'hello-dcs' has no host in the PROD namespace '$ns' yet — did 'oc apply -n $ns -f hello-dcs-route.yaml' run?" >&2
+  exit 1
+fi
+
+echo "OK: Route 'hello-dcs' admitted in the PROD namespace '$ns' at host '$host'."

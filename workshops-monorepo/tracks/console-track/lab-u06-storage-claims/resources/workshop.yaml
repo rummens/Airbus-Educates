@@ -1,0 +1,155 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-u06-storage-claims
+  labels:
+    academy.dcs/track: console
+    academy.dcs/order: "60"
+    # Console lab: the portal allocates this session for the namespace + objects
+    # below, then redirects the learner into the OpenShift console instead of the
+    # workshop dashboard. The academy console plugin guides them from there.
+    academy.dcs/lab-format: console
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/display-name: "Storage claims (console)"
+    academy.dcs/duration: "8 min"
+    academy.dcs/difficulty: beginner
+    academy.dcs/icon: monitor
+    academy.dcs/summary: >-
+      Read a PersistentVolumeClaim in the OpenShift web console — status, capacity,
+      class, events — and find the pod that mounts it.
+    # A console lab has no workshop content, so there is no README for the portal to
+    # fetch: this annotation is the course page's prospectus. Markdown, rendered.
+    academy.dcs/details: |
+      ### What this lab is
+
+      A **console lab**. Instead of a terminal and instruction pages, the lab opens the
+      OpenShift web console and walks you through it: the step you are on is highlighted
+      on the real page, and the guidance box follows you as you navigate.
+
+      Your own project is created before the lab starts, with a bound claim and a pod
+      already mounting it, so the storage you look at is real.
+
+      ### What you should already know
+
+      This lab assumes the concepts, not the clicks. You should have finished
+      **Storage**, where you requested a PersistentVolumeClaim, mounted it, and proved the
+      data survived a restart. No new Kubernetes concepts are introduced here.
+
+      ### What you will do
+
+      You will not type any commands — this lab is entirely in the console. Each screen
+      names the command it replaces, so you can map one onto the other afterwards.
+
+      - Read a claim's Bound-or-Pending status, where `oc get pvc` would report it
+      - Read requested size against granted capacity, the access mode and the storage class —
+        the summary `oc describe pvc` prints, and the one choice you cannot change afterwards
+      - Check the claim's events, where a Pending claim explains itself
+      - Trace it to the pod that mounts it and the path it is mounted at, and see why anything
+        written elsewhere is lost when the pod is replaced
+
+      ### When to reach for the console
+
+      The console wins when a pod will not start and you need to see the claim, its class
+      and its events without three commands. The CLI still wins for anything you need to
+      repeat, script, or review — which is why the terminal labs come first.
+
+      ### Cleaning up
+
+      Press **Finish** in the guidance box when you are done. That records your completion
+      and shuts the project down. Leaving the tab open just leaves it running until it
+      expires.
+    # The ConsoleLab CR (academy.dcs/v1alpha1, shipped by the console plugin repo)
+    # this session drives. It templates only <<namespace>>, which the portal always
+    # injects from the allocated session namespace, so there are no extra params.
+    academy.dcs/console-lab: lab-u06-storage-claims
+    # A console-lab learner never opens the workshop dashboard, so Educates would
+    # see the session as orphaned and reclaim it out from under them. A zero
+    # duration disables that timer; `expires` remains the real lifetime bound.
+    # The CRD pattern is ^\d+(s|m|h)$, so it must carry a unit: 0s, not 0.
+    academy.dcs/orphaned: "0s"
+    academy.dcs/expires: 60m
+spec:
+  title: "Storage claims (console)"
+  description: >-
+    You requested a volume and proved it survived a restart from the terminal in Storage.
+    This lab reads the same claim in the OpenShift web console — status, capacity, access
+    mode, class and events — and ends on the pod that mounts it, so you can diagnose a
+    storage problem from the screen instead of from three commands.
+  duration: 8m
+  difficulty: beginner
+  labels:
+    - name: module
+      value: "A-Foundations"
+  workshop:
+    # No content files: nobody opens the dashboard for a console lab, so there are
+    # no instruction pages to fetch or publish. The session pod exists only to own
+    # the namespace and its objects.
+    image: "{{ .Values.workshopImages.base }}"
+  session:
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    # Nothing to click through in the dashboard — the lab happens in the console.
+    applications:
+      terminal:
+        enabled: false
+      editor:
+        enabled: false
+      console:
+        enabled: false
+      slides:
+        enabled: false
+    objects:
+      # No storageClassName: the cluster's default class provisions the volume, the same
+      # way the terminal lab's pvc-file.yaml does. An install whose default class is a
+      # slow or absent provisioner will leave this Pending — which also holds the
+      # redirect back, because the pod below cannot start.
+      - apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: lab-data
+          namespace: $(session_namespace)
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+      # A bare Pod, not a Deployment: the ConsoleLab navigates to an exact pod path
+      # (/k8s/ns/<ns>/pods/lab-app), and a Deployment's generated pod suffix cannot be
+      # templated into the lab.
+      - apiVersion: v1
+        kind: Pod
+        metadata:
+          name: lab-app
+          namespace: $(session_namespace)
+          labels:
+            app: lab-app
+            # Makes the lab pod visible to the portal's readiness feed, which queries
+            # this Educates session label — so the browser is not redirected to the
+            # console before the pod (and therefore the bound claim) exists.
+            training.educates.dev/session.name: $(session_name)
+        spec:
+          containers:
+            - name: app
+              image: "{{ .Values.workshopImages.sample }}"
+              ports:
+                - containerPort: 8080
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 64Mi
+                limits:
+                  memory: 128Mi
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: lab-data

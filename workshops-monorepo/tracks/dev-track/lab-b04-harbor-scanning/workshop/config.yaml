@@ -1,0 +1,21 @@
+# Educates workshop config. `params` is a LIST of {name, value} entries
+# (NOT a Hugo-style map) — each is rendered in content via {{< param name >}}.
+# The param trio is mandatory; values are placeholders, re-pointable without a rebuild.
+params:
+- name: product_name
+  value: "Digital Container Service (DCS)"
+  aliases: [PRODUCT_NAME]
+- name: product_short
+  value: "DCS"
+  aliases: [PRODUCT_SHORT]
+- name: dcs_registry
+  value: "harbor.example.dcs/dcs-academy"
+  aliases: [DCS_REGISTRY]
+- name: dcs_docs_base_url
+  value: "https://docs.example.dcs"
+  aliases: [DCS_DOCS_BASE_URL]
+# Content-only (Plane 2): the Harbor web UI's own base URL, for the dashboard tab in
+# 01-catalogs-and-robots. Not needed in the terminal, so no session.env mirror required —
+# see workshop-variables-reference.md on picking the lowest-effort variable plane.
+- name: dcs_harbor_ui_url
+  value: "https://harbor.example.dcs"

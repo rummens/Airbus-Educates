@@ -1,0 +1,17 @@
+#!/bin/bash
+# Verify the app is ready, serves the configured greeting, and mounts the config file.
+avail=$(oc get deploy hello-dcs -o jsonpath='{.status.availableReplicas}' 2>/dev/null)
+if [ "${avail:-0}" -lt 1 ] 2>/dev/null; then
+  echo "Deployment hello-dcs not available yet (available=${avail:-0})." >&2
+  exit 1
+fi
+body=$(oc exec deploy/hello-dcs -- python3 -c "import urllib.request;print(urllib.request.urlopen('http://localhost:8080',timeout=5).read().decode())" 2>/dev/null)
+if ! echo "$body" | grep -q "Configured by a ConfigMap"; then
+  echo "App did not serve the configured greeting. Got: ${body:-<empty>}" >&2
+  exit 1
+fi
+if ! oc exec deploy/hello-dcs -- test -f /etc/hello-dcs/GREETING 2>/dev/null; then
+  echo "ConfigMap volume not mounted: /etc/hello-dcs/GREETING missing." >&2
+  exit 1
+fi
+echo "OK: app serves the configured greeting and mounts the config file."

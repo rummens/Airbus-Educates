@@ -1,0 +1,14 @@
+#!/bin/bash
+# Verify a RoleBinding's Role reference and Subjects are both traceable.
+rb=$(oc get rolebindings -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+if [ -z "$rb" ]; then
+  echo "No RoleBinding name found to describe — did the previous step find one?" >&2
+  exit 1
+fi
+out=$(oc describe rolebinding "$rb" 2>/dev/null)
+if ! echo "$out" | grep -q "Role:" || ! echo "$out" | grep -q "Subjects:"; then
+  echo "Expected 'Role:' and 'Subjects:' sections describing '$rb', got: $out" >&2
+  exit 1
+fi
+echo "OK: RoleBinding '$rb' traced from Role reference to Subjects."
+exit 0

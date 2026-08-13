@@ -1,0 +1,14 @@
+#!/bin/bash
+# Verify the external Route URL responds HTTP 200 (try http then https).
+host=$(oc get route hello-dcs -o jsonpath='{.spec.host}' 2>/dev/null)
+if [ -z "$host" ]; then echo "No Route host found." >&2; exit 1; fi
+code=$(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 "http://$host" 2>/dev/null)
+if [ "$code" != "200" ]; then
+  code=$(curl -sk -o /dev/null -w '%{http_code}' --max-time 10 "https://$host" 2>/dev/null)
+fi
+if [ "$code" = "200" ]; then
+  echo "OK: the Route URL ($host) responded HTTP 200."
+  exit 0
+fi
+echo "The Route URL ($host) did not return 200 (got '${code:-none}'). Give the router a moment." >&2
+exit 1

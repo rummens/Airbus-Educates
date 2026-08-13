@@ -1,0 +1,13 @@
+#!/bin/bash
+# Report whether OpenShift Dev Spaces (the CheCluster CRD/CR) is present on this
+# cluster. Either outcome is a valid, informative result — Dev Spaces is only
+# provisioned on some DCS clusters (see the workshop plan's delivery gate), so
+# this check confirms the learner ran the diagnostic, not that a specific
+# cluster state exists. It never blocks progress.
+if oc get crd checlusters.org.eclipse.che >/dev/null 2>&1; then
+  count=$(oc get checluster -A --no-headers 2>/dev/null | wc -l | tr -d ' ')
+  echo "OK: the CheCluster CRD is installed on this cluster; found ${count} CheCluster instance(s)."
+else
+  echo "OK: the CheCluster CRD is not installed on this cluster — expected wherever the platform team hasn't provisioned Dev Spaces yet."
+fi
+exit 0

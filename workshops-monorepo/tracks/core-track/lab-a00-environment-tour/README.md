@@ -1,6 +1,6 @@
 # Your Workshop Environment
 
-**A ten-minute tour of the lab environment before you start — so the tools never get in the way of the learning.**
+**A five-minute tour of the lab environment before you start — so the tools never get in the way of the learning.**
 
 Every lab in the DCS Academy runs entirely in your browser: a split terminal, a code
 editor, a visual cluster view, and a feedback form, all on one screen. This short
@@ -10,7 +10,7 @@ familiar.
 
 - **Track:** Core / Fundamentals · Lab 0
 - **Audience:** Beginner — no container, Kubernetes, or DCS experience needed
-- **Duration:** ~10 min
+- **Duration:** ~5 min
 - **Format:** Hands-on, guided — split terminal, runs in your own OpenShift session namespace
 - **Prerequisites:** A DCS login. Nothing else.
 

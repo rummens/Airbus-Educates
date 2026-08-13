@@ -1,0 +1,60 @@
+{
+  "_type": "https://in-toto.io/Statement/v0.1",
+  "predicateType": "https://slsa.dev/provenance/v0.2",
+  "subject": [
+    {
+      "name": "harbor.example.dcs/dcs-academy/samples/hello-dcs",
+      "digest": {
+        "sha256": "6b1a3c0d9f7e8b2a4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f80912345"
+      }
+    }
+  ],
+  "predicate": {
+    "builder": {
+      "id": "https://dcs.example/ci/tekton-chains@refs/tags/v1.4.2"
+    },
+    "buildType": "https://tekton.dev/attestations/chains/pipelinerun@v2",
+    "invocation": {
+      "configSource": {
+        "uri": "git+https://git.example.dcs/dcs-academy/hello-dcs.git",
+        "digest": {
+          "sha1": "3f9a1e7c2b8d4056a1c9e0f2d7b6a4c8e5f10923"
+        },
+        "entryPoint": ".tekton/build-and-sign.yaml"
+      },
+      "parameters": {
+        "IMAGE": "harbor.example.dcs/dcs-academy/samples/hello-dcs:1.0"
+      },
+      "environment": {
+        "labels": {
+          "org.opencontainers.image.source": "https://git.example.dcs/dcs-academy/hello-dcs",
+          "org.opencontainers.image.revision": "3f9a1e7c2b8d4056a1c9e0f2d7b6a4c8e5f10923"
+        }
+      }
+    },
+    "metadata": {
+      "buildStartedOn": "2026-05-14T09:12:41Z",
+      "buildFinishedOn": "2026-05-14T09:15:07Z",
+      "reproducible": false,
+      "completeness": {
+        "parameters": true,
+        "environment": false,
+        "materials": true
+      }
+    },
+    "materials": [
+      {
+        "uri": "git+https://git.example.dcs/dcs-academy/hello-dcs.git",
+        "digest": {
+          "sha1": "3f9a1e7c2b8d4056a1c9e0f2d7b6a4c8e5f10923"
+        }
+      },
+      {
+        "uri": "harbor.example.dcs/dcs-academy/base/ubi9-minimal",
+        "digest": {
+          "sha256": "a7d2e5f8091b3c4d6e7f8091a2b3c4d5e6f7809192a3b4c5d6e7f8091a2b3c4d"
+        }
+      }
+    ]
+  }
+}

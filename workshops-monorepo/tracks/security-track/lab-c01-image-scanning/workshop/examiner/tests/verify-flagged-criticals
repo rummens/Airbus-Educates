@@ -1,0 +1,14 @@
+#!/bin/bash
+# verify-flagged-criticals <report-filename> — the report has >=1 Critical finding (gate trips).
+file="${1:?report filename required (e.g. scan-report-flagged.json)}"
+path="$HOME/exercises/$file"
+if [ ! -f "$path" ]; then
+  echo "Report '$path' not found. Is the fixture shipped in ~/exercises?" >&2
+  exit 1
+fi
+crit=$(jq '[.vulnerabilities[] | select(.severity == "Critical")] | length' "$path" 2>/dev/null)
+if [ "${crit:-0}" -lt 1 ]; then
+  echo "Expected >=1 Critical finding in $file, found ${crit:-0}. This report should trip the gate." >&2
+  exit 1
+fi
+echo "OK: $file has $crit Critical finding(s) — the gate would block this image."

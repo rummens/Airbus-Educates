@@ -1,0 +1,19 @@
+#!/bin/bash
+# Verify the dcs-namespace-type-policy ClusterPolicy was applied and is scoped
+# to PROD-type namespaces as expected.
+set -uo pipefail
+
+name="dcs-namespace-type-policy"
+
+if ! oc get clusterpolicy "$name" >/dev/null 2>&1; then
+  echo "ClusterPolicy '$name' not found — did 'oc apply -f kyverno-policy.yaml' run? (This requires Kyverno's CRDs to be available in this cluster; see the workshop README for that precondition.)" >&2
+  exit 1
+fi
+
+selector=$(oc get clusterpolicy "$name" -o jsonpath='{.spec.rules[?(@.name=="prod-requires-resources")].match.any[0].resources.namespaceSelector.matchLabels.dcs\.airbus/namespace-type}' 2>/dev/null)
+if [ "$selector" != "prod" ]; then
+  echo "ClusterPolicy '$name' exists but its 'prod-requires-resources' rule does not target dcs.airbus/namespace-type=prod (found '$selector')." >&2
+  exit 1
+fi
+
+echo "OK: ClusterPolicy '$name' is present and scoped to PROD-type namespaces."

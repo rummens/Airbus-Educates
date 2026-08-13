@@ -1,0 +1,13 @@
+#!/bin/bash
+# Verify hello-dcs has both a readinessProbe (on "/") and a livenessProbe (on "/healthz").
+set -uo pipefail
+
+rpath=$(oc get deployment hello-dcs -o jsonpath='{.spec.template.spec.containers[0].readinessProbe.httpGet.path}' 2>/dev/null)
+lpath=$(oc get deployment hello-dcs -o jsonpath='{.spec.template.spec.containers[0].livenessProbe.httpGet.path}' 2>/dev/null)
+
+if [ "$rpath" != "/" ] || [ "$lpath" != "/healthz" ]; then
+  echo "Expected readinessProbe path '/' and livenessProbe path '/healthz', found readiness='${rpath:-<none>}' liveness='${lpath:-<none>}'. Did deployment-probes.yaml from the last page apply cleanly?" >&2
+  exit 1
+fi
+
+echo "OK: hello-dcs has readinessProbe on '/' and livenessProbe on '/healthz'."

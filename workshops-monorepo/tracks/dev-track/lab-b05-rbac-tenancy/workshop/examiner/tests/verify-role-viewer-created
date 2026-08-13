@@ -1,0 +1,15 @@
+#!/bin/bash
+# Verify the role-viewer Role exists and grants exactly the expected read-only verbs.
+verbs=$(oc get role role-viewer -o jsonpath='{.rules[0].verbs}' 2>/dev/null)
+if [ -z "$verbs" ]; then
+  echo "Role 'role-viewer' not found in $(oc project -q). Did 'oc apply -f role-viewer.yaml' run?" >&2
+  exit 1
+fi
+for v in get list watch; do
+  if ! echo "$verbs" | grep -q "$v"; then
+    echo "Expected verb '$v' in role-viewer's rule, got: $verbs" >&2
+    exit 1
+  fi
+done
+echo "OK: Role 'role-viewer' exists with verbs: $verbs"
+exit 0

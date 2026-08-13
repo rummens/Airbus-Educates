@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-flagged
+  labels:
+    app: hello-flagged
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-flagged
+  template:
+    metadata:
+      labels:
+        app: hello-flagged
+    spec:
+      containers:
+      - name: hello-flagged
+        # A would-be-blocked tag: its scan report (scan-report-flagged.json) has
+        # Critical findings, so the Harbor scan gate quarantines it. On a gated cluster
+        # the node cannot pull this image — the Pod stays in ImagePullBackOff.
+        # NARRATED, not applied: this workshop's environment has no live scanner wired
+        # to Harbor, so we read the report and reason about the gate rather than
+        # applying this manifest to fake a failure.
+        image: ${DCS_REGISTRY}/samples/hello-dcs:flagged
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi

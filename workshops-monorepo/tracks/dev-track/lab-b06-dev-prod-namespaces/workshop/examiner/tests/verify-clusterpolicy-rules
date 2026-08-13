@@ -1,0 +1,19 @@
+#!/bin/bash
+# Verify the ClusterPolicy carries both named rules the instructions walk
+# through — read-only check pairing the 'oc describe clusterpolicy' step.
+set -uo pipefail
+
+name="dcs-namespace-type-policy"
+rules=$(oc get clusterpolicy "$name" -o jsonpath='{.spec.rules[*].name}' 2>/dev/null)
+
+for rule in route-requires-prod prod-requires-resources; do
+  case " $rules " in
+    *" $rule "*) ;;
+    *)
+      echo "ClusterPolicy '$name' is missing expected rule '$rule' (found rules: '$rules')." >&2
+      exit 1
+      ;;
+  esac
+done
+
+echo "OK: ClusterPolicy '$name' has both rules: $rules"

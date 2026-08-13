@@ -1,0 +1,13 @@
+#!/bin/bash
+# Verify the built-in 'view' ClusterRole describes a read-only rule set.
+out=$(oc describe clusterrole view 2>/dev/null)
+if [ -z "$out" ]; then
+  echo "Could not describe the built-in 'view' ClusterRole. Does it exist on this cluster?" >&2
+  exit 1
+fi
+if ! echo "$out" | grep -qE '\bget\b' || ! echo "$out" | grep -qE '\blist\b'; then
+  echo "Expected read-only verbs (get, list, watch) in 'view' ClusterRole rules, got: $out" >&2
+  exit 1
+fi
+echo "OK: 'view' ClusterRole shows read-only verbs."
+exit 0

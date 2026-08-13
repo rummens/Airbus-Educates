@@ -1,0 +1,22 @@
+#!/bin/bash
+# Verify the rolebinding-viewer RoleBinding exists, references role-viewer, and
+# binds the viewer-bot ServiceAccount in the learner's own namespace (proving
+# envsubst filled in ${SESSION_NAMESPACE} correctly, not a literal placeholder).
+ns=$(oc project -q 2>/dev/null)
+role=$(oc get rolebinding rolebinding-viewer -o jsonpath='{.roleRef.name}' 2>/dev/null)
+if [ -z "$role" ]; then
+  echo "RoleBinding 'rolebinding-viewer' not found in $ns. Did the envsubst + apply step run?" >&2
+  exit 1
+fi
+if [ "$role" != "role-viewer" ]; then
+  echo "Expected rolebinding-viewer to reference Role 'role-viewer', got '$role'." >&2
+  exit 1
+fi
+sa_ns=$(oc get rolebinding rolebinding-viewer -o jsonpath='{.subjects[0].namespace}' 2>/dev/null)
+sa_name=$(oc get rolebinding rolebinding-viewer -o jsonpath='{.subjects[0].name}' 2>/dev/null)
+if [ "$sa_name" != "viewer-bot" ] || [ "$sa_ns" != "$ns" ]; then
+  echo "Expected subject viewer-bot in namespace $ns, got '$sa_name' in '$sa_ns' — did envsubst substitute \${SESSION_NAMESPACE}?" >&2
+  exit 1
+fi
+echo "OK: rolebinding-viewer binds role-viewer to system:serviceaccount:${ns}:viewer-bot."
+exit 0

@@ -1,0 +1,8 @@
+#!/bin/bash
+# Verify the Cluster (CNPG) resource kind is registered as an API resource.
+match=$(oc api-resources -o name 2>/dev/null | grep -i '^clusters\.postgresql\.cnpg\.io$')
+if [ -z "$match" ]; then
+  echo "clusters.postgresql.cnpg.io not found in 'oc api-resources'. The operator's CRDs may not be installed yet." >&2
+  exit 1
+fi
+echo "OK: postgresql.cnpg.io Cluster kind is registered: ${match}"

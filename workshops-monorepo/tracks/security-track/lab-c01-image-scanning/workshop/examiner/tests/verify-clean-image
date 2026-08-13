@@ -1,0 +1,10 @@
+#!/bin/bash
+# verify-clean-image <image-ref-without-transport>
+# skopeo can inspect the remediated (clean) image in Harbor and it reports a digest.
+ref="${1:?image reference required (e.g. \$DCS_REGISTRY/samples/hello-dcs:1.0)}"
+digest=$(skopeo inspect --format '{{.Digest}}' "docker://${ref}" 2>/dev/null)
+if [ -z "$digest" ]; then
+  echo "Could not inspect 'docker://${ref}'. Is the clean image in Harbor and the read-only robot account configured? (Needs a real Harbor with the sample image.)" >&2
+  exit 1
+fi
+echo "OK: inspected clean image ${ref} — digest ${digest}."

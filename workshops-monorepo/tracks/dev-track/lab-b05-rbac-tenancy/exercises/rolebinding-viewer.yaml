@@ -1,0 +1,15 @@
+# Connects a subject to a role. subjects[].namespace is filled in with your session
+# namespace at apply time (envsubst) so the ServiceAccount reference is exact:
+# system:serviceaccount:<namespace>:<name>.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: rolebinding-viewer
+subjects:
+- kind: ServiceAccount
+  name: viewer-bot
+  namespace: ${SESSION_NAMESPACE}
+roleRef:
+  kind: Role
+  name: role-viewer
+  apiGroup: rbac.authorization.k8s.io

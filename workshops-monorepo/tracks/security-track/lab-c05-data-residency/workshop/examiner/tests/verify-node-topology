@@ -1,0 +1,17 @@
+#!/bin/bash
+# verify-node-topology — the cluster returns node data; regions are advertised via the
+# standard topology.kubernetes.io/region label.
+# TOLERANT: passes when nodes are queryable even if region labels are empty (test clusters
+# may lack region topology) — emits a diagnostic hint instead of failing.
+nodes=$(oc get nodes -o name 2>/dev/null)
+if [ -z "$nodes" ]; then
+  echo "Could not query nodes with 'oc get nodes'. Is the session connected to the cluster and RBAC in place?" >&2
+  exit 1
+fi
+regions=$(oc get nodes -o jsonpath='{range .items[*]}{.metadata.labels.topology\.kubernetes\.io/region}{"\n"}{end}' 2>/dev/null | sort -u | sed '/^$/d')
+if [ -z "$regions" ]; then
+  echo "Note: nodes are queryable but advertise no 'topology.kubernetes.io/region' label — expected on a test cluster without region topology. On DCS, nodes carry region labels and this query lists them." >&2
+  echo "OK: nodes queryable (region labels absent on this cluster)."
+  exit 0
+fi
+echo "OK: nodes advertise region(s): $(echo "$regions" | tr '\n' ' ')."

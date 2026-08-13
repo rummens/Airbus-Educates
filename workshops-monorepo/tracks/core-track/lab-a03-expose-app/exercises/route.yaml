@@ -1,0 +1,16 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  # No explicit host: OpenShift auto-assigns one that includes this namespace, e.g.
+  # hello-dcs-<namespace>.<apps-domain>, on DCS-managed DNS. Staying inside the
+  # "*.apps" domain means DCS handles the external load balancer and certificate
+  # for you. (A custom DNS record is a separate ITSM request — not used here.)
+  to:
+    kind: Service
+    name: hello-dcs
+  port:
+    targetPort: 8080

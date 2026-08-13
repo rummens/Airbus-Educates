@@ -1,0 +1,8 @@
+# The migration of the compose `environment: GREETING: ...` line — the same
+# value, now living outside the image as part of the cluster's desired state.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-dcs-config
+data:
+  GREETING: "Migrated from docker-compose"

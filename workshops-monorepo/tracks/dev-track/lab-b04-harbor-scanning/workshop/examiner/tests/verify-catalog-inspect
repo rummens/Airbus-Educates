@@ -1,0 +1,10 @@
+#!/bin/bash
+# verify-catalog-inspect <image-ref-without-transport>
+# skopeo can inspect the catalog image in Harbor and it reports a digest.
+ref="${1:?image reference required (e.g. \$DCS_REGISTRY/samples/hello-dcs:1.0)}"
+digest=$(skopeo inspect --format '{{.Digest}}' "docker://${ref}" 2>/dev/null)
+if [ -z "$digest" ]; then
+  echo "Could not inspect 'docker://${ref}'. Is the image in Harbor and the read-only robot account configured?" >&2
+  exit 1
+fi
+echo "OK: inspected ${ref} — digest ${digest}."

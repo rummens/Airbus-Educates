@@ -1,0 +1,10 @@
+#!/bin/bash
+# Verify at least one RoleBinding exists in the learner's own namespace
+# (the platform-provisioned binding granting them access to it).
+count=$(oc get rolebindings --no-headers 2>/dev/null | wc -l | tr -d ' ')
+if [ "$count" -lt 1 ]; then
+  echo "Expected at least one RoleBinding in $(oc project -q), found none." >&2
+  exit 1
+fi
+echo "OK: $count RoleBinding(s) found in $(oc project -q)."
+exit 0

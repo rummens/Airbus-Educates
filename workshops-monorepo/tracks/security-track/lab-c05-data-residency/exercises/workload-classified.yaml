@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: classified-app
+  labels:
+    app: classified-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: classified-app
+  template:
+    metadata:
+      labels:
+        app: classified-app
+      annotations:
+        # Data classification the workload handles (see data-classification-matrix.md).
+        # CONFIDENTIAL data is pinned to eu-de (Germany) — expressed by the nodeSelector below.
+        data.dcs/classification: CONFIDENTIAL
+    spec:
+      # Region placement: schedule only onto nodes in the eu-de region. On DCS the platform
+      # advertises region via the standard topology label and honours this selector; the
+      # manifest only *expresses* the intent — the scheduler + platform policy enforce it.
+      nodeSelector:
+        topology.kubernetes.io/region: eu-de
+      containers:
+      - name: classified-app
+        # Sample image from a DCS Harbor catalog via the DCS_REGISTRY env var.
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi

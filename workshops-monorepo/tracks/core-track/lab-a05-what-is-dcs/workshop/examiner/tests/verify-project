@@ -1,0 +1,12 @@
+#!/bin/bash
+# Verify the current project is the session namespace.
+current=$(oc project -q 2>/dev/null)
+if [ -z "$current" ]; then
+  echo "No current project set. Run 'oc project -q' to see your project." >&2
+  exit 1
+fi
+if [ -n "$SESSION_NAMESPACE" ] && [ "$current" != "$SESSION_NAMESPACE" ]; then
+  echo "Current project is '$current' but expected your session project '$SESSION_NAMESPACE'." >&2
+  exit 1
+fi
+echo "OK: current project is '$current'."

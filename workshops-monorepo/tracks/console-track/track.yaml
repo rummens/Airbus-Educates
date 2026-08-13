@@ -1,0 +1,9 @@
+# Track metadata → one Track CR. `id` is EXPLICIT (not the folder name), so the
+# folder can be renamed freely. A workshop joins this track with label
+# academy.dcs/track: <id>. Only `id` + `title` are required; the rest have
+# defaults (order 100, icon "layers").
+id: console          # track id — must equal the workshops' academy.dcs/track label
+title: "Console — DCS in the Web UI"
+description: "Apply what the terminal labs taught, in the OpenShift web console: guided tours of the real UI."
+order: 15            # after the core foundations, before the developer track
+icon: monitor        # FA-style icon name the portal vendors

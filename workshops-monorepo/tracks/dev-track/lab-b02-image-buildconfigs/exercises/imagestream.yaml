@@ -1,0 +1,17 @@
+# The ImageStream both BuildConfigs push their output to. An ImageStream is
+# OpenShift's tracking object for the tagged versions of one image over time —
+# think of it as a named pointer that always knows the current (and past) built
+# images, independent of which registry actually stores the bytes.
+#
+# On DCS, ImageStreams are backed by your session-scoped Harbor project: the
+# push-capable robot account provisioned to this session is what lets the Build
+# Pod push here without you ever handling a credential yourself.
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: hello-dcs-built
+spec:
+  lookupPolicy:
+    # Lets other objects in this namespace (like our Deployment) reference the
+    # tag by short name; DCS still resolves the pull through Harbor.
+    local: true

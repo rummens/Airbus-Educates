@@ -1,0 +1,157 @@
+# Hidden lab: needs a namespace holding one healthy pod and one deliberately broken pod,
+# so it is launched from the academy portal:
+#   /academy/lessons/lab-u07-diagnose-a-pod/start?ns=<namespace>
+# Only <<namespace>> is templated; the pod names are owned by the paired workshop.yaml in
+# this folder and written out literally.
+apiVersion: academy.dcs/v1alpha1
+kind: ConsoleLab
+metadata:
+  name: lab-u07-diagnose-a-pod
+  annotations:
+    # The CRD is owned by the console plugin's deployment, not this chart.
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Diagnose a pod that will not start
+  description: >-
+    Work a broken pod from its status to its events to its manifest, and learn which screen
+    answers which question.
+  completionText: >-
+    Done. You worked a failing pod from its status to its container state to the events that
+    named the fault, learned what an empty log proves, and confirmed the cause in the
+    manifest — the path oc get pods, oc describe pod, oc logs and oc get pod -o yaml walk.
+  visibility: hidden
+  mode: assisted
+  context:
+    primaryResource: brokenPod
+    resources:
+      brokenPod:
+        apiVersion: v1
+        kind: Pod
+        label: Broken pod
+        name: lab-app-broken
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/core~v1~Pod'
+        consolePath: '/k8s/ns/<<namespace>>/pods/lab-app-broken'
+        tabs:
+          events: '/k8s/ns/<<namespace>>/pods/lab-app-broken/events'
+          logs: '/k8s/ns/<<namespace>>/pods/lab-app-broken/logs'
+          yaml: '/k8s/ns/<<namespace>>/pods/lab-app-broken/yaml'
+      healthyPod:
+        apiVersion: v1
+        kind: Pod
+        label: Healthy pod
+        name: lab-app
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/core~v1~Pod'
+        consolePath: '/k8s/ns/<<namespace>>/pods/lab-app'
+  steps:
+    - id: open-workloads
+      title: Open Workloads
+      description: >-
+        Every investigation of a failing application starts here, because Workloads is where
+        the symptom is visible: a pod that is not Running. You did the same triage from the
+        terminal in Configure & Troubleshoot Your App.
+      target: { type: quickStartId, value: qs-nav-workloads }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-pods
+      title: Compare the two pods
+      description: >-
+        This project holds one healthy pod and one that will not start. Both are in the pod
+        list, side by side.
+      target: { type: consoleElement, id: navigationLink, value: Pods }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~Pod' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~Pod' }
+    - id: read-pods-status
+      title: Enough to know, not enough to fix
+      description: >-
+        The Status column is what oc get pods gives you: one pod Running, one stopped at a
+        reason word. That word decides which screen you open next, so read it exactly — a
+        container that cannot be created fails differently from one that starts and exits.
+        Nothing on this list will tell you the cause.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-broken-pod
+      title: Open the broken pod
+      description: >-
+        Take the failing one. The list gave you a status; the object itself knows more.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/pods/lab-app-broken' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/lab-app-broken' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/lab-app-broken' }
+    - id: read-container-state
+      title: The container's own state
+      description: >-
+        The Containers section carries the state and reason for each container, not just for
+        the pod — the part of oc describe pod that separates "the pod is unhealthy" from
+        "this container could not be created". The pod was scheduled to a node, so capacity
+        is not the fault: the node tried and failed.
+      target: { type: consoleElement, id: detailsSection, value: Containers }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-events
+      title: Read the events
+      description: >-
+        A reason word is a category, not an explanation. The cluster records what it actually
+        tried on the next tab.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/pods/lab-app-broken/events' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/lab-app-broken/events' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/lab-app-broken/events' }
+    - id: read-events
+      title: The fault, in plain words
+      description: >-
+        This is the tail of oc describe pod, and it is where most investigations end. Read
+        the newest entry: it names exactly what the container asked for and could not get.
+        Events expire after about an hour, so on an older failure an empty stream means the
+        record aged out, not that nothing went wrong.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-logs
+      title: See why there are no logs
+      description: >-
+        The habit from the terminal is to reach for oc logs next. Do it, and notice what you
+        get.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/pods/lab-app-broken/logs' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/lab-app-broken/logs' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/lab-app-broken/logs' }
+    - id: read-logs
+      title: An empty log is a finding
+      description: >-
+        Nothing. Logs come from a process that ran, and this container never started, so
+        there is no output to collect. That is information rather than a dead end: it places
+        the fault before the application, in creating the container, which is precisely what
+        the events described.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-yaml
+      title: Confirm it in the manifest
+      description: >-
+        The event names the missing piece. The manifest names who asked for it.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/pods/lab-app-broken/yaml' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/lab-app-broken/yaml' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/lab-app-broken/yaml' }
+    - id: read-yaml
+      title: Find the request that failed
+      description: >-
+        Look in the container's env for the entry that reads a key from a Secret, and compare
+        it with the keys that Secret actually holds. That mismatch is the whole failure. The
+        fix belongs in the manifest you keep in git, not in this editor — the same rule you
+        applied repairing the app from the terminal. Press Hide if the guidance box is over
+        the text you want to read.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }

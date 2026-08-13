@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 300" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="300" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="26" text-anchor="middle" font-size="15" font-weight="bold" fill="#1b2b3a">devfile.yaml → a running workspace</text>
+
+  <!-- Step 1 -->
+  <rect x="20" y="60" width="160" height="90" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="100" y="82" text-anchor="middle" font-size="11" font-weight="bold" fill="#1b4a86">1. Submit</text>
+  <text x="100" y="102" text-anchor="middle" font-size="10" fill="#1b4a86">devfile.yaml</text>
+  <text x="100" y="118" text-anchor="middle" font-size="9.5" fill="#5a6b7b">components,</text>
+  <text x="100" y="132" text-anchor="middle" font-size="9.5" fill="#5a6b7b">projects, commands</text>
+
+  <line x1="180" y1="105" x2="205" y2="105" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="205,105 197,101 197,109" fill="#5a6b7b"/>
+
+  <!-- Step 2 -->
+  <rect x="210" y="60" width="160" height="90" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="290" y="82" text-anchor="middle" font-size="11" font-weight="bold" fill="#2c6a3a">2. Provision</text>
+  <text x="290" y="102" text-anchor="middle" font-size="9.5" fill="#2c6a3a">Che Operator creates a</text>
+  <text x="290" y="116" text-anchor="middle" font-size="9.5" fill="#2c6a3a">Pod in your namespace</text>
+  <text x="290" y="132" text-anchor="middle" font-size="9.5" fill="#2c6a3a">running the UDI image</text>
+
+  <line x1="370" y1="105" x2="395" y2="105" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="395,105 387,101 387,109" fill="#5a6b7b"/>
+
+  <!-- Step 3 -->
+  <rect x="400" y="60" width="160" height="90" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="480" y="82" text-anchor="middle" font-size="11" font-weight="bold" fill="#2c6a3a">3. Clone</text>
+  <text x="480" y="102" text-anchor="middle" font-size="9.5" fill="#2c6a3a">hello-dcs source lands</text>
+  <text x="480" y="116" text-anchor="middle" font-size="9.5" fill="#2c6a3a">on the shared volume —</text>
+  <text x="480" y="132" text-anchor="middle" font-size="9.5" fill="#2c6a3a">your code, in-cluster</text>
+
+  <line x1="560" y1="105" x2="585" y2="105" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="585,105 577,101 577,109" fill="#5a6b7b"/>
+
+  <!-- Step 4 -->
+  <rect x="590" y="60" width="150" height="90" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="665" y="82" text-anchor="middle" font-size="11" font-weight="bold" fill="#1b4a86">4. Running</text>
+  <text x="665" y="102" text-anchor="middle" font-size="9.5" fill="#1b4a86">browser IDE opens —</text>
+  <text x="665" y="116" text-anchor="middle" font-size="9.5" fill="#1b4a86">editor + in-workspace</text>
+  <text x="665" y="132" text-anchor="middle" font-size="9.5" fill="#1b4a86">terminal + run command</text>
+
+  <text x="380" y="196" text-anchor="middle" font-size="11" fill="#5a6b7b">The workspace Pod is an ordinary Pod, reconciled the same way every</text>
+  <text x="380" y="214" text-anchor="middle" font-size="11" fill="#5a6b7b">Deployment in this course has been — the Che Operator just triggers it</text>
+  <text x="380" y="232" text-anchor="middle" font-size="11" fill="#5a6b7b">for you, instead of you running `oc apply`.</text>
+</svg>

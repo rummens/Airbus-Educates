@@ -1,0 +1,8 @@
+#!/bin/bash
+# Verify the ConfigMap exists.
+if oc get configmap hello-dcs-config >/dev/null 2>&1; then
+  echo "OK: ConfigMap hello-dcs-config exists."
+  exit 0
+fi
+echo "ConfigMap 'hello-dcs-config' not found — did 'oc apply -f configmap.yaml' run?" >&2
+exit 1

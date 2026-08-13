@@ -1,0 +1,12 @@
+#!/bin/bash
+# Verify the oc client can reach the cluster API (server version returned).
+if ! oc version >/dev/null 2>&1; then
+  echo "'oc version' failed — the oc client could not run." >&2
+  exit 1
+fi
+server=$(oc version -o json 2>/dev/null | grep -c '"serverVersion"')
+if [ "${server:-0}" -lt 1 ]; then
+  echo "oc ran but did not report a server version — the cluster API may be unreachable from this session." >&2
+  exit 1
+fi
+echo "OK: oc client reached the cluster API."

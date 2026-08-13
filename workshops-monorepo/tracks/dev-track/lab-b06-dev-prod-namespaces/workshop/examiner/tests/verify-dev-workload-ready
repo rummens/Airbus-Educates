@@ -1,0 +1,14 @@
+#!/bin/bash
+# Verify hello-dcs is running, unchanged, in the DEV namespace — DEV has no
+# resource-shape requirement, so the manifest that omits a resources block
+# deploys exactly as written.
+set -uo pipefail
+
+ns="dev"
+ready=$(oc get deployment hello-dcs -n "$ns" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+if [ "${ready:-0}" -lt 1 ] 2>/dev/null; then
+  echo "Deployment 'hello-dcs' in namespace '$ns' is not ready yet (readyReplicas=${ready:-0}). Did 'envsubst < hello-dcs.yaml | oc apply -n $ns -f -' run?" >&2
+  exit 1
+fi
+
+echo "OK: hello-dcs is ready in the DEV namespace '$ns' — accepted unchanged, no resources block required."

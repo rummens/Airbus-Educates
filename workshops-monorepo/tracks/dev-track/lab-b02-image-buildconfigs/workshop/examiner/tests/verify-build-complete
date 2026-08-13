@@ -1,0 +1,16 @@
+#!/bin/bash
+# Verify the most recent Build of hello-dcs-s2i has reached phase Complete.
+# Build object names are always <buildconfig-name>-<n>, so we match by name
+# prefix rather than relying on a specific label key.
+# Builds run for real, so this check polls (see the workshop page) rather than
+# asserting instantly.
+phase=$(oc get builds -o json 2>/dev/null | jq -r '
+  [.items[] | select(.metadata.name | startswith("hello-dcs-s2i-"))]
+  | sort_by(.metadata.creationTimestamp) | last | .status.phase // empty
+')
+if [ "$phase" = "Complete" ]; then
+  echo "OK: latest build of hello-dcs-s2i is Complete."
+  exit 0
+fi
+echo "Latest build phase is '${phase:-none}', not yet Complete. A build pod may still be running — check 'oc get builds' or 'oc logs -f bc/hello-dcs-s2i'." >&2
+exit 1

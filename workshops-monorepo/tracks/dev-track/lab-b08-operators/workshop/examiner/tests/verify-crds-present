@@ -1,0 +1,10 @@
+#!/bin/bash
+# Verify the CloudNativePG operator's CRDs are installed cluster-wide (platform-managed).
+crds=$(oc get crds -o name 2>/dev/null | grep 'postgresql.cnpg.io')
+if [ -z "$crds" ]; then
+  echo "No CRDs found for group 'postgresql.cnpg.io'. Is the CloudNativePG operator installed on this cluster?" >&2
+  exit 1
+fi
+count=$(echo "$crds" | wc -l | tr -d ' ')
+echo "OK: found ${count} CloudNativePG CRD(s):"
+echo "$crds"

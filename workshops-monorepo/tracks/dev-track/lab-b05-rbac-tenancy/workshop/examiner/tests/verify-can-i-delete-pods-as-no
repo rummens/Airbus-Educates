@@ -1,0 +1,10 @@
+#!/bin/bash
+# Verify least privilege: viewer-bot's read-only Role does not grant delete.
+ns=$(oc project -q 2>/dev/null)
+out=$(oc auth can-i delete pods --as="system:serviceaccount:${ns}:viewer-bot" 2>/dev/null)
+if [ "$out" != "no" ]; then
+  echo "Expected 'no' — role-viewer only grants get/list/watch, got '$out' for delete pods." >&2
+  exit 1
+fi
+echo "OK: viewer-bot cannot delete pods — least privilege confirmed."
+exit 0

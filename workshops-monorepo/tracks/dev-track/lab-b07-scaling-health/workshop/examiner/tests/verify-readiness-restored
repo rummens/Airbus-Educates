@@ -1,0 +1,19 @@
+#!/bin/bash
+# Verify the readiness probe is restored to its known-good path and all replicas are ready.
+set -uo pipefail
+
+desired=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+path=$(oc get deployment hello-dcs -o jsonpath='{.spec.template.spec.containers[0].readinessProbe.httpGet.path}' 2>/dev/null)
+
+if [ "$path" != "/" ]; then
+  echo "readinessProbe path is '${path:-<none>}', expected '/' — did 'envsubst < deployment-probes.yaml | oc apply -f -' run to restore the known-good manifest?" >&2
+  exit 1
+fi
+
+if [ "${ready:-0}" -lt "${desired:-4}" ] 2>/dev/null; then
+  echo "hello-dcs is at ${ready:-0}/${desired:-4} ready — waiting for the restored readiness probe to bring all replicas back." >&2
+  exit 1
+fi
+
+echo "OK: hello-dcs is fully ready (${ready}/${desired}) with readinessProbe restored to '/'."

@@ -1,0 +1,9 @@
+#!/bin/bash
+# Verify GREETING is set to the expected value on the Deployment.
+val=$(oc set env deploy/hello-dcs --list 2>/dev/null | grep '^GREETING=')
+if [ "$val" = "GREETING=Hello from the DCS Academy" ]; then
+  echo "OK: $val"
+  exit 0
+fi
+echo "GREETING not set as expected on the Deployment (got: ${val:-unset})." >&2
+exit 1

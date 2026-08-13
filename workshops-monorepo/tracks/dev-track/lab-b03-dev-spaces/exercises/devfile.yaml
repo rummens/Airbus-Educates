@@ -1,0 +1,52 @@
+# Devfile for the hello-dcs sample app — the environment spec OpenShift Dev
+# Spaces reads to build a workspace: what image to develop in, what source to
+# clone, and what command starts the app. See https://devfile.io/docs/ for the
+# full schema.
+#
+# ${DCS_REGISTRY} / ${WORKSPACE_SOURCE_REPO} are this session's placeholders
+# (this workshop's Plane-3 variables — see resources/workshop.yaml `session.env`),
+# substituted the same way ${DCS_REGISTRY} is in every other DCS Academy lab.
+# No public registry, no public git host — everything here resolves inside the
+# platform.
+schemaVersion: 2.2.0
+metadata:
+  name: hello-dcs
+  version: 1.0.0
+  displayName: hello-dcs (DCS Academy sample app)
+  description: A tiny Python HTTP server — the same sample used in A02, B01 and B02.
+
+# Where you develop: one container built from the Universal Developer Image
+# (UDI), mirrored into Harbor like every other DCS image. mountSources clones
+# the project below into the workspace's shared filesystem so this container
+# can build and run it.
+components:
+  - name: dev
+    container:
+      image: ${DCS_REGISTRY}/devspaces/udi:latest
+      memoryLimit: 1Gi
+      mountSources: true
+      endpoints:
+        - name: hello-dcs
+          targetPort: 8080
+          exposure: public
+          protocol: http
+
+# What you develop: the hello-dcs source, cloned into the workspace when it
+# starts.
+projects:
+  - name: hello-dcs
+    git:
+      remotes:
+        origin: ${WORKSPACE_SOURCE_REPO}
+
+# How you run it: the same entrypoint the container image runs in production —
+# `python3 server.py` — starting hello-dcs's plain-stdlib HTTP server on :8080.
+commands:
+  - id: run-hello-dcs
+    exec:
+      component: dev
+      workingDir: ${PROJECTS_ROOT}/hello-dcs
+      commandLine: python3 server.py
+      group:
+        kind: run
+        isDefault: true

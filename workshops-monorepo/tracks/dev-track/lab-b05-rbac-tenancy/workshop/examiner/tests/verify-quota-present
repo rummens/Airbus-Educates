@@ -1,0 +1,14 @@
+#!/bin/bash
+# Verify a ResourceQuota is present in the namespace with a readable hard limit.
+count=$(oc get resourcequota --no-headers 2>/dev/null | wc -l | tr -d ' ')
+if [ "$count" -lt 1 ]; then
+  echo "Expected at least one ResourceQuota in $(oc project -q), found none." >&2
+  exit 1
+fi
+out=$(oc describe quota 2>/dev/null)
+if ! echo "$out" | grep -qi "hard"; then
+  echo "Expected a 'Hard' limit section in 'oc describe quota' output, got: $out" >&2
+  exit 1
+fi
+echo "OK: ResourceQuota present with Hard limits: $(echo "$out" | grep -i hard | head -n1)"
+exit 0

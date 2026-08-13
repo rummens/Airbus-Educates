@@ -1,0 +1,20 @@
+#!/bin/bash
+# verify-placement-expressed <workload-file> — the manifest expresses a data classification
+# annotation and a region nodeSelector (placement is declared in the spec).
+file="${1:?workload manifest required (e.g. workload-classified.yaml)}"
+path="$HOME/exercises/${file}"
+if [ ! -f "$path" ]; then
+  echo "Workload manifest '$path' not found in ~/exercises." >&2
+  exit 1
+fi
+classification=$(yq '.spec.template.metadata.annotations["data.dcs/classification"]' "$path" 2>/dev/null)
+region=$(yq '.spec.template.spec.nodeSelector["topology.kubernetes.io/region"]' "$path" 2>/dev/null)
+if [ -z "$classification" ] || [ "$classification" = "null" ]; then
+  echo "No 'data.dcs/classification' annotation found in ${file}. Placement starts with classifying the data." >&2
+  exit 1
+fi
+if [ -z "$region" ] || [ "$region" = "null" ]; then
+  echo "No 'topology.kubernetes.io/region' nodeSelector found in ${file}. Region placement is expressed via nodeSelector." >&2
+  exit 1
+fi
+echo "OK: ${file} declares classification '${classification}' pinned to region '${region}'."

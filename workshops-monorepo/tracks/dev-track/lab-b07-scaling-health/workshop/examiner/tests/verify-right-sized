@@ -1,0 +1,28 @@
+#!/bin/bash
+# Verify hello-dcs is fully ready with explicit, right-sized (not oversized) resources.
+set -uo pipefail
+
+desired=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+if [ "${ready:-0}" -lt "${desired:-4}" ] 2>/dev/null; then
+  echo "hello-dcs is at ${ready:-0}/${desired:-4} ready — did 'envsubst < deployment-probes.yaml | oc apply -f -' run and finish rolling out?" >&2
+  exit 1
+fi
+
+cpu_req=$(oc get deployment hello-dcs -o jsonpath='{.spec.template.spec.containers[0].resources.requests.cpu}' 2>/dev/null)
+if [ -z "$cpu_req" ]; then
+  echo "hello-dcs's container has no cpu request set — expected an explicit, right-sized request (e.g. 50m), not a reliance on LimitRange defaults." >&2
+  exit 1
+fi
+
+cpu_num="${cpu_req%m}"
+if [ "$cpu_num" = "$cpu_req" ]; then
+  # No 'm' suffix - value is whole cores, convert to millicores.
+  cpu_num=$((cpu_req * 1000))
+fi
+if [ "${cpu_num:-0}" -gt 200 ] 2>/dev/null; then
+  echo "hello-dcs's cpu request is '$cpu_req' — that's not meaningfully smaller than the oversized 700m from page 02. Expected a modest, right-sized request (e.g. 50m)." >&2
+  exit 1
+fi
+
+echo "OK: hello-dcs is ${ready}/${desired} ready with an explicit, right-sized cpu request of '$cpu_req'."

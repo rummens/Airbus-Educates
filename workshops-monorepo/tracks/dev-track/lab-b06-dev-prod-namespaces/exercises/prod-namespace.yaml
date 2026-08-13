@@ -1,0 +1,11 @@
+# A PROD-type namespace. Same shape as dev-namespace.yaml — only the
+# dcs.airbus/namespace-type label differs. That one label is what the
+# dcs-namespace-type-policy ClusterPolicy uses to apply PROD's stricter
+# admission rules: every container needs resource requests/limits, and only a
+# PROD-type namespace may host a Route.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: prod
+  labels:
+    dcs.airbus/namespace-type: prod

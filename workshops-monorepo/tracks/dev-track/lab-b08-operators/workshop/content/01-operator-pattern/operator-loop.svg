@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 320" font-family="sans-serif">
+  <rect x="0" y="0" width="820" height="320" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="410" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">Custom Resource → Operator → Managed Workloads</text>
+
+  <!-- Custom Resource -->
+  <rect x="24" y="100" width="200" height="100" rx="6" fill="#e8f0f7" stroke="#3b7dd8"/>
+  <text x="124" y="130" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b4a86">Custom Resource</text>
+  <text x="124" y="150" text-anchor="middle" font-size="10" fill="#5a6b7b">desired state</text>
+  <text x="124" y="166" text-anchor="middle" font-size="10" fill="#5a6b7b">you create and edit</text>
+  <text x="124" y="182" text-anchor="middle" font-size="10" fill="#5a6b7b">e.g. a Cluster CR</text>
+
+  <!-- Operator -->
+  <rect x="310" y="90" width="200" height="120" rx="6" fill="#fdf3e3" stroke="#c98a1f"/>
+  <text x="410" y="118" text-anchor="middle" font-size="13" font-weight="bold" fill="#8a5a10">Operator</text>
+  <text x="410" y="136" text-anchor="middle" font-size="10" fill="#8a5a10">controller</text>
+  <text x="410" y="154" text-anchor="middle" font-size="10" fill="#5a6b7b">watches the CR,</text>
+  <text x="410" y="170" text-anchor="middle" font-size="10" fill="#5a6b7b">reconciles continuously</text>
+  <text x="410" y="188" text-anchor="middle" font-size="10" fill="#5a6b7b">platform-installed, cluster-wide</text>
+
+  <!-- Managed workloads -->
+  <rect x="596" y="100" width="200" height="100" rx="6" fill="#eef3ee" stroke="#4a9a5a"/>
+  <text x="696" y="130" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c6a3a">Managed Workloads</text>
+  <text x="696" y="150" text-anchor="middle" font-size="10" fill="#2c6a3a">actual state</text>
+  <text x="696" y="166" text-anchor="middle" font-size="10" fill="#2c6a3a">Pods, StatefulSet,</text>
+  <text x="696" y="182" text-anchor="middle" font-size="10" fill="#2c6a3a">Services, Secrets</text>
+
+  <!-- forward arrows -->
+  <g stroke="#5a6b7b" stroke-width="2" fill="#5a6b7b">
+    <line x1="224" y1="150" x2="308" y2="150"/><polygon points="308,150 300,146 300,154"/>
+    <line x1="510" y1="150" x2="594" y2="150"/><polygon points="594,150 586,146 586,154"/>
+  </g>
+  <text x="266" y="140" text-anchor="middle" font-size="9" fill="#5a6b7b">reads</text>
+  <text x="552" y="140" text-anchor="middle" font-size="9" fill="#5a6b7b">creates /</text>
+  <text x="552" y="152" text-anchor="middle" font-size="9" fill="#5a6b7b">updates</text>
+
+  <!-- reconcile loop arrow (curves back from workloads to operator) -->
+  <path d="M 696 202 C 696 260, 410 260, 410 212" fill="none" stroke="#b3491f" stroke-width="2"/>
+  <polygon points="410,212 405,222 417,220" fill="#b3491f"/>
+  <text x="553" y="252" text-anchor="middle" font-size="11" fill="#b3491f" font-weight="bold">reconcile: observe actual state, act to close the gap — forever</text>
+
+  <text x="410" y="292" text-anchor="middle" font-size="11" fill="#5a6b7b">You only ever edit the Custom Resource. The Operator keeps everything to its right correct.</text>
+</svg>

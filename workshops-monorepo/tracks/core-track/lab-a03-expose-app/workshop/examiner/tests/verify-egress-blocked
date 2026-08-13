@@ -1,0 +1,8 @@
+#!/bin/bash
+# Verify egress to the public internet is blocked (air-gapped). Expect FAILURE.
+if oc exec deploy/hello-dcs -- python3 -c "import urllib.request; urllib.request.urlopen('https://example.com', timeout=5)" >/dev/null 2>&1; then
+  echo "Egress to https://example.com SUCCEEDED — this cluster is not air-gapped. Real DCS blocks it; treat as an environment difference." >&2
+  exit 1
+fi
+echo "OK: egress to the public internet failed/timed out — the platform is air-gapped."
+exit 0
