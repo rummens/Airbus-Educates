@@ -28,7 +28,7 @@ spec:
         fsGroup: 1001
       containers:
       - name: hello-dcs
-        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        image: ${DCS_REGISTRY}/samples/hello-dcs:v1.0.0
         ports:
         - containerPort: 8080
         # Health probes on the app's silent /healthz endpoint (readiness gates routing

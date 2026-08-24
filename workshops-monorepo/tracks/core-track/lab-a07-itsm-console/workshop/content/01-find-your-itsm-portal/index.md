@@ -33,7 +33,7 @@ to another location.
 
 The list of portals — DIV, DE, ES and the rest — lives on one documentation page:
 
-- [{{< param product_short >}} ITSM requests — Service Requests]({{< param dcs_docs_base_url >}}/itsm-requests/#service-requests)
+- [{{< param product_short >}} ITSM requests — Service Requests]({{< param dcs_docs_base_url >}}/itsm)
 
 Pick the entry for your location, open its portal, and search the service catalogue for
 the {{< param product_short >}} request. Bookmark it: the same form serves tenants,

@@ -37,7 +37,7 @@ must sit on **physically separated** disks, kept apart from national data, which
 own dedicated StorageClass. Picking the wrong class can be a **compliance breach**, not
 merely slow. So on {{< param product_short >}}, the storage class you name is a
 governance decision, not only a technical one. See the
-[{{< param product_short >}} storage concepts]({{< param dcs_docs_base_url >}}/concepts/storage).
+[{{< param product_short >}} storage concepts]({{< param dcs_docs_base_url >}}/services/namespace_aas/concepts/kubernetes-storage).
 
 ## What about object storage (S3)?
 

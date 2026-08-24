@@ -13,7 +13,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/te
 
 ## Tenant → Namespaces
 
-A [**Tenant**]({{< param dcs_docs_base_url >}}/concepts/tenancy-and-access) is the
+A [**Tenant**]({{< param dcs_docs_base_url >}}/services/tenants) is the
 org-level unit on {{< param product_short >}}: it is who is accountable, and it is what
 gets billed (recharged). A Tenant **owns one or more Namespaces**. That is the entire
 model — two levels, Tenant then Namespaces:

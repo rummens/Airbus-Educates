@@ -34,7 +34,7 @@ The payoff for you as a tenant: it's **air-gapped and sovereign** (your workload
 data stay inside the platform), it's **managed** (the platform team runs the clusters,
 security, and compliance), and it's **self-service** (you request a namespace and ship,
 without raising infrastructure tickets). Learn more in the
-[{{< param product_short >}} services overview]({{< param dcs_docs_base_url >}}/services/overview).
+[{{< param product_short >}} services overview]({{< param dcs_docs_base_url >}}/services).
 
 ![DCS at a glance](dcs-architecture.svg)
 

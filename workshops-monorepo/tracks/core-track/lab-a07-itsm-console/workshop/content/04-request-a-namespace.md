@@ -52,7 +52,7 @@ The distinction from the **Terms — Namespaces & Tenancy** lab, now as one radi
   exposure allowed**.
 
 That is the rule behind the **Expose Your App** lab: a Route needs a PROD namespace. More:
-[DEV and PROD namespaces]({{< param dcs_docs_base_url >}}/concepts/dev-and-prod-namespace).
+[DEV and PROD namespaces]({{< param dcs_docs_base_url >}}/services/namespace_aas/concepts/dev-and-prod-namespace).
 
 ## Features — optional checkboxes
 
@@ -80,5 +80,5 @@ automated.
 about ten individual quota fields (CPU, memory, ephemeral and PVC storage, image storage,
 Harbor space). Each has a documented default — and the documented advice is to **keep the
 defaults** unless you know better. The full field list is in the
-[how-to for requesting a container Namespace]({{< param dcs_docs_base_url >}}/how-to/request-a-container-namespace).
+[how-to for requesting a container Namespace]({{< param dcs_docs_base_url >}}/services/namespace_aas/quick-starts/request-namespace).
 {{< /note >}}

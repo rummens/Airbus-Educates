@@ -7,11 +7,11 @@ if ! [ -s "$f" ]; then
   echo "Click the command step above first — $f is missing or empty." >&2
   exit 1
 fi
-if ! grep -qE '-app-a' "$f"; then
+if ! grep -q -e '-app-a' "$f"; then
   echo "$f does not look like that command's output — re-run the step above." >&2
   exit 1
 fi
-if ! grep -q -- '-app-b' "$f"; then
+if ! grep -q -e '-app-b' "$f"; then
   echo "The output is recorded, but the same check against the cluster failed — re-run the step above." >&2
   exit 1
 fi

@@ -22,7 +22,7 @@ minimal Deployment from an image. The `--image` flag names the image to run; `$D
 is the Harbor registry, filled in for you:
 
 ```terminal:execute
-command: oc create deployment hello-dcs --image="$DCS_REGISTRY/samples/hello-dcs:1.0"
+command: oc create deployment hello-dcs --image="$DCS_REGISTRY/samples/hello-dcs:v1.0.0"
 ```
 
 Now wait for the Pod to be ready. `oc rollout status` blocks until the Deployment has a

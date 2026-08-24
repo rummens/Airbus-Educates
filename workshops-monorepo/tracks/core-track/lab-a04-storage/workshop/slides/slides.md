@@ -40,7 +40,7 @@ A container's own filesystem is **ephemeral** — it exists only while the Pod e
 - The file is gone — that is the default: no Pod, no data.
 
 ```
-oc create deployment hello-dcs --image="$DCS_REGISTRY/samples/hello-dcs:1.0"
+oc create deployment hello-dcs --image="$DCS_REGISTRY/samples/hello-dcs:v1.0.0"
 oc exec deploy/hello-dcs -- sh -c 'echo written-inside-the-container > /opt/app-root/src/note'
 oc delete pod -l app=hello-dcs
 ```

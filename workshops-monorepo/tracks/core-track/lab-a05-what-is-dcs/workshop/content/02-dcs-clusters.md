@@ -45,7 +45,7 @@ governed** (its controls and lifecycle), which you'll meet later in the course. 
 words overlap, but they describe two completely different things.
 {{< /note >}}
 
-Read more in the [{{< param product_short >}} cluster model]({{< param dcs_docs_base_url >}}/concepts/clusters).
+Read more in the [{{< param product_short >}} cluster model]({{< param dcs_docs_base_url >}}/services/namespace_aas/concepts/clusters).
 
 ## Next
 

@@ -17,7 +17,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/na
 On {{< param product_short >}}, the namespace is also the **unit of consumption**: you
 request namespaces and ship applications into them. That's what "Namespace as a Service"
 means — the namespace, not a server, is the thing you're given. Learn more in the
-[{{< param product_short >}} tenancy & access overview]({{< param dcs_docs_base_url >}}/concepts/tenancy-and-access).
+[{{< param product_short >}} tenancy & access overview]({{< param dcs_docs_base_url >}}/services/tenants).
 
 {{< note >}}
 **Think of an office building.** The **Tenant** is your organisation renting space in it:
@@ -57,7 +57,7 @@ a comma-separated list of kinds (`deployments,pods,services`) asks `oc` for all 
 once, so you see the whole picture in a single command:
 
 ```terminal:execute
-command: oc get deployments,pods,services | tee ~/exercises/workloads.txt
+command: oc get deployments,pods,services 2>&1 | tee ~/exercises/workloads.txt
 ```
 
 ```examiner:execute-test

@@ -25,7 +25,7 @@ By the end of this workshop you will be able to:
 - State that a Route requires a PROD-type namespace.
 
 DCS networking is covered in the
-[{{< param product_short >}} networking concepts]({{< param dcs_docs_base_url >}}/concepts/networking).
+[{{< param product_short >}} networking concepts]({{< param dcs_docs_base_url >}}/services/namespace_aas/concepts/openshift-networking).
 
 ## Prerequisites
 

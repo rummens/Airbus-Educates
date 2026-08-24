@@ -17,7 +17,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/de
 ## Create the Deployment
 
 ```terminal:execute
-command: oc create deployment hello-dcs --image=${DCS_REGISTRY}/samples/hello-dcs:1.0
+command: oc create deployment hello-dcs --image=${DCS_REGISTRY}/samples/hello-dcs:v1.0.0
 ```
 
 You'll see `deployment.apps/hello-dcs created`. Behind that one line, DCS pulled the

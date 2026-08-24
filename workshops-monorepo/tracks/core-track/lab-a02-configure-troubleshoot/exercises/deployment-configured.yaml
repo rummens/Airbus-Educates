@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: hello-dcs
-        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        image: ${DCS_REGISTRY}/samples/hello-dcs:v1.0.0
         envFrom:
         - configMapRef:
             name: hello-dcs-config

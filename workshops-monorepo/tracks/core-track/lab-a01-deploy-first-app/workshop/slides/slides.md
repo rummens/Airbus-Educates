@@ -18,7 +18,7 @@ A **Deployment** is how you tell DCS "keep one copy of this image running for me
 
 ```
 oc create deployment hello-dcs \
-  --image=${DCS_REGISTRY}/samples/hello-dcs:1.0
+  --image=${DCS_REGISTRY}/samples/hello-dcs:v1.0.0
 ```
 
 - Output: `deployment.apps/hello-dcs created`.

@@ -25,7 +25,7 @@ By the end of this workshop you will be able to:
 - State that classification drives storage-class choice, and that S3 comes via an ITSM ticket.
 
 DCS storage is covered in the
-[{{< param product_short >}} storage concepts]({{< param dcs_docs_base_url >}}/concepts/storage).
+[{{< param product_short >}} storage concepts]({{< param dcs_docs_base_url >}}/services/namespace_aas/concepts/kubernetes-storage).
 
 ## Prerequisites
 

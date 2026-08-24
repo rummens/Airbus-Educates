@@ -21,7 +21,7 @@ spec:
       - name: hello
         # Pulled from the DCS Harbor registry via the DCS_REGISTRY env var
         # (apply with: envsubst < app.yaml | oc apply -n <ns> -f -).
-        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        image: ${DCS_REGISTRY}/samples/hello-dcs:v1.0.0
         env:
         - name: MODE
           value: "CLI"
