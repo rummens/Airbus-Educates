@@ -34,7 +34,7 @@ command: oc rollout status deploy/hello-dcs --timeout=120s
 
 ```examiner:execute-test
 name: verify-ephemeral-ready
-title: Verify the app is running
+title: ✅ Verify the app is running
 timeout: 15
 retries: .INF
 delay: 2
@@ -42,10 +42,15 @@ delay: 2
 
 ## Write a file inside the container
 
-The app runs as a non-root user, so it *can* write inside its own home directory
-(`/opt/app-root/src`). Write a file there. `oc exec` runs a command inside the Pod; the `--`
-separates the `oc` flags from the command to run, and `sh -c '...'` runs that shell command
-(here it writes the file, then prints it back with `cat`):
+The app runs as a **non-root** user, so it *can* write inside its own home directory
+(`/opt/app-root/src`). Write a file there.
+
+Three parts to the command:
+
+- **`oc exec`** — runs a command inside the Pod.
+- **`--`** — separates the `oc` flags from the command to run.
+- **`sh -c '...'`** — runs that shell command. Here it writes the file, then prints it back
+  with `cat`.
 
 ```terminal:execute
 command: oc exec deploy/hello-dcs -- sh -c 'echo written-inside-the-container > /opt/app-root/src/note && cat /opt/app-root/src/note'
@@ -80,7 +85,7 @@ command: oc exec deploy/hello-dcs -- cat /opt/app-root/src/note || echo "(gone �
 
 ```examiner:execute-test
 name: verify-ephemeral-lost
-title: Verify the file did NOT survive the new Pod
+title: ✅ Verify the file did NOT survive the new Pod
 timeout: 15
 retries: .INF
 delay: 2

@@ -84,7 +84,11 @@ knowledge. Skip the heading entirely if the one-line meta prereq says it all.>
 - **Variablize the product name** where natural (`Digital Container Service (DCS)`),
   but a README may hardcode DCS naming for readability since it isn't ytt-rendered.
 - **Keep it scannable.** Hook → lead → meta → objectives → what-you'll-do. A learner
-  should decide in 20 seconds. Depth lives in the workshop pages, not here.
+  should decide in 20 seconds. Depth lives in the workshop pages, not here. Apply the
+  full formatting standard — bold key terms, one-idea paragraphs, bulleted objectives —
+  see [content-formatting-reference.md](content-formatting-reference.md).
+- **Call-outs are blockquotes here.** A README is rendered by the portal, not Hugo, so
+  `{{< note >}}` does not exist. Use `> **💡 Tip:** …` / `> **⚠️ Watch out:** …`.
 - **Don't restate the overview verbatim.** `00-workshop-overview.md` is the in-lab
   orientation; the README is the pre-launch pitch. Overlap on objectives is fine;
   don't copy the whole environment section.

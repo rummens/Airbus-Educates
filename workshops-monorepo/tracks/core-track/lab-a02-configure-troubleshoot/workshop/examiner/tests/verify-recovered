@@ -9,20 +9,20 @@
 # the CURRENT spec being complete instead: `oc rollout status` only exits 0 once the
 # newest ReplicaSet is fully rolled out and the old ones are scaled down.
 if ! oc rollout status deploy/hello-dcs --timeout=5s >/dev/null 2>&1; then
-  echo "The current Deployment has not rolled out yet — the newest Pod is not Ready. Apply the good manifest and wait." >&2
+  echo "❌ The current Deployment has not rolled out yet — the newest Pod is not Ready. Apply the good manifest and wait." >&2
   exit 1
 fi
 # Belt and braces: no hello-dcs Pod may be stuck in a start-up failure.
 reasons=$(oc get pods -l app=hello-dcs \
   -o jsonpath='{range .items[*]}{.status.containerStatuses[*].state.waiting.reason}{"\n"}{end}' 2>/dev/null)
 if echo "$reasons" | grep -qiE 'CreateContainerConfigError|CrashLoopBackOff|ImagePullBackOff|ErrImagePull|InvalidImageName|RunContainerError|CreateContainerError'; then
-  echo "A hello-dcs Pod is still failing to start ($(echo "$reasons" | grep -iE 'Error|BackOff' | head -1 | tr -d ' ')) — the fault is not fixed yet." >&2
+  echo "❌ A hello-dcs Pod is still failing to start ($(echo "$reasons" | grep -iE 'Error|BackOff' | head -1 | tr -d ' ')) — the fault is not fixed yet." >&2
   exit 1
 fi
 body=$(oc exec deploy/hello-dcs -- python3 -c "import urllib.request;print(urllib.request.urlopen('http://localhost:8080',timeout=5).read().decode())" 2>/dev/null)
 if echo "$body" | grep -q "Reconfigured without a redeploy"; then
-  echo "OK: app recovered and serves its configuration."
+  echo "✅ app recovered and serves its configuration."
   exit 0
 fi
-echo "App is ready but not serving the expected value. Got: ${body:-<empty>}" >&2
+echo "❌ App is ready but not serving the expected value. Got: ${body:-<empty>}. Check the ConfigMap name in the Deployment matches the one you created." >&2
 exit 1

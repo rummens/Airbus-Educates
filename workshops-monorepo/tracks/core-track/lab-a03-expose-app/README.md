@@ -2,12 +2,17 @@
 
 **From a local-only tunnel to a real, external URL on DCS-managed DNS — and a live tab for it inside your session.**
 
-In the **Deploy Your First App** lab you could only reach your app through a `port-forward` tunnel, just for you, just
-while the command ran. This lab gives it a proper front door: a **Service** for a stable
-in-cluster address, then a **Route** that exposes it externally on DCS DNS via the
-platform load balancer — reachable from a normal browser outside the session. You'll also
-pin the running app as a new dashboard tab, and see why a Route needs a PROD-type
-namespace.
+In the **Deploy Your First App** lab you could only reach your app through a `port-forward`
+tunnel — only for you, only while the command ran.
+
+This lab gives it a proper address:
+
+- a **Service** for a stable in-cluster address;
+- a **Route** that exposes it externally on DCS DNS via the platform load balancer,
+  reachable from a normal browser outside the session.
+
+You also pin the running app as a new **dashboard tab**, and see why a Route needs a
+**PROD-type** namespace.
 
 - **Track:** Core / Fundamentals
 - **Audience:** Beginner — you've done the **Deploy Your First App** lab (**Configure & Troubleshoot Your App** helps)
@@ -25,6 +30,9 @@ namespace.
 
 ## What you'll do
 
-Deploy the app in UI mode, front it with a Service, curl it by cluster DNS, then create a
-Route and open its external URL, pin the app as a dashboard tab, and inspect the
-platform's network posture — a pre-provisioned NetworkPolicy and blocked internet egress.
+1. **Deploy** the app in UI mode.
+2. **Front** it with a Service and `curl` it by cluster DNS.
+3. **Create** a Route and open its external URL.
+4. **Pin** the app as a dashboard tab.
+5. **Inspect** the platform's network posture — a pre-provisioned NetworkPolicy and blocked
+   internet egress.

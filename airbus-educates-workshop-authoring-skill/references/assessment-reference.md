@@ -32,7 +32,7 @@ Place test scripts in `workshop/examiner/tests/` (executable, exit `0` = pass). 
 ```markdown
 ```examiner:execute-test
 name: verify-app-running
-title: Verify the sample app is running
+title: ✅ Verify the sample app is running
 args:
 - sample-app
 timeout: 5
@@ -47,22 +47,28 @@ delay: 1
 - Every command is verified (see the every-command rule above). For a purely observational command, assert the observable state it was meant to reveal exists — do not skip it.
 - A test script counts as a runtime image dependency only if it pulls one — keep tests to shell + `oc`.
 
-**Emit a diagnostic message on failure.** A check that just exits `1` is useless to a stuck learner and to the CI pipeline reading logs. On failure, print *what* was expected and *what* was found, then exit non-zero:
+**Make the check friendly to read.** The learner sees two strings — the `title:` on the button and the script's output — and a failing check is where a beginner is most likely to give up. House standard (full rules in [content-formatting-reference.md](content-formatting-reference.md)):
+
+- `title:` starts with `✅` when the check verifies something was **created or changed**, `🔍` when it verifies something was **observed**: `title: ✅ Verify hello-dcs is running (1 ready replica)`.
+- `title:` and `description:` are rendered as **plain text** — `**bold**` shows the asterisks literally. Emoji render fine; put bold in the page prose instead.
+- Script output leads with `✅ ` on success and `❌ ` on failure, and is plain text too.
+
+**Emit a diagnostic message on failure.** A check that just exits `1` is useless to a stuck learner and to the CI pipeline reading logs. On failure, print *what* was expected, *what* was found, **and the next move** ("run the apply step above", "check `oc get events`", "this check keeps retrying"), then exit non-zero:
 
 ```bash
 #!/bin/bash
 # workshop/examiner/tests/verify-app-running
 name="${1:-sample-app}"
 if ! oc get deployment "$name" >/dev/null 2>&1; then
-  echo "Deployment '$name' not found in $(oc project -q). Did the apply step run?" >&2
+  echo "❌ Deployment '$name' not found in $(oc project -q). Did the apply step above run?" >&2
   exit 1
 fi
 ready=$(oc get deployment "$name" -o jsonpath='{.status.readyReplicas}')
 if [ "${ready:-0}" -lt 1 ]; then
-  echo "Deployment '$name' exists but has 0 ready replicas — check pod events with 'oc get events'." >&2
+  echo "❌ Deployment '$name' exists but has 0 ready replicas — check pod events with 'oc get events'." >&2
   exit 1
 fi
-echo "OK: deployment '$name' is ready."
+echo "✅ Deployment '$name' is ready."
 
 ## Hints and revealing solutions (optional)
 
@@ -72,7 +78,7 @@ Guided workshops rarely leave a learner stuck, but for steps that ask the learne
 
   ```markdown
   {{< note >}}
-  **Hint:** the pod is crash-looping. Check its recent events and logs before changing anything.
+  **💡 Hint:** the pod is crash-looping. Check its recent events and logs before changing anything.
   {{< /note >}}
   ```
 
@@ -115,7 +121,7 @@ End each workshop (before or within `99-workshop-summary.md`) with a **Check You
 1. Which namespace type enforces change control on DCS — dev or prod?
 
 {{< note >}}
-**Answer:** prod. Dev namespaces favour fast iteration; changes are promoted from dev to prod.
+**❓ Answer:** prod. Dev namespaces favour fast iteration; changes are promoted from dev to prod.
 {{< /note >}}
 ```
 
@@ -123,6 +129,8 @@ Keep questions tied to the stated learning objectives — one question per major
 
 ## Checklist
 
+- [ ] Every check title starts with `✅` (change) or `🔍` (observation); no `**` in `title:`/`description:` (plain text)
+- [ ] Every check script prints `✅ …` on success and `❌ …` (expected, found, next move) on failure
 - [ ] `spec.session.applications.examiner.enabled: true`
 - [ ] **Every command has an `examiner:execute-test`** asserting its outcome — no command is unverified (automated-pipeline requirement)
 - [ ] Atomic command sequences share one test; distinct observable effects each get their own

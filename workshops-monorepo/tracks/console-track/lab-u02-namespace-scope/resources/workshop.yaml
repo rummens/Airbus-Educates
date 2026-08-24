@@ -41,8 +41,9 @@ metadata:
 
       ### What you will do
 
-      You will not type any commands — this lab is entirely in the console. Each screen
-      names the command it replaces, so you can map one onto the other afterwards.
+      > **💡 Tip:** you will not type any commands — this lab is entirely in the console.
+      > Each screen names the `oc` command it replaces, so you can map one onto the other
+      > afterwards.
 
       - Open an object in your first project and see that its identity is name **plus** namespace
       - Switch the project selector, the console's equivalent of `oc project`, to a second
@@ -60,8 +61,9 @@ metadata:
       ### Cleaning up
 
       Press **Finish** in the guidance box when you are done. That records your completion
-      and shuts both projects down. Leaving the tab open just leaves them running until
-      they expire.
+      and shuts both projects down.
+
+      > **⚠️ Watch out:** leaving the tab open just leaves them running until they expire.
     academy.dcs/console-lab: lab-u02-namespace-scope
     # The second project the lab compares against. Its name is only knowable at launch
     # time, so the value carries the Educates variable and the portal substitutes the

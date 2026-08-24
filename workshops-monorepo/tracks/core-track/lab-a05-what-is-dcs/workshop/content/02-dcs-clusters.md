@@ -38,7 +38,7 @@ That rollout-timing and maintenance-notice difference is the **only** difference
 clusters give you the same platform and the same capabilities.
 
 {{< note >}}
-**A cluster is not a namespace type.** Don't confuse a **cluster** (Sandbox or PROD)
+**⚠️ A cluster is not a namespace type.** Don't confuse a **cluster** (Sandbox or PROD)
 with a **DEV/PROD namespace type**. A *cluster* is **where** the platform runs — the
 whole Sandbox or PROD environment. A *namespace type* is **how a single namespace is
 governed** (its controls and lifecycle), which you'll meet later in the course. The

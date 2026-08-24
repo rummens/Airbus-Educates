@@ -2,10 +2,13 @@
 title: What's Behind It
 ---
 
-You did all of that with imperative commands. Underneath, {{< param product_short >}}
-turned every one of those into a single **desired-state document**. This page shows you
-that document — it is the bridge to every later lab, where you write these documents
-yourself.
+You did all of that with **imperative** commands.
+
+Underneath, {{< param product_short >}} turned every one of them into a single
+**desired-state document**.
+
+This page shows you that document. It is the bridge to every later lab, where you write
+these documents yourself.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -15,7 +18,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/be
 ```
 
 {{< note >}}
-**Two ways to work: imperative and declarative.** These two words come up throughout the
+**📌 Two ways to work: imperative and declarative.** These two words come up throughout the
 course, so it is worth defining them plainly:
 
 - **Imperative** means you give step-by-step commands — "create this", "set that". Each
@@ -37,7 +40,7 @@ command: oc get deploy hello-dcs -o yaml > deployment.yaml
 
 ```examiner:execute-test
 name: verify-yaml-saved
-title: Verify the Deployment YAML was saved
+title: ✅ Verify the Deployment YAML was saved
 timeout: 10
 ```
 
@@ -70,10 +73,11 @@ command: oc get deploy,rs,pod -l app=hello-dcs
 
 ```examiner:execute-test
 name: verify-ownership
-title: Verify the Deployment → ReplicaSet → Pod chain
+title: 🔍 Verify the Deployment → ReplicaSet → Pod chain
 timeout: 10
 ```
 
-**Deployment → ReplicaSet → Pod**, tied together by labels and selectors. Everything you
-did by hand is captured in that YAML — and from the **Configure & Troubleshoot Your App** lab on, you'll write it directly instead
-of generating it.
+**Deployment → ReplicaSet → Pod**, tied together by **labels** and **selectors**.
+
+Everything you did by hand is captured in that YAML. From the **Configure & Troubleshoot
+Your App** lab on, you write it directly instead of generating it.

@@ -48,7 +48,7 @@ file: ~/exercises/self-service-vs-ticket.md
 Decide each one before you reveal the answers.
 
 {{< note >}}
-**Self-service via `oc`:** scale a Deployment · create a ConfigMap · expose an app with a
+**💡 Self-service via `oc`:** scale a Deployment · create a ConfigMap · expose an app with a
 Route (in a PROD namespace) · create a PVC.
 
 **Raise an ITSM request:** request a new Tenant · request a second Namespace · increase
@@ -61,7 +61,7 @@ new Harbor catalog/repo · request a security exception.
 You need 2 more CPU cores than your namespace allows for a load test. `oc` or ITSM?
 
 {{< note >}}
-**Answer:** **ITSM** — a quota increase changes your entitlement, so it goes through a
+**❓ Answer:** **ITSM** — a quota increase changes your entitlement, so it goes through a
 *Modify namespace* request. Deploying the load test itself, once you have the quota, is
 self-service.
 {{< /note >}}

@@ -1,12 +1,13 @@
 # DCS Academy — Your Lab Environment
 
-First time in a DCS Academy lab? This page explains everything you see on screen, so
-you can focus on learning rather than figuring out the tools. Each lab runs entirely in
-your browser — nothing to install.
+First time in a DCS Academy lab? This page explains everything you see on screen, so you
+can focus on learning rather than figuring out the tools.
 
-> This guide is published to the internal DCS documentation portal; the workshops link
-> to it from their overview page. Screenshots marked _(screenshot)_ are placeholders to
-> be captured from a live session — the diagram below shows the overall layout.
+Each lab runs entirely in your **browser** — nothing to install.
+
+> **📌 Note:** this guide is published to the internal DCS documentation portal, and the
+> workshops link to it from their overview page. Screenshots marked _(screenshot)_ are
+> placeholders to be captured from a live session — the diagram below shows the layout.
 
 ![Workshop dashboard layout](img/dashboard-layout.svg)
 
@@ -22,8 +23,10 @@ The screen is split in two:
 
 ## Clickable actions (you rarely type)
 
-The labs are *guided*: instead of typing commands, you click the highlighted boxes in the
-instructions and they run for you. There are three kinds you'll meet most:
+The labs are *guided*. Instead of typing commands, you click the highlighted **boxes** in
+the instructions and they run for you.
+
+Three kinds you will meet most:
 
 - **Run a command** — a dark/blue box showing a shell command. Clicking it types and runs
   the command in the terminal for you. _(screenshot: a `terminal:execute` action)_
@@ -33,25 +36,29 @@ instructions and they run for you. There are three kinds you'll meet most:
   step actually worked (pod running, service reachable) before you move on.
   _(screenshot: an examiner check passing)_
 
-If a box doesn't seem to do anything, make sure the relevant tab (usually Terminal) is
-visible, and click again.
+> **💡 If a box seems to do nothing**, make sure the relevant tab (usually **Terminal**) is
+> visible, then click again.
 
 ## The tabs
 
 ### Terminal
 
-A shell connected to your DCS session. It starts in the `~/exercises` directory where the
-lab's files live. Many labs use a **split terminal** — two stacked one above the other,
-an **upper** and a **lower** — for example one to `watch` something while the other makes
-a change. Commands are run with the OpenShift CLI, `oc`. You can type here too, but the
-guided actions do the typing for you.
+A shell connected to your DCS session. It starts in the `~/exercises` directory, where the
+lab's files live.
+
+Many labs use a **split terminal** — two stacked one above the other, an **upper** and a
+**lower**. One can `watch` something while the other makes a change.
+
+Commands run with the OpenShift CLI, `oc`. You can type here too, but the guided actions do
+the typing for you.
 _(screenshot: split terminal)_
 
 ### Editor
 
 A full VS Code editor opened on `~/exercises`, for viewing and editing the lab's files.
-Editor clickable actions open the right file and make edits automatically — you can watch
-the change happen. _(screenshot: editor with a file open)_
+
+Editor actions open the right file and make edits automatically — you watch the change
+happen. _(screenshot: editor with a file open)_
 
 ### Console
 

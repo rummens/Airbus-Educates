@@ -2,11 +2,17 @@
 
 **Your own app running on DCS in a few minutes — then a look at the YAML behind it.**
 
-This is the quick win. You take a ready-made image from the DCS registry, turn it into a
-running Deployment with a single command, customise it, reach it, change it and watch DCS
-roll out the new version — then reveal the YAML `oc` generated and read the
-Deployment → ReplicaSet → Pod chain behind it. Imperative first for speed, declarative
-last so the YAML makes sense once you've earned it.
+This is the quick win.
+
+You take a ready-made **image** from the DCS registry and turn it into a running
+**Deployment** with a single command. Then you customise it, reach it, change it, and watch
+DCS **roll out** the new version.
+
+Last, you reveal the YAML `oc` generated and read the **Deployment → ReplicaSet → Pod**
+chain behind it.
+
+> **💡 Tip:** imperative first for speed, declarative last — so the YAML makes sense by the
+> time you read it.
 
 - **Track:** Core / Fundamentals
 - **Audience:** Beginner — no prior lab required
@@ -24,6 +30,11 @@ last so the YAML makes sense once you've earned it.
 
 ## What you'll do
 
-Deploy the `hello-dcs` sample, set a greeting, tunnel to it and curl it, change the
-greeting and watch the rollout replace the pod, then save and read the Deployment YAML —
-the bridge from "do this" commands to the desired-state manifests every later lab writes.
+1. **Deploy** the `hello-dcs` sample.
+2. **Set** a greeting.
+3. **Tunnel** to it and `curl` it.
+4. **Change** the greeting and watch the rollout replace the Pod.
+5. **Save and read** the Deployment YAML.
+
+That last step is the bridge from "do this" commands to the desired-state manifests every
+later lab writes.

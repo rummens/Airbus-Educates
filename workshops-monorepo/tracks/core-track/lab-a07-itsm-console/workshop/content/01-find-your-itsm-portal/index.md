@@ -22,7 +22,7 @@ one central form.
 That has one consequence you must get right before you type anything:
 
 {{< warning >}}
-**A Tenant has to be requested for each location separately, in that location's own
+**⚠️ A Tenant has to be requested for each location separately, in that location's own
 myITSM portal.** You can only pick locations inside your own domain — to get a Tenant in
 the German national environment you request it through the German myITSM, in the Spanish
 one through the Spanish myITSM, and so on. A Tenant, once created, **cannot be moved**
@@ -40,7 +40,7 @@ the {{< param product_short >}} request. Bookmark it: the same form serves tenan
 namespaces, user management, whitelisting and general questions.
 
 {{< note >}}
-**Which location is "mine"?** The one your organisation and your account belong to — the
+**📌 Which location is "mine"?** The one your organisation and your account belong to — the
 same national domain your colleagues use. If two locations look plausible, ask in the
 "Further details" box of the request rather than guessing: moving a Tenant afterwards is
 not possible.
@@ -62,7 +62,7 @@ Then {{< param product_short >}} takes over: the onboarding itself is **automate
 DCS side** — no human hand-provisions your namespace.
 
 {{< note >}}
-**Then why does the form offer so many options?** Because the automation is already there
+**📌 Then why does the form offer so many options?** Because the automation is already there
 but the **self-service frontend is not** — ITSM is currently the input form for that
 pipeline, so every option the platform supports shows up as a field.
 

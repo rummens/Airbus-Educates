@@ -15,14 +15,17 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/im
 
 ## From Virtual Machines to Containers
 
-A **virtual machine** carries a full operating system of its own, which makes it self-contained
-but heavy — it takes minutes to boot and gigabytes of disk. A
-[container](https://kubernetes.io/docs/concepts/containers/) carries only your application
-and the few libraries it needs, and shares the host's operating system kernel. The result:
-containers start in seconds, are much smaller, and run the same way on any machine.
+A **virtual machine** carries a full operating system of its own. That makes it
+self-contained but heavy — minutes to boot, gigabytes of disk.
+
+A [container](https://kubernetes.io/docs/concepts/containers/) carries only your application
+and the few libraries it needs, and **shares** the host's operating system kernel.
+
+The result: containers start in **seconds**, are much smaller, and run the same way on any
+machine.
 
 {{< note >}}
-If you've run VMs: a container is like a VM stripped down to just your app — no separate
+**💡 If you have run VMs:** a container is like a VM stripped down to just your app — no separate
 guest OS to boot or patch. The analogy stops there, though: a container is process
 isolation, not a full machine.
 {{< /note >}}
@@ -43,10 +46,13 @@ You build an image once, then run it as a container wherever you need it.
 
 ## Where DCS images come from
 
-Because {{< param product_short >}} is air-gapped, images don't come from the public
-internet. They live in the platform's own registry (Harbor, at `{{< param dcs_registry >}}`),
-and in Foundations you **pull** from it — you don't push. That's all you need for now;
-the registry gets a workshop of its own later in the course.
+Because {{< param product_short >}} is **air-gapped**, images do not come from the public
+internet.
+
+They live in the platform's own registry — Harbor, at `{{< param dcs_registry >}}`. In
+Foundations you **pull** from it; you do not push.
+
+That is all you need for now. The registry gets a workshop of its own later in the course.
 
 ## Next
 

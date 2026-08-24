@@ -30,14 +30,14 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/tr
   certificate for you — nothing to request.
 
 {{< note >}}
-The external load balancer is **not** a native Kubernetes object — you won't find it with
+**📌 Note:** the external load balancer is **not** a native Kubernetes object — you won't find it with
 `oc get`. {{< param product_short >}} puts it in front of the cluster as a **security
 requirement**: all outside traffic terminates at a controlled, monitored edge and is
 forwarded inward, so the cluster itself is never exposed directly to the network.
 {{< /note >}}
 
 {{< note >}}
-You *can* ask for a custom DNS record outside `*.apps`, but that's a manual ITSM request,
+**📌 Note:** you *can* ask for a custom DNS record outside `*.apps`, but that's a manual ITSM request,
 not automated — so it's not recommended for development, testing, or this lab. Stay on
 `*.apps` and exposure is automatic.
 {{< /note >}}

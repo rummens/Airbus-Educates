@@ -12,7 +12,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ro
 ```
 
 {{< note >}}
-**A Route requires a PROD-type namespace.** DCS only admits Routes in namespaces marked
+**⚠️ A Route requires a PROD-type namespace.** DCS only admits Routes in namespaces marked
 PROD; a DEV namespace cannot expose anything. Your session namespace is PROD-type for this
 lab, so this works. *Why* PROD enforces this, and how, is a Developer-track topic (**DEV vs PROD Namespaces & Policies**).
 {{< /note >}}
@@ -32,7 +32,7 @@ command: oc apply -f route.yaml
 
 ```examiner:execute-test
 name: verify-route-admitted
-title: Verify the Route was admitted with a host
+title: ✅ Verify the Route was admitted with a host
 timeout: 10
 retries: .INF
 delay: 2
@@ -48,7 +48,7 @@ command: oc get route hello-dcs -o jsonpath='{.spec.host}{"\n"}'
 
 ```examiner:execute-test
 name: verify-route-admitted
-title: Confirm the Route host is set
+title: ✅ Confirm the Route host is set
 timeout: 10
 retries: 3
 delay: 2
@@ -56,11 +56,15 @@ delay: 2
 
 ## Reach it from outside the session
 
-That host is on public DCS DNS, reachable from a normal browser, not just this session.
-Call it. The first line stores the Route host in a shell variable named `HOST`; the second
-line calls it with `curl`. The `-k` flag tells `curl` to accept the DCS TLS certificate
-without complaint, and `%{http_code} from "$HOST"` prints the status code and the host it
-reached:
+That host is on public DCS DNS, reachable from a normal browser — not just from this
+session. Call it.
+
+The command has two lines and two new flags:
+
+- **line 1** — stores the Route host in a shell variable named `HOST`.
+- **line 2** — calls it with `curl`.
+- **`-k`** — tells `curl` to accept the DCS TLS certificate without complaint.
+- **`%{http_code} from "$HOST"`** — prints the status code and the host it reached.
 
 ```terminal:execute
 command: |-
@@ -70,7 +74,7 @@ command: |-
 
 ```examiner:execute-test
 name: verify-route-reachable
-title: Verify the Route URL responds (HTTP 200)
+title: ✅ Verify the Route URL responds (HTTP 200)
 timeout: 15
 retries: .INF
 delay: 2

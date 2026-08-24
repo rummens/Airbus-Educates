@@ -2,8 +2,8 @@
 # Verify the marker survived the Pod restart (same value on the new Pod).
 val=$(oc exec deploy/hello-dcs -- cat /opt/app-root/src/data/marker 2>/dev/null)
 if [ "$val" = "persisted-marker-42" ]; then
-  echo "OK: the marker survived the restart — data persisted on the volume."
+  echo "✅ the marker survived the restart — data persisted on the volume."
   exit 0
 fi
-echo "Marker missing or changed after restart (got: '${val:-<none>}')." >&2
+echo "❌ Marker missing or changed after restart (got: '${val:-<none>}'). Wait for the new Pod to be Ready, then click this check again." >&2
 exit 1

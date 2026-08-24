@@ -7,14 +7,14 @@ namespace that was simply *there*. This lab, part of **{{< param product_name >}
 where that namespace comes from: you **request** it through ITSM.
 
 {{< note >}}
-**The short version, in case you only read this page:** find your national myITSM portal →
+**💡 The short version, in case you only read this page:** find your national myITSM portal →
 request a **Tenant** (about seven fields) → request a **Namespace** if you need a second
 one (three fields, then pick *basic*). {{< param product_short >}} provisions the rest
 automatically. The pages below just walk those fields one by one.
 {{< /note >}}
 
 {{< note >}}
-**First time in one of these labs?** See the
+**💡 First time in one of these labs?** See the
 [DCS Academy help page]({{< param ingress_protocol >}}://academy.{{< param ingress_domain >}}/help).
 {{< /note >}}
 

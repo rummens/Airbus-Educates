@@ -2,8 +2,8 @@
 # Verify a fresh Pod is running after the restart.
 avail=$(oc get deploy hello-dcs -o jsonpath='{.status.availableReplicas}' 2>/dev/null)
 if [ "${avail:-0}" -ge 1 ] 2>/dev/null; then
-  echo "OK: a Pod is running after the restart."
+  echo "✅ a Pod is running after the restart."
   exit 0
 fi
-echo "No available Pod yet after restart (available=${avail:-0})." >&2
+echo "❌ No available Pod yet after restart (available=${avail:-0}). This check keeps retrying while the new Pod starts." >&2
 exit 1

@@ -2,10 +2,13 @@
 title: Deploy It
 ---
 
-One command gets your app running. A [**Deployment**](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
-is how you tell {{< param product_short >}} "keep one copy of this image running for me" —
-it pulls the image, starts a [Pod](https://kubernetes.io/docs/concepts/workloads/pods/),
-and keeps it alive.
+One command gets your app running.
+
+A [**Deployment**](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+is how you tell {{< param product_short >}}: *keep one copy of this image running for me*.
+
+It **pulls** the image, starts a [Pod](https://kubernetes.io/docs/concepts/workloads/pods/),
+and keeps that Pod alive.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -24,13 +27,15 @@ You'll see `deployment.apps/hello-dcs created`. Behind that one line, DCS pulled
 image from Harbor and scheduled a Pod to run it.
 
 {{< note >}}
-The image pull can take a few seconds the first time. The check below waits for the app
-to become available, so give it a moment — it turns green once one copy is running.
+**⏳ This takes a moment:** the image pull can take a few seconds the first time.
+
+The check below waits for the app to become available — it turns green once one copy is
+running.
 {{< /note >}}
 
 ```examiner:execute-test
 name: verify-ready
-title: Verify hello-dcs is running (1 ready replica)
+title: ✅ Verify hello-dcs is running (1 ready replica)
 timeout: 10
 retries: .INF
 delay: 2
@@ -44,12 +49,16 @@ Don't take the green check's word for it — look at what's actually running:
 command: oc get deployment,pods -l app=hello-dcs
 ```
 
-You'll see the Deployment reporting `1/1` READY and one Pod in `Running` — your app, live
-on {{< param product_short >}}.
+Two things confirm it is working:
+
+- the **Deployment** reports `1/1` READY;
+- one **Pod** is in `Running`.
+
+That is your app, live on {{< param product_short >}}.
 
 ```examiner:execute-test
 name: verify-ready
-title: Verify hello-dcs is running (1 ready replica)
+title: ✅ Verify hello-dcs is running (1 ready replica)
 timeout: 10
 retries: .INF
 delay: 2

@@ -2,10 +2,12 @@
 title: A Stable Address
 ---
 
-Pods are replaced on every rollout, and each new Pod gets a new IP address. You cannot give
-a Pod IP to anyone as a fixed address. A [**Service**](https://kubernetes.io/docs/concepts/services-networking/service/)
-solves this: it is a stable name and IP that always load-balances to whichever Pods
-currently match its selector.
+Pods are **replaced** on every rollout, and each new Pod gets a new IP address. You cannot
+hand out a Pod IP as a fixed address.
+
+A [**Service**](https://kubernetes.io/docs/concepts/services-networking/service/) solves
+this. It is a stable name and IP that always load-balances to whichever Pods currently match
+its **selector**.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -39,7 +41,7 @@ command: oc rollout status deploy/hello-dcs --timeout=90s
 
 ```examiner:execute-test
 name: verify-app-ready
-title: Verify the app is running
+title: ✅ Verify the app is running
 timeout: 15
 retries: .INF
 delay: 2
@@ -60,7 +62,7 @@ command: oc apply -f service.yaml
 
 ```examiner:execute-test
 name: verify-service
-title: Verify the Service has endpoints
+title: ✅ Verify the Service has endpoints
 timeout: 10
 retries: .INF
 delay: 2
@@ -69,10 +71,15 @@ delay: 2
 ## Reach it by cluster DNS
 
 The Service is reachable inside the cluster at `hello-dcs.<namespace>.svc`. Call it from
-your terminal. Each part of this `curl` command does one thing: `-s` runs quietly (no
-progress bar), `-o /dev/null` throws away the page body, and `-w 'HTTP %{http_code}\n'`
-prints just the HTTP status code. `$(oc project -q)` runs `oc project -q` first and inserts
-your current namespace name into the address:
+your terminal.
+
+Each part of the command does one thing:
+
+- **`-s`** — run quietly, with no progress bar.
+- **`-o /dev/null`** — throw away the page body.
+- **`-w 'HTTP %{http_code}\n'`** — print just the HTTP status code.
+- **`$(oc project -q)`** — run `oc project -q` first and insert your current namespace name
+  into the address.
 
 ```terminal:execute
 command: curl -s -o /dev/null -w 'HTTP %{http_code}\n' "http://hello-dcs.$(oc project -q).svc:8080"
@@ -80,7 +87,7 @@ command: curl -s -o /dev/null -w 'HTTP %{http_code}\n' "http://hello-dcs.$(oc pr
 
 ```examiner:execute-test
 name: verify-service-dns
-title: Verify the Service responds over cluster DNS
+title: ✅ Verify the Service responds over cluster DNS
 timeout: 10
 retries: .INF
 delay: 2

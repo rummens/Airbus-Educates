@@ -13,12 +13,18 @@ name: Slides
 url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/isolation
 ```
 
-Confirm they exist. `oc get projects` lists the namespaces **you** may see — on {{< param product_name >}}
-that is your own, never the whole cluster, so it is the command to reach for instead of
-`oc get namespaces` (which needs cluster-wide rights nobody gets here). Two shell features
-appear as well: `$(oc project -q)` runs `oc project -q` first and substitutes its output
-(your active namespace, with `-q` for the quiet, name-only form), and the pipe `|` sends
-that list into `grep`, which keeps only the lines matching your two peer namespaces:
+Confirm they exist. `oc get projects` lists the namespaces **you** may see.
+
+On {{< param product_name >}} that is your own, never the whole cluster — so it is the
+command to reach for instead of `oc get namespaces`, which needs cluster-wide rights nobody
+gets here.
+
+Two shell features appear as well:
+
+- **`$(oc project -q)`** — runs `oc project -q` first and substitutes its output: your
+  active namespace, with `-q` for the quiet, name-only form.
+- **`|`** — the pipe sends that list into `grep`, which keeps only the lines matching your
+  two peer namespaces.
 
 ```terminal:execute
 command: oc get projects | grep "$(oc project -q)-app-" | tee ~/exercises/peers.txt
@@ -26,7 +32,7 @@ command: oc get projects | grep "$(oc project -q)-app-" | tee ~/exercises/peers.
 
 ```examiner:execute-test
 name: verify-two-namespaces
-title: Verify both app-a and app-b namespaces exist
+title: ✅ Verify both app-a and app-b namespaces exist
 timeout: 10
 ```
 
@@ -45,14 +51,20 @@ namespace you name on the command line.
 ## Deploy the same app into both namespaces
 
 The important flag on this page is **`-n <namespace>`**. Every `oc` command runs against
-exactly one namespace, and `-n` is how you pick which. Leave it off and the command uses
-your *current* namespace; add `-n app-a` and it targets `app-a` instead. Same command,
-same manifest — only the `-n` value decides where the app is created.
+exactly one namespace, and `-n` is how you pick which.
 
-The deploy command combines three parts. `envsubst < app.yaml` reads `app.yaml` (the `<`
-feeds the file in as input) and replaces `${DCS_REGISTRY}` with the registry value; the
-pipe `|` sends that filled-in manifest to `oc apply`; and `-f -` tells `oc apply` to read
-the manifest from that piped input instead of from a file (the `-` means "standard input").
+- **Leave it off** — the command uses your *current* namespace.
+- **Add `-n app-a`** — it targets `app-a` instead.
+
+Same command, same manifest. Only the `-n` value decides where the app is created.
+
+The deploy command combines three parts:
+
+1. **`envsubst < app.yaml`** — reads `app.yaml` (the `<` feeds the file in as input) and
+   replaces `${DCS_REGISTRY}` with the registry value.
+2. **`|`** — the pipe sends that filled-in manifest to `oc apply`.
+3. **`-f -`** — tells `oc apply` to read the manifest from that piped input instead of from
+   a file. The `-` means "standard input".
 
 You will use the **split terminal**. In the **upper** pane, deploy into `app-a`:
 
@@ -62,7 +74,7 @@ command: envsubst < app.yaml | oc apply -n "$(oc project -q)-app-a" -f -
 
 ```examiner:execute-test
 name: verify-rollout-a
-title: Verify hello is available in app-a
+title: ✅ Verify hello is available in app-a
 timeout: 10
 retries: .INF
 delay: 2
@@ -77,14 +89,14 @@ session: 2
 
 ```examiner:execute-test
 name: verify-rollout-b
-title: Verify hello is available in app-b
+title: ✅ Verify hello is available in app-b
 timeout: 10
 retries: .INF
 delay: 2
 ```
 
 {{< note >}}
-Using `envsubst` to fill in a `${VAR}` before piping to `oc apply` is the house pattern for
+**📌 Note:** using `envsubst` to fill in a `${VAR}` before piping to `oc apply` is the house pattern for
 any manifest that carries a variable.
 {{< /note >}}
 
@@ -105,7 +117,7 @@ command: oc get deploy hello -n "$(oc project -q)-app-b"
 
 ```examiner:execute-test
 name: verify-same-name
-title: Verify the same name exists independently in both
+title: ✅ Verify the same name exists independently in both
 timeout: 10
 retries: 3
 delay: 2
@@ -140,7 +152,7 @@ The check below confirms it:
 
 ```examiner:execute-test
 name: verify-isolation
-title: Verify scaling app-a did not affect app-b
+title: ✅ Verify scaling app-a did not affect app-b
 timeout: 10
 retries: .INF
 delay: 2

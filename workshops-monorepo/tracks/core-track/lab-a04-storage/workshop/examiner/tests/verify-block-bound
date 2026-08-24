@@ -5,12 +5,12 @@
 phase=$(oc get pvc hello-dcs-block -o jsonpath='{.status.phase}' 2>/dev/null)
 case "$phase" in
   Bound)
-    echo "OK: Block PVC hello-dcs-block is Bound."
+    echo "✅ Block PVC hello-dcs-block is Bound."
     exit 0 ;;
   Pending)
-    echo "OK: Block PVC hello-dcs-block is created and awaiting a consumer (WaitForFirstConsumer binding) — it binds when a Pod mounts it."
+    echo "✅ Block PVC hello-dcs-block is created and awaiting a consumer (WaitForFirstConsumer binding) — it binds when a Pod mounts it."
     exit 0 ;;
   *)
-    echo "Block PVC hello-dcs-block not found (phase='${phase:-none}')." >&2
+    echo "❌ Block PVC hello-dcs-block not found (phase='${phase:-none}'). Re-run the apply step for the block PVC above." >&2
     exit 1 ;;
 esac

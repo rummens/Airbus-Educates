@@ -23,7 +23,7 @@ feedback form — everything the real labs use.
 1. The dashboard is split in two. What's on the **left**, and what's on the **right**?
 
 {{< note >}}
-**Answer:** The **left** shows the step-by-step **instructions** — including the quick
+**❓ Answer:** The **left** shows the step-by-step **instructions** — including the quick
 action boxes you click. The **right** is the **work area** — a set of tabs (Terminal,
 Console, Editor, Slides, Feedback), one visible at a time.
 {{< /note >}}
@@ -32,7 +32,7 @@ Console, Editor, Slides, Feedback), one visible at a time.
    **lower** pane instead of the upper one?
 
 {{< note >}}
-**Answer:** By targeting terminal **session 2**. The upper pane is `execute-1` (session 1,
+**❓ Answer:** By targeting terminal **session 2**. The upper pane is `execute-1` (session 1,
 the default); the lower pane is `execute-2` (session 2). A "run a command" action with
 `session: 2` runs in the lower pane.
 {{< /note >}}
@@ -40,7 +40,7 @@ the default); the lower pane is `execute-2` (session 2). A "run a command" actio
 3. What is the **Console** tab — and what is it **not**?
 
 {{< note >}}
-**Answer:** It's the **Kubernetes Dashboard**, a visual view of the resources in your
+**❓ Answer:** It's the **Kubernetes Dashboard**, a visual view of the resources in your
 namespace. It is **not** the OpenShift web console — that's a separate, richer tool
 toured in the **Console track**.
 {{< /note >}}

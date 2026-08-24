@@ -2,11 +2,16 @@
 
 **A ten-minute tour of the lab environment before you start — so the tools never get in the way of the learning.**
 
-Every lab in the DCS Academy runs entirely in your browser: a split terminal, a code
-editor, a visual cluster view, and a feedback form, all on one screen. This short
-orientation lab walks you around each of them and shows you the *clickable actions* the
-labs use — you click, you rarely type. Once you've done this once, every later lab feels
-familiar.
+Every lab in the DCS Academy runs entirely in your browser — a **split terminal**, a code
+**editor**, a visual **cluster view** and a **feedback** form, all on one screen.
+
+This short orientation lab walks you around each of them and shows you the **clickable
+actions** the labs use: you click, you rarely type.
+
+Once you have done this once, every later lab feels familiar.
+
+> **💡 Tip:** nothing to install and no second login — the session is created for you and
+> scoped to you alone.
 
 - **Track:** Core / Fundamentals
 - **Audience:** Beginner — no container, Kubernetes, or DCS experience needed
@@ -24,6 +29,11 @@ familiar.
 
 ## What you'll do
 
-You'll click your way around the session: run a couple of `oc` commands in the two
-terminal panes, open a file in the editor, visit the Console tab, and leave feedback.
-No concepts yet — just the lay of the land, so the real labs can focus on DCS.
+You will click your way around the session:
+
+1. Run a couple of `oc` commands in the two **terminal** panes.
+2. Open a file in the **editor**.
+3. Visit the **Console** tab.
+4. Leave **feedback**.
+
+No concepts yet — only the layout, so the real labs can focus on DCS.

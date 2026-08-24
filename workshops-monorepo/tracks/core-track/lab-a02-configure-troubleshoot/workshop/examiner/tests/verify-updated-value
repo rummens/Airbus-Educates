@@ -2,8 +2,8 @@
 # Verify the app serves the updated greeting after the rollout.
 body=$(oc exec deploy/hello-dcs -- python3 -c "import urllib.request;print(urllib.request.urlopen('http://localhost:8080',timeout=5).read().decode())" 2>/dev/null)
 if echo "$body" | grep -q "Reconfigured without a redeploy"; then
-  echo "OK: app serves the updated greeting."
+  echo "✅ app serves the updated greeting."
   exit 0
 fi
-echo "App did not serve the updated greeting yet. Got: ${body:-<empty>}" >&2
+echo "❌ App did not serve the updated greeting yet. Got: ${body:-<empty>}. The rollout may still be finishing — re-run the curl step above." >&2
 exit 1

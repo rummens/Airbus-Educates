@@ -45,10 +45,13 @@ up your own load balancer in front of them.
 ## Declarative desired-state
 
 This is the big shift. You **describe the end state you want** — "three copies of this
-image, reachable here" — and the platform **continuously reconciles reality toward it**.
-Contrast that with running `docker run` by hand: that's **imperative**, a one-time
-command with no memory. If the container dies, nothing brings it back. Declarative means
-the desired state is written down, and the platform keeps making it true.
+image, reachable here" — and the platform **continuously reconciles** reality toward it.
+
+Contrast that with running `docker run` by hand. That is **imperative**: a one-time command
+with no memory. If the container dies, nothing brings it back.
+
+**Declarative** means the desired state is written down, and the platform keeps making it
+true.
 
 *With plain Docker:* `docker run` is fire-and-forget — there is no record of what
 *should* be running, so nothing notices or repairs drift when reality changes.

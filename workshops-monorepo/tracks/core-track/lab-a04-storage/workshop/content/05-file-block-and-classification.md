@@ -23,7 +23,7 @@ The difference is mostly the [**access mode**](https://kubernetes.io/docs/concep
 | Good for | Shared files, content, uploads | Databases, single-writer, low latency |
 
 {{< note >}}
-A single RWO Block volume **won't** fan out across many replicas — only one Pod can mount
+**⚠️ Watch out:** a single RWO Block volume **will not** fan out across many replicas — only one Pod can mount
 it read-write. Multi-replica stateful apps use an operator that gives each replica its own
 volume (a Developer/Module F topic), not one shared Block PVC.
 {{< /note >}}
@@ -31,12 +31,17 @@ volume (a Developer/Module F topic), not one shared Block PVC.
 ## Classification drives the choice
 
 On a multi-national platform, **data and security classification** can *mandate* a
-particular storage class. It's less about which country and more about the **classification
-level**: some data — for example **NATO** or otherwise international-restricted material —
-must sit on **physically separated** disks, kept apart from national data, which means its
-own dedicated StorageClass. Picking the wrong class can be a **compliance breach**, not
-merely slow. So on {{< param product_short >}}, the storage class you name is a
-governance decision, not only a technical one. See the
+particular storage class.
+
+It is less about which country, and more about the **classification level**. Some data — for
+example **NATO** or otherwise international-restricted material — must sit on **physically
+separated** disks, kept apart from national data. That means its own dedicated
+**StorageClass**.
+
+Picking the wrong class can be a **compliance breach**, not merely slow.
+
+So on {{< param product_short >}} the storage class you name is a **governance** decision,
+not only a technical one. See the
 [{{< param product_short >}} storage concepts]({{< param dcs_docs_base_url >}}/services/namespace_aas/concepts/kubernetes-storage).
 
 ## What about object storage (S3)?

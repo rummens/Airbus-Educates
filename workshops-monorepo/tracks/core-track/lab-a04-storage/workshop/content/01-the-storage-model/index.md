@@ -25,7 +25,7 @@ This is **dynamic provisioning**: you never pre-create the disk, you just claim 
 creates and binds a matching PV automatically.
 
 {{< note >}}
-If you've run VMs: a PVC is like ordering a disk from the platform catalog — you state the
+**💡 If you have run VMs:** a PVC is like ordering a disk from the platform catalog — you state the
 size and type, and the platform attaches a provisioned volume. You don't format a physical
 disk yourself.
 {{< /note >}}
@@ -40,7 +40,7 @@ command: oc get storageclass | tee ~/exercises/storageclasses.txt
 
 ```examiner:execute-test
 name: verify-storageclass
-title: Verify storage classes are available
+title: 🔍 Verify storage classes are available
 timeout: 10
 ```
 

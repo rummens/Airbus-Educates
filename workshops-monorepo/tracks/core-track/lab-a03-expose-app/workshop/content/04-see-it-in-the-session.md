@@ -30,7 +30,7 @@ name: App
 ```
 
 {{< note >}}
-**Two ways to reach the same app.** The **session proxy** (this tab) is an HTTPS,
+**📌 Two ways to reach the same app.** The **session proxy** (this tab) is an HTTPS,
 auth-gated endpoint for use inside your session. The **Route** from the last page is the
 real, external URL anyone can reach from outside. Same app, two separate entry points.
 {{< /note >}}

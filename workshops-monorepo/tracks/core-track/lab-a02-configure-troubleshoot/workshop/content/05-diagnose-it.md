@@ -45,7 +45,7 @@ Events confirm it: a reference to `configmap "hello-dcs-conf" not found`.
 
 ```examiner:execute-test
 name: verify-root-cause
-title: Verify the root-cause signal is visible in the cluster
+title: 🔍 Verify the root-cause signal is visible in the cluster
 timeout: 10
 retries: .INF
 delay: 2
@@ -63,11 +63,17 @@ You get **no log lines** — instead the server answers with something like:
 Error from server (BadRequest): container "hello-dcs" in pod "hello-dcs-…" is waiting to start: CreateContainerConfigError
 ```
 
-That is not a broken command: it is the clue. There are no logs *because the container
-never started*, and the message names the reason — the container's **config** could not be
-built. The failure is **before** the app runs, which means configuration, not code. (For a
-crash *after* startup you'd add `--previous` to read the dead container's logs; here there
-is nothing to read.)
+That is not a broken command — it is the clue.
+
+There are no logs *because the container never started*, and the message names the reason:
+the container's **config** could not be built.
+
+The failure is **before** the app runs, which means **configuration**, not code.
+
+{{< note >}}
+**📌 Note:** for a crash *after* startup you would add `--previous` to read the dead
+container's logs. Here there is nothing to read.
+{{< /note >}}
 
 ## The diagnosis
 

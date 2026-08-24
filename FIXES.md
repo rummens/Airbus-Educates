@@ -4,6 +4,15 @@ Copy-paste-into-chat log of learner-visible fixes and improvements. Newest day f
 one line per change, no internals. Platform/portal changes are live once ArgoCD has
 synced `main`; workshop content is live on the next session start.
 
+## 2026-08-24
+
+- All Core track labs are easier to skim: the key terms are now **bold**, long paragraphs are split into short ones with one idea each, and anything that was a list hidden inside a sentence (the columns to look at, the parts of a command, the steps of a task) is now an actual list.
+- Tips, warnings and side notes now sit in their own coloured box with a clear label — 💡 Tip, 📌 Note, ⚠️ Watch out, ⏳ This takes a moment — so they stand out instead of hiding in the text.
+- Verify buttons now start with ✅ (something you created or changed) or 🔍 (something you looked at), so you can tell at a glance what a check is for.
+- Verify messages are friendlier: a pass says ✅ and what is now true; a failure says ❌, what was expected, what was found, and what to do next — several checks that used to leave you guessing now name the step to go back to.
+- Lab descriptions on the course pages (both the terminal labs and the console labs) got the same treatment: shorter paragraphs, the journey as a numbered list, and a highlighted tip.
+- The lab environment guide is laid out the same way, so the help page and the labs read alike.
+
 ## 2026-08-13
 
 - Core track order: **What is DCS?** now comes second, right after the environment tour, so you get the platform introduction before the hands-on labs. It is still optional — you can skip ahead to Deploy Your First App and come back.

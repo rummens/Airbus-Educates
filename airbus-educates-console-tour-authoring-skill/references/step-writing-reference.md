@@ -160,6 +160,25 @@ them gone: the panel's **Hide** button removes the spotlight and the box until t
 **Show guidance**, and the lab keeps running underneath. Say so in the step text on the pages
 where it matters — a YAML tab is the usual one.
 
+## Step text is plain text — the formatting standard does not apply here
+
+The console plugin puts `title`, `description` and `completionText` on screen **verbatim**. It
+is not markdown and not HTML:
+
+- Backticks show as backticks. Write `oc get pods` bare, as the existing labs do.
+- `**bold**` shows the asterisks.
+- Bullets, numbered lists, blockquotes and `{{< note >}}` do not render.
+- No emoji. They are reserved for the markdown surfaces.
+
+Skimmability in a step box comes from the length rule above — 2–4 short sentences, one idea
+each — not from formatting.
+
+The DCS skimmable-formatting standard (**bold key terms**, lists for actions and choices,
+`> **💡 Tip:**` call-out blocks) *does* apply to this lab's markdown surfaces: the
+`academy.dcs/details` prospectus and the `academy.dcs/summary`. Full rules:
+[the workshop skill's content-formatting-reference.md](../../airbus-educates-workshop-authoring-skill/references/content-formatting-reference.md)
+and [portal-metadata-reference.md](portal-metadata-reference.md).
+
 ## Voice
 
 Follow the house rules from the workshop authoring skill:

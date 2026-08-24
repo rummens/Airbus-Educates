@@ -23,42 +23,43 @@ those forms is for.
 1. You work in the German national environment and need a Tenant. Which portal?
 
 {{< note >}}
-**Answer:** The **German** myITSM. A Tenant is requested per location, in that location's
+**❓ Answer:** The **German** myITSM. A Tenant is requested per location, in that location's
 own portal, and cannot be moved later.
 {{< /note >}}
 
 2. You have just been given a Tenant. Do you need a second request to get a namespace?
 
 {{< note >}}
-**Answer:** Not for the first one — a Tenant comes with a **default namespace**. Every
+**❓ Answer:** Not for the first one — a Tenant comes with a **default namespace**. Every
 *further* namespace is a "New namespace for existing tenant" request.
 {{< /note >}}
 
 3. You need a namespace but have no idea what CPU and memory numbers to put in.
 
 {{< note >}}
-**Answer:** Choose **basic standard namespace** — pre-configured and standard-sized. Raise
+**❓ Answer:** Choose **basic standard namespace** — pre-configured and standard-sized. Raise
 the limits later with a *Modify namespace* request. You never have to touch expert mode.
 {{< /note >}}
 
 4. Is **scaling a Deployment** a request?
 
 {{< note >}}
-**Answer:** No — scaling is self-service via `oc`, within the quota and rights you already
+**❓ Answer:** No — scaling is self-service via `oc`, within the quota and rights you already
 have. Only *raising* that quota is a request.
 {{< /note >}}
 
 5. Why does the form ask for so much detail?
 
 {{< note >}}
-**Answer:** Because {{< param product_short >}} onboarding is **automated** and the fields
+**❓ Answer:** Because {{< param product_short >}} onboarding is **automated** and the fields
 feed that automation directly — the missing piece is the self-service frontend, not the
 provisioning.
 {{< /note >}}
 
 ## Next Steps
 
-That completes the Core track. The **Console track** does the same work in the OpenShift
-web console, and the **Developer track** goes into the mechanisms: **RBAC, Tenancy &
-Namespaces** (access in full) and **DEV vs PROD Namespaces & Policies** (how DEV and PROD
-differ by policy).
+That completes the Core track. Two tracks continue from here:
+
+- the **Console track** — the same work, done in the OpenShift web console;
+- the **Developer track** — the mechanisms behind it: **RBAC, Tenancy & Namespaces** (access
+  in full) and **DEV vs PROD Namespaces & Policies** (how DEV and PROD differ by policy).

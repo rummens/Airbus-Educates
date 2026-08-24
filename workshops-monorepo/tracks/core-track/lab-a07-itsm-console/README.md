@@ -2,17 +2,26 @@
 
 **Every namespace you have used so far was simply there. This lab shows where it comes from — and what the request form actually asks you.**
 
-DCS is multi-national, so there is no single ITSM portal: each location (DIV, DE, ES, …)
-has its own myITSM, and a Tenant must be requested in the portal of its own location — it
-cannot be moved afterwards. This lab finds the right portal, walks the **New tenant**
-request (fields, then billing and export control) and the **New namespace for existing
-tenant** request, and closes with the self-service vs request line.
+DCS is multi-national, so there is no single ITSM portal. Each location (DIV, DE, ES, …) has
+its own **myITSM**.
 
-Deliberately a **quick-start**, not a reference: the namespace page steers to the *basic*
-option and leaves expert mode (operators, capacity tiers, the ten quota fields) as a
-pointer to the docs. The form has many options because DCS onboarding is **automated** —
-ITSM is currently the input form for that pipeline; the missing piece is the self-service
-frontend, not the provisioning.
+A **Tenant** must be requested in the portal of its own location — and it cannot be moved
+afterwards.
+
+This lab walks the whole path:
+
+- find the **right portal**;
+- the **New tenant** request — the fields, then billing and export control;
+- the **New namespace for existing tenant** request;
+- the **self-service vs request** line.
+
+Deliberately a **quick-start**, not a reference. The namespace page steers to the *basic*
+option and leaves expert mode — operators, capacity tiers, the ten quota fields — as a
+pointer to the docs.
+
+> **📌 Note:** the form has many options because DCS onboarding is **automated**. ITSM is
+> currently the input form for that pipeline; the missing piece is the self-service
+> frontend, not the provisioning.
 
 - **Track:** Core / Fundamentals
 - **Audience:** Beginner — you've done the **Terms — Namespaces & Tenancy** lab

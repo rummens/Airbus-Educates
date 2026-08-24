@@ -39,7 +39,7 @@ file: ~/exercises/hello-dcs-with-volume.yaml
 ```
 
 {{< note >}}
-**Two details make the write work.** This image runs as a **non-root** user, and a non-root
+**📌 Two details make the write work.** This image runs as a **non-root** user, and a non-root
 process can only write where it owns the path.
 
 1. **The mount path.** A volume mounted at a root-level path like `/data` stays root-owned
@@ -50,11 +50,15 @@ process can only write where it owns the path.
    that group and make it group-writable, so the non-root app can write it.
 {{< /note >}}
 
-Applying it takes two steps. The manifest names its image as `${DCS_REGISTRY}/...` instead
-of a hard-coded registry, so the same file works on any DCS environment. `envsubst` replaces
-`${DCS_REGISTRY}` with the real value and prints the finished manifest; the `|` pipe hands
-that output straight to `oc apply -f -` (the `-` means "read the manifest from the pipe, not
-a file"):
+The manifest names its image as `${DCS_REGISTRY}/...` instead of a hard-coded registry, so
+the same file works on any DCS environment.
+
+Applying it therefore takes two steps, joined by a pipe:
+
+1. **`envsubst`** — replaces `${DCS_REGISTRY}` with the real value and prints the finished
+   manifest.
+2. **`| oc apply -f -`** — hands that output straight to `oc`. The `-` means "read the
+   manifest from the pipe, not a file".
 
 ```terminal:execute
 command: envsubst < hello-dcs-with-volume.yaml | oc apply -f -
@@ -71,7 +75,7 @@ the claim is Bound and the app is running with the volume mounted:
 
 ```examiner:execute-test
 name: verify-pvc-bound
-title: Verify the PVC is Bound
+title: ✅ Verify the PVC is Bound
 timeout: 15
 retries: .INF
 delay: 2
@@ -79,7 +83,7 @@ delay: 2
 
 ```examiner:execute-test
 name: verify-volume-mounted
-title: Verify the app is running with the volume mounted
+title: ✅ Verify the app is running with the volume mounted
 timeout: 15
 retries: .INF
 delay: 2
@@ -95,7 +99,7 @@ command: oc exec deploy/hello-dcs -- sh -c 'echo persisted-marker-42 > /opt/app-
 
 ```examiner:execute-test
 name: verify-marker-written
-title: Verify the marker file exists in the volume
+title: ✅ Verify the marker file exists in the volume
 timeout: 10
 retries: .INF
 delay: 2

@@ -19,7 +19,7 @@ controls which traffic may reach a Pod, matched by **labels**. On {{< param prod
 traffic is restricted by default, and one policy has been pre-provisioned for your app.
 
 {{< note >}}
-**Observe only.** Tenants can't self-create NetworkPolicies on {{< param product_short >}}
+**⚠️ Observe only.** Tenants can't self-create NetworkPolicies on {{< param product_short >}}
 yet — it's on the roadmap. So here you *inspect* one rather than author it.
 {{< /note >}}
 
@@ -30,7 +30,7 @@ command: oc describe networkpolicy allow-hello-dcs-ingress | tee ~/exercises/net
 ```examiner:execute-test
 name: verify-networkpolicy
 prefix: After the describe
-title: Verify you inspected the NetworkPolicy
+title: 🔍 Verify you inspected the NetworkPolicy
 timeout: 10
 ```
 
@@ -54,7 +54,7 @@ gets everything it needs from inside the platform (images from Harbor, packages 
 internal mirrors), never from the open internet.
 
 {{< note >}}
-**There is a controlled exception.** Specific external resources *can* be reached through
+**📌 There is a controlled exception.** Specific external resources *can* be reached through
 a managed egress proxy — but this is **not on by default**. Each destination must be
 **explicitly whitelisted and enabled** (via a request to the platform team), so egress
 stays deny-by-default and every allowed route is deliberate and auditable. "Air-gapped"
@@ -63,12 +63,12 @@ means *no open path out*, not *no path ever*.
 
 ```examiner:execute-test
 name: verify-egress-blocked
-title: Verify egress to the public internet is blocked
+title: 🔍 Verify egress to the public internet is blocked
 timeout: 15
 ```
 
 {{< note >}}
-On a lab cluster that happens to have internet access, this check may not pass — the real
+**⚠️ Watch out:** on a lab cluster that happens to have internet access, this check may not pass — the real
 {{< param product_short >}} platform blocks it. That's an environment difference, not a
 mistake on your part.
 {{< /note >}}

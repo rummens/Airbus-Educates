@@ -60,6 +60,12 @@ point it at a later slot in the track or send the concept back to a terminal lab
    sentence is not enough — see [references/portal-metadata-reference.md](references/portal-metadata-reference.md).
 7. **Plain language, DCS voice.** Same rules as the workshop skill: no idioms, no metaphors, no
    marketing tone. Short sentences. Define nothing that a prerequisite lab already defined.
+   **Step text is plain text, not markdown** — the console plugin renders `title`, `description`
+   and `completionText` verbatim beside the highlight, so backticks, `**bold**`, bullets and
+   emoji all show up literally. Write `oc get pods`, not `` `oc get pods` ``. The skimmable
+   formatting standard (bold key terms, lists, `> **💡 Tip:**` call-outs) applies to the lab's
+   `academy.dcs/details` prospectus, which *is* markdown — see
+   [the workshop skill's content-formatting-reference.md](../airbus-educates-workshop-authoring-skill/references/content-formatting-reference.md).
 8. **Naming.** Folder name, `ConsoleLab` `metadata.name`, and the paired Workshop name are
    identical. Default tours are `tour-<subject>`; portal-launched labs are `lab-u<NN>-<subject>`
    (`u` for the console/UI series, numbered in delivery order).
@@ -146,6 +152,9 @@ Check, in this order:
 4. Does any click change the screen without the next step saying what changed? → split it into
    an action step and an `acknowledge` reaction step.
 5. Is the portal description one thin sentence? → write the `details` prospectus.
+5b. Does any step text contain backticks, `**`, bullets or emoji? → strip them; step text is
+   plain. Is the `details` prospectus a wall of prose? → bold the key terms, split the
+   paragraphs, list the journey, add a `> **💡 Tip:**` call-out.
 6. Does every target exist on the page the previous step leaves the learner on?
 7. Is any step's verification already true when the step becomes current? → it will be skipped
    in silence. Most often a namespace-selection step in a lab the portal already scoped.

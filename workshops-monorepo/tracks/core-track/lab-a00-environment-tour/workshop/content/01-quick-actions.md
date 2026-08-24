@@ -3,9 +3,10 @@ title: Quick Actions
 ---
 
 Before anything else, the one thing that makes these labs work: the **boxes** in the
-instructions on the left. They are buttons. Click one and it does the work for you — types
-a command, opens a file, checks your cluster, opens a slide. You rarely type anything by
-hand.
+instructions on the left. They are **buttons**.
+
+Click one and it does the work for you — it types a command, opens a file, checks your
+cluster, or opens a slide. You rarely type anything by hand.
 
 If you skip past them and read only the text, the lab will feel broken. So try them here,
 on a page where nothing can go wrong.
@@ -41,16 +42,18 @@ there.
 
 ```examiner:execute-test
 name: verify-quick-action
-title: Verify your first quick action ran
+title: ✅ Verify your first quick action ran
 timeout: 10
 ```
 
-Green means the step really worked — not "the page scrolled past", but "the cluster and
-your session are in the state this step promised". If a check is ever **red**, fix the
-step above before moving on; checks are safe to click again.
+**Green** means the step really worked — not "the page scrolled past", but "the cluster
+and your session are in the state this step promised".
+
+If a check is ever **red**, fix the step above before moving on. Checks are safe to click
+again.
 
 {{< note >}}
-**Amber means waiting, not broken.** Checks run one at a time. Click a second check while
+**⚠️ Amber means waiting, not broken.** Checks run one at a time. Click a second check while
 the first is still running and it turns amber until its turn comes — then it runs and shows
 its real result. Nothing is wrong; give it a moment.
 {{< /note >}}
@@ -76,7 +79,7 @@ name: Terminal
 ```
 
 {{< note >}}
-**If a box seems to do nothing**, click it again. A "run a command" box needs the Terminal
+**💡 If a box seems to do nothing**, click it again. A "run a command" box needs the Terminal
 tab; if you are looking at the Slides or the Editor, the command still ran — switch back to
 the Terminal to see it.
 {{< /note >}}

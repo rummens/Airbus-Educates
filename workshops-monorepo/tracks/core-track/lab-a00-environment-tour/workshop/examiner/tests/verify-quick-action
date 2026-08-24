@@ -3,7 +3,7 @@
 # it writes one line into ~/exercises/quick-actions.txt.
 f="$HOME/exercises/quick-actions.txt"
 if [ ! -s "$f" ]; then
-  echo "$f is missing or empty. Click the 'echo ... > ~/exercises/quick-actions.txt' box above — make sure the Terminal tab is the visible tab." >&2
+  echo "❌ $f is missing or empty. Click the 'echo ... > ~/exercises/quick-actions.txt' box above — make sure the Terminal tab is the visible tab." >&2
   exit 1
 fi
-echo "OK: quick action ran, $f contains: $(cat "$f")"
+echo "✅ quick action ran, $f contains: $(cat "$f")"

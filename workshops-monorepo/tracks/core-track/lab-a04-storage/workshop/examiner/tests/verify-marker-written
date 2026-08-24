@@ -2,8 +2,8 @@
 # Verify the marker file exists in the mounted volume with the expected value.
 val=$(oc exec deploy/hello-dcs -- cat /opt/app-root/src/data/marker 2>/dev/null)
 if [ "$val" = "persisted-marker-42" ]; then
-  echo "OK: marker written to the volume."
+  echo "✅ marker written to the volume."
   exit 0
 fi
-echo "Marker not found or unexpected (got: '${val:-<none>}'). Did the write step run?" >&2
+echo "❌ Marker not found or unexpected (got: '${val:-<none>}'). Re-run the write step above." >&2
 exit 1

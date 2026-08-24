@@ -19,7 +19,7 @@ namespace, each with the same object names, each on its own lifecycle. This is t
 the `hello`-in-two-namespaces demo you ran, applied to a real delivery pipeline.
 
 {{< note >}}
-DEV and PROD aren't just naming conventions on {{< param product_short >}} — they're
+**📌 Note:** DEV and PROD are not just naming conventions on {{< param product_short >}} — they're
 namespace **types** with different rules. You'll see how they're enforced in the
 Developer track (**DEV vs PROD Namespaces & Policies**).
 {{< /note >}}
@@ -47,6 +47,6 @@ You want DEV, QA and PROD copies of the same app — same names — all running 
 What gives you that cleanly?
 
 {{< note >}}
-**Answer:** Put each copy in its **own namespace**. Identical names coexist without
+**❓ Answer:** Put each copy in its **own namespace**. Identical names coexist without
 clashing, and each instance has an independent lifecycle, quota, and access policy.
 {{< /note >}}

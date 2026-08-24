@@ -110,3 +110,4 @@ Commands are run with `oc` in the terminal.
 - [ ] Every named concept in Prerequisites/Further Reading links to official docs
 - [ ] Duration and difficulty match `workshop.yaml`
 - [ ] No `terminal:execute` or `editor:*` actions on the overview page
+- [ ] Formatted per [content-formatting-reference.md](content-formatting-reference.md) — key terms bold, What You'll Learn / Prerequisites as bulleted lists, the first-time note as a `{{< note >}}` led by `**💡 Tip:**`

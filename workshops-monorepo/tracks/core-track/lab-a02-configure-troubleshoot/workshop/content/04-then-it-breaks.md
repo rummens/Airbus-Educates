@@ -34,14 +34,14 @@ app. You'll see a Pod that is **not** Ready — a status like `CreateContainerCo
 
 ```examiner:execute-test
 name: verify-not-ready
-title: Verify the app is currently broken (not ready)
+title: ✅ Verify the app is currently broken (not ready)
 timeout: 10
 retries: .INF
 delay: 2
 ```
 
 {{< warning >}}
-Don't fix anything yet. The next page is about *reading what the cluster is telling you* —
+**⚠️ Do not fix anything yet.** The next page is about *reading what the cluster is telling you* —
 that skill matters more than this specific bug. Try to diagnose the cause from the
 cluster's own messages before changing anything.
 {{< /warning >}}

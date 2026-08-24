@@ -5,8 +5,8 @@
 # ReplicaSet lists fine. Check the RS directly.
 rs=$(oc get rs -l app=hello-dcs -o name 2>/dev/null | head -1)
 if [ -n "$rs" ]; then
-  echo "OK: Deployment owns a ReplicaSet which owns the Pod(s): $rs"
+  echo "✅ Deployment owns a ReplicaSet which owns the Pod(s): $rs"
   exit 0
 fi
-echo "No ReplicaSet found for app=hello-dcs — the Deployment should have created one." >&2
+echo "❌ No ReplicaSet found for app=hello-dcs — the Deployment should have created one. Check the Deployment exists with "oc get deploy hello-dcs"." >&2
 exit 1

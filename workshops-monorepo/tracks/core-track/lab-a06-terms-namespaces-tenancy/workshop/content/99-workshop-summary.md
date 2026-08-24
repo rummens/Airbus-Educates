@@ -20,7 +20,7 @@ You now have the vocabulary — and you've *seen* the thing the words describe.
 1. What does a **namespace** isolate?
 
 {{< note >}}
-**Answer:** The objects within it (Deployments, Pods, Services, ConfigMaps, …), their
+**❓ Answer:** The objects within it (Deployments, Pods, Services, ConfigMaps, …), their
 **names**, and **actions** taken on them. Objects in one namespace don't see or affect
 objects in another.
 {{< /note >}}
@@ -28,14 +28,14 @@ objects in another.
 2. Give **one concrete reason** to run multiple namespaces.
 
 {{< note >}}
-**Answer:** Any of: separate DEV/QA/PROD instances of one app; team / blast-radius
+**❓ Answer:** Any of: separate DEV/QA/PROD instances of one app; team / blast-radius
 isolation; independent quotas and RBAC; naming freedom (no cross-team name coordination).
 {{< /note >}}
 
 3. Is **"project"** a separate layer between Tenant and Namespace on {{< param product_short >}}?
 
 {{< note >}}
-**Answer:** No. "Project" is just OpenShift's word for a namespace. The model is two
+**❓ Answer:** No. "Project" is just OpenShift's word for a namespace. The model is two
 levels only: **Tenant → Namespaces**.
 {{< /note >}}
 

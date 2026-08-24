@@ -33,7 +33,7 @@ If it doesn't, leave all four fields empty:
 One declaration: do you plan to put **EC or ITAR data** into any namespace of this tenant?
 
 {{< warning >}}
-{{< param product_short >}} **can** host such data. But if you answer yes, you must notify
+**⚠️ Watch out:** {{< param product_short >}} **can** host such data. But if you answer yes, you must notify
 your **local Export Control team** — your Export Control officer, or the Export Control
 hub page, is the place to start. They just want to know; this is a notification duty, not
 a rejection.

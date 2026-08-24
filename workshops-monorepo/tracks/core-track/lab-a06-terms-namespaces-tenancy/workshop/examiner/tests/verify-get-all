@@ -4,11 +4,11 @@
 # check that only asserts it goes green before the learner clicks anything.
 f="$HOME/exercises/workloads.txt"
 if ! [ -s "$f" ]; then
-  echo "Click the command step above first — $f is missing or empty." >&2
+  echo "❌ Click the command step above first — $f is missing or empty." >&2
   exit 1
 fi
 if ! grep -qE 'NAME|No resources found' "$f"; then
-  echo "$f does not look like that command's output — re-run the step above." >&2
+  echo "❌ $f does not look like that command's output — re-run the step above." >&2
   exit 1
 fi
-echo "OK: you listed the workloads in your namespace"
+echo "✅ you listed the workloads in your namespace"

@@ -3,8 +3,8 @@
 # pod (works whether or not a port-forward is running) — the image ships python3.
 body=$(oc exec deploy/hello-dcs -- python3 -c "import urllib.request;print(urllib.request.urlopen('http://localhost:8080',timeout=5).read().decode())" 2>/dev/null)
 if echo "$body" | grep -q "Hello from the DCS Academy"; then
-  echo "OK: the app served your greeting."
+  echo "✅ the app served your greeting."
   exit 0
 fi
-echo "Response did not contain the expected greeting. Got: ${body:-<empty>}" >&2
+echo "❌ Response did not contain the expected greeting. Got: ${body:-<empty>}. Wait for the Pod to be Ready, then re-run the curl step above." >&2
 exit 1

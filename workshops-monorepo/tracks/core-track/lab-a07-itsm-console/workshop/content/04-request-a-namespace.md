@@ -13,7 +13,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/na
 ```
 
 {{< note >}}
-**Your Tenant already came with one namespace.** You only need this request from the
+**📌 Your Tenant already came with one namespace.** You only need this request from the
 *second* namespace onwards.
 {{< /note >}}
 
@@ -37,7 +37,7 @@ The form offers three paths. For getting started, one of them is the answer:
 - **Customized (expert mode)** — you set every quota and technical parameter by hand.
 
 {{< note >}}
-**Basic is not a downgrade.** Same platform, sensible defaults, and the limits are raised
+**📌 Basic is not a downgrade.** Same platform, sensible defaults, and the limits are raised
 on request. Choose expert mode when you already know your exact numbers — not to keep your
 options open.
 {{< /note >}}
@@ -65,7 +65,7 @@ Leave them all off if you don't know you need them; they can be added later.
   in "Further details".
 
 {{< warning >}}
-"Harbor **project**" is Harbor's own word for a registry namespace. It is **not** a layer
+**⚠️ Watch out:** "Harbor **project**" is Harbor's own word for a registry namespace. It is **not** a layer
 in the {{< param product_short >}} tenancy model — that is still just **Tenant →
 Namespaces**, as the **Terms — Namespaces & Tenancy** lab said.
 {{< /warning >}}
@@ -76,7 +76,7 @@ Three fields, one usage choice, zero or more features, submit. Everything after 
 automated.
 
 {{< note >}}
-**Going further later.** Expert mode adds operators, capacity tiers (16 / 32 / 48 CPU) and
+**📌 Going further later.** Expert mode adds operators, capacity tiers (16 / 32 / 48 CPU) and
 about ten individual quota fields (CPU, memory, ephemeral and PVC storage, image storage,
 Harbor space). Each has a documented default — and the documented advice is to **keep the
 defaults** unless you know better. The full field list is in the

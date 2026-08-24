@@ -18,14 +18,14 @@ Your app went from a private tunnel to a real, external address on
 1. How do you reach a **Service** from inside the cluster?
 
 {{< note >}}
-**Answer:** By its DNS name `‹service›.‹namespace›.svc` (optionally with the port), e.g.
+**❓ Answer:** By its DNS name `‹service›.‹namespace›.svc` (optionally with the port), e.g.
 `hello-dcs.<namespace>.svc:8080`. The Service load-balances to the matching Pods.
 {{< /note >}}
 
 2. What does a **Route** add that a Service alone doesn't?
 
 {{< note >}}
-**Answer:** External reachability — it publishes the Service on a public hostname on
+**❓ Answer:** External reachability — it publishes the Service on a public hostname on
 DCS-managed DNS via the external load balancer, so clients *outside* the cluster can reach
 it. A Service alone is in-cluster only.
 {{< /note >}}
@@ -33,7 +33,7 @@ it. A Service alone is in-cluster only.
 3. Why does a Route need a **PROD-type namespace**?
 
 {{< note >}}
-**Answer:** DCS policy only admits Routes in PROD-type namespaces — exposing a service is
+**❓ Answer:** DCS policy only admits Routes in PROD-type namespaces — exposing a service is
 a production-grade action. DEV namespaces can't create Routes. (The enforcement mechanism
 is covered by the Developer-track lab **DEV vs PROD Namespaces & Policies**.)
 {{< /note >}}
@@ -41,7 +41,7 @@ is covered by the Developer-track lab **DEV vs PROD Namespaces & Policies**.)
 4. Why did the `example.com` call **fail**?
 
 {{< note >}}
-**Answer:** DCS is air-gapped — workloads have no egress to the public internet.
+**❓ Answer:** DCS is air-gapped — workloads have no egress to the public internet.
 Everything comes from inside the platform (Harbor images, internal mirrors).
 {{< /note >}}
 

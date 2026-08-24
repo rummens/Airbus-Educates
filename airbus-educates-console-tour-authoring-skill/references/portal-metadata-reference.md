@@ -58,6 +58,29 @@ Markdown, in a YAML block scalar. Cover, with `###` headings:
 
 `lab-u01-container-access` is the reference implementation.
 
+### Formatting the prospectus
+
+`details` and `summary` are the console lab's only markdown surfaces, so the house
+skimmable-formatting standard applies to them in full — see
+[the workshop skill's content-formatting-reference.md](../../airbus-educates-workshop-authoring-skill/references/content-formatting-reference.md):
+
+- **Bold the key terms** on first mention (`**console lab**`, `**Logs** tab, the prerequisite
+  lab titles).
+- **Paragraphs of ≤3 lines**, one idea each. Split long sentences.
+- Every journey step and every option is a **list item**, led by its bolded term where it names
+  one.
+- Hints and cautions go in a **blockquote call-out** — the portal renders markdown, not Hugo, so
+  `{{< note >}}` is unavailable:
+
+  ```markdown
+  > **💡 Tip:** you will not type a single command — every screen names the `oc` command it
+  > replaces, so you can map one onto the other afterwards.
+  ```
+
+- Two or three call-outs at most. Emoji only from the sanctioned set (💡 📌 ⚠️).
+- None of this reaches the step boxes — see
+  [step-writing-reference.md](step-writing-reference.md).
+
 ## Ordering and tracks
 
 - `academy.dcs/track` puts the lab in a track; `academy.dcs/order` sorts it within that track.

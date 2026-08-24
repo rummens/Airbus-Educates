@@ -31,7 +31,7 @@ command: oc apply -f configmap.yaml
 
 ```examiner:execute-test
 name: verify-configmap-updated
-title: Verify the ConfigMap holds the new greeting
+title: ✅ Verify the ConfigMap holds the new greeting
 timeout: 10
 ```
 
@@ -67,13 +67,13 @@ template except for the config it reads: the rollout is what turned the staged c
 a live one.
 
 {{< note >}}
-Want to watch it happen? In the **lower** terminal you can run `oc get pods -w` to see the
+**💡 Want to watch it happen?** In the **lower** terminal you can run `oc get pods -w` to see the
 old Pod terminate as the new one starts. Press `Ctrl-C` there when done.
 {{< /note >}}
 
 ```examiner:execute-test
 name: verify-updated-value
-title: Verify the app now serves the updated greeting
+title: ✅ Verify the app now serves the updated greeting
 timeout: 15
 retries: .INF
 delay: 2

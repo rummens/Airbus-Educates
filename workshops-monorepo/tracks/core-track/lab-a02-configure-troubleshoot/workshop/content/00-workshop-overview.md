@@ -2,14 +2,20 @@
 title: "Configure & Troubleshoot Your App"
 ---
 
-In the **Deploy Your First App** lab you customised your app with `oc set env` — one value, on the command line. That's
-fine for one setting, but a real app on **{{< param product_name >}}** has many settings,
-and some of them are secret. This lab moves configuration to where it belongs — into
-dedicated objects — and then, because things break in the real world, hands you a broken
-app and teaches you to fix it.
+In the **Deploy Your First App** lab you customised your app with `oc set env` — one value,
+on the command line.
+
+That is fine for one setting. A real app on **{{< param product_name >}}** has many
+settings, and some of them are **secret**.
+
+This lab does two things:
+
+1. moves configuration into **dedicated objects**, where it belongs;
+2. hands you a **broken** app and teaches you to fix it — because things break in the real
+   world.
 
 {{< note >}}
-**First time in one of these labs?** See the
+**💡 First time in one of these labs?** See the
 [DCS Academy help page]({{< param ingress_protocol >}}://academy.{{< param ingress_domain >}}/help)
 for the terminal, editor and clickable actions.
 {{< /note >}}
@@ -29,7 +35,7 @@ By the end of this workshop you will be able to:
   Deployment → ReplicaSet → Pod chain. This lab reuses the same `hello-dcs` app.
 
 {{< note >}}
-**New to the command line or containers?** This track goes best if you're comfortable
+**💡 New to the command line or containers?** This track goes best if you're comfortable
 with **basic Linux/terminal use** (running a command, reading its output, editing a file)
 and know **a little about containers** (what an image is versus a running container). You
 don't need to be an expert, and nothing here is blocking — but if it's all new, a short

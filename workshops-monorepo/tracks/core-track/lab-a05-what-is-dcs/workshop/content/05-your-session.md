@@ -29,7 +29,7 @@ command: oc whoami | tee ~/exercises/whoami.txt
 
 ```examiner:execute-test
 name: verify-whoami
-title: Verify you are authenticated
+title: 🔍 Verify you are authenticated
 timeout: 10
 ```
 
@@ -43,7 +43,7 @@ command: oc version | tee ~/exercises/version.txt
 
 ```examiner:execute-test
 name: verify-oc-version
-title: Verify the cluster API is reachable
+title: 🔍 Verify the cluster API is reachable
 timeout: 10
 ```
 
@@ -58,12 +58,12 @@ command: oc project -q | tee ~/exercises/project.txt
 
 ```examiner:execute-test
 name: verify-project
-title: Verify your project is selected
+title: 🔍 Verify your project is selected
 timeout: 10
 ```
 
 {{< note >}}
-Your project name is also available in the terminal as `$SESSION_NAMESPACE`. Because it
+**📌 Note:** your project name is also available in the terminal as `$SESSION_NAMESPACE`. Because it
 is already your default, most `oc` commands need no `-n` flag.
 {{< /note >}}
 
@@ -78,11 +78,11 @@ command: oc status | tee ~/exercises/status.txt
 
 ```examiner:execute-test
 name: verify-status
-title: Verify oc status runs against your project
+title: 🔍 Verify oc status runs against your project
 timeout: 10
 ```
 
 {{< note >}}
-Prefer a visual view? {{< param product_short >}} has a web console too — the whole
+**💡 Prefer a visual view?** {{< param product_short >}} has a web console too — the whole
 **Console track** is a guided tour of it. For now, the terminal is all you need.
 {{< /note >}}

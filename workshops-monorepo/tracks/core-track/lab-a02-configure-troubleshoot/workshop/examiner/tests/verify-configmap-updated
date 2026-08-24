@@ -2,8 +2,8 @@
 # Verify the ConfigMap now holds the updated greeting.
 val=$(oc get configmap hello-dcs-config -o jsonpath='{.data.GREETING}' 2>/dev/null)
 if [ "$val" = "Reconfigured without a redeploy" ]; then
-  echo "OK: ConfigMap GREETING updated."
+  echo "✅ ConfigMap GREETING updated."
   exit 0
 fi
-echo "ConfigMap GREETING not updated (got: '${val:-unset}')." >&2
+echo "❌ ConfigMap GREETING not updated (got: '${val:-unset}'). Re-run the edit and apply steps above." >&2
 exit 1

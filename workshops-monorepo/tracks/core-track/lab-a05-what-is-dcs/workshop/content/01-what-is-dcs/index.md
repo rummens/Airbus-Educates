@@ -16,7 +16,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/pl
 ```
 
 {{< note >}}
-**Who it is for.** {{< param product_short >}} is the container platform of **Airbus
+**📌 Who it is for.** {{< param product_short >}} is the container platform of **Airbus
 Defence and Space** — its tenants are D&S programmes and teams. Other Airbus divisions run
 their own platforms; the section below explains why D&S built its own rather than joining
 one of them.
@@ -25,15 +25,22 @@ one of them.
 ## Why DCS?
 
 Airbus Commercial adopted OpenShift to modernise how applications are built and run.
-Airbus Defence and Space faces the same need at greater scale and under stricter
-security and sovereignty requirements — which is what {{< param product_short >}}
-delivers: a **Namespace as a Service** platform where teams request namespaces and ship
-applications, while the platform handles the clusters, security, and compliance.
 
-The payoff for you as a tenant: it's **air-gapped and sovereign** (your workloads and
-data stay inside the platform), it's **managed** (the platform team runs the clusters,
-security, and compliance), and it's **self-service** (you request a namespace and ship,
-without raising infrastructure tickets). Learn more in the
+Airbus Defence and Space faces the same need at greater scale, and under stricter
+**security** and **sovereignty** requirements.
+
+That is what {{< param product_short >}} delivers: a **Namespace as a Service** platform.
+Teams request namespaces and ship applications; the platform handles the clusters, security
+and compliance.
+
+The payoff for you as a tenant is three things:
+
+- **air-gapped and sovereign** — your workloads and data stay inside the platform;
+- **managed** — the platform team runs the clusters, security and compliance;
+- **self-service** — you request a namespace and ship, without raising infrastructure
+  tickets.
+
+Learn more in the
 [{{< param product_short >}} services overview]({{< param dcs_docs_base_url >}}/services).
 
 ![DCS at a glance](dcs-architecture.svg)

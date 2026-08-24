@@ -15,8 +15,8 @@ name: Feedback
 ```
 
 {{< note >}}
-The form has two quick 1–5 ratings and a comment box. One submit and you're done —
-then come back here for the wrap-up.
+**💡 Tip:** the form has two quick 1–5 ratings and a comment box. One **submit** and you
+are done — then come back here for the wrap-up.
 {{< /note >}}
 
 Return to the workshop when you've submitted:

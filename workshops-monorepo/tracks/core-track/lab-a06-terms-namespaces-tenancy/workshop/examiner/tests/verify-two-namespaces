@@ -4,15 +4,15 @@
 # check that only asserts it goes green before the learner clicks anything.
 f="$HOME/exercises/peers.txt"
 if ! [ -s "$f" ]; then
-  echo "Click the command step above first — $f is missing or empty." >&2
+  echo "❌ Click the command step above first — $f is missing or empty." >&2
   exit 1
 fi
 if ! grep -q -e '-app-a' "$f"; then
-  echo "$f does not look like that command's output — re-run the step above." >&2
+  echo "❌ $f does not look like that command's output — re-run the step above." >&2
   exit 1
 fi
 if ! grep -q -e '-app-b' "$f"; then
-  echo "The output is recorded, but the same check against the cluster failed — re-run the step above." >&2
+  echo "❌ The output is recorded, but the same check against the cluster failed — re-run the step above." >&2
   exit 1
 fi
-echo "OK: you can see both peer namespaces"
+echo "✅ you can see both peer namespaces"

@@ -2,10 +2,11 @@
 title: Reach It
 ---
 
-Your app is running, but nothing outside the cluster can talk to it yet. For a quick
-local test you can open a **tunnel** from your terminal straight to the Pod with
-[`oc port-forward`](https://docs.openshift.com/container-platform/latest/nodes/containers/nodes-containers-port-forwarding.html) —
-no public address required.
+Your app is running, but nothing outside the cluster can talk to it yet.
+
+For a quick local test, open a **tunnel** from your terminal straight to the Pod with
+[`oc port-forward`](https://docs.openshift.com/container-platform/latest/nodes/containers/nodes-containers-port-forwarding.html).
+No public address required.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -15,8 +16,11 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/re
 ```
 
 {{< note >}}
-This is a *local* tunnel, just for you, just while the command runs — not real exposure.
-Giving the app a proper external address (a **Route**) is the whole point of **Expose Your App**.
+**📌 Note:** this is a *local* tunnel — only for you, only while the command runs. It is
+not real exposure.
+
+Giving the app a proper external address (a **Route**) is the whole point of **Expose Your
+App**.
 {{< /note >}}
 
 ## Open the tunnel (lower terminal)
@@ -36,7 +40,7 @@ session: 2
 
 ```examiner:execute-test
 name: verify-portforward
-title: Verify the tunnel reaches the app (HTTP 200)
+title: ✅ Verify the tunnel reaches the app (HTTP 200)
 timeout: 10
 retries: .INF
 delay: 2
@@ -50,13 +54,14 @@ Now `curl` the app in the **upper** pane:
 command: curl -s localhost:8080
 ```
 
-You should see your greeting — **`Hello from the DCS Academy`** — in the plain-text
-response. The app reads `GREETING` at request time, so what you set on the last page is
-what comes back.
+You should see your greeting in the plain-text response: `Hello from the DCS Academy`.
+
+The app reads `GREETING` at request time, so what you set on the last page is what comes
+back.
 
 ```examiner:execute-test
 name: verify-greeting
-title: Verify the app serves your greeting
+title: ✅ Verify the app serves your greeting
 timeout: 10
 retries: 3
 delay: 2

@@ -2,15 +2,20 @@
 title: "Your Workshop Environment"
 ---
 
-Welcome to the **{{< param product_name >}}** Academy. This short lab tours the environment
-every lab runs in — the clickable actions, the terminal, the editor, the cluster view and
-the feedback form — before you learn anything about the platform itself.
+Welcome to the **{{< param product_name >}}** Academy.
+
+This short lab tours the **environment** every lab runs in, before you learn anything about
+the platform itself:
+
+- the **clickable actions** you use instead of typing,
+- the **terminal**, the **editor** and the **Console** view,
+- the **feedback** form.
 
 This is the very first lab in the Foundations track. It assumes **no prior container,
 Kubernetes, or {{< param product_short >}} knowledge** — just a DCS login.
 
 {{< note >}}
-**First time in one of these labs?** You're in the right place — that's what this lab
+**💡 First time in one of these labs?** You're in the right place — that's what this lab
 covers. For a written reference you can keep open in another browser tab, see the
 [DCS Academy help page]({{< param ingress_protocol >}}://academy.{{< param ingress_domain >}}/help).
 {{< /note >}}
@@ -33,10 +38,13 @@ None. A DCS login is all you need — every tool is already running in your brow
 ## Your Environment
 
 This session is a browser-based environment with an embedded **terminal**, a **code
-editor**, and a **Console** tab, all on one screen. Nothing to install, no login to do.
-All commands are run with [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html),
-the OpenShift command line, and you already have your own {{< param product_short >}}
-project scoped just to you.
+editor** and a **Console** tab, all on one screen.
+
+Nothing to install, no login to do.
+
+All commands run with [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html),
+the OpenShift command line. You already have your own {{< param product_short >}} project,
+scoped to you alone.
 
 ## Time and Difficulty
 

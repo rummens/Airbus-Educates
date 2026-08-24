@@ -3,8 +3,11 @@ title: What Is a Namespace?
 ---
 
 You have been working inside a [**Namespace**](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
-this whole time without a name for it. A namespace groups and isolates a set of
-workloads: the Deployments, Pods, Services, ConfigMaps and so on that belong together.
+this whole time, without a name for it.
+
+A namespace **groups** and **isolates** a set of workloads — the Deployments, Pods,
+Services, ConfigMaps and so on that belong together.
+
 Objects in one namespace do not see or collide with objects in another.
 
 Open the slide for this page (📊 **Slides** tab):
@@ -14,13 +17,17 @@ name: Slides
 url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/namespace
 ```
 
-On {{< param product_short >}}, the namespace is also the **unit of consumption**: you
-request namespaces and ship applications into them. That's what "Namespace as a Service"
-means — the namespace, not a server, is the thing you're given. Learn more in the
+On {{< param product_short >}} the namespace is also the **unit of consumption**: you
+request namespaces and ship applications into them.
+
+That is what "Namespace as a Service" means — the **namespace**, not a server, is the thing
+you are given.
+
+Learn more in the
 [{{< param product_short >}} tenancy & access overview]({{< param dcs_docs_base_url >}}/services/tenants).
 
 {{< note >}}
-**Think of an office building.** The **Tenant** is your organisation renting space in it:
+**💡 Think of an office building.** The **Tenant** is your organisation renting space in it:
 named on the contract, billed monthly, accountable for what happens inside. A **Namespace**
 is one room your organisation was given — your furniture, your mess, and nothing from the
 room next door leaks in. **RBAC** decides who holds a key to which room. And the **PROD**
@@ -40,12 +47,12 @@ command: oc project | tee ~/exercises/project.txt
 
 ```examiner:execute-test
 name: verify-active-namespace
-title: Verify you have an active namespace
+title: 🔍 Verify you have an active namespace
 timeout: 10
 ```
 
 {{< note >}}
-{{< param product_short >}} shows this as a **project**. On OpenShift, "project" is just
+**📌 Note:** {{< param product_short >}} shows this as a **project**. On OpenShift, "project" is just
 the word for a namespace with a little extra metadata — it is **not** a separate layer
 above it. We'll come back to that on the Tenancy page.
 {{< /note >}}
@@ -62,7 +69,7 @@ command: oc get deployments,pods,services 2>&1 | tee ~/exercises/workloads.txt
 
 ```examiner:execute-test
 name: verify-get-all
-title: Verify you can list workloads in your namespace
+title: 🔍 Verify you can list workloads in your namespace
 timeout: 10
 ```
 

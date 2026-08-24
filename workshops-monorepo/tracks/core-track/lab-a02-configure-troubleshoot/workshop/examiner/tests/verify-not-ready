@@ -6,15 +6,15 @@
 reasons=$(oc get pods -l app=hello-dcs \
   -o jsonpath='{range .items[*]}{.status.containerStatuses[*].state.waiting.reason}{"\n"}{end}' 2>/dev/null)
 if echo "$reasons" | grep -qiE 'CreateContainerConfigError|CrashLoopBackOff|ImagePullBackOff|ErrImagePull|InvalidImageName|RunContainerError|CreateContainerError'; then
-  echo "OK: a hello-dcs Pod is failing to start ($(echo "$reasons" | grep -iE 'Error|BackOff' | head -1 | tr -d ' ')) — the fault is live."
+  echo "✅ a hello-dcs Pod is failing to start ($(echo "$reasons" | grep -iE 'Error|BackOff' | head -1 | tr -d ' ')) — the fault is live."
   exit 0
 fi
 # Fallback: desired replicas not fully ready.
 desired=$(oc get deploy hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
 ready=$(oc get deploy hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
 if [ "${ready:-0}" -lt "${desired:-1}" ] 2>/dev/null; then
-  echo "OK: only ${ready:-0}/${desired:-1} replicas ready — the app is not healthy."
+  echo "✅ only ${ready:-0}/${desired:-1} replicas ready — the app is not healthy."
   exit 0
 fi
-echo "Expected the app to be broken, but no failing Pod was found. Did the broken manifest apply?" >&2
+echo "❌ Expected the app to be broken, but no failing Pod was found. Did the broken manifest apply?" >&2
 exit 1

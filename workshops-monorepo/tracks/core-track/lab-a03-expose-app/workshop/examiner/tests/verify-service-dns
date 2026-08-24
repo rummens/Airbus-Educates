@@ -3,8 +3,8 @@
 ns=$(oc project -q 2>/dev/null)
 code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 "http://hello-dcs.${ns}.svc:8080" 2>/dev/null)
 if [ "$code" = "200" ]; then
-  echo "OK: Service responded HTTP 200 over cluster DNS (hello-dcs.${ns}.svc:8080)."
+  echo "✅ Service responded HTTP 200 over cluster DNS (hello-dcs.${ns}.svc:8080)."
   exit 0
 fi
-echo "No HTTP 200 from hello-dcs.${ns}.svc:8080 (got '${code:-none}')." >&2
+echo "❌ No HTTP 200 from hello-dcs.${ns}.svc:8080 (got '${code:-none}'). Check the Service exists and a Pod is Ready, then re-run the curl step above." >&2
 exit 1

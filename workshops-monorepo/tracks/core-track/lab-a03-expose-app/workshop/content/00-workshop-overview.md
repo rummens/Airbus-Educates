@@ -3,13 +3,17 @@ title: "Expose Your App"
 ---
 
 So far your app has only been reachable through a **local tunnel** — a `port-forward` that
-runs only while a single terminal command is open. That works for a quick test, but not for
-anything real. In this workshop on **{{< param product_name >}}** you will give the app a
-proper address: first a stable in-cluster name, then a real external URL that anyone can
-reach.
+runs only while a single terminal command is open.
+
+That works for a quick test, but not for anything real.
+
+In this workshop on **{{< param product_name >}}** you give the app a proper address:
+
+1. a stable **in-cluster** name;
+2. a real **external** URL that anyone can reach.
 
 {{< note >}}
-**First time in one of these labs?** See the
+**💡 First time in one of these labs?** See the
 [DCS Academy help page]({{< param ingress_protocol >}}://academy.{{< param ingress_domain >}}/help)
 for the terminal, editor and clickable actions.
 {{< /note >}}

@@ -7,7 +7,9 @@ description: >
   Harbor images, variablization and the param trio, the mandatory introduction
   page and first-time note, hybrid documentation links, content depth (one
   concept per page; what/why/how; expected output; analogies; diagrams; learning
-  styles; realistic duration), examiner coverage (a check for every command) plus
+  styles; realistic duration), skimmable formatting (bold key terms, short one-idea
+  paragraphs, lists for actions and choices, call-out blocks with emoji labels,
+  friendly examiner titles and messages), examiner coverage (a check for every command) plus
   knowledge check and challenge, the vcluster-vs-namespace decision, `config.yaml`
   params format, split-terminal wording, plain-language tone (no idioms; no AI-voice
   tells; simple explained commands; declarative/imperative defined before use), the
@@ -159,6 +161,7 @@ the usual remedy. References point at the authoritative source.
 - **H5. Written, not generated.** **Rule:** no AI-voice tells — the reassuring contrast clause ("instant, honest feedback that a step worked, instead of guessing"), the tricolon, "let's dive in", "powerful/seamless/simply", second-person hype, a paragraph restating the heading. Prose states what the thing is and what to do. **Check:** read each page aloud; a sentence that could be deleted with no loss of information is the finding. **Fix:** cut it. *(**Major** — a learner rated the workshop down explicitly "because of the AI feeling"; it costs credibility disproportionate to its length.)*
 - **H6. Explanation proportion.** **Rule:** the depth of an explanation matches how much the learner has to do with it. Background on why a platform behaves oddly is one or two sentences, not a page; the detail belongs in a doc link. **Check:** any page whose explanation exceeds its action; any rationale for a limitation the learner cannot influence. **Fix:** compress to the operative sentence, link the rest. *(**Minor**.)*
 - **H7. The interaction model is taught before it is relied on.** **Rule:** the first page that uses a clickable action explains the affordance — that clicking runs it in the terminal, and what happens if you click twice or click ahead. **Check:** find the first `terminal:execute`/`examiner:execute-test` in the workshop and read what precedes it. **Fix:** add the one-line explanation on page 00/01. *(**Major** — cohort feedback: "it took me the two first chapters to use the quick actions", and premature clicking (dim I4) is the single most-reported defect.)*
+- **H9. Formatted to be skimmed.** **Rule:** every learner-facing markdown surface (instruction pages, `README.md`, `academy.dcs/details`, slides) follows the house formatting standard: **key domain nouns/verbs bold on first mention** (~3–8 per page, not repeated, never inside/around `code`); **paragraphs of ≤3 lines carrying one idea**, long sentences split into separate sentences with a blank line or a list (a bare line break renders as the same paragraph and changes nothing); **every sequence of ≥2 actions a numbered list and every set of options/facts/columns a bulleted list**, items led by their bolded term; **hints, warnings and asides in call-out blocks with a bold emoji label** — `{{< note >}}` + `**💡 Tip:**` / `**📌 Note:**`, `{{< warning >}}` + `**⚠️ Watch out:**`, `{{< danger >}}` + `**🛑 Careful:**` on instruction pages, and `> **💡 Tip:** …` blockquotes in README/`details` where Hugo shortcodes do not render; **two or three call-outs per page at most**; emoji only from the sanctioned set (💡 📌 ⚠️ 🛑 ⏳ ❓ ✅ 🔍 ❌ 📊) and never in a heading or in `title:` front matter. **Check:** read each page for a paragraph over three lines, a prose sentence listing three or more things the learner should look at, a page with no bolded term, a page of stacked call-outs, and ad-hoc emoji (🚀 🎉 🔥). Grep the READMEs and `details` annotations for `{{<` (does not render there). **Fix:** bold the first mentions, split the paragraphs, convert the prose enumeration to a list, move the aside into a call-out. *(content-formatting-reference — **Minor** per page; **Major** when a whole lab is unformatted prose, since it is the difference between skimmable and unusable for a beginner.)*
 - **H8. Repetition is bounded.** **Rule:** a task repeated to teach a pattern is done two or three times, not N; anything beyond that is described, not repeated (e.g. one ticket walked end to end, the rest listed). **Check:** count identical action shapes per lab. **Fix:** collapse the tail into a summary or a table. *(**Suggestion**.)*
 
 ### I. Assessment
@@ -183,6 +186,7 @@ the usual remedy. References point at the authoritative source.
 
 ### I5. Failure messages the learner can act on
 - **Rule:** a failed check prints *what* was expected, *what* was found, and *which step* to go back to. Silence with a red state is not a result. **Check:** read each test script's failure path; run one deliberately failing check and read what the learner sees. **Fix:** add the diagnostic echo before the non-zero exit. *(**Major** — cohort suggestion: "the UI only changes to a red state without providing any warning or error message".)*
+- **Rule (friendly wording):** every `examiner:execute-test` `title:` starts with `✅` (the check verifies something created or changed) or `🔍` (it verifies something observed); every test script prints `✅ …` on success and `❌ …` on failure. Neither `title:`/`description:` nor script output is markdown, so **no `**` anywhere in them** — the asterisks render literally. **Check:** grep content for `title:` lines under `examiner:execute-test` without a leading emoji, and for `**` inside them; grep `workshop/examiner/tests/*` for `echo` lines with no `✅`/`❌`. **Fix:** prefix the emoji; move any bold into the page prose. *(content-formatting-reference — **Minor**.)*
 
 ### J. Clickable actions & terminal
 - **Rule:** guided experience (no manual typing); YAML block-scalar safety (`|-`, indent indicators, `|+`+`eot`); dashboard tab visibility tracked; split terminal referred to as **upper/lower** (`execute-1`=upper, `execute-2`=lower), never left/right; terminal working directory tracked. **Check:** read actions and prose. **Fix:** correct wording/YAML/tab guidance. *(clickable-actions reference, workshop-dashboard-reference, content-depth-reference.)*
@@ -267,6 +271,15 @@ keep asking two questions: *what is on screen now?* and *what did the last click
   (markdown) is the course page. It states what the lab is, what the learner should already
   know, what they will do, and when the console beats the CLI. **Check:** read the annotation.
   **Fix:** write it. *(**Major** if a single sentence.)*
+  Its **formatting** follows the house standard like any other markdown surface — bold key
+  terms, ≤3-line paragraphs, the journey as a bulleted list, at most two `> **💡 Tip:**`
+  blockquote call-outs (Hugo shortcodes do not render in the portal). *(dim H9.)*
+- **N9b. Step text is plain text.** **Rule:** `title`, `description` and `completionText` in a
+  `ConsoleLab` are rendered **verbatim** beside the highlight — backticks, `**bold**`, bullets,
+  blockquotes and emoji all appear literally. **Check:** grep `consolelab.yaml` for `` ` ``,
+  `**`, `- ` list items and emoji. **Fix:** strip them; write `oc get pods` bare. Skimmability
+  in a step box comes from the 2–4-short-sentence rule, not formatting.
+  *(**Minor**, **Major** for a step whose text is visibly full of stray asterisks.)*
 - **N10. It runs.** **Rule:** the lab walks start to finish with no Continue, every step
   anchored. **Check:** add the lab to `ACADEMY_HIDDEN_LABS` (and `LAB_PARAMS`) in the console
   plugin's `tests/e2e/specs/hidden-labs.spec.ts` and run it; then walk it once by hand. Watch
@@ -358,6 +371,9 @@ labs). Run the list against each workshop under review; each maps to the dimensi
 | 24 | Warnings in the empty console possibly exposing internals | M4 |
 | 25 | Same manual task repeated many times (ticket after ticket) | H8 |
 | 26 | Console-lab animation too long / distracting | N (step pacing) |
+| 27 | Page is a wall of prose — nothing bold, long paragraphs, options listed inside a sentence | H9 |
+| 28 | Hints and warnings buried in the prose instead of a call-out block | H9 |
+| 29 | Examiner button and failure message read like machine output, not like help | I5, H9 |
 
 When a review finds a **new** class of learner-reported defect, add a row here and, if it is not
 already covered, a rule above — this table is the skill's memory of what actually goes wrong.

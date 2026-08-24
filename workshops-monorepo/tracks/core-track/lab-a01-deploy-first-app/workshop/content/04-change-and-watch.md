@@ -2,10 +2,15 @@
 title: Change It and Watch the Rollout
 ---
 
-This is the core {{< param product_short >}} behaviour, made concrete. When you change the
-desired state (here, the greeting), the platform reconciles to it: it rolls out a **new**
-Pod with the new configuration and retires the old one, with no downtime and nothing for
-you to restart by hand. The next page defines this "desired state" idea properly.
+This is the core {{< param product_short >}} behaviour, made concrete.
+
+When you change the **desired state** — here, the greeting — the platform reconciles to it:
+
+1. it **rolls out** a new Pod with the new configuration;
+2. it **retires** the old one.
+
+No downtime, and nothing for you to restart by hand. The next page defines this
+"desired state" idea properly.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -27,15 +32,17 @@ waits for the new version to become available:
 
 ```examiner:execute-test
 name: verify-rollout-new
-title: Verify the new greeting rolled out
+title: ✅ Verify the new greeting rolled out
 timeout: 10
 retries: .INF
 delay: 2
 ```
 
 {{< note >}}
-The rollout **replaced the Pod** — so the tunnel from the last page, which pointed at the
-*old* Pod, is now closed. That's expected; you'll just reopen it.
+**⚠️ The rollout replaced the Pod.** The tunnel from the last page pointed at the *old*
+Pod, so it is now closed.
+
+That is expected — you simply reopen it.
 {{< /note >}}
 
 ## Reopen the tunnel (lower terminal)
@@ -54,7 +61,7 @@ session: 2
 
 ```examiner:execute-test
 name: verify-portforward
-title: Verify the tunnel reaches the new Pod (HTTP 200)
+title: ✅ Verify the tunnel reaches the new Pod (HTTP 200)
 timeout: 10
 retries: .INF
 delay: 2
@@ -66,13 +73,14 @@ delay: 2
 command: curl -s localhost:8080
 ```
 
-The response now reads **`Updated without a rebuild`** — served by a brand-new Pod, from
-the same image, with no rebuild. That's declarative desired-state and self-healing at
-work.
+The response now reads `Updated without a rebuild`.
+
+It is served by a brand-new **Pod**, from the **same image**, with no rebuild — declarative
+desired state at work.
 
 ```examiner:execute-test
 name: verify-new-greeting
-title: Verify the app serves the updated greeting
+title: ✅ Verify the app serves the updated greeting
 timeout: 10
 retries: 3
 delay: 2

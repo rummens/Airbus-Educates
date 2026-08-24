@@ -9,7 +9,7 @@ worth keeping, you need storage that lives *outside* the Pod. This workshop on
 restart.
 
 {{< note >}}
-**First time in one of these labs?** See the
+**💡 First time in one of these labs?** See the
 [DCS Academy help page]({{< param ingress_protocol >}}://academy.{{< param ingress_domain >}}/help)
 for the terminal, editor and clickable actions.
 {{< /note >}}

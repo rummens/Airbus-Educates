@@ -43,8 +43,9 @@ metadata:
 
       ### What you will do
 
-      You will not type any commands — this lab is entirely in the console. Each screen
-      names the command it replaces, so you can map one onto the other afterwards.
+      > **💡 Tip:** you will not type any commands — this lab is entirely in the console.
+      > Each screen names the `oc` command it replaces, so you can map one onto the other
+      > afterwards.
 
       - Read a Service's selector and port mapping, where `oc get service` reports the address
       - Check what that selector actually matched on the Service's Pods tab — the screen behind
@@ -63,8 +64,10 @@ metadata:
       ### Cleaning up
 
       Press **Finish** in the guidance box when you are done. That records your completion
-      and shuts the project down. Leaving the tab open just leaves it running until it
-      expires.
+      and shuts the project down.
+
+      > **⚠️ Watch out:** leaving the tab open just leaves the project running until it
+      > expires.
     # The ConsoleLab CR (academy.dcs/v1alpha1, shipped by the console plugin repo)
     # this session drives. It templates only <<namespace>>, which the portal always
     # injects from the allocated session namespace, so there are no extra params.

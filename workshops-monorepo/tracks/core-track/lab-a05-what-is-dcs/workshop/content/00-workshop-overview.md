@@ -12,13 +12,13 @@ tour. It assumes **no prior container or Kubernetes knowledge**. If you'd rather
 nothing later depends on finishing this one first.
 
 {{< note >}}
-Prefer it visual? Open the **Slides** tab for a low-text overview of everything on these
+**💡 Prefer it visual?** Open the **Slides** tab for a low-text overview of everything on these
 pages. Each concept page also has a *📊 See this on a slide* link that jumps the Slides
 tab straight to the matching slide.
 {{< /note >}}
 
 {{< note >}}
-**First time in one of these labs?** Take two minutes to read the
+**💡 First time in one of these labs?** Take two minutes to read the
 [DCS Academy help page]({{< param ingress_protocol >}}://academy.{{< param ingress_domain >}}/help) —
 it explains the terminal, editor and the clickable actions you'll use here.
 {{< /note >}}
@@ -40,7 +40,7 @@ None. Curiosity about [containers](https://kubernetes.io/docs/concepts/container
 enough — we introduce everything you need.
 
 {{< note >}}
-**New to the command line or containers?** This track goes best if you're comfortable
+**💡 New to the command line or containers?** This track goes best if you're comfortable
 with **basic Linux/terminal use** (running a command, reading its output, editing a file)
 and know **a little about containers** (what an image is versus a running container). You
 don't need to be an expert, and nothing here is blocking — but if it's all new, a short

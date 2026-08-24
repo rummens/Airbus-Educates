@@ -35,6 +35,6 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/da
 The rest of this lab is one page per tab.
 
 {{< note >}}
-**Watch which tab is visible.** Running a command switches you to the Terminal tab; if a
+**⚠️ Watch which tab is visible.** Running a command switches you to the Terminal tab; if a
 step sent you to the Console, the Editor or the Slides, switch back afterwards.
 {{< /note >}}

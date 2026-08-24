@@ -7,14 +7,18 @@ This is the entry point to the course: you'll get your own app running on
 There is no theory to read first. If you want the background on *what DCS is* and *why
 Kubernetes*, that is the **What is DCS?** lab, which you can take at any time.
 
-You'll deploy a small sample called **hello-dcs**: a tiny web server that listens on port
-8080 and prints a greeting. Its image already lives in the {{< param product_short >}}
-[Harbor](https://goharbor.io/) registry (`{{< param dcs_registry >}}`), pulled from
-inside the platform — nothing comes from the public internet. More on the registry in the
+You will deploy a small sample called **hello-dcs** — a tiny web server that listens on
+port 8080 and prints a greeting.
+
+Its **image** already lives in the {{< param product_short >}}
+[Harbor](https://goharbor.io/) registry (`{{< param dcs_registry >}}`) and is pulled from
+inside the platform. Nothing comes from the public internet.
+
+More on the registry in the
 [{{< param product_short >}} registry docs]({{< param dcs_docs_base_url >}}/services/container-registry).
 
 {{< note >}}
-**First time in one of these labs?** See the
+**💡 First time in one of these labs?** See the
 [DCS Academy help page]({{< param ingress_protocol >}}://academy.{{< param ingress_domain >}}/help)
 for the terminal, editor and clickable actions.
 {{< /note >}}
@@ -35,7 +39,7 @@ By the end of this workshop you will be able to:
   containers or `oc`? The **What is DCS?** lab gives the background, but isn't required first.
 
 {{< note >}}
-**New to the command line or containers?** This track goes best if you're comfortable
+**💡 New to the command line or containers?** This track goes best if you're comfortable
 with **basic Linux/terminal use** (running a command, reading its output, editing a file)
 and know **a little about containers** (what an image is versus a running container). You
 don't need to be an expert, and nothing here is blocking — but if it's all new, a short

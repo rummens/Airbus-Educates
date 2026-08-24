@@ -12,7 +12,7 @@ This is vocabulary plus a hands-on demo, not the full governance model, which co
 in the Developer track.
 
 {{< note >}}
-**First time in one of these labs?** See the
+**💡 First time in one of these labs?** See the
 [DCS Academy help page]({{< param ingress_protocol >}}://academy.{{< param ingress_domain >}}/help)
 for the terminal, editor and clickable actions.
 {{< /note >}}

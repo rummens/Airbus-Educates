@@ -22,7 +22,7 @@ machines, why Kubernetes beats plain Docker, and how to work in your session wit
 1. What makes {{< param product_short >}} **air-gapped**, and what does that mean for where images come from?
 
 {{< note >}}
-**Answer:** {{< param product_short >}} runs on-premises with no internet access from
+**❓ Answer:** {{< param product_short >}} runs on-premises with no internet access from
 workloads. All images are provided from within the platform (the Harbor registry) — you
 can't pull from public registries.
 {{< /note >}}
@@ -30,7 +30,7 @@ can't pull from public registries.
 2. What is the **one real difference** between the Sandbox and PROD clusters?
 
 {{< note >}}
-**Answer:** Feature-rollout timing and maintenance notice/SLA. New platform features
+**❓ Answer:** Feature-rollout timing and maintenance notice/SLA. New platform features
 reach Sandbox first and PROD about a month later; Sandbox announces maintenance
 shorter-term (slightly lower SLA), PROD with longer notice (higher SLA). Otherwise the
 two clusters are identical — same platform, same capabilities.
@@ -39,14 +39,14 @@ two clusters are identical — same platform, same capabilities.
 3. What is the difference between a container **image** and a **container**?
 
 {{< note >}}
-**Answer:** The image is the blueprint (a packaged, read-only built artifact); the
+**❓ Answer:** The image is the blueprint (a packaged, read-only built artifact); the
 container is a running instance of that image.
 {{< /note >}}
 
 4. Name **one thing Kubernetes gives you that plain Docker doesn't**.
 
 {{< note >}}
-**Answer:** Any of: scheduling (the platform picks where a workload runs), self-healing
+**❓ Answer:** Any of: scheduling (the platform picks where a workload runs), self-healing
 (crashed containers are restarted/rescheduled automatically), scaling (ask for N replicas
 up or down), or declarative desired-state (you describe the target and the platform
 continuously reconciles to it, versus a one-shot `docker run`).

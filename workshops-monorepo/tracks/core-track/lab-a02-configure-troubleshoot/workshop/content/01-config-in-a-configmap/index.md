@@ -3,8 +3,11 @@ title: Config in a ConfigMap
 ---
 
 A [**ConfigMap**](https://kubernetes.io/docs/concepts/configuration/configmap/) holds
-non-secret configuration as key/value pairs, *outside* your image. The same image can
-then run in DEV, QA and PROD with different ConfigMaps — no rebuild to change a setting.
+non-secret configuration as key/value pairs, *outside* your image.
+
+The same image then runs in **DEV**, **QA** and **PROD** with different ConfigMaps — no
+rebuild to change a setting.
+
 On an air-gapped platform that matters: promoting an app moves its **config**, not a new
 image.
 
@@ -16,7 +19,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/co
 ```
 
 {{< note >}}
-If you've run VMs: a ConfigMap is like the answer file or config drive you attach to one
+**💡 If you have run VMs:** a ConfigMap is like the answer file or config drive you attach to one
 golden template — same image, environment-specific settings supplied from outside.
 {{< /note >}}
 
@@ -47,16 +50,19 @@ command: oc apply -f configmap.yaml
 
 ```examiner:execute-test
 name: verify-configmap
-title: Verify the ConfigMap exists
+title: ✅ Verify the ConfigMap exists
 timeout: 10
 ```
 
 ## Wire it into the app
 
 Now open the Deployment. This is the declarative manifest behind the app you deployed in
-the **Deploy Your First App** lab, written out in full. It consumes the ConfigMap **both ways**: `envFrom` turns every
-key into an environment variable, and a volume mounts the same keys as files under
-`/etc/hello-dcs`.
+the **Deploy Your First App** lab, written out in full.
+
+It consumes the ConfigMap **both ways**:
+
+- **`envFrom`** — turns every key into an environment variable;
+- **a volume** — mounts the same keys as files under `/etc/hello-dcs`.
 
 ```editor:open-file
 file: ~/exercises/deployment-configured.yaml
@@ -83,7 +89,7 @@ command: oc rollout status deploy/hello-dcs --timeout=90s
 
 ```examiner:execute-test
 name: verify-configured
-title: Verify the app runs and serves the configured greeting
+title: ✅ Verify the app runs and serves the configured greeting
 timeout: 15
 retries: .INF
 delay: 2

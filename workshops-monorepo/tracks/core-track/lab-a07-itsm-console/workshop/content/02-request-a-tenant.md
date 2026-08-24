@@ -32,7 +32,7 @@ That's the whole first half of the form.
 ## Two things you can't undo
 
 {{< warning >}}
-**Location is permanent.** A Tenant cannot be moved once created — pick the location you
+**⚠️ Location is permanent.** A Tenant cannot be moved once created — pick the location you
 actually work in.
 
 **Names get a suffix.** {{< param product_short >}} appends a random suffix to keep names
@@ -41,7 +41,7 @@ Use the name from the confirmation everywhere afterwards.
 {{< /warning >}}
 
 {{< note >}}
-**Unsure about a field?** Don't stall. Leave it at its default and write your question in
+**💡 Unsure about a field?** Don't stall. Leave it at its default and write your question in
 **"Further details"** at the end of the form — that box is read.
 {{< /note >}}
 
