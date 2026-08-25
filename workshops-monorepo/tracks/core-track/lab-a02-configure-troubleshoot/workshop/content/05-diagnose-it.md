@@ -45,7 +45,7 @@ Events confirm it: a reference to `configmap "hello-dcs-conf" not found`.
 
 ```examiner:execute-test
 name: verify-root-cause
-title: 🔍 Verify the root-cause signal is visible in the cluster
+title: Verify the root-cause signal is visible in the cluster
 timeout: 10
 retries: .INF
 delay: 2

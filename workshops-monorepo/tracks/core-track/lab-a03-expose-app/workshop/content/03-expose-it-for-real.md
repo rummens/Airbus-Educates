@@ -32,7 +32,7 @@ command: oc apply -f route.yaml
 
 ```examiner:execute-test
 name: verify-route-admitted
-title: ✅ Verify the Route was admitted with a host
+title: Verify the Route was admitted with a host
 timeout: 10
 retries: .INF
 delay: 2
@@ -48,7 +48,7 @@ command: oc get route hello-dcs -o jsonpath='{.spec.host}{"\n"}'
 
 ```examiner:execute-test
 name: verify-route-admitted
-title: ✅ Confirm the Route host is set
+title: Confirm the Route host is set
 timeout: 10
 retries: 3
 delay: 2
@@ -74,7 +74,7 @@ command: |-
 
 ```examiner:execute-test
 name: verify-route-reachable
-title: ✅ Verify the Route URL responds (HTTP 200)
+title: Verify the Route URL responds (HTTP 200)
 timeout: 15
 retries: .INF
 delay: 2

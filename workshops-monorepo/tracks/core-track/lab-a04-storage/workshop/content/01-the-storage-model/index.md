@@ -40,7 +40,7 @@ command: oc get storageclass | tee ~/exercises/storageclasses.txt
 
 ```examiner:execute-test
 name: verify-storageclass
-title: 🔍 Verify storage classes are available
+title: Verify storage classes are available
 timeout: 10
 ```
 

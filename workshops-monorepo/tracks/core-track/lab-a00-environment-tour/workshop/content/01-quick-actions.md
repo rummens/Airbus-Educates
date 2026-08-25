@@ -42,7 +42,7 @@ there.
 
 ```examiner:execute-test
 name: verify-quick-action
-title: ✅ Verify your first quick action ran
+title: Verify your first quick action ran
 timeout: 10
 ```
 

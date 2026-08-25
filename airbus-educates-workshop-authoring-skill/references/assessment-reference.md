@@ -32,7 +32,7 @@ Place test scripts in `workshop/examiner/tests/` (executable, exit `0` = pass). 
 ```markdown
 ```examiner:execute-test
 name: verify-app-running
-title: ✅ Verify the sample app is running
+title: Verify the sample app is running
 args:
 - sample-app
 timeout: 5
@@ -49,9 +49,11 @@ delay: 1
 
 **Make the check friendly to read.** The learner sees two strings — the `title:` on the button and the script's output — and a failing check is where a beginner is most likely to give up. House standard (full rules in [content-formatting-reference.md](content-formatting-reference.md)):
 
-- `title:` starts with `✅` when the check verifies something was **created or changed**, `🔍` when it verifies something was **observed**: `title: ✅ Verify hello-dcs is running (1 ready replica)`.
-- `title:` and `description:` are rendered as **plain text** — `**bold**` shows the asterisks literally. Emoji render fine; put bold in the page prose instead.
-- Script output leads with `✅ ` on success and `❌ ` on failure, and is plain text too.
+- **No status emoji in `title:`** — not `✅`, not `🔍`. The action block is already the state indicator (Educates colours it amber while queued/running, green on pass, red on fail), and `title:` is static text that cannot follow it, so a typed-in tick shows green before, during and after a failed run. There is no state-aware property: the action takes only `name`, `title`, `prefix`, `args`, `timeout`, `retries`, `delay`, `cooldown`, `url`, `inputs`.
+- `title:` and `description:` are rendered as **plain text** — `**bold**` shows the asterisks literally. All emphasis belongs in the page prose.
+- A good title names the outcome imperatively and says which resource or value: `Verify hello-dcs is running (1 ready replica)`.
+- **Script output** is produced at the moment of pass/fail, so a marker there is truthful: lead with `✅ ` on success and `❌ ` on failure (plain text — it is not Markdown).
+- Explain the colour indicator once, in prose, on the first page that has a check.
 
 **Emit a diagnostic message on failure.** A check that just exits `1` is useless to a stuck learner and to the CI pipeline reading logs. On failure, print *what* was expected, *what* was found, **and the next move** ("run the apply step above", "check `oc get events`", "this check keeps retrying"), then exit non-zero:
 
@@ -129,7 +131,7 @@ Keep questions tied to the stated learning objectives — one question per major
 
 ## Checklist
 
-- [ ] Every check title starts with `✅` (change) or `🔍` (observation); no `**` in `title:`/`description:` (plain text)
+- [ ] No status emoji (`✅`/`🔍`) and no `**` in any check `title:`/`description:` — both are static plain text; the action block is the state indicator
 - [ ] Every check script prints `✅ …` on success and `❌ …` (expected, found, next move) on failure
 - [ ] `spec.session.applications.examiner.enabled: true`
 - [ ] **Every command has an `examiner:execute-test`** asserting its outcome — no command is unverified (automated-pipeline requirement)

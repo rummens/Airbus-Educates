@@ -33,7 +33,7 @@ Pod terminate, a new one start, and the PVC stay `Bound` throughout. `Ctrl-C` wh
 
 ```examiner:execute-test
 name: verify-restarted
-title: ✅ Verify a fresh Pod is running
+title: Verify a fresh Pod is running
 timeout: 15
 retries: .INF
 delay: 2
@@ -49,7 +49,7 @@ command: oc exec deploy/hello-dcs -- cat /opt/app-root/src/data/marker
 
 ```examiner:execute-test
 name: verify-persisted
-title: ✅ Verify the marker survived the restart
+title: Verify the marker survived the restart
 timeout: 10
 retries: .INF
 delay: 2

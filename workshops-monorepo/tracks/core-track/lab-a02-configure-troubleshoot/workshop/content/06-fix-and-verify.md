@@ -45,7 +45,7 @@ command: oc rollout status deploy/hello-dcs --timeout=90s
 
 ```examiner:execute-test
 name: verify-recovered
-title: ✅ Verify the app has recovered and serves its config
+title: Verify the app has recovered and serves its config
 timeout: 15
 retries: .INF
 delay: 2

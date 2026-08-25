@@ -35,7 +35,7 @@ running.
 
 ```examiner:execute-test
 name: verify-ready
-title: ✅ Verify hello-dcs is running (1 ready replica)
+title: Verify hello-dcs is running (1 ready replica)
 timeout: 10
 retries: .INF
 delay: 2
@@ -58,7 +58,7 @@ That is your app, live on {{< param product_short >}}.
 
 ```examiner:execute-test
 name: verify-ready
-title: ✅ Verify hello-dcs is running (1 ready replica)
+title: Verify hello-dcs is running (1 ready replica)
 timeout: 10
 retries: .INF
 delay: 2

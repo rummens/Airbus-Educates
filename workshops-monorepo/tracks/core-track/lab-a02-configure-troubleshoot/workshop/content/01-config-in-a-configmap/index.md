@@ -50,7 +50,7 @@ command: oc apply -f configmap.yaml
 
 ```examiner:execute-test
 name: verify-configmap
-title: ✅ Verify the ConfigMap exists
+title: Verify the ConfigMap exists
 timeout: 10
 ```
 
@@ -89,7 +89,7 @@ command: oc rollout status deploy/hello-dcs --timeout=90s
 
 ```examiner:execute-test
 name: verify-configured
-title: ✅ Verify the app runs and serves the configured greeting
+title: Verify the app runs and serves the configured greeting
 timeout: 15
 retries: .INF
 delay: 2

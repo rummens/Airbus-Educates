@@ -32,7 +32,7 @@ waits for the new version to become available:
 
 ```examiner:execute-test
 name: verify-rollout-new
-title: ✅ Verify the new greeting rolled out
+title: Verify the new greeting rolled out
 timeout: 10
 retries: .INF
 delay: 2
@@ -61,7 +61,7 @@ session: 2
 
 ```examiner:execute-test
 name: verify-portforward
-title: ✅ Verify the tunnel reaches the new Pod (HTTP 200)
+title: Verify the tunnel reaches the new Pod (HTTP 200)
 timeout: 10
 retries: .INF
 delay: 2
@@ -80,7 +80,7 @@ desired state at work.
 
 ```examiner:execute-test
 name: verify-new-greeting
-title: ✅ Verify the app serves the updated greeting
+title: Verify the app serves the updated greeting
 timeout: 10
 retries: 3
 delay: 2

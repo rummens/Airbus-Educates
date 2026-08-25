@@ -40,7 +40,7 @@ command: oc get deploy hello-dcs -o yaml > deployment.yaml
 
 ```examiner:execute-test
 name: verify-yaml-saved
-title: ✅ Verify the Deployment YAML was saved
+title: Verify the Deployment YAML was saved
 timeout: 10
 ```
 
@@ -73,7 +73,7 @@ command: oc get deploy,rs,pod -l app=hello-dcs
 
 ```examiner:execute-test
 name: verify-ownership
-title: 🔍 Verify the Deployment → ReplicaSet → Pod chain
+title: Verify the Deployment → ReplicaSet → Pod chain
 timeout: 10
 ```
 

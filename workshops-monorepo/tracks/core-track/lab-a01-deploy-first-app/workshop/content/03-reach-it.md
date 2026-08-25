@@ -40,7 +40,7 @@ session: 2
 
 ```examiner:execute-test
 name: verify-portforward
-title: ✅ Verify the tunnel reaches the app (HTTP 200)
+title: Verify the tunnel reaches the app (HTTP 200)
 timeout: 10
 retries: .INF
 delay: 2
@@ -61,7 +61,7 @@ back.
 
 ```examiner:execute-test
 name: verify-greeting
-title: ✅ Verify the app serves your greeting
+title: Verify the app serves your greeting
 timeout: 10
 retries: 3
 delay: 2

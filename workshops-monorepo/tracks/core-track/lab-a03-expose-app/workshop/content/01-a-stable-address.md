@@ -41,7 +41,7 @@ command: oc rollout status deploy/hello-dcs --timeout=90s
 
 ```examiner:execute-test
 name: verify-app-ready
-title: ✅ Verify the app is running
+title: Verify the app is running
 timeout: 15
 retries: .INF
 delay: 2
@@ -62,7 +62,7 @@ command: oc apply -f service.yaml
 
 ```examiner:execute-test
 name: verify-service
-title: ✅ Verify the Service has endpoints
+title: Verify the Service has endpoints
 timeout: 10
 retries: .INF
 delay: 2
@@ -87,7 +87,7 @@ command: curl -s -o /dev/null -w 'HTTP %{http_code}\n' "http://hello-dcs.$(oc pr
 
 ```examiner:execute-test
 name: verify-service-dns
-title: ✅ Verify the Service responds over cluster DNS
+title: Verify the Service responds over cluster DNS
 timeout: 10
 retries: .INF
 delay: 2

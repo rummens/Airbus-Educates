@@ -32,7 +32,7 @@ command: oc apply -f secret.yaml
 
 ```examiner:execute-test
 name: verify-secret
-title: ✅ Verify the Secret exists
+title: Verify the Secret exists
 timeout: 10
 ```
 
@@ -71,7 +71,7 @@ That is the habit: prove the wiring without exposing the secret.
 
 ```examiner:execute-test
 name: verify-secret-injected
-title: ✅ Verify API_TOKEN is injected into the container
+title: Verify API_TOKEN is injected into the container
 timeout: 10
 retries: .INF
 delay: 2

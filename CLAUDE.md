@@ -45,7 +45,8 @@ what/why/how, expected output, **VM-world analogies tapering with level**, **SVG
 realistic err-low duration) · an **examiner check for every command** + knowledge check ·
 **skimmable formatting** (bold key terms, ≤3-line one-idea paragraphs, actions/choices as
 lists, `{{< note >}}`/`{{< warning >}}` call-outs led by `**💡 Tip:**`/`**⚠️ Watch out:**`,
-examiner titles `✅`/`🔍` and messages `✅`/`❌` — ConsoleLab step text stays plain text) ·
+examiner **script** messages `✅`/`❌` — examiner `title:` and ConsoleLab step text stay plain
+text, no emoji: they are static, and the examiner action block is its own state indicator) ·
 split terminal = **upper/lower** (`execute-1`/`-2`) · decide **vcluster (default) vs OpenShift
 namespace** and record why.
 

@@ -34,7 +34,7 @@ command: oc rollout status deploy/hello-dcs --timeout=120s
 
 ```examiner:execute-test
 name: verify-ephemeral-ready
-title: ✅ Verify the app is running
+title: Verify the app is running
 timeout: 15
 retries: .INF
 delay: 2
@@ -85,7 +85,7 @@ command: oc exec deploy/hello-dcs -- cat /opt/app-root/src/note || echo "(gone �
 
 ```examiner:execute-test
 name: verify-ephemeral-lost
-title: ✅ Verify the file did NOT survive the new Pod
+title: Verify the file did NOT survive the new Pod
 timeout: 15
 retries: .INF
 delay: 2

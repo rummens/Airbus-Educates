@@ -27,7 +27,7 @@ default.
 
 ```examiner:execute-test
 name: verify-ready
-title: 🔍 Verify the Deployment is readable
+title: Verify the Deployment is readable
 timeout: 10
 retries: 3
 delay: 2
@@ -45,7 +45,7 @@ you'll watch that happen properly on a later page.
 
 ```examiner:execute-test
 name: verify-env-set
-title: ✅ Verify GREETING is set on the Deployment
+title: Verify GREETING is set on the Deployment
 timeout: 10
 retries: .INF
 delay: 2
@@ -65,7 +65,7 @@ greeting.
 
 ```examiner:execute-test
 name: verify-env-set
-title: ✅ Verify GREETING is now listed
+title: Verify GREETING is now listed
 timeout: 10
 retries: .INF
 delay: 2

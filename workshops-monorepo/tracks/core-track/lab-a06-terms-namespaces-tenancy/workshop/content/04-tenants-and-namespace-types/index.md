@@ -56,7 +56,7 @@ command: oc get namespace "$(oc project -q)" -o jsonpath='{.metadata.labels}' | 
 
 ```examiner:execute-test
 name: verify-namespace-labels
-title: 🔍 Verify your namespace labels are readable
+title: Verify your namespace labels are readable
 timeout: 10
 ```
 

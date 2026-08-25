@@ -47,7 +47,7 @@ command: oc project | tee ~/exercises/project.txt
 
 ```examiner:execute-test
 name: verify-active-namespace
-title: 🔍 Verify you have an active namespace
+title: Verify you have an active namespace
 timeout: 10
 ```
 
@@ -69,7 +69,7 @@ command: oc get deployments,pods,services 2>&1 | tee ~/exercises/workloads.txt
 
 ```examiner:execute-test
 name: verify-get-all
-title: 🔍 Verify you can list workloads in your namespace
+title: Verify you can list workloads in your namespace
 timeout: 10
 ```
 

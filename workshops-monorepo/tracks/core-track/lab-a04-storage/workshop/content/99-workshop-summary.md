@@ -40,7 +40,7 @@ command: oc get pvc hello-dcs-block
 
 ```examiner:execute-test
 name: verify-block-bound
-title: ✅ Verify the Block PVC is Bound
+title: Verify the Block PVC is Bound
 timeout: 20
 retries: .INF
 delay: 2

@@ -75,7 +75,7 @@ the claim is Bound and the app is running with the volume mounted:
 
 ```examiner:execute-test
 name: verify-pvc-bound
-title: ✅ Verify the PVC is Bound
+title: Verify the PVC is Bound
 timeout: 15
 retries: .INF
 delay: 2
@@ -83,7 +83,7 @@ delay: 2
 
 ```examiner:execute-test
 name: verify-volume-mounted
-title: ✅ Verify the app is running with the volume mounted
+title: Verify the app is running with the volume mounted
 timeout: 15
 retries: .INF
 delay: 2
@@ -99,7 +99,7 @@ command: oc exec deploy/hello-dcs -- sh -c 'echo persisted-marker-42 > /opt/app-
 
 ```examiner:execute-test
 name: verify-marker-written
-title: ✅ Verify the marker file exists in the volume
+title: Verify the marker file exists in the volume
 timeout: 10
 retries: .INF
 delay: 2

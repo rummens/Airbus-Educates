@@ -38,7 +38,7 @@ log in by hand.
 
 ```examiner:execute-test
 name: verify-whoami
-title: 🔍 Verify you are authenticated
+title: Verify you are authenticated
 timeout: 10
 ```
 
@@ -58,7 +58,7 @@ in the **lower** pane while the upper one kept its output.
 
 ```examiner:execute-test
 name: verify-status
-title: 🔍 Verify oc status runs against your project
+title: Verify oc status runs against your project
 timeout: 10
 ```
 

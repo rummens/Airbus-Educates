@@ -4,6 +4,10 @@ Copy-paste-into-chat log of learner-visible fixes and improvements. Newest day f
 one line per change, no internals. Platform/portal changes are live once ArgoCD has
 synced `main`; workshop content is live on the next session start.
 
+## 2026-08-25
+
+- Verify buttons no longer carry a ✅ in their label. The tick was fixed text, so it showed a green check even before you clicked, while the check was still running, and after one had failed. The button's own colour is the status again — amber while it waits, green when it passes, red when it fails — and the label just says what a green result would mean.
+
 ## 2026-08-24
 
 - All Core track labs are easier to skim: the key terms are now **bold**, long paragraphs are split into short ones with one idea each, and anything that was a list hidden inside a sentence (the columns to look at, the parts of a command, the steps of a task) is now an actual list.

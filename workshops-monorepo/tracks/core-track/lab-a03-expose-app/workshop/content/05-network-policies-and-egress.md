@@ -30,7 +30,7 @@ command: oc describe networkpolicy allow-hello-dcs-ingress | tee ~/exercises/net
 ```examiner:execute-test
 name: verify-networkpolicy
 prefix: After the describe
-title: 🔍 Verify you inspected the NetworkPolicy
+title: Verify you inspected the NetworkPolicy
 timeout: 10
 ```
 
@@ -63,7 +63,7 @@ means *no open path out*, not *no path ever*.
 
 ```examiner:execute-test
 name: verify-egress-blocked
-title: 🔍 Verify egress to the public internet is blocked
+title: Verify egress to the public internet is blocked
 timeout: 15
 ```
 

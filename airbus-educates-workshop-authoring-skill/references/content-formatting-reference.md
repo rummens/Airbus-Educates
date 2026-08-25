@@ -13,7 +13,8 @@ Apply it to **every** learner-facing surface of a lab:
 | `workshop/content/*.md` instruction pages | Yes — full standard |
 | `README.md` (the portal course page prospectus) | Yes — full standard, but `> ` blockquote call-outs instead of Hugo shortcodes |
 | `academy.dcs/details` annotation (console labs) | Yes — same as README |
-| `examiner:execute-test` titles + test script output | Yes — the emoji rules below |
+| `examiner:execute-test` titles | Plain text, **no emoji, no bold** — see §6 |
+| examiner test **script output** | Yes — the `✅`/`❌` message rules in §6 |
 | `workshop/slides/slides.md` | Bold key terms; slides are already lists |
 | ConsoleLab `description` / `completionText` step text | **No** — plain text only (see below) |
 
@@ -161,41 +162,55 @@ or on its own page.
 Emoji exist here to make a page scannable, not decorative. The whole sanctioned set:
 
 - 💡 📌 ⚠️ 🛑 ⏳ ❓ — call-out labels (above)
-- ✅ — a passing/verifying examiner check, and a completed item in the summary
-- 🔍 — an examiner check that verifies *observation* rather than a change
-- ❌ — an examiner failure message
+- ✅ — the **recommended** option in a list of choices, or a done item in a recap list
+- ✅ / ❌ — the pass and fail lines an examiner **test script prints** (never a title, see §6)
 - 📊 — the **Slides** tab jump link (already the house convention)
 
-Never put emoji in: page `title:` front matter, headings, resource names, commands, or prose
-sentences. One emoji per place, at the start.
+Never put emoji in: an examiner `title:`/`description:` (§6), page `title:` front matter,
+headings, resource names, commands, or prose sentences. One emoji per place, at the start.
 
-## 6. Examiner checks — friendly titles, friendly messages
+**Never use an emoji to say what state something is in.** Educates already colours a check's
+action block amber/green/red. A static emoji cannot follow that, so it lies for most of the
+time the page is on screen.
 
-The learner reads two examiner strings: the `title:` on the button, and the script's output when
-it fails. Both are the moment a beginner is most likely to give up, so both get attention.
+## 6. Examiner checks — never put a state emoji in the title
 
-**Titles** get a leading emoji and stay short:
+**Rule: no `✅`, `🔍`, `❌` or any other status emoji in an examiner `title:` or `description:`.**
+
+The action block itself is the state indicator: Educates colours it amber while the check is
+queued or running, **green** when it passes and **red** when it fails. The `title:` is static
+text that never changes — so a `✅` typed into it renders a permanent green tick beside a check
+that has not run, is still running, or has just failed. It contradicts the only signal the
+learner has.
+
+There is no way around this. The action's properties are `name`, `title`, `prefix`, `args`,
+`timeout`, `retries`, `delay`, `cooldown`, `url` and `inputs` — none of them is state-aware,
+and `title` is not templated.
 
 ````markdown
 ```examiner:execute-test
 name: verify-ready
-title: ✅ Verify hello-dcs is running (1 ready replica)
+title: Verify hello-dcs is running (1 ready replica)
 timeout: 10
 retries: .INF
 delay: 2
 ```
 ````
 
-- `✅` for a check that something was **created, changed, or is now working**.
-- `🔍` for a check that something was **observed** (an inspection command's state assertion).
-- Keep the existing `Verify …` / `Confirm …` wording — imperative, names the outcome.
+What a good title does instead:
 
-> **⚠️ Watch out:** the examiner `title:` and `description:` are rendered as **plain text**, not
-> Markdown. `**bold**` there shows the asterisks literally. Emoji render fine. Put the bold in
-> the surrounding page prose, never in the title.
+- **Name the outcome, imperatively** — `Verify the Route was admitted with a host`,
+  `Confirm the Route host is set`. The learner should know what green would *mean*.
+- **Say which thing** — the resource name, the value, the count (`1 ready replica`).
+- **Stay short** — it is a button label, not a sentence.
 
-**Script output** is the diagnostic a stuck learner reads. Keep the expected-vs-found detail
-required by [assessment-reference.md](assessment-reference.md), and lead with an emoji:
+> **⚠️ Watch out:** `title:` and `description:` are **plain text**, not Markdown. `**bold**`
+> shows the asterisks literally, and emoji are not interpreted as anything but characters. All
+> emphasis belongs in the surrounding page prose.
+
+**Script output** is different: it is produced at the moment the check actually passes or fails,
+so a marker there is truthful. Keep the expected-vs-found detail required by
+[assessment-reference.md](assessment-reference.md) and lead with it:
 
 ```bash
 #!/bin/bash
@@ -214,6 +229,12 @@ exit 1
   message that only states the problem leaves the learner stuck; name the next move ("run the
   apply step above", "check `oc get events`", "this check keeps retrying").
 - Plain text only — script output is not Markdown either.
+- These lines are read in the CI/smoke-test logs as much as by a learner, which is the other
+  reason to keep them explicit.
+
+**Explain the colours once, in prose, on the first page that has a check** — that is where the
+learner learns to read the indicator (green = the state this step promised, red = fix the step
+above, amber = queued behind another check). See A00's *Quick Actions* page.
 
 ## 7. Page skeleton
 
@@ -264,6 +285,7 @@ So in a `ConsoleLab` CR:
 - A page with no bolded terms — nothing to anchor a skim.
 - A page where every second block is a `{{< note >}}`.
 - `**bold**` inside an examiner `title:` (renders as literal asterisks).
+- A `✅` (or any state emoji) inside an examiner `title:` — the title never changes, so it shows a green tick before, during and after a failed run.
 - Emoji in a heading or in `title:` front matter.
 - Decorative emoji chosen ad hoc (🚀 🎉 🔥) instead of the sanctioned set.
 - A blockquote call-out on an instruction page where `{{< note >}}` was available.
@@ -280,7 +302,9 @@ So in a `ConsoleLab` CR:
 - [ ] Hints/warnings/asides are call-outs with a bold emoji label from the sanctioned set
 - [ ] `{{< note >}}`/`{{< warning >}}`/`{{< danger >}}` on instruction pages; `> ` blockquotes in README/`details`
 - [ ] Two or three call-outs per page at most — boxes never outnumber the prose between them
-- [ ] Every `examiner:execute-test` title starts with `✅` (change) or `🔍` (observation)
+- [ ] No status emoji (`✅`/`🔍`/`❌`) and no `**` in any examiner `title:`/`description:` — both are static plain text; the action block is the state indicator
+- [ ] Examiner titles name the outcome imperatively and say which resource/value
 - [ ] Every examiner script prints `✅ …` on success and `❌ … expected/found/next step` on failure
+- [ ] The colour indicator (green / red / amber) is explained in prose on the first page with a check
 - [ ] Emoji only from the sanctioned set, only at the start of a call-out label, check title, or check message
 - [ ] ConsoleLab step text left as plain text — no markdown, no emoji

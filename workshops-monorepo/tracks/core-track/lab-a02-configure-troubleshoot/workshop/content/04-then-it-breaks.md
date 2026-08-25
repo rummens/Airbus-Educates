@@ -34,7 +34,7 @@ app. You'll see a Pod that is **not** Ready — a status like `CreateContainerCo
 
 ```examiner:execute-test
 name: verify-not-ready
-title: ✅ Verify the app is currently broken (not ready)
+title: Verify the app is currently broken (not ready)
 timeout: 10
 retries: .INF
 delay: 2

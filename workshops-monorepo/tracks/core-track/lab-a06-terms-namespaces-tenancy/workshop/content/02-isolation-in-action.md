@@ -32,7 +32,7 @@ command: oc get projects | grep "$(oc project -q)-app-" | tee ~/exercises/peers.
 
 ```examiner:execute-test
 name: verify-two-namespaces
-title: ✅ Verify both app-a and app-b namespaces exist
+title: Verify both app-a and app-b namespaces exist
 timeout: 10
 ```
 
@@ -74,7 +74,7 @@ command: envsubst < app.yaml | oc apply -n "$(oc project -q)-app-a" -f -
 
 ```examiner:execute-test
 name: verify-rollout-a
-title: ✅ Verify hello is available in app-a
+title: Verify hello is available in app-a
 timeout: 10
 retries: .INF
 delay: 2
@@ -89,7 +89,7 @@ session: 2
 
 ```examiner:execute-test
 name: verify-rollout-b
-title: ✅ Verify hello is available in app-b
+title: Verify hello is available in app-b
 timeout: 10
 retries: .INF
 delay: 2
@@ -117,7 +117,7 @@ command: oc get deploy hello -n "$(oc project -q)-app-b"
 
 ```examiner:execute-test
 name: verify-same-name
-title: ✅ Verify the same name exists independently in both
+title: Verify the same name exists independently in both
 timeout: 10
 retries: 3
 delay: 2
@@ -152,7 +152,7 @@ The check below confirms it:
 
 ```examiner:execute-test
 name: verify-isolation
-title: ✅ Verify scaling app-a did not affect app-b
+title: Verify scaling app-a did not affect app-b
 timeout: 10
 retries: .INF
 delay: 2
