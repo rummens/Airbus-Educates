@@ -16,7 +16,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/display-name: "Services & routes (console)"
-    academy.dcs/duration: "10 min"
+    academy.dcs/duration: "5 min"
     academy.dcs/difficulty: beginner
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
@@ -85,7 +85,7 @@ spec:
     stable in-cluster address, a Route for a URL outside it. This lab walks the same chain
     in the OpenShift web console, where a Service with no matching pods is visible at a
     glance, and ends at the NetworkPolicies that can block traffic the chain allows.
-  duration: 10m
+  duration: 5m
   difficulty: beginner
   labels:
     - name: module

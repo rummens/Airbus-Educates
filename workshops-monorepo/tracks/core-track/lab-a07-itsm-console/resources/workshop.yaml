@@ -15,7 +15,7 @@ metadata:
 spec:
   title: "Requesting a Tenant & Namespace via ITSM"
   description: Get yourself onto DCS from nothing — find your national myITSM portal, request a Tenant, then request the namespaces it owns. A quick start through both forms, field by field, plus which everyday actions stay self-service with oc.
-  duration: 20m
+  duration: 15m
   difficulty: beginner
   labels:
     - name: module

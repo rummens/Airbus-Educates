@@ -14,7 +14,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/display-name: "Storage claims (console)"
-    academy.dcs/duration: "8 min"
+    academy.dcs/duration: "5 min"
     academy.dcs/difficulty: beginner
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
@@ -81,7 +81,7 @@ spec:
     This lab reads the same claim in the OpenShift web console — status, capacity, access
     mode, class and events — and ends on the pod that mounts it, so you can diagnose a
     storage problem from the screen instead of from three commands.
-  duration: 8m
+  duration: 5m
   difficulty: beginner
   labels:
     - name: module

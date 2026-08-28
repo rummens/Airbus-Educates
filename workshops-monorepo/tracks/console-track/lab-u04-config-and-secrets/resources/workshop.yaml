@@ -14,7 +14,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/display-name: "Config & secrets (console)"
-    academy.dcs/duration: "10 min"
+    academy.dcs/duration: "5 min"
     academy.dcs/difficulty: beginner
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
@@ -82,7 +82,7 @@ spec:
     terminal in Configure & Troubleshoot Your App. This lab finds the same objects in the
     OpenShift web console, shows what Reveal values really means, and ends on the
     Deployment tab that wires configuration into a workload.
-  duration: 10m
+  duration: 5m
   difficulty: beginner
   labels:
     - name: module
