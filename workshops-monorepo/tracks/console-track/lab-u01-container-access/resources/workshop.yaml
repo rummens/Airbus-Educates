@@ -14,7 +14,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/display-name: "Inspect a running container (console)"
-    academy.dcs/duration: "10 min"
+    academy.dcs/duration: "5 min"
     academy.dcs/difficulty: beginner
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
@@ -84,7 +84,7 @@ spec:
     A guided tour of pod inspection in the OpenShift web console: locate a running
     pod, read its logs, and open a terminal inside its container. Runs in your own
     project, which is created and populated for you before the lab starts.
-  duration: 10m
+  duration: 5m
   difficulty: beginner
   labels:
     - name: module

@@ -14,7 +14,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/display-name: "Diagnose a broken pod (console)"
-    academy.dcs/duration: "10 min"
+    academy.dcs/duration: "5 min"
     academy.dcs/difficulty: beginner
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
@@ -85,7 +85,7 @@ spec:
     Troubleshoot Your App. This lab gives you a pod that will not start and walks the same
     investigation through the OpenShift web console — status, events, an empty log, and the
     manifest that caused it — so you know which tab answers which question.
-  duration: 10m
+  duration: 5m
   difficulty: beginner
   labels:
     - name: module

@@ -14,7 +14,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/display-name: "Deployments & rollouts (console)"
-    academy.dcs/duration: "10 min"
+    academy.dcs/duration: "5 min"
     academy.dcs/difficulty: beginner
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
@@ -82,7 +82,7 @@ spec:
     First App. This lab walks the same object through the OpenShift web console —
     replicas, owned pods, revision history, events and live YAML — so you can recognise
     each command's equivalent on screen.
-  duration: 10m
+  duration: 5m
   difficulty: beginner
   labels:
     - name: module
