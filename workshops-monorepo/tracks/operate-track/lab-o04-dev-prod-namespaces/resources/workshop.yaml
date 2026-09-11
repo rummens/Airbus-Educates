@@ -5,9 +5,10 @@ metadata:
   labels:
     academy.dcs/track: operate
     academy.dcs/order: "40"
-    # The lab's PROD-type peer namespace is where the Route is created; the session
-    # namespace itself stays dev.
-    dcs.airbus.com/lifecycle: dev
+    # This lab DOES create a Route — in its PROD-type peer namespace, which is the whole
+    # point of it. External exposure means the lab is prod-lifecycle, even though the
+    # session's own namespace is only ever used to run oc.
+    dcs.airbus.com/lifecycle: prod
   annotations:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
