@@ -1,0 +1,98 @@
+# Hidden lab: it needs a scraped workload to graph, so it is launched from the academy
+# portal with the namespace in the URL. Only <<namespace>> is templated.
+apiVersion: academy.dcs/v1alpha1
+kind: ConsoleLab
+metadata:
+  name: tour-o01-metrics
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: See your metrics drawn
+  description: >-
+    Run a query in the console's metrics view, read it as a graph over time, and find the
+    same numbers per workload without writing PromQL.
+  completionText: >-
+    Done. You ran the query you previously issued with curl, read it over a time range
+    rather than as one instant, and found the per-workload view that answers most questions
+    without a query at all.
+  visibility: hidden
+  mode: assisted
+  context:
+    primaryResource: labServiceMonitor
+    resources:
+      labServiceMonitor:
+        apiVersion: monitoring.coreos.com/v1
+        kind: ServiceMonitor
+        label: Lab service monitor
+        name: lab-app
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/monitoring.coreos.com~v1~ServiceMonitor'
+        consolePath: '/k8s/ns/<<namespace>>/monitoring.coreos.com~v1~ServiceMonitor/lab-app'
+      labDeployment:
+        apiVersion: apps/v1
+        kind: Deployment
+        label: Lab deployment
+        name: lab-app
+        namespace: '<<namespace>>'
+        consolePath: '/k8s/ns/<<namespace>>/deployments/lab-app'
+  steps:
+    - id: open-observe
+      title: Open Observe
+      description: >-
+        Observe is where the platform's monitoring surfaces. You come here when a number
+        matters over time rather than right now — which is most of the time during an
+        incident.
+      target: { type: quickStartId, value: qs-nav-observe }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-metrics
+      title: Open Metrics
+      description: >-
+        This is a PromQL box and a graph. It queries the same store your curl against the
+        tenant endpoint reached, and it is scoped to the project you are in — you cannot
+        read another tenant's series here either.
+      target: { type: consoleElement, id: navigationLink, value: Metrics }
+      complete:
+        operation: { type: navigate, path: '/monitoring/query-browser' }
+        verify: { type: route, path: '/monitoring/query-browser' }
+    - id: run-a-query
+      title: Run a query
+      description: >-
+        Type hello_dcs_up and run it. One series per Pod comes back, carrying the labels
+        the platform added — namespace, pod, service — on top of the ones the app set.
+      target: { type: consoleElement, id: detailsSection, value: Metrics }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: read-the-graph
+      title: Read it over time
+      description: >-
+        Change the query to sum by (pod) (rate(hello_dcs_requests_total[5m])) and pick a
+        time range. A graph answers "is this getting worse" in a way a single instant value
+        never does, which is the reason to come here rather than to a terminal.
+      target: { type: consoleElement, id: detailsSection, value: Metrics }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-servicemonitor
+      title: See what asked for the scrape
+      description: >-
+        None of that would exist without the ServiceMonitor in your own namespace. Its
+        selector names the Service, and its endpoint names the port BY NAME — the two
+        fields that fail silently when they are wrong.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/monitoring.coreos.com~v1~ServiceMonitor/lab-app' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/monitoring.coreos.com~v1~ServiceMonitor/lab-app' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/monitoring.coreos.com~v1~ServiceMonitor/lab-app' }
+    - id: per-workload-metrics
+      title: The view that needs no query
+      description: >-
+        The Developer perspective's Observe page shows CPU, memory and — when your app
+        exposes them — its own custom metrics, per workload, with no PromQL at all. Start
+        here; drop to the query box when this cannot answer the question.
+      target: { type: consoleElement, id: detailsSection, value: Observe }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }

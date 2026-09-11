@@ -1,0 +1,134 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: tour-b05-autoscaling
+  labels:
+    academy.dcs/track: build
+    # Sits directly after the terminal lab it complements.
+    academy.dcs/order: "55"
+    academy.dcs/lab-format: console
+    # Optional: the catalog badges it, leaves it out of the "Lab N of M" counter, and
+    # does not require it for the track trophy.
+    academy.dcs/optional: "true"
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/display-name: "Autoscaling in the console"
+    academy.dcs/duration: "7 min"
+    academy.dcs/difficulty: intermediate
+    academy.dcs/icon: monitor
+    academy.dcs/summary: >-
+      Read an HPA's current utilisation against its target, its replica bounds, and the Deployment it owns.
+    academy.dcs/details: |
+      ### What this lab is
+
+      A **console lab**, and an optional companion to **Autoscaling**. It opens the
+      OpenShift web console and highlights each step on the real page.
+
+      A Deployment with CPU requests and a HorizontalPodAutoscaler are created before it
+      starts, so the numbers on screen are real.
+
+      ### What you should already know
+
+      The concepts, not the clicks. **Autoscaling** is where the HPA loop, requests as the
+      denominator, and the scale-in window are explained.
+
+      ### What you will do
+
+      > **💡 Tip:** you type nothing. Each screen names the `oc` command it stands in for.
+
+      - Find HorizontalPodAutoscalers where `oc get hpa` would list them
+      - Read current utilisation against the target — the TARGETS column, drawn
+      - Read the min and max replica bounds, and what the HPA currently wants
+      - See the Deployment the HPA owns, and that its replica count is no longer yours to set
+      - Find the Add HorizontalPodAutoscaler action on a Deployment's Actions menu
+
+      ### When the console wins
+
+      Utilisation against target is a number in the CLI and a graph here, which makes a
+      scaling decision much easier to explain to somebody else.
+
+      ### Cleaning up
+
+      Press **Finish** in the guidance box when you are done.
+
+      > **⚠️ Watch out:** leaving the tab open only leaves the project running until it
+      > expires.
+    academy.dcs/console-lab: tour-b05-autoscaling
+    academy.dcs/orphaned: "0s"
+    academy.dcs/expires: 60m
+spec:
+  title: "Autoscaling in the console"
+  description: >-
+    The console side of Autoscaling: an HPA's utilisation against target, its bounds, and the Deployment whose replica count it now owns.
+  duration: 7m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Build-and-Run"
+  workshop:
+    # No content files: a console-lab learner never opens the dashboard. The session
+    # exists to own the namespace and the objects the tour points at.
+    image: "{{ .Values.workshopImages.base }}"
+  session:
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: false
+      editor:
+        enabled: false
+      console:
+        enabled: false
+      slides:
+        enabled: false
+    objects:
+      # A Deployment with a CPU request — without one an HPA has no denominator and
+      # reports <unknown> forever, which would make this tour show nothing.
+      - apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: lab-app
+          namespace: $(session_namespace)
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: lab-app
+          template:
+            metadata:
+              labels:
+                app: lab-app
+                training.educates.dev/session.name: $(session_name)
+            spec:
+              containers:
+                - name: app
+                  image: "{{ .Values.workshopImages.sample }}"
+                  ports:
+                    - containerPort: 8080
+                  resources:
+                    requests: { cpu: 100m, memory: 64Mi }
+                    limits: { cpu: 200m, memory: 128Mi }
+      - apiVersion: autoscaling/v2
+        kind: HorizontalPodAutoscaler
+        metadata:
+          name: lab-app
+          namespace: $(session_namespace)
+        spec:
+          scaleTargetRef:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: lab-app
+          minReplicas: 1
+          maxReplicas: 6
+          metrics:
+            - type: Resource
+              resource:
+                name: cpu
+                target:
+                  type: Utilization
+                  averageUtilization: 50

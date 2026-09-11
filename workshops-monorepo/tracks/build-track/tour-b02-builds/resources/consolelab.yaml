@@ -1,0 +1,124 @@
+# Hidden lab: it needs a BuildConfig to look at, so it is launched from the academy
+# portal, which provisions the namespace and passes it in the URL:
+#   /academy/lessons/tour-b02-builds/start?ns=<namespace>
+# Only <<namespace>> is templated; the object names are owned by the paired
+# workshop.yaml in this folder and are written out literally.
+apiVersion: academy.dcs/v1alpha1
+kind: ConsoleLab
+metadata:
+  name: tour-b02-builds
+  annotations:
+    # The CRD is owned by the console plugin's deployment, not this chart.
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Follow a build through the console
+  description: >-
+    Find a BuildConfig, read its strategy and output, start a build, watch its log and
+    see the ImageStream tag it produced.
+  completionText: >-
+    Done. You found the recipe, ran it, watched the log stream and saw the tag the result
+    landed under — everything oc get bc, oc start-build, oc logs build and oc get
+    imagestream give you, on four screens.
+  visibility: hidden
+  mode: assisted
+  context:
+    primaryResource: labBuildConfig
+    resources:
+      labBuildConfig:
+        apiVersion: build.openshift.io/v1
+        kind: BuildConfig
+        label: Lab build config
+        name: lab-built
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/build.openshift.io~v1~BuildConfig'
+        consolePath: '/k8s/ns/<<namespace>>/buildconfigs/lab-built'
+        tabs:
+          builds: '/k8s/ns/<<namespace>>/buildconfigs/lab-built/builds'
+          yaml: '/k8s/ns/<<namespace>>/buildconfigs/lab-built/yaml'
+      labImageStream:
+        apiVersion: image.openshift.io/v1
+        kind: ImageStream
+        label: Lab image stream
+        name: lab-built
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/image.openshift.io~v1~ImageStream'
+        consolePath: '/k8s/ns/<<namespace>>/imagestreams/lab-built'
+  steps:
+    - id: open-builds-nav
+      title: Open Builds
+      description: >-
+        Builds is where the objects that turn source into images live. You come here to
+        answer "did the last build work, and what did it produce?" — the question oc get
+        builds answers from the terminal.
+      target: { type: quickStartId, value: qs-nav-builds }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-buildconfigs
+      title: Open BuildConfigs
+      description: >-
+        Each row is a recipe, not a run. This is what oc get bc lists, and the number of
+        builds beside it is how often that recipe has been used.
+      target: { type: consoleElement, id: navigationLink, value: BuildConfigs }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/build.openshift.io~v1~BuildConfig' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/build.openshift.io~v1~BuildConfig' }
+    - id: open-buildconfig
+      title: Open the lab BuildConfig
+      description: >-
+        The details page carries the three decisions that make a build: where the source
+        comes from, which strategy builds it, and which image stream tag the result is
+        pushed to. Those are the fields you read in the manifest during the terminal lab.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/buildconfigs/lab-built' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/buildconfigs/lab-built' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/buildconfigs/lab-built' }
+    - id: read-strategy
+      title: Read the strategy and the output
+      description: >-
+        Strategy says how the image is made, and the output target says where it goes.
+        Change either one and you have a different recipe — which is why this object is
+        versioned in git rather than edited here.
+      target: { type: consoleElement, id: detailsSection, value: BuildConfig details }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: start-build
+      title: Start a build
+      description: >-
+        The Actions menu holds Start build. That is oc start-build, and it creates a new
+        Build object rather than changing this one — every run is its own record.
+      target: { type: consoleElement, id: actionsMenu, value: Actions }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-builds-tab
+      title: Open the Builds tab
+      description: >-
+        Every run of this recipe is listed here with its status and when it ran. A failed
+        build stays in this list, which is what makes it useful at three in the morning.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/buildconfigs/lab-built/builds' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/buildconfigs/lab-built/builds' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/buildconfigs/lab-built/builds' }
+    - id: read-build-log
+      title: Read a build's log
+      description: >-
+        Open a build and its Logs tab. The log streams as it runs, and it contains the
+        three phases the terminal lab described: the source arriving, each Containerfile
+        step, and the push of the finished image. This is oc logs build/<name>.
+      target: { type: consoleElement, id: detailsSection, value: Build details }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-imagestream
+      title: See where the image landed
+      description: >-
+        Image Streams, under Builds, holds the result. The tag on this one resolves to a
+        digest — the tag is a label that can move, the digest is the image itself. This is
+        what a Deployment refers to instead of a registry URL.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/imagestreams/lab-built' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/imagestreams/lab-built' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/imagestreams/lab-built' }

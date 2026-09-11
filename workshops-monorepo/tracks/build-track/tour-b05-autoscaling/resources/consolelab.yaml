@@ -1,0 +1,97 @@
+# Hidden lab: needs a Deployment with CPU requests and an HPA to read, so it is launched
+# from the academy portal with the namespace in the URL.
+apiVersion: academy.dcs/v1alpha1
+kind: ConsoleLab
+metadata:
+  name: tour-b05-autoscaling
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Watch an autoscaler decide
+  description: >-
+    Read a HorizontalPodAutoscaler's current utilisation against its target, its replica
+    bounds, and the Deployment whose replica count it now owns.
+  completionText: >-
+    Done. You read the same numbers oc get hpa prints — current against target, min, max
+    and what it currently wants — and saw the Deployment that no longer decides its own
+    replica count.
+  visibility: hidden
+  mode: assisted
+  context:
+    primaryResource: labHpa
+    resources:
+      labHpa:
+        apiVersion: autoscaling/v2
+        kind: HorizontalPodAutoscaler
+        label: Lab autoscaler
+        name: lab-app
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/horizontalpodautoscalers'
+        consolePath: '/k8s/ns/<<namespace>>/horizontalpodautoscalers/lab-app'
+      labDeployment:
+        apiVersion: apps/v1
+        kind: Deployment
+        label: Lab deployment
+        name: lab-app
+        namespace: '<<namespace>>'
+        consolePath: '/k8s/ns/<<namespace>>/deployments/lab-app'
+  steps:
+    - id: open-workloads
+      title: Open Workloads
+      description: >-
+        HorizontalPodAutoscalers live with the workloads they control, because that is
+        what they are: a controller writing a replica count onto something else.
+      target: { type: quickStartId, value: qs-nav-workloads }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-hpa-list
+      title: Open HorizontalPodAutoscalers
+      description: >-
+        The list carries what oc get hpa prints: the workload each one targets, current
+        utilisation against target, and the replica bounds it may move within.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/horizontalpodautoscalers' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/horizontalpodautoscalers' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/horizontalpodautoscalers' }
+    - id: open-hpa
+      title: Open the lab autoscaler
+      description: >-
+        Current utilisation is a percentage of the CPU REQUEST, not of a core. With no
+        request there is nothing to take a percentage of, and this page shows unknown
+        forever — which is the single most common reason an HPA appears to do nothing.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/horizontalpodautoscalers/lab-app' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/horizontalpodautoscalers/lab-app' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/horizontalpodautoscalers/lab-app' }
+    - id: read-hpa-details
+      title: Read the bounds and the decision
+      description: >-
+        Min and max are the range it may move within; the desired count is what it wants
+        right now. An idle app sits at the minimum, which is the correct answer rather
+        than a broken one.
+      target: { type: consoleElement, id: detailsSection, value: HorizontalPodAutoscaler details }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-deployment
+      title: See what it controls
+      description: >-
+        The Deployment's replica count is no longer yours to set: change it here and the
+        autoscaler will move it back on its next pass. That is not a conflict, it is the
+        arrangement you asked for.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app' }
+    - id: find-add-hpa
+      title: Find where an autoscaler is added
+      description: >-
+        The Actions menu has Add HorizontalPodAutoscaler — the console's version of oc
+        autoscale. The form asks for exactly the three things the manifest declares: the
+        target metric, and the minimum and maximum replicas.
+      target: { type: consoleElement, id: actionsMenu, value: Actions }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }

@@ -1,0 +1,127 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: tour-b02-builds
+  labels:
+    academy.dcs/track: build
+    # Sits directly after the terminal lab it complements.
+    academy.dcs/order: "25"
+    academy.dcs/lab-format: console
+    # Optional: the catalog badges it, leaves it out of the "Lab N of M" counter, and
+    # does not require it for the track trophy.
+    academy.dcs/optional: "true"
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/display-name: "Builds in the console"
+    academy.dcs/duration: "8 min"
+    academy.dcs/difficulty: intermediate
+    academy.dcs/icon: monitor
+    academy.dcs/summary: >-
+      Find a BuildConfig, its builds, the log of one run and the ImageStream tag it
+      produced — the console side of the Build Your Image lab.
+    academy.dcs/details: |
+      ### What this lab is
+
+      A **console lab**, and an optional companion to **Build Your Image on DCS**. Instead
+      of instruction pages it opens the OpenShift web console and highlights each step on
+      the real page.
+
+      A BuildConfig and a finished build are created before it starts, so every screen has
+      something real on it.
+
+      ### What you should already know
+
+      The concepts, not the clicks. **Build Your Image on DCS** is where BuildConfig, Build
+      and ImageStream are explained; nothing new is introduced here.
+
+      ### What you will do
+
+      > **💡 Tip:** you type nothing. Each screen names the `oc` command it stands in for.
+
+      - Find BuildConfigs where `oc get bc` would list them
+      - Open one and read the strategy, source type and output target
+      - Open a build and read its log, the console's `oc logs build/...`
+      - See the ImageStream the output landed in, and the tag that resolves to a digest
+      - Find the Start build action — the console's `oc start-build`
+
+      ### When the console wins
+
+      For a failed build, the log and the object that produced it are one click apart, and
+      the history of every run is a list rather than a command. For anything repeatable,
+      the CLI still wins.
+
+      ### Cleaning up
+
+      Press **Finish** in the guidance box when you are done — that records completion and
+      shuts the project down.
+
+      > **⚠️ Watch out:** leaving the tab open only leaves the project running until it
+      > expires.
+    academy.dcs/console-lab: tour-b02-builds
+    academy.dcs/orphaned: "0s"
+    academy.dcs/expires: 60m
+spec:
+  title: "Builds in the console"
+  description: >-
+    The console side of Build Your Image on DCS: a BuildConfig, the builds it has produced,
+    the log of one run, and the ImageStream tag holding the result.
+  duration: 8m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Build-and-Run"
+  workshop:
+    # No content files: a console-lab learner never opens the dashboard. The session
+    # exists to own the namespace and the objects the tour points at.
+    image: "{{ .Values.workshopImages.base }}"
+  session:
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: false
+      editor:
+        enabled: false
+      console:
+        enabled: false
+      slides:
+        enabled: false
+    objects:
+      # An ImageStream and a BuildConfig so the tour has real objects to open. The
+      # build itself is started by the learner in the console (the last step), which
+      # is more honest than pre-running one: they see the Start build action do
+      # something.
+      - apiVersion: image.openshift.io/v1
+        kind: ImageStream
+        metadata:
+          name: lab-built
+          namespace: $(session_namespace)
+          labels:
+            app: lab-built
+      - apiVersion: build.openshift.io/v1
+        kind: BuildConfig
+        metadata:
+          name: lab-built
+          namespace: $(session_namespace)
+          labels:
+            app: lab-built
+        spec:
+          source:
+            type: Dockerfile
+            # A Dockerfile source needs no git server and no upload: the content is
+            # in the object, so a build can be started from the console with one
+            # click and will actually succeed.
+            dockerfile: |
+              FROM {{ .Values.workshopImages.sample }}
+              ENV GREETING="Built from the console"
+          strategy:
+            type: Docker
+          output:
+            to:
+              kind: ImageStreamTag
+              name: lab-built:latest

@@ -1,0 +1,123 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: tour-b04-health
+  labels:
+    academy.dcs/track: build
+    # Sits directly after the terminal lab it complements.
+    academy.dcs/order: "45"
+    academy.dcs/lab-format: console
+    # Optional: the catalog badges it, leaves it out of the "Lab N of M" counter, and
+    # does not require it for the track trophy.
+    academy.dcs/optional: "true"
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/display-name: "Health & resources in the console"
+    academy.dcs/duration: "8 min"
+    academy.dcs/difficulty: intermediate
+    academy.dcs/icon: monitor
+    academy.dcs/summary: >-
+      Read probes, resource numbers, Pod conditions and the project's quota on screen — the console side of Health & Resources.
+    academy.dcs/details: |
+      ### What this lab is
+
+      A **console lab**, and an optional companion to **Health & Resources**. It opens the
+      OpenShift web console and highlights each step on the real page.
+
+      An app is running before it starts, with probes and resource numbers already set, so
+      every screen shows live values.
+
+      ### What you should already know
+
+      The concepts, not the clicks. **Health & Resources** is where probes, requests,
+      limits and the namespace budget are explained.
+
+      ### What you will do
+
+      > **💡 Tip:** you type nothing. Each screen names the `oc` command it stands in for.
+
+      - Read a Deployment's replica ring, where `oc get deployment` reports ready versus desired
+      - Find the probes and the resource block on the Pod template — what you wrote in YAML
+      - Open a Pod and read its conditions and restart count, the console's `oc describe pod`
+      - Open the project's ResourceQuota and read Used against Hard
+      - Find the LimitRange that supplies defaults when a manifest sets none
+
+      ### When the console wins
+
+      Quota and limits are a table here rather than three commands, and a Pod's conditions
+      sit next to its events. For anything repeatable the CLI still wins.
+
+      ### Cleaning up
+
+      Press **Finish** in the guidance box when you are done.
+
+      > **⚠️ Watch out:** leaving the tab open only leaves the project running until it
+      > expires.
+    academy.dcs/console-lab: tour-b04-health
+    academy.dcs/orphaned: "0s"
+    academy.dcs/expires: 60m
+spec:
+  title: "Health & resources in the console"
+  description: >-
+    The console side of Health & Resources: probes and resource numbers on the Pod template, a Pod's conditions and restarts, and the project's quota and limit ranges.
+  duration: 8m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Build-and-Run"
+  workshop:
+    # No content files: a console-lab learner never opens the dashboard. The session
+    # exists to own the namespace and the objects the tour points at.
+    image: "{{ .Values.workshopImages.base }}"
+  session:
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: false
+      editor:
+        enabled: false
+      console:
+        enabled: false
+      slides:
+        enabled: false
+    objects:
+      # An app with probes and explicit resources: the two things this tour reads off
+      # the Pod template, and the reason its Pod shows real conditions.
+      - apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: lab-app
+          namespace: $(session_namespace)
+        spec:
+          replicas: 2
+          selector:
+            matchLabels:
+              app: lab-app
+          template:
+            metadata:
+              labels:
+                app: lab-app
+                training.educates.dev/session.name: $(session_name)
+            spec:
+              containers:
+                - name: app
+                  image: "{{ .Values.workshopImages.sample }}"
+                  ports:
+                    - containerPort: 8080
+                  readinessProbe:
+                    httpGet: { path: /healthz, port: 8080 }
+                    initialDelaySeconds: 3
+                    periodSeconds: 5
+                  livenessProbe:
+                    httpGet: { path: /healthz, port: 8080 }
+                    initialDelaySeconds: 10
+                    periodSeconds: 10
+                  resources:
+                    requests: { cpu: 50m, memory: 64Mi }
+                    limits: { cpu: 100m, memory: 128Mi }

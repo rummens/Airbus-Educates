@@ -1,0 +1,93 @@
+# Hidden lab: needs a Pod that is actively logging, so it is launched from the academy
+# portal with the namespace in the URL. The Pod has a STABLE name (not created by a
+# Deployment), so its Logs tab can be path-targeted.
+apiVersion: academy.dcs/v1alpha1
+kind: ConsoleLab
+metadata:
+  name: tour-o02-logs
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+spec:
+  title: Follow a log without a terminal
+  description: >-
+    Open a Pod's Logs tab, follow the stream, pause it to read one moment, and see where an
+    aggregated view would fit.
+  completionText: >-
+    Done. You followed a live log, paused it to read a specific line, and saw where the
+    Logs tab stops being enough — which is exactly where an aggregated store begins.
+  visibility: hidden
+  mode: assisted
+  context:
+    primaryResource: labPod
+    resources:
+      labPod:
+        apiVersion: v1
+        kind: Pod
+        label: Lab logger pod
+        name: lab-logger
+        namespace: '<<namespace>>'
+        listPath: '/k8s/ns/<<namespace>>/pods'
+        consolePath: '/k8s/ns/<<namespace>>/pods/lab-logger'
+        tabs:
+          logs: '/k8s/ns/<<namespace>>/pods/lab-logger/logs'
+          events: '/k8s/ns/<<namespace>>/pods/lab-logger/events'
+  steps:
+    - id: open-workloads
+      title: Open Workloads
+      description: >-
+        Logs belong to a container, so you reach them through the Pod that runs it —
+        the same path oc logs takes, with the Pod named for you.
+      target: { type: quickStartId, value: qs-nav-workloads }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-pod
+      title: Open the logger pod
+      description: >-
+        This Pod writes a line every few seconds, and a warning to stderr every ninth one.
+        Its details page is where a restart count and its conditions live — the context you
+        usually want next to a log.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/pods/lab-logger' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/lab-logger' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/lab-logger' }
+    - id: open-logs-tab
+      title: Open the Logs tab
+      description: >-
+        This is oc logs -f, streaming. Both stdout and stderr arrive in the same view, in
+        order, which is why writing errors to stderr costs you nothing here and helps a
+        parser later.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/pods/lab-logger/logs' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/lab-logger/logs' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/lab-logger/logs' }
+    - id: pause-the-stream
+      title: Pause it and read one line
+      description: >-
+        The stream keeps scrolling, which is useless when you are trying to read. Pause it,
+        find a WARN line, and notice you can select and copy text here — the part of a
+        terminal people miss when a log is racing past.
+      target: { type: consoleElement, id: detailsSection, value: Logs }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: container-selector
+      title: Find the container selector
+      description: >-
+        A Pod with more than one container gets a dropdown here. That is the -c flag, and
+        forgetting it is why a sidecar's logs sometimes seem to be missing.
+      target: { type: consoleElement, id: detailsSection, value: Logs }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: where-aggregation-fits
+      title: Where this page stops
+      description: >-
+        Delete this Pod and everything on this screen is gone with it — the node's file went
+        too. That is the gap an aggregated store fills, and on a cluster with one, Observe
+        has a Logs entry that searches across workloads and outlives them.
+      target: { type: quickStartId, value: qs-nav-observe }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }

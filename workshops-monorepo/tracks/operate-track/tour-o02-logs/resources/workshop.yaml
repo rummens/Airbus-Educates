@@ -1,0 +1,127 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: tour-o02-logs
+  labels:
+    academy.dcs/track: operate
+    # Sits directly after the terminal lab it complements.
+    academy.dcs/order: "25"
+    academy.dcs/lab-format: console
+    # Optional: the catalog badges it, leaves it out of the "Lab N of M" counter, and
+    # does not require it for the track trophy.
+    academy.dcs/optional: "true"
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/display-name: "Logs in the console"
+    academy.dcs/duration: "6 min"
+    academy.dcs/difficulty: intermediate
+    academy.dcs/icon: monitor
+    academy.dcs/summary: >-
+      Follow a Pod's log in the console, pause it, switch containers, and see where an aggregated view would sit.
+    academy.dcs/details: |
+      ### What this lab is
+
+      A **console lab**, and an optional companion to **Logs**. It opens the OpenShift web
+      console and highlights each step on the real page.
+
+      A Pod that logs steadily is created before the lab starts, so the log view has
+      something moving in it.
+
+      ### What you should already know
+
+      The concepts, not the clicks. **Logs** is where the log path, `--previous` and
+      aggregation are explained.
+
+      ### What you will do
+
+      > **💡 Tip:** you type nothing. Each screen names the `oc` command it stands in for.
+
+      - Open a Pod's Logs tab, the console's `oc logs -f`
+      - Follow the stream, pause it, and read a specific moment
+      - Switch container when a Pod runs more than one, which `-c` does from a terminal
+      - See where an aggregated log view would sit, and what it adds over this page
+
+      ### When the console wins
+
+      Following a log while clicking between Pods is genuinely faster here, and the Logs
+      tab sits next to the events that explain a restart.
+
+      ### Cleaning up
+
+      Press **Finish** in the guidance box when you are done.
+
+      > **⚠️ Watch out:** leaving the tab open only leaves the project running until it
+      > expires.
+    academy.dcs/console-lab: tour-o02-logs
+    academy.dcs/orphaned: "0s"
+    academy.dcs/expires: 60m
+spec:
+  title: "Logs in the console"
+  description: >-
+    The console side of Logs: a Pod's Logs tab, following and pausing a live stream, and what an aggregated log store would add.
+  duration: 6m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "O-Operate-and-Observe"
+  workshop:
+    # No content files: a console-lab learner never opens the dashboard. The session
+    # exists to own the namespace and the objects the tour points at.
+    image: "{{ .Values.workshopImages.base }}"
+  session:
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: false
+      editor:
+        enabled: false
+      console:
+        enabled: false
+      slides:
+        enabled: false
+    objects:
+      # A Pod with a STABLE name, so the tour can path-target its Logs tab (a Pod
+      # created by a Deployment has a generated suffix). It logs every few seconds, so
+      # the stream has something in it.
+      - apiVersion: v1
+        kind: Pod
+        metadata:
+          name: lab-logger
+          namespace: $(session_namespace)
+          labels:
+            app: lab-logger
+            training.educates.dev/session.name: $(session_name)
+        spec:
+          containers:
+            - name: logger
+              image: "{{ .Values.workshopImages.sample }}"
+              command:
+                - sh
+                - -c
+                - |
+                  i=0
+                  while true; do
+                    i=$((i+1))
+                    echo "[lab-logger] request ${i} served in $(( (i * 7) % 40 + 5 ))ms"
+                    [ $((i % 9)) -eq 0 ] && echo "[lab-logger] WARN slow response, retrying" >&2
+                    sleep 3
+                  done
+              resources:
+                requests: { cpu: 25m, memory: 32Mi }
+                limits: { cpu: 50m, memory: 64Mi }
+              # A bare Pod is admitted by PodSecurity directly rather than through a
+              # controller, so it has to say the restricted things out loud or the
+              # console shows a policy warning next to a lab about reading logs.
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsNonRoot: true
+                capabilities:
+                  drop: ["ALL"]
+                seccompProfile:
+                  type: RuntimeDefault

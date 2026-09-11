@@ -1,0 +1,146 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: tour-o01-metrics
+  labels:
+    academy.dcs/track: operate
+    # Sits directly after the terminal lab it complements.
+    academy.dcs/order: "15"
+    academy.dcs/lab-format: console
+    # Optional: the catalog badges it, leaves it out of the "Lab N of M" counter, and
+    # does not require it for the track trophy.
+    academy.dcs/optional: "true"
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/display-name: "Metrics in the console"
+    academy.dcs/duration: "8 min"
+    academy.dcs/difficulty: intermediate
+    academy.dcs/icon: monitor
+    academy.dcs/summary: >-
+      Run a PromQL query in the console, read it as a graph over time, and find your workload's own metrics without writing a query.
+    academy.dcs/details: |
+      ### What this lab is
+
+      A **console lab**, and an optional companion to **Metrics & Monitoring**. It opens
+      the OpenShift web console and highlights each step on the real page.
+
+      An app exposing `/metrics` and a ServiceMonitor asking for it are created before the
+      lab starts, so there is a real target and real series to look at.
+
+      ### What you should already know
+
+      The concepts, not the clicks. **Metrics & Monitoring** is where the pipeline, the
+      ServiceMonitor and PromQL are explained.
+
+      ### What you will do
+
+      > **💡 Tip:** you type no `oc` commands, but you will type one PromQL query — the
+      > same one you ran from the terminal.
+
+      - Open the metrics view and run a query, where `curl` against the query endpoint stood in
+      - Read a graph over a time range instead of one instant value
+      - Find your workload's own metrics in the Developer perspective, without writing PromQL
+      - See the ServiceMonitor object that asked for the scrape
+
+      ### When the console wins
+
+      A graph over fifteen minutes answers "is this getting worse" in a way a single number
+      never does, and it is the fastest way to show somebody else what you are seeing.
+
+      ### Cleaning up
+
+      Press **Finish** in the guidance box when you are done.
+
+      > **⚠️ Watch out:** leaving the tab open only leaves the project running until it
+      > expires.
+    academy.dcs/console-lab: tour-o01-metrics
+    academy.dcs/orphaned: "0s"
+    academy.dcs/expires: 60m
+spec:
+  title: "Metrics in the console"
+  description: >-
+    The console side of Metrics & Monitoring: the query view, a graph over a time range, and the Developer perspective's per-workload metrics.
+  duration: 8m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "O-Operate-and-Observe"
+  workshop:
+    # No content files: a console-lab learner never opens the dashboard. The session
+    # exists to own the namespace and the objects the tour points at.
+    image: "{{ .Values.workshopImages.base }}"
+  session:
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: false
+      editor:
+        enabled: false
+      console:
+        enabled: false
+      slides:
+        enabled: false
+    objects:
+      # An app that serves /metrics, a Service with a NAMED port (a ServiceMonitor
+      # selects ports by name), and the ServiceMonitor itself — so the tour has a real
+      # target and real series rather than an empty graph.
+      - apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: lab-app
+          namespace: $(session_namespace)
+        spec:
+          replicas: 2
+          selector:
+            matchLabels:
+              app: lab-app
+          template:
+            metadata:
+              labels:
+                app: lab-app
+                training.educates.dev/session.name: $(session_name)
+            spec:
+              containers:
+                - name: app
+                  image: "{{ .Values.workshopImages.sample }}"
+                  ports:
+                    - name: http
+                      containerPort: 8080
+                  resources:
+                    requests: { cpu: 50m, memory: 64Mi }
+                    limits: { cpu: 100m, memory: 128Mi }
+      - apiVersion: v1
+        kind: Service
+        metadata:
+          name: lab-app
+          namespace: $(session_namespace)
+          labels:
+            app: lab-app
+        spec:
+          selector:
+            app: lab-app
+          ports:
+            - name: http
+              port: 8080
+              targetPort: http
+      - apiVersion: monitoring.coreos.com/v1
+        kind: ServiceMonitor
+        metadata:
+          name: lab-app
+          namespace: $(session_namespace)
+          labels:
+            app: lab-app
+        spec:
+          selector:
+            matchLabels:
+              app: lab-app
+          endpoints:
+            - port: http
+              path: /metrics
+              interval: 30s
