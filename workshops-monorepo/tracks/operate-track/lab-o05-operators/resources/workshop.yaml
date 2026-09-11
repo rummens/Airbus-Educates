@@ -69,6 +69,39 @@ spec:
         policy: restricted
         token:
           enabled: true
+    # A tenant may only touch the operator kinds the platform entitles them to. The
+    # Educates session role knows nothing about postgresql.cnpg.io, so without this the
+    # learner cannot create the very object the lab is about. Granting it per session, in
+    # the session's own namespace, is exactly the shape a real entitlement takes.
+    #
+    # The subject must be the session's ServiceAccount, which lives in the WORKSHOP
+    # namespace — binding the session namespace's SA group matches nothing.
+    objects:
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: cnpg-instance-owner
+        namespace: $(session_namespace)
+      rules:
+      - apiGroups: ["postgresql.cnpg.io"]
+        resources: ["clusters", "clusters/status", "backups", "scheduledbackups", "poolers"]
+        verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: cnpg-instance-owner
+        namespace: $(session_namespace)
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: cnpg-instance-owner
+      subjects:
+      - kind: ServiceAccount
+        name: $(service_account)
+        namespace: $(workshop_namespace)
+      - apiGroup: rbac.authorization.k8s.io
+        kind: Group
+        name: system:serviceaccounts:$(session_namespace)
     applications:
       terminal:
         enabled: true

@@ -29,13 +29,12 @@ running PostgreSQL — as the example throughout. It adds a CRD named `Cluster` 
 own API group, so it never collides with any other `Cluster`-named type), plus a handful
 of supporting CRDs for backups and connection pooling.
 
-Confirm they're already on the cluster. `oc get crds` lists every CustomResourceDefinition
-registered with the API server — `crds` is the plural short name for
-CustomResourceDefinition, the same way `po` is short for Pod. Piping to `grep` filters
-that (potentially long) list down to just the group we care about:
+Confirm the cluster knows those kinds. **Discovery** — what `oc` itself uses to work out
+which types exist — is readable by any authenticated user, so this works from inside your own
+namespace without any cluster-wide permission:
 
 ```terminal:execute
-command: oc get crds | grep cnpg
+command: oc api-resources --api-group=postgresql.cnpg.io
 ```
 
 ```examiner:execute-test
@@ -57,7 +56,7 @@ alike, which is a useful way to discover what a cluster can do beyond the handfu
 types you already know:
 
 ```terminal:execute
-command: oc api-resources | grep -i postgresql
+command: oc explain cluster.spec --api-version=postgresql.cnpg.io/v1 | head -25
 ```
 
 ```examiner:execute-test
@@ -94,7 +93,7 @@ name: Console
 ```
 
 Browse to the **Custom Resource Definitions** view under the cluster-scoped resources —
-you'll find `clusters.postgresql.cnpg.io` listed there, the same object `oc get crds`
+you'll find `clusters.postgresql.cnpg.io` listed there, the same object the discovery view
 showed you, just in a GUI. This console is the Kubernetes web console bound to your
 session, not the OpenShift-branded console, so its resource list is generic rather than
 grouped by "Installed Operators" the way the full OpenShift console would show it — but

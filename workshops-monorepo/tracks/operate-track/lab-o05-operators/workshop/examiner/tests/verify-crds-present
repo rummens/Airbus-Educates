@@ -1,10 +1,15 @@
 #!/bin/bash
-# Verify the CloudNativePG operator's CRDs are installed cluster-wide (platform-managed).
-crds=$(oc get crds -o name 2>/dev/null | grep 'postgresql.cnpg.io')
-if [ -z "$crds" ]; then
-  echo "❌ No CRDs found for group 'postgresql.cnpg.io'. Is the CloudNativePG operator installed on this cluster?" >&2
+# The operator's kinds must be served by this cluster's API.
+#
+# Read through DISCOVERY rather than `oc get crds`: CustomResourceDefinitions are
+# cluster-scoped and a tenant has no right to list them, but every authenticated user
+# can ask the API which kinds exist. That is also why the page uses api-resources.
+set -uo pipefail
+out=$(oc api-resources --api-group=postgresql.cnpg.io --no-headers 2>/dev/null)
+if [ -z "$out" ]; then
+  echo "❌ The API serves no kinds in group 'postgresql.cnpg.io'. Is the CloudNativePG operator installed on this cluster? Without an operator there is no lab: check with 'oc api-resources | head'." >&2
   exit 1
 fi
-count=$(echo "$crds" | wc -l | tr -d ' ')
-echo "✅ found ${count} CloudNativePG CRD(s):"
-echo "$crds"
+n=$(echo "$out" | grep -c .)
+echo "✅ The cluster serves ${n} kind(s) in postgresql.cnpg.io, added by the operator:"
+echo "$out" | awk '{print "   " $1}'

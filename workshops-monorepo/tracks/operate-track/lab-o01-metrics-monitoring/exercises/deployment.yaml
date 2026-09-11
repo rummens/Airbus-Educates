@@ -1,0 +1,38 @@
+# The app, exposing its own metrics. hello-dcs serves Prometheus exposition format on
+# /metrics — a request counter and a couple of gauges — which is all a target needs.
+# Apply with: envsubst < deployment.yaml | oc apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-dcs
+  template:
+    metadata:
+      labels:
+        app: hello-dcs
+    spec:
+      containers:
+      - name: hello-dcs
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        ports:
+        - name: http
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi

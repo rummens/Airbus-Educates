@@ -1,0 +1,21 @@
+# A ServiceMonitor is how you ASK to be scraped. You do not configure Prometheus —
+# you create an object in your own namespace, and the platform's user-workload
+# monitoring picks it up.
+#
+#   selector       — which Service to scrape (by label, in this namespace).
+#   endpoints.port — the Service's port BY NAME.
+#   interval       — how often. 30s is the usual default; shorter costs storage.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  selector:
+    matchLabels:
+      app: hello-dcs
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s

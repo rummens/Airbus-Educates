@@ -1,8 +1,14 @@
 #!/bin/bash
 # Verify the CloudNativePG operator reports the sample-db Cluster CR as fully reconciled.
-phase=$(oc get cluster.postgresql.cnpg.io sample-db -o jsonpath='{.status.phase}' 2>/dev/null)
+# The operator has real work to do here — provision a volume, start PostgreSQL,
+# bootstrap it — so wait rather than read once.
+for _ in $(seq 1 36); do          # ~180s
+  phase=$(oc get cluster.postgresql.cnpg.io sample-db -o jsonpath='{.status.phase}' 2>/dev/null)
+  [ "$phase" = "Cluster in healthy state" ] && break
+  sleep 5
+done
 if [ "$phase" != "Cluster in healthy state" ]; then
-  echo "❌ sample-db is not healthy yet (status.phase='${phase:-<empty>}'). Reconciliation can take a minute or two." >&2
+  echo "❌ sample-db is not healthy after 3 minutes (status.phase='${phase:-<empty>}'). Watch what the operator is doing: oc get pods -l cnpg.io/cluster=sample-db and oc describe cluster sample-db" >&2
   exit 1
 fi
 echo "✅ sample-db reports phase '${phase}'."
