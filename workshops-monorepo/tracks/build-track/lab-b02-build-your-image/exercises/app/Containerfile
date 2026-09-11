@@ -1,0 +1,12 @@
+# The image you are about to build ON the cluster.
+#
+# FROM must name an image the platform already has: DCS is air-gapped, so a build
+# pulls its base from the DCS registry like everything else. ${DCS_REGISTRY} is
+# substituted before the build starts.
+FROM ${DCS_REGISTRY}/samples/hello-dcs:1.0
+
+# Your change: the greeting is baked into the image rather than set at deploy time.
+# That is the difference between configuration and a build — this value ships with
+# the artefact and is identical everywhere it runs.
+ENV GREETING="Built on DCS, by me"
+ENV VERSION="2.0"

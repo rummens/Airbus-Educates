@@ -1,0 +1,39 @@
+# Deploys the image YOU built, referenced by its ImageStream tag rather than by a
+# registry URL. The platform resolves the tag to the exact image the build produced.
+# Apply with: envsubst < deployment.yaml | oc apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-built
+  labels:
+    app: hello-built
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-built
+  template:
+    metadata:
+      labels:
+        app: hello-built
+    spec:
+      containers:
+      - name: hello-built
+        # image-registry.openshift-image-registry.svc:5000 is the cluster's own registry,
+        # where builds put their output. ${SESSION_NAMESPACE} is your namespace.
+        image: image-registry.openshift-image-registry.svc:5000/${SESSION_NAMESPACE}/hello-built:latest
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi

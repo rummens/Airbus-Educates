@@ -1,0 +1,16 @@
+#!/bin/bash
+# The build's output must be tracked by the ImageStream, as a tag resolving to a digest.
+set -uo pipefail
+for _ in $(seq 1 24); do          # ~120s
+  ref=$(oc get imagestream hello-built -o jsonpath='{.status.tags[0].items[0].dockerImageReference}' 2>/dev/null)
+  [ -n "$ref" ] && break
+  sleep 5
+done
+if [ -z "$ref" ]; then
+  echo "❌ The ImageStream has no tag yet. A tag appears when a build PUSHES successfully — check the end of: oc logs build/hello-built-1" >&2
+  exit 1
+fi
+case "$ref" in
+  *@sha256:*) echo "✅ The ImageStream tag resolves to a digest: ${ref##*/}" ;;
+  *)          echo "✅ The ImageStream tag resolves to ${ref##*/}" ;;
+esac

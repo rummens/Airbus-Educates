@@ -1,0 +1,15 @@
+#!/bin/bash
+# The first build must reach Complete. Waits: it pulls a base image before it can start.
+set -uo pipefail
+for _ in $(seq 1 48); do          # ~240s
+  phase=$(oc get build hello-built-1 -o jsonpath='{.status.phase}' 2>/dev/null)
+  case "$phase" in
+    Complete) echo "✅ Build hello-built-1 completed."; exit 0 ;;
+    Failed|Error|Cancelled)
+      echo "❌ Build hello-built-1 ended as '${phase}'. Read why: oc logs build/hello-built-1 — a FROM that names an unreachable registry is the usual cause on an air-gapped cluster." >&2
+      exit 1 ;;
+  esac
+  sleep 5
+done
+echo "❌ Build hello-built-1 is still '${phase:-missing}' after 4 minutes. Did 'oc start-build hello-built --from-dir=.' run? Check: oc get builds" >&2
+exit 1

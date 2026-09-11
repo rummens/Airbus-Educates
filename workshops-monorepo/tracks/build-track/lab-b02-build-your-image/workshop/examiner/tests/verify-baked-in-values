@@ -1,0 +1,16 @@
+#!/bin/bash
+# The values must come from the IMAGE, not from anything set at deploy time — that is
+# the distinction the whole lab turns on.
+set -uo pipefail
+g=$(oc exec deploy/hello-built -- printenv GREETING 2>/dev/null | tr -d '\r')
+v=$(oc exec deploy/hello-built -- printenv VERSION 2>/dev/null | tr -d '\r')
+if [ -z "$g" ]; then
+  echo "❌ GREETING is not set in the running container. It is baked into the image by the Containerfile, so an empty value means the deployed image is not the one you built." >&2
+  exit 1
+fi
+env_set=$(oc get deployment hello-built -o jsonpath='{.spec.template.spec.containers[0].env}' 2>/dev/null)
+if [ -n "$env_set" ]; then
+  echo "⚠️ The Deployment sets env of its own (${env_set}), so this no longer proves the value came from the image. Remove it to make the point." >&2
+  exit 1
+fi
+echo "✅ The container runs with GREETING='${g}'${v:+ and VERSION='${v}'}, and the Deployment sets neither — both came from the image you built."

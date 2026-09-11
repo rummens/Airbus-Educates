@@ -1,0 +1,11 @@
+#!/bin/bash
+# After a deliberate rollout, the NEW image's value must be what the container serves.
+set -uo pipefail
+for _ in $(seq 1 36); do          # ~180s
+  ready=$(oc get deployment hello-built -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  g=$(oc exec deploy/hello-built -- printenv GREETING 2>/dev/null | tr -d '\r')
+  case "$g" in *"Rebuilt"*) echo "✅ The rebuilt image is now running: GREETING='${g}'."; exit 0 ;; esac
+  sleep 5
+done
+echo "❌ The running app still serves '${g:-<none>}' after the rollout (ready=${ready:-0}). 'oc rollout restart' makes the Deployment pull the tag again — check it completed: oc rollout status deploy/hello-built" >&2
+exit 1

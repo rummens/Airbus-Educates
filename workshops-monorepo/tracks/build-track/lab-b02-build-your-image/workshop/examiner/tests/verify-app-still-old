@@ -1,0 +1,15 @@
+#!/bin/bash
+# The lab's point: a NEW IMAGE DOES NOT RESTART ANYTHING. The running Pod still has the
+# value from the image it started with.
+set -uo pipefail
+g=$(oc exec deploy/hello-built -- printenv GREETING 2>/dev/null | tr -d '\r')
+if [ -z "$g" ]; then
+  echo "❌ Could not read GREETING from the running container. Is the app still running? Check: oc get pods -l app=hello-built" >&2
+  exit 1
+fi
+case "$g" in
+  *"Rebuilt"*)
+    echo "❌ The running app already serves the REBUILT value ('${g}'). Something restarted the Pod — so the page's point (a new image changes nothing by itself) cannot be demonstrated. If you restarted it early, that is the cause." >&2
+    exit 1 ;;
+esac
+echo "✅ The running app still says '${g}' — the second build produced a new image, and nothing told the Deployment about it."

@@ -1,0 +1,13 @@
+#!/bin/bash
+# `oc new-build --binary` creates TWO objects: the recipe and a place to put its output.
+set -uo pipefail
+if ! oc get buildconfig hello-built >/dev/null 2>&1; then
+  echo "❌ No BuildConfig named 'hello-built'. Did 'oc new-build --binary --strategy=docker --name=hello-built' run? If it was refused, this namespace is not entitled to create builds." >&2
+  exit 1
+fi
+strategy=$(oc get buildconfig hello-built -o jsonpath='{.spec.strategy.type}' 2>/dev/null)
+if ! oc get imagestream hello-built >/dev/null 2>&1; then
+  echo "❌ The BuildConfig exists but there is no 'hello-built' ImageStream for its output. new-build normally creates both." >&2
+  exit 1
+fi
+echo "✅ BuildConfig 'hello-built' (${strategy} strategy) and its ImageStream both exist."

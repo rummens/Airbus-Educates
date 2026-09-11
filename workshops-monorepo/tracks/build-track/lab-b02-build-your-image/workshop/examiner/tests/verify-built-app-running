@@ -1,0 +1,18 @@
+#!/bin/bash
+# The app must be running FROM the image the build produced.
+set -uo pipefail
+for _ in $(seq 1 36); do          # ~180s
+  ready=$(oc get deployment hello-built -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  [ "${ready:-0}" -ge 1 ] 2>/dev/null && break
+  sleep 5
+done
+if [ "${ready:-0}" -lt 1 ] 2>/dev/null; then
+  echo "❌ hello-built has no ready replica. If the Pod cannot pull, the image reference may be wrong — it must point at the in-cluster registry path for THIS namespace. Check: oc describe pod -l app=hello-built | tail -20" >&2
+  exit 1
+fi
+img=$(oc get deployment hello-built -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null)
+case "$img" in
+  *image-registry.openshift-image-registry.svc*) ;;
+  *) echo "❌ The Deployment runs '${img}', which is not the image you built in this namespace." >&2; exit 1 ;;
+esac
+echo "✅ Running ${ready} replica(s) from your own build: ${img}"

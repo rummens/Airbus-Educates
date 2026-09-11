@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="420" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">Three objects, one image — and no Docker daemon anywhere</text>
+
+  <rect x="24" y="54" width="210" height="96" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="129" y="78" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b4a86">BuildConfig</text>
+  <text x="129" y="98" text-anchor="middle" font-size="10" fill="#1b4a86">the recipe: input, strategy, output</text>
+  <text x="129" y="116" text-anchor="middle" font-size="10" fill="#1b4a86">created once</text>
+  <text x="129" y="136" text-anchor="middle" font-size="10" fill="#5a6b7b">git source, or binary from your files</text>
+
+  <line x1="234" y1="102" x2="272" y2="102" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="272,102 264,98 264,106" fill="#5a6b7b"/>
+  <text x="253" y="94" text-anchor="middle" font-size="9" fill="#5a6b7b">start-build</text>
+
+  <rect x="276" y="54" width="210" height="96" rx="8" fill="#fdf4e8" stroke="#c08a2d" stroke-width="2"/>
+  <text x="381" y="78" text-anchor="middle" font-size="13" font-weight="bold" fill="#7a5410">Build</text>
+  <text x="381" y="98" text-anchor="middle" font-size="10" fill="#7a5410">ONE run, as a Pod in your namespace</text>
+  <text x="381" y="116" text-anchor="middle" font-size="10" fill="#7a5410">has logs, succeeds or fails</text>
+  <text x="381" y="136" text-anchor="middle" font-size="10" fill="#7a5410">stays afterwards as the record</text>
+
+  <line x1="486" y1="102" x2="524" y2="102" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="524,102 516,98 516,106" fill="#5a6b7b"/>
+  <text x="505" y="94" text-anchor="middle" font-size="9" fill="#5a6b7b">push</text>
+
+  <rect x="528" y="54" width="208" height="96" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="632" y="78" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c6a3a">ImageStream</text>
+  <text x="632" y="98" text-anchor="middle" font-size="10" fill="#2c6a3a">a NAME for the result</text>
+  <text x="632" y="116" text-anchor="middle" font-size="10" fill="#2c6a3a">tag → image digest</text>
+  <text x="632" y="136" text-anchor="middle" font-size="10" fill="#2c6a3a">so a Deployment says hello-built:latest</text>
+
+  <!-- the gap -->
+  <rect x="24" y="174" width="712" height="72" rx="8" fill="#fdeeee" stroke="#c0504d" stroke-width="2"/>
+  <text x="380" y="198" text-anchor="middle" font-size="13" font-weight="bold" fill="#8a2f2c">A new image does not restart anything</text>
+  <text x="44" y="220" font-size="11" fill="#8a2f2c">The running Pod keeps the image it started with. Something must connect "a build finished" to "the new version is live":</text>
+  <text x="44" y="238" font-size="11" fill="#8a2f2c">an image trigger on the Deployment, a pipeline step, or you, typing oc rollout restart.</text>
+
+  <!-- on DCS -->
+  <rect x="24" y="262" width="712" height="136" rx="8" fill="#ffffff" stroke="#c5ced6" stroke-width="2"/>
+  <text x="380" y="286" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b2b3a">What air-gapping changes — and what it does not</text>
+  <text x="44" y="310" font-size="11" fill="#1b2b3a">FROM must name an image the platform already has. A base that is not mirrored fails at the first instruction.</text>
+  <text x="44" y="330" font-size="11" fill="#1b2b3a">Output goes to your tenant's Harbor project: DEV takes pushes, PROD takes none and pulls only below the CVE threshold.</text>
+  <text x="44" y="350" font-size="11" fill="#1b2b3a">Getting an image into PROD is a promotion — a mirror from DEV via ITSM — or a cleared image from the green catalog.</text>
+  <text x="44" y="370" font-size="11" fill="#2c6a3a">Unchanged: the objects, the commands, the log, the tag, the rebuild. Only the endpoints differ.</text>
+  <text x="44" y="390" font-size="11" fill="#5a6b7b">The builder image itself is platform-provided and platform-patched. You choose what goes IN; the platform owns what builds it.</text>
+</svg>

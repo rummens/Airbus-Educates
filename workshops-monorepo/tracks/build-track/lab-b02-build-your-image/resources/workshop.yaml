@@ -1,0 +1,131 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b02-build-your-image
+  labels:
+    academy.dcs/track: build
+    academy.dcs/order: "20"
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/icon: package
+    academy.dcs/details: |
+      **There is no Docker daemon on this platform, and you do not need one.**
+
+      A **BuildConfig** builds your image *inside the cluster*: it takes your files and a
+      Containerfile, runs the build in a Pod, and pushes the result to a registry — with
+      no privileged tooling anywhere near your laptop.
+
+      You create one, feed it the files from your session, watch the build log stream,
+      and then deploy the image **you** made — referenced by an **ImageStream** tag
+      rather than a registry URL.
+
+      Then a change and a second build, so you can see what a new image actually costs,
+      and what triggers a rebuild on a real project.
+
+      > **💡 Tip:** builds are a workload like any other. They queue, they have logs, they
+      > can fail, and they draw on your namespace budget.
+spec:
+  title: "Build Your Image on DCS"
+  description: Build a container image inside the cluster with a BuildConfig — no Docker daemon — then deploy what you built by its ImageStream tag and rebuild it after a change.
+  duration: 25m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Build-and-Run"
+  publish:
+    image: "$(image_repository)/lab-b02-build-your-image-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b02-build-your-image/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b02-build-your-image/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b02-build-your-image/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/build-track/lab-b02-build-your-image"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b02-build-your-image-files:$(workshop_version)"
+    {{- end }}
+  session:
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    - name: SESSION_NAMESPACE
+      value: "$(session_namespace)"
+    namespaces:
+      # A build is a Pod: it needs room alongside the app it produces.
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    # Builds are not in the Educates session role, so a learner cannot create the very
+    # objects this lab is about. Granted here, in the session's own namespace, bound to
+    # the session ServiceAccount (which lives in the WORKSHOP namespace).
+    #
+    # builds/docker is its own permission on OpenShift: the build STRATEGY is gated
+    # separately from creating a BuildConfig, because a Dockerfile build is more
+    # powerful than a source build. A tenant on DCS is entitled to the strategies the
+    # platform allows, which is exactly this shape.
+    objects:
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: image-builder
+        namespace: $(session_namespace)
+      rules:
+      - apiGroups: ["build.openshift.io"]
+        resources: ["buildconfigs", "buildconfigs/instantiate", "buildconfigs/instantiatebinary",
+                    "buildconfigs/webhooks", "builds", "builds/log", "builds/details"]
+        verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+      - apiGroups: ["build.openshift.io"]
+        resources: ["builds/docker", "builds/source", "builds/optimizeddocker"]
+        verbs: ["create"]
+      - apiGroups: ["image.openshift.io"]
+        resources: ["imagestreams", "imagestreams/layers", "imagestreamtags",
+                    "imagestreamimages", "imagestreammappings", "imagestreamimports"]
+        verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: image-builder
+        namespace: $(session_namespace)
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: image-builder
+      subjects:
+      - kind: ServiceAccount
+        name: $(service_account)
+        namespace: $(workshop_namespace)
+      - apiGroup: rbac.authorization.k8s.io
+        kind: Group
+        name: system:serviceaccounts:$(session_namespace)
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      slides:
+        enabled: true
+      examiner:
+        enabled: true
+      vcluster:
+        enabled: false
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-b02-build-your-image&session=$(session_namespace)"

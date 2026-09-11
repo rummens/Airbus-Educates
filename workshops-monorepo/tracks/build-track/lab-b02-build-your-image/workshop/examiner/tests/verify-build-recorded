@@ -1,0 +1,9 @@
+#!/bin/bash
+# A Build stays after it runs — that record is what you read when one fails at 3am.
+set -uo pipefail
+n=$(oc get builds --no-headers 2>/dev/null | wc -l | tr -d ' ')
+if [ "${n:-0}" -lt 1 ] 2>/dev/null; then
+  echo "❌ No Builds listed at all. Each run of a BuildConfig should leave one behind — check: oc get bc,builds" >&2
+  exit 1
+fi
+echo "✅ ${n} Build(s) recorded, each one a run of the recipe with its own status and logs."
