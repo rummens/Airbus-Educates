@@ -2,14 +2,30 @@
 # volumeClaimTemplates must have produced ONE BOUND CLAIM PER REPLICA, named
 # data-hello-dcs-<ordinal> — not one shared volume.
 set -uo pipefail
-want=$(oc get statefulset hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
-want="${want:-2}"
-for i in $(seq 0 $(( want - 1 ))); do
-  name="data-hello-dcs-$i"
-  phase=$(oc get pvc "$name" -o jsonpath='{.status.phase}' 2>/dev/null)
-  if [ "$phase" != "Bound" ]; then
-    echo "❌ PersistentVolumeClaim '$name' is '${phase:-missing}', expected Bound. Each replica gets its own claim from volumeClaimTemplates; the name is <template>-<statefulset>-<ordinal>. Binding can wait for the Pod to be scheduled, so this check keeps retrying." >&2
-    exit 1
-  fi
+
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  want=$(oc get statefulset hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+  want="${want:-2}"
+  for i in $(seq 0 $(( want - 1 ))); do
+    name="data-hello-dcs-$i"
+    phase=$(oc get pvc "$name" -o jsonpath='{.status.phase}' 2>/dev/null)
+    if [ "$phase" != "Bound" ]; then
+      echo "❌ PersistentVolumeClaim '$name' is '${phase:-missing}', expected Bound. Each replica gets its own claim from volumeClaimTemplates; the name is <template>-<statefulset>-<ordinal>. Binding can wait for the Pod to be scheduled, so this check keeps retrying." >&2
+      return 1
+    fi
+  done
+  echo "✅ ${want} bound claim(s), one per replica: data-hello-dcs-0 … data-hello-dcs-$(( want - 1 ))."
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
 done
-echo "✅ ${want} bound claim(s), one per replica: data-hello-dcs-0 … data-hello-dcs-$(( want - 1 ))."
+printf '%s\n' "$_out" >&2
+exit 1

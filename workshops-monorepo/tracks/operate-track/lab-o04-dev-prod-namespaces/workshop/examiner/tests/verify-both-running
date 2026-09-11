@@ -5,12 +5,28 @@ set -uo pipefail
 # The session sets these; derive them if a caller did not.
 DEV_NS="${DEV_NS:-$(oc project -q)-dev}"
 PROD_NS="${PROD_NS:-$(oc project -q)-prod}"
-d=$(oc get deployment hello-dcs -n "$DEV_NS" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
-p=$(oc get deployment hello-dcs -n "$PROD_NS" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
-if [ "${d:-0}" -lt 1 ] 2>/dev/null || [ "${p:-0}" -lt 1 ] 2>/dev/null; then
-  echo "❌ Expected the app ready in both namespaces, found DEV=${d:-0} PROD=${p:-0}. This check keeps retrying while rollouts finish." >&2
-  exit 1
-fi
-dres=$(oc get deployment hello-dcs -n "$DEV_NS" -o jsonpath='{.spec.template.spec.containers[0].resources}' 2>/dev/null)
-pres=$(oc get deployment hello-dcs -n "$PROD_NS" -o jsonpath='{.spec.template.spec.containers[0].resources.requests.cpu}' 2>/dev/null)
-echo "✅ Running in both: DEV (declared resources: ${dres:-none}) and PROD (cpu request ${pres}) — two running states from two manifests, which is what promotion prevents."
+
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  d=$(oc get deployment hello-dcs -n "$DEV_NS" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  p=$(oc get deployment hello-dcs -n "$PROD_NS" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  if [ "${d:-0}" -lt 1 ] 2>/dev/null || [ "${p:-0}" -lt 1 ] 2>/dev/null; then
+    echo "❌ Expected the app ready in both namespaces, found DEV=${d:-0} PROD=${p:-0}. This check keeps retrying while rollouts finish." >&2
+    return 1
+  fi
+  dres=$(oc get deployment hello-dcs -n "$DEV_NS" -o jsonpath='{.spec.template.spec.containers[0].resources}' 2>/dev/null)
+  pres=$(oc get deployment hello-dcs -n "$PROD_NS" -o jsonpath='{.spec.template.spec.containers[0].resources.requests.cpu}' 2>/dev/null)
+  echo "✅ Running in both: DEV (declared resources: ${dres:-none}) and PROD (cpu request ${pres}) — two running states from two manifests, which is what promotion prevents."
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
+done
+printf '%s\n' "$_out" >&2
+exit 1

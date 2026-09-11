@@ -2,10 +2,26 @@
 # Verify a quota-exceeded FailedCreate event is visible for hello-dcs's ReplicaSet.
 set -uo pipefail
 
-hit=$(oc get events --field-selector reason=FailedCreate -o jsonpath='{.items[*].message}' 2>/dev/null | grep -c 'exceeded quota')
-if [ "${hit:-0}" -lt 1 ] 2>/dev/null; then
-  echo "❌ No FailedCreate event mentioning 'exceeded quota' yet. Did 'envsubst < deployment-oversized.yaml | oc apply -f -' run? Events take a few seconds to appear — this check keeps retrying." >&2
-  exit 1
-fi
 
-echo "✅ Found a FailedCreate event reporting an exceeded quota — the admission rejection is on the record."
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  hit=$(oc get events --field-selector reason=FailedCreate -o jsonpath='{.items[*].message}' 2>/dev/null | grep -c 'exceeded quota')
+  if [ "${hit:-0}" -lt 1 ] 2>/dev/null; then
+    echo "❌ No FailedCreate event mentioning 'exceeded quota' yet. Did 'envsubst < deployment-oversized.yaml | oc apply -f -' run? Events take a few seconds to appear — this check keeps retrying." >&2
+    return 1
+  fi
+
+  echo "✅ Found a FailedCreate event reporting an exceeded quota — the admission rejection is on the record."
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
+done
+printf '%s\n' "$_out" >&2
+exit 1

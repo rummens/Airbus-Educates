@@ -1,9 +1,25 @@
 #!/bin/bash
 # Verify the migrated hello-dcs Deployment has 1 ready replica.
-ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
-if [ "${ready:-0}" -ge 1 ] 2>/dev/null; then
-  echo "✅ hello-dcs has ${ready} ready replica(s)."
-  exit 0
-fi
-echo "❌ hello-dcs is not ready yet (expected 1 ready replica, found ${ready:-0}). The image may still be pulling — this check keeps retrying. If it stays red, check: oc get events" >&2
+
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  if [ "${ready:-0}" -ge 1 ] 2>/dev/null; then
+    echo "✅ hello-dcs has ${ready} ready replica(s)."
+    return 0
+  fi
+  echo "❌ hello-dcs is not ready yet (expected 1 ready replica, found ${ready:-0}). The image may still be pulling — this check keeps retrying. If it stays red, check: oc get events" >&2
+  return 1
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
+done
+printf '%s\n' "$_out" >&2
 exit 1

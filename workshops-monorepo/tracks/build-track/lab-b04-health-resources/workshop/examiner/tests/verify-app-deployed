@@ -2,19 +2,35 @@
 # Page 01's apply: the Deployment is running one replica and the Service exists, so
 # the rest of the lab has something to scale and an endpoint list to watch.
 set -uo pipefail
-ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
-if [ "${ready:-0}" -lt 1 ] 2>/dev/null; then
-  echo "❌ hello-dcs has ${ready:-0} ready replicas, expected at least 1. Did the 'envsubst < deployment-base.yaml | oc apply -f -' step run? The image may still be pulling — this check keeps retrying." >&2
-  exit 1
-fi
-if ! oc get service hello-dcs >/dev/null 2>&1; then
-  echo "❌ Service 'hello-dcs' not found. The same step applies service.yaml — re-run it." >&2
-  exit 1
-fi
-img=$(oc get deployment hello-dcs -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null)
-case "$img" in
-  *'${DCS_REGISTRY}'*)
-    echo "❌ The image is still the literal \${DCS_REGISTRY} string ($img) — applied without envsubst. Re-run: envsubst < deployment-base.yaml | oc apply -f -" >&2
-    exit 1 ;;
-esac
-echo "✅ hello-dcs is running ${ready} replica(s) from $img, with a Service in front of it."
+
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  if [ "${ready:-0}" -lt 1 ] 2>/dev/null; then
+    echo "❌ hello-dcs has ${ready:-0} ready replicas, expected at least 1. Did the 'envsubst < deployment-base.yaml | oc apply -f -' step run? The image may still be pulling — this check keeps retrying." >&2
+    return 1
+  fi
+  if ! oc get service hello-dcs >/dev/null 2>&1; then
+    echo "❌ Service 'hello-dcs' not found. The same step applies service.yaml — re-run it." >&2
+    return 1
+  fi
+  img=$(oc get deployment hello-dcs -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null)
+  case "$img" in
+    *'${DCS_REGISTRY}'*)
+      echo "❌ The image is still the literal \${DCS_REGISTRY} string ($img) — applied without envsubst. Re-run: envsubst < deployment-base.yaml | oc apply -f -" >&2
+      return 1 ;;
+  esac
+  echo "✅ hello-dcs is running ${ready} replica(s) from $img, with a Service in front of it."
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
+done
+printf '%s\n' "$_out" >&2
+exit 1

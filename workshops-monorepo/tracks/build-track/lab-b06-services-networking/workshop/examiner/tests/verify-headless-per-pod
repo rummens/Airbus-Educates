@@ -2,17 +2,33 @@
 # The headless name must resolve to ONE ADDRESS PER READY POD, and those addresses
 # must be the Pod IPs — not any Service's virtual IP.
 set -uo pipefail
-ns=$(oc project -q 2>/dev/null)
-podips=$(oc get pods -l app=hello-dcs --field-selector=status.phase=Running -o jsonpath='{range .items[*]}{.status.podIP}{"\n"}{end}' 2>/dev/null | grep -c .)
-ips=$(getent hosts "hello-dcs-peers.${ns}.svc.cluster.local" 2>/dev/null | awk '{print $1}' | sort -u)
-n=$(echo "$ips" | grep -c .)
-if [ "${n:-0}" -lt 2 ] 2>/dev/null; then
-  echo "❌ DNS returned ${n:-0} address(es) for the headless Service, expected one per ready Pod (${podips}). Got: $(echo $ips). DNS records follow readiness, so this check keeps retrying while Pods come up." >&2
-  exit 1
-fi
-cip=$(oc get svc hello-dcs -o jsonpath='{.spec.clusterIP}' 2>/dev/null)
-if echo "$ips" | grep -qx "$cip"; then
-  echo "❌ One of the returned addresses (${cip}) is the ClusterIP Service's virtual IP — the headless name should resolve to Pod IPs only." >&2
-  exit 1
-fi
-echo "✅ The headless name resolves to ${n} Pod addresses, none of them a Service virtual IP."
+
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  ns=$(oc project -q 2>/dev/null)
+  podips=$(oc get pods -l app=hello-dcs --field-selector=status.phase=Running -o jsonpath='{range .items[*]}{.status.podIP}{"\n"}{end}' 2>/dev/null | grep -c .)
+  ips=$(getent hosts "hello-dcs-peers.${ns}.svc.cluster.local" 2>/dev/null | awk '{print $1}' | sort -u)
+  n=$(echo "$ips" | grep -c .)
+  if [ "${n:-0}" -lt 2 ] 2>/dev/null; then
+    echo "❌ DNS returned ${n:-0} address(es) for the headless Service, expected one per ready Pod (${podips}). Got: $(echo $ips). DNS records follow readiness, so this check keeps retrying while Pods come up." >&2
+    return 1
+  fi
+  cip=$(oc get svc hello-dcs -o jsonpath='{.spec.clusterIP}' 2>/dev/null)
+  if echo "$ips" | grep -qx "$cip"; then
+    echo "❌ One of the returned addresses (${cip}) is the ClusterIP Service's virtual IP — the headless name should resolve to Pod IPs only." >&2
+    return 1
+  fi
+  echo "✅ The headless name resolves to ${n} Pod addresses, none of them a Service virtual IP."
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
+done
+printf '%s\n' "$_out" >&2
+exit 1

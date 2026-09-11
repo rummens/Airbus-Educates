@@ -2,16 +2,32 @@
 # The replacement for hello-dcs-0 must be called hello-dcs-0 again (stable identity)
 # and must be a genuinely NEW Pod (a different UID) rather than the old one restarted.
 set -uo pipefail
-uid=$(oc get pod hello-dcs-0 -o jsonpath='{.metadata.uid}' 2>/dev/null)
-if [ -z "$uid" ]; then
-  echo "❌ No Pod named 'hello-dcs-0'. A StatefulSet must recreate the same ordinal after a delete — if it is missing, the StatefulSet may still be recreating it. This check keeps retrying." >&2
-  exit 1
-fi
-phase=$(oc get pod hello-dcs-0 -o jsonpath='{.status.phase}' 2>/dev/null)
-ready=$(oc get pod hello-dcs-0 -o jsonpath='{range .status.conditions[?(@.type=="Ready")]}{.status}{end}' 2>/dev/null)
-if [ "$phase" != "Running" ] || [ "$ready" != "True" ]; then
-  echo "❌ hello-dcs-0 exists but is phase=${phase:-?} ready=${ready:-?}. Waiting for the replacement to come up; this check keeps retrying." >&2
-  exit 1
-fi
-age=$(oc get pod hello-dcs-0 -o jsonpath='{.metadata.creationTimestamp}' 2>/dev/null)
-echo "✅ hello-dcs-0 is back with the same name, as a new Pod (uid ${uid}, created ${age})."
+
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  uid=$(oc get pod hello-dcs-0 -o jsonpath='{.metadata.uid}' 2>/dev/null)
+  if [ -z "$uid" ]; then
+    echo "❌ No Pod named 'hello-dcs-0'. A StatefulSet must recreate the same ordinal after a delete — if it is missing, the StatefulSet may still be recreating it. This check keeps retrying." >&2
+    return 1
+  fi
+  phase=$(oc get pod hello-dcs-0 -o jsonpath='{.status.phase}' 2>/dev/null)
+  ready=$(oc get pod hello-dcs-0 -o jsonpath='{range .status.conditions[?(@.type=="Ready")]}{.status}{end}' 2>/dev/null)
+  if [ "$phase" != "Running" ] || [ "$ready" != "True" ]; then
+    echo "❌ hello-dcs-0 exists but is phase=${phase:-?} ready=${ready:-?}. Waiting for the replacement to come up; this check keeps retrying." >&2
+    return 1
+  fi
+  age=$(oc get pod hello-dcs-0 -o jsonpath='{.metadata.creationTimestamp}' 2>/dev/null)
+  echo "✅ hello-dcs-0 is back with the same name, as a new Pod (uid ${uid}, created ${age})."
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
+done
+printf '%s\n' "$_out" >&2
+exit 1

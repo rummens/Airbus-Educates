@@ -1,20 +1,36 @@
 #!/bin/bash
 # Both replicas ready, and named by ordinal rather than by generated suffix.
 set -uo pipefail
-want=$(oc get statefulset hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
-if [ -z "$want" ]; then
-  echo "❌ StatefulSet 'hello-dcs' not found. Did 'envsubst < statefulset.yaml | oc apply -f -' run?" >&2
-  exit 1
-fi
-ready=$(oc get statefulset hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
-if [ "${ready:-0}" -lt "$want" ] 2>/dev/null; then
-  echo "❌ ${ready:-0} of ${want} replicas are ready. A StatefulSet starts them IN ORDER — hello-dcs-0 must be Ready before hello-dcs-1 is created — so this is slower than a Deployment. This check keeps retrying." >&2
-  exit 1
-fi
-for i in $(seq 0 $(( want - 1 ))); do
-  if ! oc get pod "hello-dcs-$i" >/dev/null 2>&1; then
-    echo "❌ Expected a Pod named 'hello-dcs-$i' (ordinal names are the point), but it does not exist." >&2
-    exit 1
+
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  want=$(oc get statefulset hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+  if [ -z "$want" ]; then
+    echo "❌ StatefulSet 'hello-dcs' not found. Did 'envsubst < statefulset.yaml | oc apply -f -' run?" >&2
+    return 1
   fi
+  ready=$(oc get statefulset hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  if [ "${ready:-0}" -lt "$want" ] 2>/dev/null; then
+    echo "❌ ${ready:-0} of ${want} replicas are ready. A StatefulSet starts them IN ORDER — hello-dcs-0 must be Ready before hello-dcs-1 is created — so this is slower than a Deployment. This check keeps retrying." >&2
+    return 1
+  fi
+  for i in $(seq 0 $(( want - 1 ))); do
+    if ! oc get pod "hello-dcs-$i" >/dev/null 2>&1; then
+      echo "❌ Expected a Pod named 'hello-dcs-$i' (ordinal names are the point), but it does not exist." >&2
+      return 1
+    fi
+  done
+  echo "✅ ${ready} replicas ready, named hello-dcs-0 … hello-dcs-$(( want - 1 )) by ordinal."
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
 done
-echo "✅ ${ready} replicas ready, named hello-dcs-0 … hello-dcs-$(( want - 1 )) by ordinal."
+printf '%s\n' "$_out" >&2
+exit 1

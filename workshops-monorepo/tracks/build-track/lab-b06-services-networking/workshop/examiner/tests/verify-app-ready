@@ -1,9 +1,25 @@
 #!/bin/bash
 # Two ready replicas, so every Service on the later pages has more than one endpoint.
 set -uo pipefail
-ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
-if [ "${ready:-0}" -lt 2 ] 2>/dev/null; then
-  echo "❌ hello-dcs has ${ready:-0} ready replicas, expected 2. Did the apply step above run? The image may still be pulling — this check keeps retrying." >&2
-  exit 1
-fi
-echo "✅ hello-dcs is running ${ready} ready replicas."
+
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  if [ "${ready:-0}" -lt 2 ] 2>/dev/null; then
+    echo "❌ hello-dcs has ${ready:-0} ready replicas, expected 2. Did the apply step above run? The image may still be pulling — this check keeps retrying." >&2
+    return 1
+  fi
+  echo "✅ hello-dcs is running ${ready} ready replicas."
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
+done
+printf '%s\n' "$_out" >&2
+exit 1

@@ -2,14 +2,30 @@
 # The broken readiness probe must have REMOVED an address from the Service endpoints:
 # fewer ready endpoints than the Deployment's desired replica count.
 set -uo pipefail
-desired=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
-count=$(oc get endpoints hello-dcs -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null | wc -w | tr -d ' ')
-if [ "${count:-0}" -ge "${desired:-4}" ] 2>/dev/null; then
-  echo "❌ The Service still has ${count} of ${desired:-4} addresses — expected one fewer once the broken Pod fails readiness. Did the 'oc set probe ... /this-path-does-not-exist' step run? It takes ~20s to roll out and start failing; this check keeps retrying." >&2
-  exit 1
-fi
-if [ "${count:-0}" -lt 1 ] 2>/dev/null; then
-  echo "❌ The Service has NO addresses left — every Pod is failing readiness, not just one. Restore the known-good manifest: envsubst < deployment-probes.yaml | oc apply -f -" >&2
-  exit 1
-fi
-echo "✅ The Service is down to ${count} of ${desired} addresses — the unready Pod was taken out of rotation while the rest keep serving."
+
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  desired=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+  count=$(oc get endpoints hello-dcs -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null | wc -w | tr -d ' ')
+  if [ "${count:-0}" -ge "${desired:-4}" ] 2>/dev/null; then
+    echo "❌ The Service still has ${count} of ${desired:-4} addresses — expected one fewer once the broken Pod fails readiness. Did the 'oc set probe ... /this-path-does-not-exist' step run? It takes ~20s to roll out and start failing; this check keeps retrying." >&2
+    return 1
+  fi
+  if [ "${count:-0}" -lt 1 ] 2>/dev/null; then
+    echo "❌ The Service has NO addresses left — every Pod is failing readiness, not just one. Restore the known-good manifest: envsubst < deployment-probes.yaml | oc apply -f -" >&2
+    return 1
+  fi
+  echo "✅ The Service is down to ${count} of ${desired} addresses — the unready Pod was taken out of rotation while the rest keep serving."
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
+done
+printf '%s\n' "$_out" >&2
+exit 1

@@ -5,14 +5,30 @@ set -uo pipefail
 # The session sets these; derive them if a caller did not.
 DEV_NS="${DEV_NS:-$(oc project -q)-dev}"
 PROD_NS="${PROD_NS:-$(oc project -q)-prod}"
-host=$(oc get route hello-dcs -n "$PROD_NS" -o jsonpath='{.spec.host}' 2>/dev/null)
-if [ -z "$host" ]; then
-  echo "❌ The Route in $PROD_NS has no host yet. The platform fills it in on admission; this check keeps retrying." >&2
-  exit 1
-fi
-case "$host" in
-  hello-dcs-${PROD_NS}.*)
-    echo "✅ The platform assigned the host ${host} — <route>-<namespace>.<ingress domain>, generated, not requested."
-    exit 0 ;;
-esac
-echo "✅ The Route host is ${host} (this cluster's pattern differs from <route>-<namespace>.<domain>, which is fine — the platform still assigned it)."
+
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  host=$(oc get route hello-dcs -n "$PROD_NS" -o jsonpath='{.spec.host}' 2>/dev/null)
+  if [ -z "$host" ]; then
+    echo "❌ The Route in $PROD_NS has no host yet. The platform fills it in on admission; this check keeps retrying." >&2
+    return 1
+  fi
+  case "$host" in
+    hello-dcs-${PROD_NS}.*)
+      echo "✅ The platform assigned the host ${host} — <route>-<namespace>.<ingress domain>, generated, not requested."
+      return 0 ;;
+  esac
+  echo "✅ The Route host is ${host} (this cluster's pattern differs from <route>-<namespace>.<domain>, which is fine — the platform still assigned it)."
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
+done
+printf '%s\n' "$_out" >&2
+exit 1

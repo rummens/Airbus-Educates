@@ -5,14 +5,30 @@
 # single envFrom entry or as per-key valueFrom.configMapKeyRef entries
 # depending on the oc version, so check the raw manifest for the reference
 # rather than one specific field shape.
-if ! oc get deploy hello-dcs -o yaml 2>/dev/null | grep -q "hello-dcs-config"; then
-  echo "❌ The Deployment does not reference hello-dcs-config yet. Run the 'oc set env deploy/hello-dcs --from=configmap/hello-dcs-config' step above." >&2
-  exit 1
-fi
-ns=$(oc project -q 2>/dev/null)
-body=$(curl -s --max-time 8 "http://hello-dcs.${ns}.svc:8080" 2>/dev/null)
-if ! echo "$body" | grep -q "Migrated from docker-compose"; then
-  echo "❌ Expected the app to serve 'Migrated from docker-compose', got: ${body:-<empty>}. The rollout may still be in progress — this check keeps retrying." >&2
-  exit 1
-fi
-echo "✅ GREETING comes from hello-dcs-config, and the app serves it."
+
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  if ! oc get deploy hello-dcs -o yaml 2>/dev/null | grep -q "hello-dcs-config"; then
+    echo "❌ The Deployment does not reference hello-dcs-config yet. Run the 'oc set env deploy/hello-dcs --from=configmap/hello-dcs-config' step above." >&2
+    return 1
+  fi
+  ns=$(oc project -q 2>/dev/null)
+  body=$(curl -s --max-time 8 "http://hello-dcs.${ns}.svc:8080" 2>/dev/null)
+  if ! echo "$body" | grep -q "Migrated from docker-compose"; then
+    echo "❌ Expected the app to serve 'Migrated from docker-compose', got: ${body:-<empty>}. The rollout may still be in progress — this check keeps retrying." >&2
+    return 1
+  fi
+  echo "✅ GREETING comes from hello-dcs-config, and the app serves it."
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
+done
+printf '%s\n' "$_out" >&2
+exit 1

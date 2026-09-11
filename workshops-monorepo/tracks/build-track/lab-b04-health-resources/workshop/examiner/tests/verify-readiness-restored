@@ -2,18 +2,34 @@
 # Verify the readiness probe is restored to its known-good path and all replicas are ready.
 set -uo pipefail
 
-desired=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
-ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
-path=$(oc get deployment hello-dcs -o jsonpath='{.spec.template.spec.containers[0].readinessProbe.httpGet.path}' 2>/dev/null)
 
-if [ "$path" != "/" ]; then
-  echo "❌ The readiness path is '${path:-<none>}', expected '/'. Restore the known-good manifest: envsubst < deployment-probes.yaml | oc apply -f -" >&2
-  exit 1
-fi
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  desired=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+  ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  path=$(oc get deployment hello-dcs -o jsonpath='{.spec.template.spec.containers[0].readinessProbe.httpGet.path}' 2>/dev/null)
 
-if [ "${ready:-0}" -lt "${desired:-4}" ] 2>/dev/null; then
-  echo "❌ hello-dcs is at ${ready:-0}/${desired:-4} ready — waiting for the restored probe to bring every replica back. This check keeps retrying." >&2
-  exit 1
-fi
+  if [ "$path" != "/" ]; then
+    echo "❌ The readiness path is '${path:-<none>}', expected '/'. Restore the known-good manifest: envsubst < deployment-probes.yaml | oc apply -f -" >&2
+    return 1
+  fi
 
-echo "✅ hello-dcs is fully ready (${ready}/${desired}), with readiness restored to '/'."
+  if [ "${ready:-0}" -lt "${desired:-4}" ] 2>/dev/null; then
+    echo "❌ hello-dcs is at ${ready:-0}/${desired:-4} ready — waiting for the restored probe to bring every replica back. This check keeps retrying." >&2
+    return 1
+  fi
+
+  echo "✅ hello-dcs is fully ready (${ready}/${desired}), with readiness restored to '/'."
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
+done
+printf '%s\n' "$_out" >&2
+exit 1

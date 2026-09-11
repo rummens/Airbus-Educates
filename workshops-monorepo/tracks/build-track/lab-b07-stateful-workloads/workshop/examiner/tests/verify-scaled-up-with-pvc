@@ -1,19 +1,35 @@
 #!/bin/bash
 # Scaling out a StatefulSet provisions a NEW claim for the new ordinal.
 set -uo pipefail
-want=$(oc get statefulset hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
-if [ "${want:-0}" -lt 3 ] 2>/dev/null; then
-  echo "❌ The StatefulSet is set to ${want:-?} replicas, expected 3. Did 'oc scale statefulset/hello-dcs --replicas=3' run?" >&2
-  exit 1
-fi
-ready=$(oc get statefulset hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
-if [ "${ready:-0}" -lt 3 ] 2>/dev/null; then
-  echo "❌ ${ready:-0} of 3 replicas are ready. The new replica waits for the others AND for its volume to be provisioned, so scaling a stateful app out is slower. This check keeps retrying." >&2
-  exit 1
-fi
-phase=$(oc get pvc data-hello-dcs-2 -o jsonpath='{.status.phase}' 2>/dev/null)
-if [ "$phase" != "Bound" ]; then
-  echo "❌ Claim 'data-hello-dcs-2' is '${phase:-missing}', expected Bound — the new replica should have brought its own new volume." >&2
-  exit 1
-fi
-echo "✅ hello-dcs-2 is ready and came with its own new bound claim, data-hello-dcs-2."
+
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  want=$(oc get statefulset hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+  if [ "${want:-0}" -lt 3 ] 2>/dev/null; then
+    echo "❌ The StatefulSet is set to ${want:-?} replicas, expected 3. Did 'oc scale statefulset/hello-dcs --replicas=3' run?" >&2
+    return 1
+  fi
+  ready=$(oc get statefulset hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  if [ "${ready:-0}" -lt 3 ] 2>/dev/null; then
+    echo "❌ ${ready:-0} of 3 replicas are ready. The new replica waits for the others AND for its volume to be provisioned, so scaling a stateful app out is slower. This check keeps retrying." >&2
+    return 1
+  fi
+  phase=$(oc get pvc data-hello-dcs-2 -o jsonpath='{.status.phase}' 2>/dev/null)
+  if [ "$phase" != "Bound" ]; then
+    echo "❌ Claim 'data-hello-dcs-2' is '${phase:-missing}', expected Bound — the new replica should have brought its own new volume." >&2
+    return 1
+  fi
+  echo "✅ hello-dcs-2 is ready and came with its own new bound claim, data-hello-dcs-2."
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
+done
+printf '%s\n' "$_out" >&2
+exit 1

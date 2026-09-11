@@ -2,20 +2,36 @@
 # Each replica must resolve, by its own per-Pod name, to ITS OWN Pod IP — not to a
 # Service IP and not to a sibling's address.
 set -uo pipefail
-ns=$(oc project -q 2>/dev/null)
-want=$(oc get statefulset hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
-want="${want:-2}"
-for i in $(seq 0 $(( want - 1 ))); do
-  pod="hello-dcs-$i"
-  podip=$(oc get pod "$pod" -o jsonpath='{.status.podIP}' 2>/dev/null)
-  dns=$(getent hosts "${pod}.hello-dcs.${ns}.svc.cluster.local" 2>/dev/null | awk '{print $1}' | head -1)
-  if [ -z "$podip" ] || [ -z "$dns" ]; then
-    echo "❌ Could not resolve ${pod}.hello-dcs.${ns}.svc.cluster.local (podIP='${podip:-none}', DNS='${dns:-none}'). Per-Pod records exist only while the Pod is Ready; this check keeps retrying." >&2
-    exit 1
-  fi
-  if [ "$dns" != "$podip" ]; then
-    echo "❌ ${pod} resolves to ${dns} but its Pod IP is ${podip} — the per-Pod name must answer with that Pod's own address." >&2
-    exit 1
-  fi
+
+# Wait for the state this asserts, rather than reading once.
+#
+# Educates re-runs a red check until it passes, so a single read looks fine in a
+# session — but CI runs each grader exactly once, and a controller that has not
+# finished converging fails a lab that is behaving correctly. The assertion itself
+# is unchanged; it is just given up to two minutes to become true.
+_check() {
+  ns=$(oc project -q 2>/dev/null)
+  want=$(oc get statefulset hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+  want="${want:-2}"
+  for i in $(seq 0 $(( want - 1 ))); do
+    pod="hello-dcs-$i"
+    podip=$(oc get pod "$pod" -o jsonpath='{.status.podIP}' 2>/dev/null)
+    dns=$(getent hosts "${pod}.hello-dcs.${ns}.svc.cluster.local" 2>/dev/null | awk '{print $1}' | head -1)
+    if [ -z "$podip" ] || [ -z "$dns" ]; then
+      echo "❌ Could not resolve ${pod}.hello-dcs.${ns}.svc.cluster.local (podIP='${podip:-none}', DNS='${dns:-none}'). Per-Pod records exist only while the Pod is Ready; this check keeps retrying." >&2
+      return 1
+    fi
+    if [ "$dns" != "$podip" ]; then
+      echo "❌ ${pod} resolves to ${dns} but its Pod IP is ${podip} — the per-Pod name must answer with that Pod's own address." >&2
+      return 1
+    fi
+  done
+  echo "✅ Each replica resolves by its own name to its own Pod address (checked hello-dcs-0 … hello-dcs-$(( want - 1 )))."
+}
+
+for _ in $(seq 1 24); do
+  _out=$(_check "$@" 2>&1) && { printf '%s\n' "$_out"; exit 0; }
+  sleep 5
 done
-echo "✅ Each replica resolves by its own name to its own Pod address (checked hello-dcs-0 … hello-dcs-$(( want - 1 )))."
+printf '%s\n' "$_out" >&2
+exit 1
