@@ -1,3 +1,32 @@
+# Build & Run + Operate & Observe (delivered 2026-09-11)
+
+Both tracks are built, live-verified lab by lab, and published
+(`availability: available`). See [course-module-b.md](course-module-b.md),
+[course-module-o.md](course-module-o.md) and
+[TRACK-PLAN-build-operate.md](TRACK-PLAN-build-operate.md).
+
+- [x] **P1** 15 terminal labs authored to the Core/Console baseline and smoke-tested on CRC.
+- [x] **P1** 5 optional console companions (ConsoleLab + paired Workshop), session objects
+      validated server-side.
+- [x] **P1** Old dev-track and security-track moved to `workshops-monorepo/_superseded/`.
+- [x] **P2** Portal: optional-lab badge, required-path numbering, trophies ignoring optional
+      labs; open-track state remembered across navigation; ConsoleLink into the console
+      masthead.
+- [x] **P2** `hello-dcs` serves `/metrics`; `dcs-workshop-base` gains nslookup/dig/host.
+- [x] **P2** Harness fixes: tracks-root resolution (the coverage gate was a silent no-op),
+      `session.env` lifted into portal-less deploys, teardown waits for namespaces,
+      `SMOKE_REGISTRY` override.
+
+## Follow-ups
+
+- [ ] **P2** Rebuild and push the portal image so the catalog changes (optional badge, open-track
+      memory) reach the cluster.
+- [ ] **P3** Alerts lab (o06) — the obvious next lab in Operate & Observe.
+- [ ] **P3** o02's LogQL section becomes hands-on when a LokiStack is reachable.
+- [ ] **P3** Tune lab durations to observed medians once real learners have run the tracks.
+- [ ] **P2** Security track: revive from `_superseded/`, and reconcile with b03 — all
+      image-scanning teaching now lives there, so Security keeps governance and provenance.
+
 # Tasks
 
 Task tracking for the DCS Academy. Priorities: **P1** (blocker), **P2** (important), **P3** (nice-to-have).

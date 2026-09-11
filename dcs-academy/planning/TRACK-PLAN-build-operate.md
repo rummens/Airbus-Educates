@@ -228,3 +228,41 @@ Each unresolved item degrades its lab to concept/fixture-only — decide before 
 | 11 | **Dev Spaces** instance + mirrored UDI, else keep b10 a concept lab | b10 |
 | 12 | `hello-dcs` needs a **`/metrics` endpoint** if o01 is to scrape a real tenant app (else scrape a platform-provided target) | o01, tour-o01 |
 | 13 | Console labs need the **academy console plugin** present on the target cluster and the labs reachable from the portal launcher (already true for the Console track) | all 5 tours |
+
+---
+
+## Status: both tracks delivered (2026-09-11)
+
+Everything in this plan is built, live-verified and published. What was actually delivered,
+against what was planned:
+
+| Planned | Delivered |
+|---|---|
+| Build & Run, 10 labs | **10 labs**, all green on a real cluster |
+| Operate & Observe, 5 labs | **5 labs**, all green |
+| 5 optional console companions | **5**, one per GUI-heavy lab, in their own tracks |
+| Portal "Optional" badge | shipped (badge, numbering, trophy) |
+| Both tracks published | `availability: available` on both |
+
+### Blockers that were closed rather than waited on
+
+- **b02's "air-gapped git source"** — removed by using a **binary build**: the learner's own
+  session files are the input, the objects are identical, and the git path is taught where it
+  belongs (triggers).
+- **b03's "push-capable Harbor project"** — the lab exercises the *mechanics* against the
+  cluster's own registry (a real `skopeo copy`, which is what a promotion performs) and
+  *teaches* the policy, saying which is which.
+- **o01/o02's monitoring stack** — cluster monitoring and user-workload monitoring were
+  enabled on the test cluster; Loki was judged too heavy for CRC, so o02's aggregation half is
+  taught and its `oc logs` half is fully hands-on.
+
+### Still open
+
+- **Alerts** (o06) — a `PrometheusRule` is a query with a threshold; needs nothing o01 did not
+  already teach.
+- **LogQL hands-on** in o02, whenever a LokiStack is reachable.
+- **The Security track** — still superseded, and now owes a reconciliation: all image-scanning
+  teaching lives in b03, so a revived Security track keeps the governance and provenance angle
+  only.
+- **Durations** are authored estimates. They should be tuned to observed medians once real
+  learners have run these.

@@ -26,6 +26,20 @@ the workload it becomes — sized, autoscaled, reachable, stateful, and survivab
 | 90 | [Resilience & Scheduling](workshop-plans/lab-b09-resilience-scheduling.md) | 25m | 22/22 |
 | 100 | [Dev Spaces](workshop-plans/lab-b10-dev-spaces.md) *(optional)* | 18m | 4/4 |
 
+### Optional console companions
+
+Each sits directly after the terminal lab it complements, marked `academy.dcs/optional`, so
+the catalog badges it and leaves it out of the required path and the track trophy.
+
+| Order | Console lab | Pairs with | Duration |
+|---|---|---|---|
+| 25 | Builds in the console | Build Your Image on DCS | 8m |
+| 45 | Health & resources in the console | Health & Resources | 8m |
+| 55 | Autoscaling in the console | Autoscaling | 7m |
+
+They apply the concepts and introduce none: every step names the `oc` command it stands in
+for, and says what the console is actually better at.
+
 ## Decisions that shaped the track
 
 - **b01 is the on-ramp**, and it now teaches the **SCC** properly rather than naming it: the

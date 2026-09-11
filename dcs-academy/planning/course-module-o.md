@@ -14,6 +14,16 @@ Created 2026-09-11 in the split described in
 | 40 | [DEV vs PROD Namespaces](workshop-plans/lab-o04-dev-prod-namespaces.md) | 25m | 22/22 |
 | 50 | [Operators on DCS](workshop-plans/lab-o05-operators.md) | 25m | 12/12 |
 
+### Optional console companions
+
+| Order | Console lab | Pairs with | Duration |
+|---|---|---|---|
+| 15 | Metrics in the console | Metrics & Monitoring | 8m |
+| 25 | Logs in the console | Logs | 6m |
+
+The metrics tour is where a **graph over a time range** finally beats an instant value, and
+the logs tour is where pausing a stream and selecting text beats `-f` in a terminal.
+
 ## The through-line
 
 **Every boundary in this track is the same boundary.** Metrics stop at your namespace because
