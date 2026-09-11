@@ -1,0 +1,92 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-o03-rbac-tenancy
+  labels:
+    academy.dcs/track: operate
+    academy.dcs/order: "30"
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/icon: key
+    academy.dcs/details: |
+      **"Why can't I see the other team's Pods?" has an exact answer, and you can read it.**
+
+      Core gave you the words — **Tenant**, **Namespace**, and the fact that "project" is
+      not a separate layer. This lab opens the mechanism: the RBAC objects that decide who
+      may do what, where.
+
+      You start from `oc auth can-i`, then go behind the answer to the **Role**,
+      **RoleBinding** and **rule** that produced it. Then you build the chain yourself for
+      a ServiceAccount you create, and prove least privilege with `--as` — before and
+      after.
+
+      Ends on quotas: what your namespace was given, and why an increase is a request
+      rather than a setting.
+
+      > **💡 Tip:** `oc auth can-i --as` is the single most useful RBAC command there is.
+      > You can test any subject's access without ever logging in as them.
+spec:
+  title: "RBAC & Tenancy"
+  description: Open up the mechanism behind Tenant and Namespace — read the Role, RoleBinding and rules behind an access decision, build the chain yourself for a ServiceAccount, and prove least privilege with oc auth can-i --as.
+  duration: 25m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "O-Operate-and-Observe"
+  publish:
+    image: "$(image_repository)/lab-o03-rbac-tenancy-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o03-rbac-tenancy/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o03-rbac-tenancy/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o03-rbac-tenancy/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/operate-track/lab-o03-rbac-tenancy"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-o03-rbac-tenancy-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # SESSION_NAMESPACE is referenced by rolebinding-viewer.yaml, which names the
+    # ServiceAccount subject exactly (system:serviceaccount:<ns>:viewer-bot) and is
+    # applied with `envsubst < f.yaml | oc apply -f -`.
+    env:
+    - name: SESSION_NAMESPACE
+      value: "$(session_namespace)"
+    namespaces:
+      budget: small
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      slides:
+        enabled: true
+      examiner:
+        enabled: true
+      # RBAC is read and written in the learner's own namespace; a vcluster would put
+      # them somewhere with different bindings than the platform actually gave them.
+      vcluster:
+        enabled: false
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-o03-rbac-tenancy&session=$(session_namespace)"
