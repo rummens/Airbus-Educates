@@ -2,6 +2,9 @@
 # The app runs in both namespaces, and the two differ in exactly one way: PROD
 # declares resources, DEV took the defaults.
 set -uo pipefail
+# The session sets these; derive them if a caller did not.
+DEV_NS="${DEV_NS:-$(oc project -q)-dev}"
+PROD_NS="${PROD_NS:-$(oc project -q)-prod}"
 d=$(oc get deployment hello-dcs -n "$DEV_NS" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
 p=$(oc get deployment hello-dcs -n "$PROD_NS" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
 if [ "${d:-0}" -lt 1 ] 2>/dev/null || [ "${p:-0}" -lt 1 ] 2>/dev/null; then

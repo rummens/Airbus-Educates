@@ -1,6 +1,9 @@
 #!/bin/bash
 # Two peer namespaces, one of each type, labelled for this session.
 set -uo pipefail
+# The session sets these; derive them if a caller did not.
+DEV_NS="${DEV_NS:-$(oc project -q)-dev}"
+PROD_NS="${PROD_NS:-$(oc project -q)-prod}"
 for ns in "$DEV_NS" "$PROD_NS"; do
   if ! oc get namespace "$ns" >/dev/null 2>&1; then
     echo "❌ Namespace '$ns' does not exist. Both are created with the session — if one is missing, the session did not provision correctly." >&2

@@ -1,6 +1,9 @@
 #!/bin/bash
 # Something for the Route to point at, in DEV.
 set -uo pipefail
+# The session sets these; derive them if a caller did not.
+DEV_NS="${DEV_NS:-$(oc project -q)-dev}"
+PROD_NS="${PROD_NS:-$(oc project -q)-prod}"
 for _ in $(seq 1 18); do
   n=$(oc get endpoints hello-dcs -n "$DEV_NS" -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null | wc -w | tr -d ' ')
   [ "${n:-0}" -ge 1 ] 2>/dev/null && { echo "✅ The Service in $DEV_NS has ${n} endpoint(s)."; exit 0; }

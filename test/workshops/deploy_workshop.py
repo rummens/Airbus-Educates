@@ -103,9 +103,13 @@ def oc_delete(ctx, kind, name):
 
 
 def authored_session_extras(subpath):
-    """Lift `session.objects` + `session.ingresses` from the workshop's real
-    resources/workshop.yaml so labs that pre-provision RBAC / extra namespaces /
+    """Lift `session.objects`, `session.ingresses` and `session.env` from the workshop's
+    real resources/workshop.yaml so labs that pre-provision RBAC / extra namespaces /
     NetworkPolicies / app ingresses (e.g. A04, A06) deploy faithfully.
+
+    `env` matters as much as `objects`: a lab that provisions peer namespaces also tells
+    the learner their names through session env vars, and without them every command and
+    grader referring to $DEV_NS/$PROD_NS silently targets "".
 
     The synthesized session spec below omits these; without them those labs'
     examiner checks fail for reasons that would NOT happen on the real cluster.
@@ -129,7 +133,7 @@ def authored_session_extras(subpath):
         sess = (yaml.safe_load(frag) or {}).get("session", {}) or {}
     except yaml.YAMLError:
         return {}
-    return {k: sess[k] for k in ("objects", "ingresses") if k in sess}
+    return {k: sess[k] for k in ("objects", "ingresses", "env") if k in sess}
 
 
 def build_workshop(name, url, ref, subpath, budget, apps, vcluster, image, registry, title, desc):
@@ -161,6 +165,13 @@ def build_workshop(name, url, ref, subpath, budget, apps, vcluster, image, regis
         session.setdefault("objects", []).extend(extras["objects"])
     if extras.get("ingresses"):
         session["ingresses"] = extras["ingresses"]
+    if extras.get("env"):
+        # The authored env wins on name collisions EXCEPT for DCS_REGISTRY, which the
+        # --registry flag exists to override (the authored value is the DCS Harbor, which
+        # a local cluster cannot reach).
+        authored = [e for e in extras["env"] if e.get("name") != "DCS_REGISTRY"]
+        have = {e["name"] for e in session.get("env", [])}
+        session.setdefault("env", []).extend(e for e in authored if e.get("name") not in have)
     workshop = {"files": [{"git": {"url": url, "ref": ref},
                            "includePaths": inc, "newRootPath": subpath}]}
     if image:

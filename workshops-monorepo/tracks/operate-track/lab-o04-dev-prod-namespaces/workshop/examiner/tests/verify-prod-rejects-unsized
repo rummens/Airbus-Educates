@@ -2,6 +2,9 @@
 # PROD must have refused the unsized manifest AT ADMISSION: no Deployment exists, or
 # the one that exists is the sized one from the next step.
 set -uo pipefail
+# The session sets these; derive them if a caller did not.
+DEV_NS="${DEV_NS:-$(oc project -q)-dev}"
+PROD_NS="${PROD_NS:-$(oc project -q)-prod}"
 if ! oc get deployment hello-dcs -n "$PROD_NS" >/dev/null 2>&1; then
   echo "✅ Nothing was created in $PROD_NS — the unsized manifest was refused at admission, before any object existed."
   exit 0

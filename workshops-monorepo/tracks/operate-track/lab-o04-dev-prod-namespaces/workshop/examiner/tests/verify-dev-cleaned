@@ -1,6 +1,9 @@
 #!/bin/bash
 # The DEV attempt is removed; PROD keeps running.
 set -uo pipefail
+# The session sets these; derive them if a caller did not.
+DEV_NS="${DEV_NS:-$(oc project -q)-dev}"
+PROD_NS="${PROD_NS:-$(oc project -q)-prod}"
 for _ in $(seq 1 12); do
   oc get deployment hello-dcs -n "$DEV_NS" >/dev/null 2>&1 || break
   sleep 5

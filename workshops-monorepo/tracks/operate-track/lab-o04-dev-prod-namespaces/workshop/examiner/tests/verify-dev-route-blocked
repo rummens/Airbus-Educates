@@ -2,6 +2,9 @@
 # The Route must NOT exist in DEV: admission refused it. Asserting an absence is the
 # point — a Route here would mean the policy is not enforcing.
 set -uo pipefail
+# The session sets these; derive them if a caller did not.
+DEV_NS="${DEV_NS:-$(oc project -q)-dev}"
+PROD_NS="${PROD_NS:-$(oc project -q)-prod}"
 if oc get route hello-dcs -n "$DEV_NS" >/dev/null 2>&1; then
   echo "❌ A Route exists in $DEV_NS, but a DEV-type namespace must not be able to publish one. The policy is not enforcing — check: oc get clusterpolicy dcs-nstype-\$(oc project -q) -o yaml" >&2
   exit 1
