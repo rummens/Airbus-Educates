@@ -1,0 +1,10 @@
+#!/bin/bash
+# The Deployment replaces the deleted Pod, back to three ready replicas.
+set -uo pipefail
+for _ in $(seq 1 24); do
+  ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  [ "${ready:-0}" -ge 3 ] 2>/dev/null && { echo "✅ Back to ${ready} ready replicas — the deleted Pod was replaced."; exit 0; }
+  sleep 5
+done
+echo "❌ Only ${ready:-0} of 3 replicas are ready. The replacement Pod may still be starting; this check waits. If it stays low, check: oc get events" >&2
+exit 1

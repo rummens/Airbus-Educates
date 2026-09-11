@@ -1,0 +1,51 @@
+# Three replicas with a deliberate shutdown story:
+#
+#   terminationGracePeriodSeconds: 30 — how long the kubelet waits after SIGTERM
+#       before it SIGKILLs the container. The clock starts when the Pod is marked for
+#       deletion, and it covers the preStop hook too.
+#
+#   preStop: sleep 10 — runs BEFORE SIGTERM is sent. Its real job is to cover a race:
+#       when a Pod is deleted, "stop routing traffic to it" and "tell it to stop" happen
+#       in parallel, so a few requests can still arrive after shutdown begins. Pausing
+#       here gives the Service time to take the Pod out of its endpoints first.
+#
+# Apply with: envsubst < deployment.yaml | oc apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-dcs
+  template:
+    metadata:
+      labels:
+        app: hello-dcs
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: hello-dcs
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        ports:
+        - containerPort: 8080
+        lifecycle:
+          preStop:
+            exec:
+              command: ["sh", "-c", "sleep 10"]
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi

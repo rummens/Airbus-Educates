@@ -1,0 +1,16 @@
+#!/bin/bash
+# Scaled to the floor, the budget must allow NOTHING — the page's point, and the
+# self-inflicted wound it warns about.
+set -uo pipefail
+for _ in $(seq 1 24); do
+  allowed=$(oc get pdb hello-dcs -o jsonpath='{.status.disruptionsAllowed}' 2>/dev/null)
+  healthy=$(oc get pdb hello-dcs -o jsonpath='{.status.currentHealthy}' 2>/dev/null)
+  desired=$(oc get pdb hello-dcs -o jsonpath='{.status.desiredHealthy}' 2>/dev/null)
+  if [ "${allowed:-1}" -eq 0 ] 2>/dev/null && [ "${healthy:-0}" -le "${desired:-2}" ] 2>/dev/null; then
+    echo "✅ The budget now allows 0 disruptions: ${healthy} healthy Pods against a floor of ${desired}. A drain would have to wait."
+    exit 0
+  fi
+  sleep 5
+done
+echo "❌ Expected disruptionsAllowed=0 once the replica count reached the floor, found ${allowed:-?} with ${healthy:-?} healthy against ${desired:-?}. Did 'oc scale deploy/hello-dcs --replicas=2' run and finish?" >&2
+exit 1

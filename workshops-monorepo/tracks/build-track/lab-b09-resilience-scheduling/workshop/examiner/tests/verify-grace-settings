@@ -1,0 +1,15 @@
+#!/bin/bash
+# Both halves of the shutdown budget must be configured, or the timing on this page
+# means nothing.
+set -uo pipefail
+g=$(oc get deploy hello-dcs -o jsonpath='{.spec.template.spec.terminationGracePeriodSeconds}' 2>/dev/null)
+pre=$(oc get deploy hello-dcs -o jsonpath='{.spec.template.spec.containers[0].lifecycle.preStop.exec.command}' 2>/dev/null)
+if [ -z "$g" ]; then
+  echo "❌ The Pod template sets no terminationGracePeriodSeconds. Re-apply deployment.yaml, which sets 30." >&2
+  exit 1
+fi
+if [ -z "$pre" ]; then
+  echo "❌ The container has no preStop hook. Re-apply deployment.yaml, which sleeps 10 before SIGTERM." >&2
+  exit 1
+fi
+echo "✅ Grace period ${g}s with a preStop hook (${pre}) — shutdown has a budget and a pause."

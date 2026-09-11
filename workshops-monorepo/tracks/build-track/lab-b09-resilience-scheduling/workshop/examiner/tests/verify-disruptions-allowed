@@ -1,0 +1,15 @@
+#!/bin/bash
+# With 3 replicas and a floor of 2, the platform may take exactly one Pod — the number
+# that tells you a drain can proceed one Pod at a time.
+set -uo pipefail
+for _ in $(seq 1 24); do
+  allowed=$(oc get pdb hello-dcs -o jsonpath='{.status.disruptionsAllowed}' 2>/dev/null)
+  healthy=$(oc get pdb hello-dcs -o jsonpath='{.status.currentHealthy}' 2>/dev/null)
+  if [ "${allowed:-0}" -ge 1 ] 2>/dev/null; then
+    echo "✅ The budget allows ${allowed} disruption(s): ${healthy} Pods healthy against a floor of $(oc get pdb hello-dcs -o jsonpath='{.status.desiredHealthy}' 2>/dev/null)."
+    exit 0
+  fi
+  sleep 5
+done
+echo "❌ disruptionsAllowed is ${allowed:-0} with ${healthy:-0} healthy Pods — expected at least 1 while 3 replicas run against a floor of 2. The status updates a moment after the Pods are ready; this check waits for it." >&2
+exit 1

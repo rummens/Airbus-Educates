@@ -1,0 +1,20 @@
+#!/bin/bash
+# The template must carry BOTH asks, and the spread must be the soft form this lab
+# deliberately chose.
+set -uo pipefail
+key=$(oc get deploy hello-dcs -o jsonpath='{.spec.template.spec.topologySpreadConstraints[0].topologyKey}' 2>/dev/null)
+when=$(oc get deploy hello-dcs -o jsonpath='{.spec.template.spec.topologySpreadConstraints[0].whenUnsatisfiable}' 2>/dev/null)
+aff=$(oc get deploy hello-dcs -o jsonpath='{.spec.template.spec.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].weight}' 2>/dev/null)
+if [ -z "$key" ]; then
+  echo "❌ The Pod template has no topologySpreadConstraints. Did 'envsubst < deployment-spread.yaml | oc apply -f -' run?" >&2
+  exit 1
+fi
+if [ "$when" != "ScheduleAnyway" ]; then
+  echo "❌ whenUnsatisfiable is '${when:-<none>}', expected ScheduleAnyway. With DoNotSchedule on a cluster that cannot spread, replicas would sit Pending instead of running." >&2
+  exit 1
+fi
+if [ -z "$aff" ]; then
+  echo "❌ The template has no preferred podAntiAffinity term — the manifest declares both ways of asking to be spread." >&2
+  exit 1
+fi
+echo "✅ The template asks to be spread by ${key} (${when}), plus a preferred anti-affinity of weight ${aff}."

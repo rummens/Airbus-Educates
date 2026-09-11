@@ -1,0 +1,28 @@
+{
+  "workshop": "lab-b09-resilience-scheduling",
+  "_note": "The PDB is demonstrated through its own STATUS, not by evicting a Pod: the Educates session role grants poddisruptionbudgets but not pods/eviction, and a node drain is the platform's action, not a tenant's. disruptionsAllowed 1 → 0 → 1 as the replica count crosses the floor is the observable, tenant-scoped proof. The timed deletion writes its measured seconds to /tmp/shutdown-seconds.txt for the check to read. verify-all-replicas-scheduled tolerates a single-node cluster on purpose — whenUnsatisfiable: ScheduleAnyway is exactly what makes that case still work, and the check says which case it saw.",
+  "steps": [
+    {"run": "envsubst < deployment.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=240s"},
+    {"check": "verify-app-ready"},
+    {"run": "oc apply -f pdb.yaml"},
+    {"check": "verify-pdb-created"},
+    {"run": "oc get pdb hello-dcs -o custom-columns=NAME:.metadata.name,MIN:.spec.minAvailable,ALLOWED:.status.disruptionsAllowed,HEALTHY:.status.currentHealthy,DESIRED:.status.desiredHealthy,EXPECTED:.status.expectedPods"},
+    {"check": "verify-disruptions-allowed"},
+    {"run": "oc scale deploy/hello-dcs --replicas=2 && oc rollout status deploy/hello-dcs --timeout=180s"},
+    {"run": "oc get pdb hello-dcs -o custom-columns=MIN:.spec.minAvailable,ALLOWED:.status.disruptionsAllowed,HEALTHY:.status.currentHealthy,EXPECTED:.status.expectedPods"},
+    {"check": "verify-disruptions-blocked"},
+    {"run": "oc scale deploy/hello-dcs --replicas=3 && oc rollout status deploy/hello-dcs --timeout=180s"},
+    {"check": "verify-headroom-restored"},
+    {"run": "oc get deploy hello-dcs -o jsonpath='{.spec.template.spec.terminationGracePeriodSeconds}{\"  preStop: \"}{.spec.template.spec.containers[0].lifecycle.preStop.exec.command}{\"\\n\"}'"},
+    {"check": "verify-grace-settings"},
+    {"run": "pod=$(oc get pods -l app=hello-dcs -o name | head -1); start=$(date +%s); oc delete \"$pod\"; end=$(date +%s); echo $(( end - start )) > /tmp/shutdown-seconds.txt; echo \"deleting $pod took $(cat /tmp/shutdown-seconds.txt) seconds\""},
+    {"check": "verify-shutdown-took-time"},
+    {"run": "oc get pods -l app=hello-dcs"},
+    {"check": "verify-replacement-ready"},
+    {"run": "oc get pods -l app=hello-dcs -o custom-columns=NAME:.metadata.name,NODE:.spec.nodeName,STATUS:.status.phase"},
+    {"run": "envsubst < deployment-spread.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=240s"},
+    {"check": "verify-spread-constraints"},
+    {"run": "oc get pods -l app=hello-dcs -o custom-columns=NAME:.metadata.name,NODE:.spec.nodeName,STATUS:.status.phase"},
+    {"check": "verify-all-replicas-scheduled"}
+  ]
+}

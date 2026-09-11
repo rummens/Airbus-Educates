@@ -1,0 +1,14 @@
+#!/bin/bash
+# More replicas than the floor is the real fix — the platform gets its room back.
+set -uo pipefail
+for _ in $(seq 1 24); do
+  allowed=$(oc get pdb hello-dcs -o jsonpath='{.status.disruptionsAllowed}' 2>/dev/null)
+  healthy=$(oc get pdb hello-dcs -o jsonpath='{.status.currentHealthy}' 2>/dev/null)
+  if [ "${allowed:-0}" -ge 1 ] 2>/dev/null && [ "${healthy:-0}" -ge 3 ] 2>/dev/null; then
+    echo "✅ Back to ${healthy} healthy Pods, and the platform may take ${allowed} again."
+    exit 0
+  fi
+  sleep 5
+done
+echo "❌ Expected 3 healthy Pods and at least 1 allowed disruption, found ${healthy:-?} healthy / ${allowed:-?} allowed. Did 'oc scale deploy/hello-dcs --replicas=3' finish rolling out?" >&2
+exit 1

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 450" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="450" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">Two kinds of disruption, two different defences</text>
+
+  <!-- involuntary -->
+  <rect x="24" y="48" width="344" height="150" rx="8" fill="#fdeeee" stroke="#c0504d" stroke-width="2"/>
+  <text x="196" y="72" text-anchor="middle" font-size="13" font-weight="bold" fill="#8a2f2c">Involuntary — nobody chose it</text>
+  <text x="44" y="96" font-size="11" fill="#8a2f2c">a node fails · a kernel panics</text>
+  <text x="44" y="114" font-size="11" fill="#8a2f2c">a container is OOMKilled</text>
+  <text x="44" y="140" font-size="11" font-weight="bold" fill="#8a2f2c">Nothing negotiates. Your defences:</text>
+  <text x="44" y="158" font-size="11" fill="#8a2f2c">more than one replica · probes</text>
+  <text x="44" y="176" font-size="11" fill="#8a2f2c">spreading across nodes</text>
+
+  <!-- voluntary -->
+  <rect x="392" y="48" width="344" height="150" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="564" y="72" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b4a86">Voluntary — the platform chose it</text>
+  <text x="412" y="96" font-size="11" fill="#1b4a86">a node is drained for maintenance</text>
+  <text x="412" y="114" font-size="11" fill="#1b4a86">an upgrade · a rebalance</text>
+  <text x="412" y="140" font-size="11" font-weight="bold" fill="#1b4a86">Planned actions can wait:</text>
+  <text x="412" y="158" font-size="11" fill="#1b4a86">a PodDisruptionBudget says how much</text>
+  <text x="412" y="176" font-size="11" fill="#1b4a86">of your app must stay up meanwhile</text>
+
+  <!-- PDB detail -->
+  <rect x="392" y="214" width="344" height="92" rx="8" fill="#ffffff" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="412" y="236" font-size="12" font-weight="bold" fill="#1b4a86">minAvailable: 2</text>
+  <text x="412" y="256" font-size="11" fill="#2c6a3a">3 replicas → disruptionsAllowed: 1 — a drain proceeds, one Pod at a time</text>
+  <text x="412" y="276" font-size="11" fill="#8a2f2c">2 replicas → disruptionsAllowed: 0 — the drain WAITS, the node goes unpatched</text>
+  <text x="412" y="296" font-size="11" fill="#1b4a86">The fix is more replicas than the floor, not a lower floor.</text>
+
+  <!-- involuntary detail -->
+  <rect x="24" y="214" width="344" height="92" rx="8" fill="#ffffff" stroke="#c0504d" stroke-width="2"/>
+  <text x="44" y="236" font-size="12" font-weight="bold" fill="#8a2f2c">Three replicas on ONE node</text>
+  <text x="44" y="256" font-size="11" fill="#8a2f2c">is not three replicas: it is one failure</text>
+  <text x="44" y="276" font-size="11" fill="#8a2f2c">away from an outage, and one drain</text>
+  <text x="44" y="296" font-size="11" fill="#8a2f2c">away from a full restart.</text>
+
+  <!-- shutdown -->
+  <rect x="24" y="322" width="712" height="106" rx="8" fill="#fdf4e8" stroke="#c08a2d" stroke-width="2"/>
+  <text x="380" y="346" text-anchor="middle" font-size="13" font-weight="bold" fill="#7a5410">Either way, it ends in the same sequence</text>
+  <text x="44" y="370" font-size="11" fill="#7a5410">1. the Pod leaves the Service's endpoints — AND, at the same moment, shutdown begins. Neither is instant.</text>
+  <text x="44" y="390" font-size="11" fill="#7a5410">2. preStop runs (cover that race), then SIGTERM arrives.</text>
+  <text x="44" y="410" font-size="11" fill="#7a5410">3. after terminationGracePeriodSeconds, SIGKILL. An app that ignores SIGTERM spends the whole budget, every time.</text>
+</svg>

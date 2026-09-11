@@ -1,0 +1,70 @@
+# The same app, now asking to be SPREAD rather than packed onto one node.
+#
+#   topologySpreadConstraints — keep the number of Pods per node within maxSkew of each
+#       other, counting by the topologyKey label. kubernetes.io/hostname spreads across
+#       nodes; topology.kubernetes.io/zone would spread across failure domains.
+#
+#   whenUnsatisfiable: ScheduleAnyway — a PREFERENCE. If the spread cannot be honoured
+#       (a single-node cluster, or a busy one), schedule anyway rather than leaving Pods
+#       Pending. DoNotSchedule makes it a hard requirement instead: guaranteed spread,
+#       at the price of Pods that may never start.
+#
+#   podAntiAffinity (preferred) — the older way to say the same thing, still useful for
+#       "prefer not to put two of these together" without the skew arithmetic.
+#
+# Apply with: envsubst < deployment-spread.yaml | oc apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello-dcs
+  template:
+    metadata:
+      labels:
+        app: hello-dcs
+    spec:
+      terminationGracePeriodSeconds: 30
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: hello-dcs
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app: hello-dcs
+      containers:
+      - name: hello-dcs
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        ports:
+        - containerPort: 8080
+        lifecycle:
+          preStop:
+            exec:
+              command: ["sh", "-c", "sleep 10"]
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi

@@ -1,0 +1,10 @@
+#!/bin/bash
+# Three ready replicas: the budget on the next page needs headroom to be interesting.
+set -uo pipefail
+for _ in $(seq 1 24); do
+  ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  [ "${ready:-0}" -ge 3 ] 2>/dev/null && { echo "✅ hello-dcs is running ${ready} ready replicas."; exit 0; }
+  sleep 5
+done
+echo "❌ hello-dcs has ${ready:-0} ready replicas, expected 3. Did the apply step run? The image may still be pulling — check: oc get pods -l app=hello-dcs" >&2
+exit 1

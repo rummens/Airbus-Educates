@@ -1,0 +1,20 @@
+#!/bin/bash
+# ScheduleAnyway means the spread is a PREFERENCE: every replica must be running even
+# where the cluster cannot honour it. Reports the placement either way.
+set -uo pipefail
+for _ in $(seq 1 24); do
+  ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  [ "${ready:-0}" -ge 3 ] 2>/dev/null && break
+  sleep 5
+done
+if [ "${ready:-0}" -lt 3 ] 2>/dev/null; then
+  pend=$(oc get pods -l app=hello-dcs --field-selector=status.phase=Pending -o name 2>/dev/null | wc -l | tr -d ' ')
+  echo "❌ Only ${ready:-0} of 3 replicas are ready (${pend} Pending). With whenUnsatisfiable: ScheduleAnyway none should be stuck on placement — read the scheduler's reason: oc describe pod -l app=hello-dcs" >&2
+  exit 1
+fi
+nodes=$(oc get pods -l app=hello-dcs -o jsonpath='{range .items[*]}{.spec.nodeName}{"\n"}{end}' 2>/dev/null | sort -u | wc -l | tr -d ' ')
+if [ "${nodes:-1}" -le 1 ]; then
+  echo "✅ All ${ready} replicas are running, on ${nodes} node — this cluster has nowhere to spread to, and ScheduleAnyway is exactly why they run anyway."
+  exit 0
+fi
+echo "✅ All ${ready} replicas are running, spread across ${nodes} nodes."

@@ -1,0 +1,17 @@
+# A PodDisruptionBudget does not stop your Pods from dying. It constrains what the
+# PLATFORM may do on purpose — draining a node for maintenance, an upgrade, a rebalance.
+#
+# minAvailable: 2 means "however you do your maintenance, leave at least two of mine
+# serving". With 3 replicas that allows one Pod to be taken at a time; with only 2
+# replicas it allows none, and a drain waits for you.
+#
+# maxUnavailable is the same idea from the other end; use one or the other.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: hello-dcs
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: hello-dcs

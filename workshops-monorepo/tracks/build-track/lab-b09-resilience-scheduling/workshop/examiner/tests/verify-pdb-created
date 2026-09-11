@@ -1,0 +1,19 @@
+#!/bin/bash
+# The budget exists, states a floor, and actually SELECTS the app — a PDB whose selector
+# matches nothing is the classic silent mistake.
+set -uo pipefail
+min=$(oc get pdb hello-dcs -o jsonpath='{.spec.minAvailable}' 2>/dev/null)
+if [ -z "$min" ]; then
+  echo "❌ PodDisruptionBudget 'hello-dcs' not found, or it sets no minAvailable. Did 'oc apply -f pdb.yaml' run?" >&2
+  exit 1
+fi
+for _ in $(seq 1 12); do
+  exp=$(oc get pdb hello-dcs -o jsonpath='{.status.expectedPods}' 2>/dev/null)
+  [ "${exp:-0}" -ge 1 ] 2>/dev/null && break
+  sleep 5
+done
+if [ "${exp:-0}" -lt 1 ] 2>/dev/null; then
+  echo "❌ The budget matches 0 Pods (expectedPods=${exp:-0}). Its selector (app=hello-dcs) must match the Deployment's Pod labels, or it protects nothing while looking correct." >&2
+  exit 1
+fi
+echo "✅ The budget exists with minAvailable=${min} and selects ${exp} Pod(s)."

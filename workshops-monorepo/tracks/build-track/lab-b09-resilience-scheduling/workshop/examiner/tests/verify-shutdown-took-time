@@ -1,0 +1,23 @@
+#!/bin/bash
+# The page TIMED a real deletion into /tmp/shutdown-seconds.txt. Assert it was not
+# instant: the preStop hook alone is 10s, and an app that ignores SIGTERM spends the
+# rest of the grace period too.
+set -uo pipefail
+f=/tmp/shutdown-seconds.txt
+if [ ! -f "$f" ]; then
+  echo "❌ No timing recorded at $f. Run the timed deletion step above — it writes the measured seconds there." >&2
+  exit 1
+fi
+secs=$(tr -dc '0-9' < "$f")
+if [ -z "$secs" ]; then
+  echo "❌ $f does not contain a number. Re-run the timed deletion step." >&2
+  exit 1
+fi
+if [ "$secs" -lt 8 ] 2>/dev/null; then
+  echo "❌ The deletion took only ${secs}s. With preStop sleeping 10s it cannot finish that fast — check the Pod template still carries the lifecycle hook: oc get deploy hello-dcs -o yaml" >&2
+  exit 1
+fi
+grace=$(oc get deploy hello-dcs -o jsonpath='{.spec.template.spec.terminationGracePeriodSeconds}' 2>/dev/null)
+note="the preStop pause"
+[ "$secs" -ge $(( ${grace:-30} - 5 )) ] 2>/dev/null && note="the FULL grace period — the app ignores SIGTERM, so the kubelet had to SIGKILL it"
+echo "✅ The deletion took ${secs}s of a ${grace:-30}s budget: ${note}."
