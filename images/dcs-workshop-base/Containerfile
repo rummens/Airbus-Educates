@@ -43,5 +43,21 @@ RUN set -eux; \
 # NB: don't run `oc version` here — under cross-arch QEMU emulation the foreign
 # oc binary fails to exec (exit 127) and breaks multi-arch builds. It runs fine
 # natively on the target cluster.
+
+# DNS tools. The base ships neither nslookup, dig nor host, so a learner debugging
+# cluster DNS (or a Service type, or a headless Service's per-Pod records) has only
+# `getent hosts`, which answers with addresses but never shows the CNAME chain or
+# which resolver replied. bind-utils adds all three.
+#
+# Workshop CONTENT and examiner checks still use `getent`: the portal-less test
+# harness deploys labs on the stock educates-base-environment (it drops the custom
+# image unless --keep-image), so anything that assumes this image would pass in a
+# session and fail in CI.
+RUN set -eux; \
+    dnf install -y --setopt=install_weak_deps=False --nodocs bind-utils; \
+    dnf clean all; \
+    rm -rf /var/cache/dnf; \
+    test -x /usr/bin/nslookup; test -x /usr/bin/dig; test -x /usr/bin/host
+
 # Educates base runs as uid 1001; restore it.
 USER 1001
