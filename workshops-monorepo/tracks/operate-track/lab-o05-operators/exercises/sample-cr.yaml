@@ -1,0 +1,23 @@
+# A minimal CloudNativePG Cluster — the instance YOU own.
+#
+# Notice what is NOT here: no image, no StatefulSet, no PersistentVolumeClaim, no
+# Service, no readiness probe, no failover logic. You declare WHAT you want; the
+# operator — installed and configured cluster-wide by the platform — decides HOW,
+# and creates every one of those objects for you.
+#
+# imageName is deliberately omitted. On DCS the platform configures the operator
+# with the operand image it is allowed to run, pulled from the DCS registry. That
+# is what "the platform owns the operator" means in practice: you do not pick the
+# PostgreSQL build, and you do not need to.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: sample-db
+spec:
+  # How many copies of PostgreSQL you want. One is enough to see the pattern; a
+  # real tenant-owned database would use three, so the operator can fail over.
+  instances: 1
+
+  # How much disk each instance gets. The operator creates the claim.
+  storage:
+    size: 1Gi

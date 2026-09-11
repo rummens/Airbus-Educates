@@ -114,6 +114,13 @@ spec:
         # so no extra Role is needed for the Route steps.
         name: edit
       subjects:
+      # The session pod's ServiceAccount lives in the WORKSHOP (environment) namespace,
+      # not in the session namespace — binding the session namespace's SA group alone
+      # matches nothing, and every `oc apply -n <peer namespace>` is refused. Both
+      # subjects are listed so the binding holds however the session is provisioned.
+      - kind: ServiceAccount
+        name: $(service_account)
+        namespace: $(workshop_namespace)
       - apiGroup: rbac.authorization.k8s.io
         kind: Group
         name: system:serviceaccounts:$(session_namespace)
@@ -127,6 +134,13 @@ spec:
         kind: ClusterRole
         name: edit
       subjects:
+      # The session pod's ServiceAccount lives in the WORKSHOP (environment) namespace,
+      # not in the session namespace — binding the session namespace's SA group alone
+      # matches nothing, and every `oc apply -n <peer namespace>` is refused. Both
+      # subjects are listed so the binding holds however the session is provisioned.
+      - kind: ServiceAccount
+        name: $(service_account)
+        namespace: $(workshop_namespace)
       - apiGroup: rbac.authorization.k8s.io
         kind: Group
         name: system:serviceaccounts:$(session_namespace)

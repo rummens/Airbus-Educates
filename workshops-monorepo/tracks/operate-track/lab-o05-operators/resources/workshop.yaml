@@ -1,0 +1,88 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-o05-operators
+  labels:
+    academy.dcs/track: operate
+    academy.dcs/order: "50"
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/icon: cog
+    academy.dcs/details: |
+      **Every platform service you are offered arrives the same way: as an operator.**
+
+      An operator is a controller that watches for objects of a kind it understands and
+      makes reality match them — the same reconcile loop a Deployment uses, applied to
+      something bigger than a Pod.
+
+      You read the **CustomResourceDefinition** that added a new kind to this cluster,
+      create a **Custom Resource** of that kind — a PostgreSQL cluster in a few lines —
+      and watch the operator build everything underneath it.
+
+      Then the part that matters on DCS: the **ownership split**. The platform owns the
+      operator; you own the instance it manages, including its data, its config and its
+      day-2.
+
+      > **💡 Tip:** the manifest you write here has no image, no StatefulSet and no
+      > volumes in it. Counting what you did *not* have to write is the point.
+spec:
+  title: "Operators on DCS"
+  description: The pattern behind every platform service — a controller reconciling your Custom Resource. Read a CRD, create an instance, watch the operator build it, and learn who owns what.
+  duration: 25m
+  difficulty: advanced
+  labels:
+    - name: module
+      value: "O-Operate-and-Observe"
+  publish:
+    image: "$(image_repository)/lab-o05-operators-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o05-operators/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o05-operators/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o05-operators/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/operate-track/lab-o05-operators"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-o05-operators-files:$(workshop_version)"
+    {{- end }}
+  session:
+    namespaces:
+      # The operator provisions a StatefulSet with its own PVC for the database
+      # instance, so the namespace needs room for more than the CR itself.
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      slides:
+        enabled: true
+      examiner:
+        enabled: true
+      # The operator is cluster-wide and platform-owned; the learner's CR must land in a
+      # real namespace it is already watching, not inside a nested cluster.
+      vcluster:
+        enabled: false
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-o05-operators&session=$(session_namespace)"
