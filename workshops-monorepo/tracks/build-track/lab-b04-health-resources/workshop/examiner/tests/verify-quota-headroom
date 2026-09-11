@@ -1,12 +1,12 @@
 #!/bin/bash
-# After right-sizing, the app's four replicas must claim only a fraction of the
-# namespace budget — where four Pods on the LimitRange default (512Mi each) claimed
-# the whole limit side.
+# After right-sizing, what the app CLAIMS from the namespace budget must be a fraction
+# of what it claimed on the LimitRange defaults (4 x 512Mi = the whole limit side).
 #
-# Asserted on the APP's own Pods, not on the quota's Used figure: quota accounting
-# lags Pod termination, so for a few seconds after the rollout the retiring
-# default-sized Pods are still counted and Used still reads the full ceiling. The
-# Pods are the deterministic signal; the quota is printed for context.
+# Read from the Deployment's own template, not from the Pods and not from the quota's
+# Used figure, because both are noisy at exactly this moment: mid-rollout the retiring
+# 512Mi Pods are still Running alongside the new 128Mi ones, and quota accounting lags
+# Pod termination by a few seconds. The template is the desired state the learner just
+# applied, and it is stable the instant the apply returns.
 set -uo pipefail
 
 to_mi() {                       # normalise Ki/Mi/Gi (and bare bytes) to MiB
@@ -19,31 +19,30 @@ to_mi() {                       # normalise Ki/Mi/Gi (and bare bytes) to MiB
   esac
 }
 
-desired=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
-desired="${desired:-4}"
+lim=$(oc get deployment hello-dcs -o jsonpath='{.spec.template.spec.containers[0].resources.limits.memory}' 2>/dev/null)
+replicas=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+replicas="${replicas:-4}"
 
-# Sum the memory limits of the app's RUNNING Pods (retiring Pods are excluded, which
-# is exactly what the quota cannot do yet).
-total=0
-pods=0
-for m in $(oc get pods -l app=hello-dcs --field-selector=status.phase=Running \
-             -o jsonpath='{range .items[*]}{.spec.containers[0].resources.limits.memory}{"\n"}{end}' 2>/dev/null); do
-  total=$(( total + $(to_mi "$m") ))
-  pods=$(( pods + 1 ))
-done
-
-if [ "$pods" -lt "$desired" ]; then
-  echo "❌ Only $pods of $desired replicas are Running, so the budget cannot be read yet. Did 'envsubst < deployment-probes.yaml | oc apply -f -' finish rolling out? This check keeps retrying." >&2
+if [ -z "$lim" ]; then
+  echo "❌ The Deployment's container sets no memory limit, so its Pods fall back to the LimitRange default of 512Mi each and claim the whole budget. Did 'envsubst < deployment-probes.yaml | oc apply -f -' run?" >&2
   exit 1
 fi
 
-# The right-sized template sets 128Mi per container: 4 x 128Mi = 512Mi. Allow slack,
-# but stay far below the 512Mi-per-Pod LimitRange default this page moved away from.
-ceiling=$(( desired * 200 ))
-if [ "$total" -gt "$ceiling" ]; then
-  echo "❌ The $pods replicas still claim ${total}Mi of memory limits, more than the ${ceiling}Mi expected for a right-sized app. Are they still on the LimitRange default of 512Mi each? Re-apply: envsubst < deployment-probes.yaml | oc apply -f -" >&2
+per=$(to_mi "$lim")
+if [ "$per" -gt 200 ] 2>/dev/null; then
+  echo "❌ Each replica still claims ${lim} of memory, expected the right-sized 128Mi from deployment-probes.yaml. Re-apply it: envsubst < deployment-probes.yaml | oc apply -f -" >&2
   exit 1
 fi
 
+claim=$(( per * replicas ))
 hard=$(oc get resourcequota -o jsonpath='{.items[0].status.hard.limits\.memory}' 2>/dev/null)
-echo "✅ The $pods replicas claim ${total}Mi of memory limits${hard:+ against a ${hard} ceiling} — a quarter of what they took on the LimitRange defaults."
+if [ -n "$hard" ]; then
+  h=$(to_mi "$hard")
+  if [ "$claim" -ge "$h" ] 2>/dev/null; then
+    echo "❌ ${replicas} replicas at ${lim} claim ${claim}Mi against a ${hard} ceiling — that is no headroom at all. Expected the right-sized template to leave most of the budget free." >&2
+    exit 1
+  fi
+  echo "✅ ${replicas} replicas at ${lim} claim ${claim}Mi of the ${hard} limit budget — a quarter of what they took on the LimitRange defaults, with real headroom left."
+  exit 0
+fi
+echo "✅ ${replicas} replicas at ${lim} claim ${claim}Mi of memory limits — a quarter of what they took on the LimitRange defaults."
