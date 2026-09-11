@@ -33,7 +33,7 @@ command: oc get hpa hello-dcs
 ```examiner:execute-test
 name: verify-hpa-still-reading
 title: Verify the HPA is still reporting a current CPU figure
-timeout: 30
+timeout: 90
 retries: .INF
 delay: 3
 ```

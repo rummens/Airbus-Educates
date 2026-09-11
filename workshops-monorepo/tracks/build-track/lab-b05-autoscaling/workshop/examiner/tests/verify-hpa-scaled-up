@@ -1,13 +1,19 @@
 #!/bin/bash
-# Under load the HPA must have raised the replica count above minReplicas, and the
-# Deployment must be following it.
+# Under load the HPA must raise the replica count above minReplicas, and the Deployment
+# must follow it. Waits internally: the HPA samples every ~15s and scales at most once
+# per interval, so a scale-out is never instant.
 set -uo pipefail
 min=$(oc get hpa hello-dcs -o jsonpath='{.spec.minReplicas}' 2>/dev/null)
 min="${min:-1}"
-desired=$(oc get hpa hello-dcs -o jsonpath='{.status.desiredReplicas}' 2>/dev/null)
-spec=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
-if [ "${desired:-0}" -le "$min" ] 2>/dev/null && [ "${spec:-0}" -le "$min" ] 2>/dev/null; then
-  echo "❌ The HPA still wants ${desired:-?} replicas and the Deployment is at ${spec:-?} — expected more than the minimum of ${min} while the load runs. The HPA samples every 15s, so give it ~30s of load; this check keeps retrying. If the current utilisation is <unknown>, no metrics are reaching the HPA." >&2
-  exit 1
-fi
-echo "✅ The HPA scaled out: it wants ${desired} replicas (minimum is ${min}), and the Deployment is set to ${spec}."
+for _ in $(seq 1 24); do          # ~120s
+  desired=$(oc get hpa hello-dcs -o jsonpath='{.status.desiredReplicas}' 2>/dev/null)
+  spec=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+  if [ "${desired:-0}" -gt "$min" ] 2>/dev/null || [ "${spec:-0}" -gt "$min" ] 2>/dev/null; then
+    echo "✅ The HPA scaled out: it wants ${desired} replicas (minimum is ${min}), and the Deployment is set to ${spec}."
+    exit 0
+  fi
+  sleep 5
+done
+cur=$(oc get hpa hello-dcs -o jsonpath='{.status.currentMetrics[0].resource.current.averageUtilization}' 2>/dev/null)
+echo "❌ The HPA is still at the minimum of ${min} replicas after 2 minutes (current CPU: ${cur:-<unknown>}% of request). If the utilisation is <unknown>, no metrics are reaching it. If it is simply below 50%, the load is not driving the app hard enough — re-run the load step and leave it running." >&2
+exit 1

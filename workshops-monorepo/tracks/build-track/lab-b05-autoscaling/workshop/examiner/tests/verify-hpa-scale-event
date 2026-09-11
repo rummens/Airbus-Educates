@@ -1,10 +1,15 @@
 #!/bin/bash
-# The scale decision must be on the record, with the metric that caused it — the
-# event trail is what you read when an HPA surprises you.
+# The scale decision must be on the record with the metric that caused it — the event
+# trail is what you read when an HPA surprises you. Waits internally: the event is
+# written when the controller acts, which lags the load by an interval or two.
 set -uo pipefail
-ev=$(oc describe hpa hello-dcs 2>/dev/null | grep -c "SuccessfulRescale")
-if [ "${ev:-0}" -lt 1 ] 2>/dev/null; then
-  echo "❌ No SuccessfulRescale event on the HPA yet — it has not changed the replica count. Has the load step run long enough for a scale-out? This check keeps retrying." >&2
-  exit 1
-fi
-echo "✅ The HPA recorded ${ev} rescale event(s), each naming the metric that triggered it."
+for _ in $(seq 1 24); do          # ~120s
+  ev=$(oc describe hpa hello-dcs 2>/dev/null | grep -c "SuccessfulRescale")
+  if [ "${ev:-0}" -ge 1 ] 2>/dev/null; then
+    echo "✅ The HPA recorded ${ev} rescale event(s), each naming the metric that triggered it."
+    exit 0
+  fi
+  sleep 5
+done
+echo "❌ No SuccessfulRescale event on the HPA after 2 minutes — it has not changed the replica count at all. Check that the load step ran long enough, and that 'oc get hpa hello-dcs' shows a real current utilisation rather than <unknown>." >&2
+exit 1

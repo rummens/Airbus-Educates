@@ -57,7 +57,7 @@ In the lower pane you should see TARGETS climb well past `50%`, then the Pod cou
 ```examiner:execute-test
 name: verify-hpa-scaled-up
 title: Verify the HPA scaled the Deployment above its minimum
-timeout: 180
+timeout: 150
 retries: .INF
 delay: 5
 ```
@@ -78,7 +78,7 @@ triggered it, like `New size: 3; reason: cpu resource utilization (percentage of
 ```examiner:execute-test
 name: verify-hpa-scale-event
 title: Verify the HPA recorded a scaling event with its reason
-timeout: 30
+timeout: 150
 retries: .INF
 delay: 3
 ```

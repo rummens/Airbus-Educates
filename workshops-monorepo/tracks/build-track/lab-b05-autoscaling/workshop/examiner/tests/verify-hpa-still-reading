@@ -1,10 +1,14 @@
 #!/bin/bash
-# After the load stops the HPA must still be reporting a figure (0% is fine) — the
-# point of the page is that it keeps measuring while it waits out the window.
+# After the load stops the HPA must still report a figure (0% is a fine answer) — the
+# page's point is that it keeps measuring while it waits out the scale-in window.
 set -uo pipefail
-cur=$(oc get hpa hello-dcs -o jsonpath='{.status.currentMetrics[0].resource.current.averageUtilization}' 2>/dev/null)
-if [ -z "$cur" ]; then
-  echo "❌ The HPA has stopped reporting a current CPU figure. Expected a number (0% is a valid answer once the load ends). Check: oc describe hpa hello-dcs" >&2
-  exit 1
-fi
-echo "✅ The HPA is still measuring — current CPU is ${cur}% of request while it waits out the scale-in window."
+for _ in $(seq 1 12); do          # ~60s
+  cur=$(oc get hpa hello-dcs -o jsonpath='{.status.currentMetrics[0].resource.current.averageUtilization}' 2>/dev/null)
+  if [ -n "$cur" ]; then
+    echo "✅ The HPA is still measuring — current CPU is ${cur}% of request while it waits out the scale-in window."
+    exit 0
+  fi
+  sleep 5
+done
+echo "❌ The HPA has stopped reporting a current CPU figure. Expected a number (0% is valid once the load ends). Check: oc describe hpa hello-dcs" >&2
+exit 1

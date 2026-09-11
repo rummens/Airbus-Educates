@@ -72,7 +72,7 @@ The **TARGETS** column reads `<current>/<target>` — for example `3%/50%`.
 ```examiner:execute-test
 name: verify-hpa-has-metrics
 title: Verify the HPA is reading live CPU metrics
-timeout: 90
+timeout: 150
 retries: .INF
 delay: 5
 ```

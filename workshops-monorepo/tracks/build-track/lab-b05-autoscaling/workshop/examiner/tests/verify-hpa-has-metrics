@@ -1,12 +1,18 @@
 #!/bin/bash
 # The HPA must be reading live metrics: a current utilisation figure, not <unknown>.
-# Needs the cluster's metrics API (user-workload monitoring on DCS). On a cluster with
-# no Metrics API this can never pass — see the smoke plan's exclusion note.
+#
+# Waits internally. The first metrics can take up to a minute after the HPA is created,
+# and a check that only goes green because the UI happens to retry it cannot be verified
+# by CI, which runs each check once.
 set -uo pipefail
-cur=$(oc get hpa hello-dcs -o jsonpath='{.status.currentMetrics[0].resource.current.averageUtilization}' 2>/dev/null)
-if [ -z "$cur" ]; then
-  cond=$(oc get hpa hello-dcs -o jsonpath='{range .status.conditions[*]}{.type}={.status} {end}' 2>/dev/null)
-  echo "❌ The HPA reports no current CPU utilisation yet (TARGETS shows <unknown>). Conditions: ${cond:-<none>}. The first metrics can take up to a minute; this check keeps retrying. If it never clears, this cluster has no metrics API serving Pod metrics." >&2
-  exit 1
-fi
-echo "✅ The HPA is reading live metrics — current CPU is ${cur}% of request."
+for _ in $(seq 1 24); do          # ~120s
+  cur=$(oc get hpa hello-dcs -o jsonpath='{.status.currentMetrics[0].resource.current.averageUtilization}' 2>/dev/null)
+  if [ -n "$cur" ]; then
+    echo "✅ The HPA is reading live metrics — current CPU is ${cur}% of request."
+    exit 0
+  fi
+  sleep 5
+done
+cond=$(oc get hpa hello-dcs -o jsonpath='{range .status.conditions[*]}{.type}={.status} {end}' 2>/dev/null)
+echo "❌ After 2 minutes the HPA still reports no current CPU utilisation (TARGETS shows <unknown>). Conditions: ${cond:-<none>}. Either the container sets no CPU request, or this cluster's metrics API is not serving Pod metrics (on a cluster without monitoring, 'oc adm top pods' fails too)." >&2
+exit 1
