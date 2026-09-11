@@ -1,29 +1,49 @@
 #!/bin/bash
-# After right-sizing, the namespace budget must have real headroom on the limit side —
-# the whole point of the exercise (it was Used == Hard two pages earlier).
+# After right-sizing, the app's four replicas must claim only a fraction of the
+# namespace budget — where four Pods on the LimitRange default (512Mi each) claimed
+# the whole limit side.
+#
+# Asserted on the APP's own Pods, not on the quota's Used figure: quota accounting
+# lags Pod termination, so for a few seconds after the rollout the retiring
+# default-sized Pods are still counted and Used still reads the full ceiling. The
+# Pods are the deterministic signal; the quota is printed for context.
 set -uo pipefail
-q=$(oc get resourcequota -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
-if [ -z "$q" ]; then
-  echo "❌ No ResourceQuota in this namespace, so there is no budget to read. A 'medium' budget session should always carry one." >&2
-  exit 1
-fi
-used=$(oc get resourcequota "$q" -o jsonpath='{.status.used.limits\.memory}' 2>/dev/null)
-hard=$(oc get resourcequota "$q" -o jsonpath='{.status.hard.limits\.memory}' 2>/dev/null)
-if [ -z "$used" ] || [ -z "$hard" ]; then
-  echo "❌ Quota '$q' does not track limits.memory (used='${used:-<none>}' hard='${hard:-<none>}'), so headroom cannot be read here." >&2
-  exit 1
-fi
+
 to_mi() {                       # normalise Ki/Mi/Gi (and bare bytes) to MiB
   case "$1" in
     *Gi) echo $(( ${1%Gi} * 1024 )) ;;
     *Mi) echo "${1%Mi}" ;;
     *Ki) echo $(( ${1%Ki} / 1024 )) ;;
+    "")  echo 0 ;;
     *)   echo $(( ${1:-0} / 1048576 )) ;;
   esac
 }
-u=$(to_mi "$used"); h=$(to_mi "$hard")
-if [ "${u:-0}" -ge "${h:-0}" ] 2>/dev/null; then
-  echo "❌ limits.memory is still ${used} of ${hard} — no headroom. Did 'envsubst < deployment-probes.yaml | oc apply -f -' finish rolling out? The right-sized template should leave about three quarters of the budget free." >&2
+
+desired=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+desired="${desired:-4}"
+
+# Sum the memory limits of the app's RUNNING Pods (retiring Pods are excluded, which
+# is exactly what the quota cannot do yet).
+total=0
+pods=0
+for m in $(oc get pods -l app=hello-dcs --field-selector=status.phase=Running \
+             -o jsonpath='{range .items[*]}{.spec.containers[0].resources.limits.memory}{"\n"}{end}' 2>/dev/null); do
+  total=$(( total + $(to_mi "$m") ))
+  pods=$(( pods + 1 ))
+done
+
+if [ "$pods" -lt "$desired" ]; then
+  echo "❌ Only $pods of $desired replicas are Running, so the budget cannot be read yet. Did 'envsubst < deployment-probes.yaml | oc apply -f -' finish rolling out? This check keeps retrying." >&2
   exit 1
 fi
-echo "✅ limits.memory is ${used} of ${hard} — the same four replicas now leave real headroom."
+
+# The right-sized template sets 128Mi per container: 4 x 128Mi = 512Mi. Allow slack,
+# but stay far below the 512Mi-per-Pod LimitRange default this page moved away from.
+ceiling=$(( desired * 200 ))
+if [ "$total" -gt "$ceiling" ]; then
+  echo "❌ The $pods replicas still claim ${total}Mi of memory limits, more than the ${ceiling}Mi expected for a right-sized app. Are they still on the LimitRange default of 512Mi each? Re-apply: envsubst < deployment-probes.yaml | oc apply -f -" >&2
+  exit 1
+fi
+
+hard=$(oc get resourcequota -o jsonpath='{.items[0].status.hard.limits\.memory}' 2>/dev/null)
+echo "✅ The $pods replicas claim ${total}Mi of memory limits${hard:+ against a ${hard} ceiling} — a quarter of what they took on the LimitRange defaults."

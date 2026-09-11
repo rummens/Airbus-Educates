@@ -63,14 +63,20 @@ command: oc describe quota
 
 ```examiner:execute-test
 name: verify-quota-headroom
-title: Verify the namespace budget now has headroom on limits
-timeout: 15
+title: Verify the right-sized replicas claim only a fraction of the budget
+timeout: 20
 retries: .INF
-delay: 2
+delay: 3
 ```
 
 `limits.memory` should now read roughly `512Mi / 2Gi` instead of the `2Gi / 2Gi` you saw two
-pages ago.
+pages ago — four replicas at 128Mi each instead of four at the 512Mi default.
+
+{{< note >}}
+**⏳ This takes a moment:** quota accounting lags Pod **termination**. For a few seconds after
+the rollout, the retiring Pods are still counted and `Used` still shows the old figure. Run
+`oc describe quota` again if you catch it mid-way.
+{{< /note >}}
 
 Same four replicas. Same app. A quarter of the budget, and real headroom for whatever you
 deploy next.
