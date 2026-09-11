@@ -1,0 +1,10 @@
+{
+  "workshop": "lab-b10-dev-spaces",
+  "_note": "A concept lab by necessity: Dev Spaces is operator-provided and neither CRC nor this training cluster runs it (checked: no checlusters.org.eclipse.che CRD). What CAN be asserted is asserted — the devfile exists, sources its dev image from the platform registry rather than a public one, and is a structurally valid 2.x devfile with a container component and commands. The quarry's 'is Dev Spaces installed' check was removed rather than kept: it exited 0 whatever it found, which makes it decoration rather than a test.",
+  "steps": [
+    {"run": "cat ~/exercises/devfile.yaml | head -30"},
+    {"check": "verify-devfile"},
+    {"run": "python3 -c \"import re; raw=open('/home/eduk8s/exercises/devfile.yaml').read(); print('schemaVersion:', re.search(r'schemaVersion:\\\\s*(\\\\S+)', raw).group(1)); print('components:', len(re.findall(r'^\\\\s+- name:', raw, re.M))); print('commands:', len(re.findall(r'^\\\\s+- id:', raw, re.M)))\""},
+    {"check": "verify-devfile-structure"}
+  ]
+}

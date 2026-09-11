@@ -25,11 +25,24 @@ Two lines that matter:
 
 ## Create the BuildConfig
 
+```editor:open-file
+file: ~/exercises/buildconfig.yaml
+```
+
+Two objects: an **ImageStream** for the output to land in, and the **BuildConfig** itself.
+Three fields in it are the whole recipe:
+
+- **`source.type: Binary`** — the input is handed over at start time. With a git server the
+  cluster can reach, this would be `git:` instead: same object, same strategy, different source.
+- **`strategy.dockerStrategy.dockerfilePath: Containerfile`** — the default is a file called
+  exactly `Dockerfile`. This project uses the `Containerfile` spelling, so the path is stated.
+- **`output.to`** — the ImageStream tag the finished image is pushed to.
+
 ```terminal:execute
 command: |-
   cd ~/exercises/app
   envsubst < Containerfile > Containerfile.resolved && mv Containerfile.resolved Containerfile
-  oc new-build --binary --strategy=docker --name=hello-built
+  oc apply -f ~/exercises/buildconfig.yaml
 ```
 
 ```examiner:execute-test
@@ -40,9 +53,11 @@ retries: .INF
 delay: 3
 ```
 
-That one command created **two** objects: the `hello-built` BuildConfig, and a `hello-built`
-ImageStream for its output. `--binary` says the input will be handed over at start time rather
-than fetched from git.
+{{< note >}}
+**💡 Tip:** `oc new-build --binary --strategy=docker --name=hello-built` generates the same two
+objects in one line. It assumes `Dockerfile`, though — which is exactly the assumption this
+manifest had to override.
+{{< /note >}}
 
 {{< note >}}
 **📌 Why `envsubst` first.** A `Containerfile` is read by the build, not by Kubernetes, so

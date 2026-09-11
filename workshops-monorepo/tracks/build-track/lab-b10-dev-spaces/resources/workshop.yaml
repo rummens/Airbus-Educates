@@ -1,0 +1,87 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b10-dev-spaces
+  labels:
+    academy.dcs/track: build
+    academy.dcs/order: "100"
+    academy.dcs/optional: "true"
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/icon: edit
+    academy.dcs/details: |
+      **Optional — the fourth thing you can do with a git repository on this platform.**
+
+      The track so far used git as a *build source*. **OpenShift Dev Spaces** uses it as an
+      **in-cluster IDE**: a workspace defined by a **devfile**, running on the cluster, with
+      the same registry and the same security posture as everything else you deploy.
+
+      You read a real devfile field by field — the image the workspace develops in, the
+      endpoints it exposes, the commands it can run — and place Dev Spaces against the
+      three other ways this track has worked with code.
+
+      > **📌 Mostly a reading lab here.** Dev Spaces is operator-provided, and this training
+      > cluster does not run it. The devfile and the model are the transferable parts, and
+      > the lab is honest about which steps need an instance.
+spec:
+  title: "Dev Spaces"
+  description: Git as an in-cluster IDE — what a devfile declares, how a workspace differs from a build, and where Dev Spaces fits next to the editor, BuildConfigs and your laptop.
+  duration: 18m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Build-and-Run"
+  publish:
+    image: "$(image_repository)/lab-b10-dev-spaces-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b10-dev-spaces/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b10-dev-spaces/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b10-dev-spaces/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/build-track/lab-b10-dev-spaces"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b10-dev-spaces-files:$(workshop_version)"
+    {{- end }}
+  session:
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    - name: WORKSPACE_SOURCE_REPO
+      value: "https://gitlab.example.dcs/your-tenant/hello-dcs.git"
+    namespaces:
+      budget: small
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      slides:
+        enabled: true
+      examiner:
+        enabled: true
+      vcluster:
+        enabled: false
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-b10-dev-spaces&session=$(session_namespace)"

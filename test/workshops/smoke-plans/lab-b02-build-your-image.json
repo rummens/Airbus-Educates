@@ -1,25 +1,63 @@
 {
   "workshop": "lab-b02-build-your-image",
-  "_note": "A BINARY build, deliberately: it needs no git server the cluster can reach, so the lab works on an air-gapped platform and on a training cluster alike, while the objects and commands are identical to a git-source build. Builds are NOT in the Educates session role (measured: create buildconfigs/builds/imagestreams all 'no'), so session.objects grants them — including builds/docker, which OpenShift gates separately from creating a BuildConfig because a Dockerfile build is more powerful than a source build. Output goes to the cluster's internal registry here; on DCS it goes to the tenant's Harbor project, which the last page covers.",
+  "_note": "A BINARY build, deliberately: it needs no git server the cluster can reach, so the lab works on an air-gapped platform and on a training cluster alike, while the objects and commands are identical to a git-source build. Builds are NOT in the Educates session role (measured: create buildconfigs/builds/imagestreams all 'no'), so session.objects grants them \u2014 including builds/docker, which OpenShift gates separately from creating a BuildConfig because a Dockerfile build is more powerful than a source build. Output goes to the cluster's internal registry here; on DCS it goes to the tenant's Harbor project, which the last page covers. The BuildConfig is a manifest rather than `oc new-build`, because the docker strategy defaults to a file named exactly Dockerfile and this project spells it Containerfile \u2014 the failure mode is 'open /tmp/build/inputs/Dockerfile: no such file or directory', which is a confusing way to learn it.",
   "steps": [
-    {"run": "cd app && envsubst < Containerfile > C.tmp && mv C.tmp Containerfile && oc new-build --binary --strategy=docker --name=hello-built"},
-    {"check": "verify-buildconfig-created"},
-    {"run": "cd app && oc start-build hello-built --from-dir=. --follow"},
-    {"check": "verify-build-completed"},
-    {"run": "oc get builds"},
-    {"check": "verify-build-recorded"},
-    {"run": "oc get imagestream hello-built -o jsonpath='{range .status.tags[*]}{.tag}{\"  ->  \"}{.items[0].dockerImageReference}{\"\\n\"}{end}'"},
-    {"check": "verify-imagestream-tag"},
-    {"run": "envsubst < deployment.yaml | oc apply -f - && oc rollout status deploy/hello-built --timeout=240s"},
-    {"check": "verify-built-app-running"},
-    {"run": "oc exec deploy/hello-built -- printenv GREETING VERSION"},
-    {"check": "verify-baked-in-values"},
-    {"run": "cd app && sed -i 's/Built on DCS, by me/Rebuilt, and it shows/' Containerfile && grep GREETING Containerfile"},
-    {"run": "cd app && oc start-build hello-built --from-dir=. --follow"},
-    {"check": "verify-second-build"},
-    {"run": "oc exec deploy/hello-built -- printenv GREETING"},
-    {"check": "verify-app-still-old"},
-    {"run": "oc rollout restart deploy/hello-built && oc rollout status deploy/hello-built --timeout=240s"},
-    {"check": "verify-new-image-rolled-out"}
+    {
+      "run": "cd app && envsubst < Containerfile > C.tmp && mv C.tmp Containerfile && oc apply -f ../buildconfig.yaml"
+    },
+    {
+      "check": "verify-buildconfig-created"
+    },
+    {
+      "run": "cd app && oc start-build hello-built --from-dir=. --follow"
+    },
+    {
+      "check": "verify-build-completed"
+    },
+    {
+      "run": "oc get builds"
+    },
+    {
+      "check": "verify-build-recorded"
+    },
+    {
+      "run": "oc get imagestream hello-built -o jsonpath='{range .status.tags[*]}{.tag}{\"  ->  \"}{.items[0].dockerImageReference}{\"\\n\"}{end}'"
+    },
+    {
+      "check": "verify-imagestream-tag"
+    },
+    {
+      "run": "envsubst < deployment.yaml | oc apply -f - && oc rollout status deploy/hello-built --timeout=240s"
+    },
+    {
+      "check": "verify-built-app-running"
+    },
+    {
+      "run": "oc exec deploy/hello-built -- printenv GREETING VERSION"
+    },
+    {
+      "check": "verify-baked-in-values"
+    },
+    {
+      "run": "cd app && sed -i 's/Built on DCS, by me/Rebuilt, and it shows/' Containerfile && grep GREETING Containerfile"
+    },
+    {
+      "run": "cd app && oc start-build hello-built --from-dir=. --follow"
+    },
+    {
+      "check": "verify-second-build"
+    },
+    {
+      "run": "oc exec deploy/hello-built -- printenv GREETING"
+    },
+    {
+      "check": "verify-app-still-old"
+    },
+    {
+      "run": "oc rollout restart deploy/hello-built && oc rollout status deploy/hello-built --timeout=240s"
+    },
+    {
+      "check": "verify-new-image-rolled-out"
+    }
   ]
 }

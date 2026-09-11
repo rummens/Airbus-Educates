@@ -1,0 +1,39 @@
+# The recipe, written out rather than generated, because every field in it is a
+# decision worth seeing.
+#
+# An ImageStream first: somewhere for the output to land and be tracked.
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: hello-built
+  labels:
+    app: hello-built
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: hello-built
+  labels:
+    app: hello-built
+spec:
+  source:
+    # binary: the input is handed to the build at start time (oc start-build
+    # --from-dir), rather than fetched from a git repository. On DCS with a
+    # reachable GitLab you would use `git:` here instead — same object, same
+    # strategy, different source.
+    type: Binary
+    binary: {}
+  strategy:
+    type: Docker
+    dockerStrategy:
+      # The default is a file called exactly "Dockerfile". This project uses the
+      # Containerfile spelling, so the path has to be said out loud — otherwise the
+      # build fails with "open /tmp/build/inputs/Dockerfile: no such file or directory",
+      # which is a confusing way to learn this.
+      dockerfilePath: Containerfile
+  output:
+    # Where the finished image goes: the ImageStream tag above. On DCS this is
+    # your tenant's Harbor project instead.
+    to:
+      kind: ImageStreamTag
+      name: hello-built:latest

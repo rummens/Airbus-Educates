@@ -1,0 +1,28 @@
+#!/bin/bash
+# The devfile must be a VALID devfile, not just a file that mentions the right words:
+# a 2.x schema, a container component to develop in, and at least one command.
+# This is the part of the lab a session can genuinely verify without Dev Spaces
+# installed — the workspace itself needs an operator the platform provides.
+set -uo pipefail
+f=~/exercises/devfile.yaml
+if [ ! -f "$f" ]; then
+  echo "❌ No devfile at $f. The session content may not have downloaded." >&2
+  exit 1
+fi
+python3 - "$f" <<'PY'
+import sys, re
+raw = open(sys.argv[1]).read()
+def fail(msg):
+    print(f"❌ {msg}", file=sys.stderr); sys.exit(1)
+m = re.search(r'^schemaVersion:\s*([\d.]+)', raw, re.M)
+if not m or not m.group(1).startswith("2."):
+    fail(f"schemaVersion is {m.group(1) if m else 'missing'}; a devfile for Dev Spaces is 2.x.")
+if not re.search(r'^components:', raw, re.M):
+    fail("the devfile declares no components, so there is nothing to develop in.")
+if not re.search(r'^\s+container:', raw, re.M):
+    fail("no component is a container; a workspace needs at least one to run in.")
+if not re.search(r'^commands:', raw, re.M):
+    fail("the devfile declares no commands, so the workspace would not know how to run the app.")
+cmds = len(re.findall(r'^\s+- id:', raw, re.M))
+print(f"✅ Valid devfile (schemaVersion {m.group(1)}): a container component to develop in and {cmds} command(s) defined.")
+PY
