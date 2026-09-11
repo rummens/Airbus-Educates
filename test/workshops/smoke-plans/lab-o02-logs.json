@@ -1,0 +1,23 @@
+{
+  "workshop": "lab-o02-logs",
+  "_note": "Everything asserted here runs on `oc logs` alone, which needs no log store — deliberate, because CRC cannot host a LokiStack (too heavy) and the aggregation half of the lab is therefore taught rather than run. The page says so in a warning rather than pretending. verify-logs-gone-with-pod asserts an ABSENCE: after the crashing Deployment is deleted, oc logs must have nothing left to read — that is the lab's closing point.",
+  "steps": [
+    {"run": "envsubst < deployment.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=240s"},
+    {"check": "verify-app-ready"},
+    {"run": "url=\"http://hello-dcs.$(oc project -q).svc:8080\"; oc apply -f service.yaml; for i in $(seq 1 20); do curl -s -o /dev/null \"$url\" 2>/dev/null; done; echo sent 20"},
+    {"run": "oc logs deploy/hello-dcs --tail=20"},
+    {"check": "verify-logs-readable"},
+    {"run": "oc logs -l app=hello-dcs --tail=5 --prefix"},
+    {"check": "verify-logs-all-replicas"},
+    {"run": "oc logs -l app=hello-dcs --since=5m --tail=50 --prefix"},
+    {"check": "verify-logs-since"},
+    {"run": "envsubst < crashing.yaml | oc apply -f - && sleep 30 && oc get pods -l app=flaky"},
+    {"check": "verify-flaky-restarting"},
+    {"run": "pod=$(oc get pods -l app=flaky -o name | head -1); oc logs \"$pod\" --previous --tail=20 || true"},
+    {"check": "verify-previous-logs"},
+    {"run": "oc delete deploy flaky"},
+    {"check": "verify-flaky-gone"},
+    {"run": "oc logs deploy/flaky --previous 2>&1 | tail -2 || true"},
+    {"check": "verify-logs-gone-with-pod"}
+  ]
+}

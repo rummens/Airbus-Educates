@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="420" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">One line, two destinations, two lifetimes</text>
+
+  <rect x="24" y="52" width="150" height="76" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="99" y="76" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c6a3a">your process</text>
+  <text x="99" y="96" text-anchor="middle" font-size="10" fill="#2c6a3a">writes to stdout</text>
+  <text x="99" y="112" text-anchor="middle" font-size="10" fill="#2c6a3a">and stderr</text>
+
+  <rect x="204" y="52" width="176" height="76" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="292" y="76" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b4a86">container runtime</text>
+  <text x="292" y="96" text-anchor="middle" font-size="10" fill="#1b4a86">writes it to a file</text>
+  <text x="292" y="112" text-anchor="middle" font-size="10" fill="#1b4a86">on that node</text>
+
+  <line x1="174" y1="90" x2="200" y2="90" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="200,90 192,86 192,94" fill="#5a6b7b"/>
+
+  <!-- oc logs branch -->
+  <rect x="430" y="30" width="306" height="86" rx="8" fill="#fdf4e8" stroke="#c08a2d" stroke-width="2"/>
+  <text x="583" y="54" text-anchor="middle" font-size="12" font-weight="bold" fill="#7a5410">oc logs reads that file</text>
+  <text x="446" y="74" font-size="10" fill="#7a5410">-f follow · --tail · --since · -c container · -l selector</text>
+  <text x="446" y="92" font-size="10" font-weight="bold" fill="#7a5410">--previous → the container that already died</text>
+  <text x="446" y="108" font-size="10" fill="#8a2f2c">rotated when large · GONE when the Pod goes</text>
+
+  <line x1="380" y1="80" x2="426" y2="70" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="426,70 418,68 419,76" fill="#5a6b7b"/>
+
+  <!-- collector branch -->
+  <rect x="430" y="136" width="306" height="96" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="583" y="160" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b4a86">a collector ships it to the log store</text>
+  <text x="446" y="180" font-size="10" fill="#1b4a86">one per node · attaches labels · LokiStack on OpenShift</text>
+  <text x="446" y="198" font-size="10" fill="#2c6a3a">outlives the Pod · searchable across workloads</text>
+  <text x="446" y="216" font-size="10" fill="#2c6a3a">retention is a policy somebody pays for</text>
+
+  <line x1="380" y1="100" x2="426" y2="170" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="426,170 418,162 412,170" fill="#5a6b7b"/>
+
+  <!-- consequences -->
+  <rect x="24" y="252" width="712" height="66" rx="8" fill="#fdeeee" stroke="#c0504d" stroke-width="2"/>
+  <text x="380" y="276" text-anchor="middle" font-size="13" font-weight="bold" fill="#8a2f2c">Where oc logs stops</text>
+  <text x="44" y="298" font-size="11" fill="#8a2f2c">It can only speak for containers that still exist. Last night's crash, on a node since drained, is only in the store.</text>
+
+  <rect x="24" y="332" width="712" height="66" rx="8" fill="#fdf4e8" stroke="#c08a2d" stroke-width="2"/>
+  <text x="380" y="356" text-anchor="middle" font-size="13" font-weight="bold" fill="#7a5410">Two rules that follow from the picture</text>
+  <text x="44" y="378" font-size="11" fill="#7a5410">Do not write logs to a file inside the container: nothing collects it, and it dies with the Pod.</text>
+  <text x="44" y="394" font-size="11" fill="#7a5410">Never log a secret: every line is copied centrally, kept for the retention period, and read by everyone entitled to it.</text>
+</svg>

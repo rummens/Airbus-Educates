@@ -1,0 +1,83 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-o02-logs
+  labels:
+    academy.dcs/track: operate
+    academy.dcs/order: "20"
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/icon: file-check
+    academy.dcs/details: |
+      **Metrics tell you that something changed. Logs tell you what happened.**
+
+      You practise reading logs properly — following them live, going back in time,
+      reaching the output of a container that has already **crashed**, and picking one
+      container out of a Pod that runs several.
+
+      Then the limit: delete the Pod and the logs go with it. That is the gap aggregation
+      fills, and the last page covers how it works on DCS — the
+      collector, the log store, LogQL and the same tenancy boundary your metrics have.
+
+      > **💡 Tip:** `--previous` is the flag that pays for this lab. The logs explaining a
+      > crash belong to the container that crashed, not the one that replaced it.
+spec:
+  title: "Logs"
+  description: Read logs properly — follow, filter, go back to a crashed container, pick one container out of many — then meet the limit that makes aggregation necessary.
+  duration: 20m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "O-Operate-and-Observe"
+  publish:
+    image: "$(image_repository)/lab-o02-logs-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o02-logs/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o02-logs/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o02-logs/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/operate-track/lab-o02-logs"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-o02-logs-files:$(workshop_version)"
+    {{- end }}
+  session:
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      slides:
+        enabled: true
+      examiner:
+        enabled: true
+      vcluster:
+        enabled: false
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-o02-logs&session=$(session_namespace)"

@@ -1,0 +1,15 @@
+#!/bin/bash
+# The deliberately broken workload must actually be failing and being restarted.
+set -uo pipefail
+for _ in $(seq 1 24); do          # ~120s
+  r=$(oc get pods -l app=flaky -o jsonpath='{.items[0].status.containerStatuses[0].restartCount}' 2>/dev/null)
+  phase=$(oc get pods -l app=flaky -o jsonpath='{.items[0].status.containerStatuses[0].state.waiting.reason}' 2>/dev/null)
+  [ "${r:-0}" -ge 1 ] 2>/dev/null && break
+  case "$phase" in *CrashLoop*) break ;; esac
+  sleep 5
+done
+if [ "${r:-0}" -lt 1 ] 2>/dev/null && [ -z "$phase" ]; then
+  echo "❌ The flaky workload is not restarting yet (restarts=${r:-0}). It logs, then exits 1 — give it a few seconds; this check keeps waiting." >&2
+  exit 1
+fi
+echo "✅ The flaky container has restarted ${r:-0} time(s)${phase:+ and is now ${phase}} — there is a dead container to read."

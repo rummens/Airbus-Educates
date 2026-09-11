@@ -1,0 +1,13 @@
+# A stable address, so the traffic loop has something to call.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  selector:
+    app: hello-dcs
+  ports:
+  - port: 8080
+    targetPort: 8080

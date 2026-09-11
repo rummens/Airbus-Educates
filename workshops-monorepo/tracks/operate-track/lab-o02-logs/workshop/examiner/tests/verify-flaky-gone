@@ -1,0 +1,9 @@
+#!/bin/bash
+# The crashing workload is removed — and with it, everything oc logs could say about it.
+set -uo pipefail
+for _ in $(seq 1 18); do
+  oc get deployment flaky >/dev/null 2>&1 || { echo "✅ The flaky Deployment is gone."; exit 0; }
+  sleep 5
+done
+echo "❌ The 'flaky' Deployment still exists. Run: oc delete deploy flaky" >&2
+exit 1

@@ -1,0 +1,10 @@
+#!/bin/bash
+# Two replicas, so the label-selector read on the next page has more than one to show.
+set -uo pipefail
+for _ in $(seq 1 24); do
+  ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  [ "${ready:-0}" -ge 2 ] 2>/dev/null && { echo "✅ hello-dcs is running ${ready} replicas."; exit 0; }
+  sleep 5
+done
+echo "❌ hello-dcs has ${ready:-0} ready replicas, expected 2. Did the apply step run? The image may still be pulling." >&2
+exit 1

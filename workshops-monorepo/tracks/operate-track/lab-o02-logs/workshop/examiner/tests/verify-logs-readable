@@ -1,0 +1,14 @@
+#!/bin/bash
+# Logs are readable through the Deployment, without knowing a Pod's generated name.
+set -uo pipefail
+for _ in $(seq 1 18); do
+  out=$(oc logs deploy/hello-dcs --tail=20 2>/dev/null)
+  [ -n "$out" ] && break
+  sleep 5
+done
+if [ -z "$out" ]; then
+  echo "❌ No output from 'oc logs deploy/hello-dcs'. The app logs its own startup, so an empty read means the Pod is not running yet — check: oc get pods -l app=hello-dcs" >&2
+  exit 1
+fi
+n=$(echo "$out" | grep -c .)
+echo "✅ Read ${n} line(s) through the Deployment, no Pod name needed."

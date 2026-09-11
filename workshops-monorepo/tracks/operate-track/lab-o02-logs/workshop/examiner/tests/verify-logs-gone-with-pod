@@ -1,0 +1,13 @@
+#!/bin/bash
+# The lab's closing point, asserted: with the workload deleted, oc logs has nothing to
+# read. A success here would mean the Pod is still around and the page's claim is wrong.
+set -uo pipefail
+for _ in $(seq 1 12); do
+  oc get pods -l app=flaky --no-headers 2>/dev/null | grep -q . || break
+  sleep 5
+done
+if oc logs deploy/flaky --tail=1 >/dev/null 2>&1; then
+  echo "❌ 'oc logs deploy/flaky' still returns output, so the workload has not finished going away. Wait for the Pod to terminate and try again." >&2
+  exit 1
+fi
+echo "✅ The workload's logs are unreachable now — the Pod is gone and the node's file went with it. That gap is what an aggregated store fills."

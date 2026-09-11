@@ -1,0 +1,15 @@
+#!/bin/bash
+# --previous must reach the TERMINATED container's output, which is where the fatal
+# error was printed. The replacement container knows nothing about it.
+set -uo pipefail
+for _ in $(seq 1 24); do          # ~120s
+  pod=$(oc get pods -l app=flaky -o name 2>/dev/null | head -1)
+  [ -n "$pod" ] && out=$(oc logs "$pod" --previous --tail=20 2>/dev/null)
+  case "${out:-}" in *"cannot reach the database"*) 
+    echo "✅ --previous recovered the dead container's fatal line: 'cannot reach the database at db.internal:5432'."
+    exit 0 ;;
+  esac
+  sleep 5
+done
+echo "❌ Could not read the previous container's fatal error. A Pod only has a 'previous' container once it has restarted at least once — check restarts with: oc get pods -l app=flaky" >&2
+exit 1

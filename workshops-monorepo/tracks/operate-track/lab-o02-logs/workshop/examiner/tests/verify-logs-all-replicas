@@ -1,0 +1,14 @@
+#!/bin/bash
+# A label selector reads EVERY replica, and --prefix is what makes them distinguishable.
+set -uo pipefail
+for _ in $(seq 1 18); do
+  out=$(oc logs -l app=hello-dcs --tail=5 --prefix 2>/dev/null)
+  pods=$(printf '%s\n' "$out" | grep -o '^\[pod/[^]]*\]' | sort -u | grep -c . )
+  [ "${pods:-0}" -ge 2 ] 2>/dev/null && break
+  sleep 5
+done
+if [ "${pods:-0}" -lt 2 ] 2>/dev/null; then
+  echo "❌ Saw output from ${pods:-0} replica(s), expected 2. Without --prefix the lines carry no Pod name, and without -l only one Pod is read — check both are in the command, and that both replicas are Running." >&2
+  exit 1
+fi
+echo "✅ Read logs from ${pods} replicas in one command, each line prefixed with its Pod."
