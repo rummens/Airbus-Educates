@@ -81,7 +81,7 @@
     {% if s.description %}<p class="track-desc">{{ s.description }}</p>{% endif %}
     <div class="grid">
       {% for c in s.courses %}
-        {{ m.tile(c, ratings, min_reviews, difficulty_icon, s.icon, progress.get(c.name, ''), loop.index, s.courses|length) }}
+        {{ m.tile(c, ratings, min_reviews, difficulty_icon, s.icon, progress.get(c.name, ''), c.seq, c.seq_total) }}
       {% endfor %}
     </div>
   </details>

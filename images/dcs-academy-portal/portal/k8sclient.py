@@ -258,6 +258,10 @@ def _list_courses_live():
             # Lab format: "terminal" (Educates dashboard, the default) or "console"
             # (redirect into the OpenShift console; see consolelab.py).
             "lab_format": _lbl(meta, "lab-format", "terminal"),
+            # Optional labs (a console companion, a background lab) are badged in
+            # the catalog, skipped by the "Lab N of M" numbering, and not required
+            # for the track trophy — the required path stays the spine of a track.
+            "optional": _lbl(meta, "optional") == "true",
             "console_lab": _ann(meta, "console-lab"),
             "console_lab_params": _ann(meta, "console-lab-params"),
             # academy.dcs/icon (FA-style name) → vendored icon; "" → tile falls
@@ -641,5 +645,5 @@ _DEMO_COURSES = [
      "source_url": "https://github.com/rummens/Airbus-Educates/tree/main/workshops-monorepo/tracks/core-track/lab-u01-container-access",
      "vcluster": False, "module": "", "readme_url": "", "icon": "monitor",
      "lab_format": "console", "console_lab": "lab-u01-container-access",
-     "console_lab_params": "podName=lab-app"},
+     "console_lab_params": "podName=lab-app", "optional": True},
 ]

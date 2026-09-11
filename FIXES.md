@@ -4,6 +4,10 @@ Copy-paste-into-chat log of learner-visible fixes and improvements. Newest day f
 one line per change, no internals. Platform/portal changes are live once ArgoCD has
 synced `main`; workshop content is live on the next session start.
 
+## 2026-09-11
+
+- Optional labs are now marked as such in the catalog: they carry an **Optional** badge, they are left out of the "Lab 3 of 8" counter, and you no longer need them for a track's trophy. **What is DCS?** is the first lab marked this way — skip it and come back whenever you like.
+
 ## 2026-08-25
 
 - Verify buttons no longer carry a ✅ in their label. The tick was fixed text, so it showed a green check even before you clicked, while the check was still running, and after one had failed. The button's own colour is the status again — amber while it waits, green when it passes, red when it fails — and the label just says what a green result would mean.

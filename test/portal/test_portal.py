@@ -437,6 +437,40 @@ def test_catalog_filters_by_lab_format(client):
     assert 'data-format="console"' in catalog and 'data-format="terminal"' in catalog
 
 
+def test_optional_lab_is_badged_and_left_out_of_the_numbering(client):
+    """An optional lab (a console companion) is marked as such and carries no
+    sequence number, so adding one does not renumber the track it sits in."""
+    body = client.get("/").data.decode()
+    _, catalog = body.split('id="catalog"', 1)
+    # Every tile says whether it is optional, so the attribute can be filtered on.
+    assert catalog.count('class="tile"') == catalog.count("data-optional=")
+    assert 'data-optional="yes"' in catalog and 'pill-optional' in catalog
+
+    courses = k8sclient.list_courses()
+    required = [c for c in courses if not c.get("optional")]
+    assert len(required) < len(courses)                      # the demo catalog has one
+    # Exactly the required labs are numbered — an optional lab gets no "Lab N of M",
+    # so the counter stays the length of the track's spine.
+    assert catalog.count('class="tile-seq"') == len(required)
+    opt = next(c for c in courses if c.get("optional"))
+    req_in_track = sum(1 for c in required if c["track"] == opt["track"])
+    assert f"Lab {req_in_track} of {req_in_track}" in catalog
+
+
+def test_track_trophy_ignores_optional_labs(db):
+    """Optional has to mean optional: the track trophy is earned on the required
+    path, otherwise a learner who skipped the console companion never completes."""
+    courses = [{"name": "l1", "track": "T1"},
+               {"name": "l2", "track": "T1"},
+               {"name": "l3", "track": "T1", "optional": True}]
+    feedback.mark_progress("alice", "l1", "completed")
+    feedback.mark_progress("alice", "l2", "completed")
+    t = appmod._trophies("alice", courses)
+    earned = {x["title"]: x["earned"] for x in t["items"]}
+    assert earned["T1 Track"] is True                        # l3 optional, not needed
+    assert earned["Academy Master"] is False                 # that one does count every lab
+
+
 def test_banner_renders_on_landing(client):
     feedback.set_setting("banner", "Scheduled maintenance tonight")
     assert b"Scheduled maintenance tonight" in client.get("/").data

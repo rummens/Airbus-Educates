@@ -39,6 +39,10 @@
   {%- endif -%}
   {#- Which interface the learner works in: a console lab runs inside the OpenShift
       console (guided), a terminal lab in the Educates dashboard. -#}
+  {#- Optional labs: a companion to a required lab, not part of the track's spine. -#}
+  {%- if c.optional -%}
+  <span class="pill pill-optional">{{ icon('sparkles')|safe }}Optional</span>
+  {%- endif -%}
   <span class="pill">
     {%- if c.lab_format == 'console' -%}
       {{ icon('monitor')|safe }}Console lab
@@ -53,12 +57,12 @@
 <a class="tile" href="{{ url_for('course', name=c.name) }}"
    data-title="{{ c.title|lower }}" data-difficulty="{{ c.difficulty }}"
    data-track="{{ c.track }}" data-mins="{{ c.duration }}"
-   data-format="{{ c.lab_format or 'terminal' }}">
+   data-format="{{ c.lab_format or 'terminal' }}" data-optional="{{ 'yes' if c.optional else 'no' }}">
   <div class="tile-top">
     <span class="tile-icon">{{ icon(c.icon or sicon or 'book')|safe }}</span>
     {{ status_badge(status) }}
   </div>
-  {% if total %}<span class="tile-seq">Lab {{ idx }} of {{ total }}</span>{% endif %}
+  {% if idx and total %}<span class="tile-seq">Lab {{ idx }} of {{ total }}</span>{% endif %}
   <h3 class="tile-title">{{ c.title }}</h3>
   <p class="tile-summary">{{ c.summary }}</p>
   {{ meta_pills(c, difficulty_icon) }}

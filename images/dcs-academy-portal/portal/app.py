@@ -202,6 +202,12 @@ def create_app():
         # Only render courses in a declared track. Uncategorised ones are hidden
         # (kept startable by URL) rather than shown in a ragged "More" section.
         sections = [dict(t, courses=by_track.get(t["name"], [])) for t in tracks]
+        # "Lab N of M" numbers the REQUIRED path only: optional labs sit in place
+        # but carry no sequence number, so adding one doesn't renumber the track.
+        for s in sections:
+            required = [c for c in s["courses"] if not c.get("optional")]
+            for i, c in enumerate(required, 1):
+                c["seq"], c["seq_total"] = i, len(required)
         hidden = sum(len(v) for k, v in by_track.items() if k not in track_names)
         # "Continue where you left off"
         cont = feedback.last_in_progress(_user()) if not cfg.DEMO else None
@@ -535,8 +541,13 @@ def _trophies(user, courses, tracks=None):
     track_title = {t["name"]: t.get("title", t["name"]) for t in (tracks or [])}
 
     def group(key):
+        # A track trophy requires the track's REQUIRED labs. Optional labs (console
+        # companions) would otherwise make "optional" a lie — you'd need them to
+        # finish the track. Academy Master still counts every lab, as it says.
         g = {}
         for c in courses:
+            if c.get("optional"):
+                continue
             g.setdefault(c.get(key) or "", []).append(c["name"])
         return {k: v for k, v in g.items() if k}
 
