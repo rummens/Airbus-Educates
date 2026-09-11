@@ -1,0 +1,15 @@
+#!/bin/bash
+# --config shows what the container will DO: user, env, cmd, ports. The User line is the
+# one that decides whether the restricted SCC will admit it.
+set -uo pipefail
+out=$(skopeo inspect --config "docker://${DCS_REGISTRY}/samples/hello-dcs:1.0" 2>/dev/null)
+if [ -z "$out" ]; then
+  echo "❌ No runtime configuration returned. Did the inspect command run with --config?" >&2
+  exit 1
+fi
+case "$out" in
+  *'"User"'*|*'"Env"'*) ;;
+  *) echo "❌ The response carries neither User nor Env. Got: $(printf '%s' "$out" | head -c 160)" >&2; exit 1 ;;
+esac
+user=$(printf '%s' "$out" | sed -n 's/.*"User": *"\([^"]*\)".*/\1/p' | head -1)
+echo "✅ Read the image's runtime configuration${user:+ — it runs as User '${user}'}, without downloading it."

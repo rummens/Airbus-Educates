@@ -1,0 +1,18 @@
+#!/bin/bash
+# The pull path from your namespace to the registry works — every other lab depends on it.
+set -uo pipefail
+for _ in $(seq 1 36); do          # ~180s
+  phase=$(oc get pod from-registry -o jsonpath='{.status.phase}' 2>/dev/null)
+  [ "$phase" = "Running" ] && break
+  case "$phase" in
+    Failed) break ;;
+  esac
+  sleep 5
+done
+if [ "$phase" != "Running" ]; then
+  reason=$(oc get pod from-registry -o jsonpath='{.status.containerStatuses[0].state.waiting.reason}' 2>/dev/null)
+  echo "❌ The Pod is '${phase:-missing}'${reason:+ (${reason})}. ImagePullBackOff here means the registry value is wrong or the image is not mirrored — the two failure modes this lab is about." >&2
+  exit 1
+fi
+img=$(oc get pod from-registry -o jsonpath='{.spec.containers[0].image}' 2>/dev/null)
+echo "✅ Running from ${img} — your namespace may pull from that registry."

@@ -1,0 +1,24 @@
+{
+  "workshop": "lab-b03-harbor",
+  "_note": "Registry MECHANICS are exercised for real (skopeo inspect, --config, and a genuine registry-to-registry copy into the cluster's own registry using the session token as credentials); registry POLICY is taught, because a training cluster has no Harbor with a scanner attached. The scan reports are fixtures in the shape Harbor's scanner produces, read with jq — the fields and the gate arithmetic are what transfer, and the lab says so where it matters. skopeo ships in dcs-workshop-base; there is no docker or podman anywhere, by design.",
+  "steps": [
+    {"run": "envsubst < pod-from-registry.yaml | oc apply -f - && oc wait --for=condition=Ready pod/from-registry --timeout=240s"},
+    {"check": "verify-pull-works"},
+    {"run": "skopeo inspect docker://${DCS_REGISTRY}/samples/hello-dcs:1.0 | head -25"},
+    {"check": "verify-inspect-works"},
+    {"run": "skopeo inspect docker://${DCS_REGISTRY}/samples/hello-dcs:1.0 --format '{{ .Digest }}'"},
+    {"check": "verify-digest-readable"},
+    {"run": "skopeo inspect --config docker://${DCS_REGISTRY}/samples/hello-dcs:1.0 | head -20"},
+    {"check": "verify-config-readable"},
+    {"run": "skopeo copy --dest-tls-verify=false --dest-creds \"$(oc whoami):$(oc whoami -t)\" docker://${DCS_REGISTRY}/samples/hello-dcs:1.0 docker://image-registry.openshift-image-registry.svc:5000/${SESSION_NAMESPACE}/mirrored:1.0"},
+    {"check": "verify-image-copied"},
+    {"run": "oc get imagestream mirrored -o jsonpath='{range .status.tags[*]}{.tag}{\"  ->  \"}{.items[0].dockerImageReference}{\"\\n\"}{end}'"},
+    {"check": "verify-mirrored-tag"},
+    {"run": "jq '{artifact, scanner: .scanner.name, summary}' ~/exercises/scan-report.json"},
+    {"check": "verify-clean-summary"},
+    {"run": "jq '{artifact, summary}' ~/exercises/scan-report-flagged.json"},
+    {"check": "verify-flagged-summary"},
+    {"run": "jq -r '.vulnerabilities[] | select(.severity==\"Critical\") | \"\\(.id)  \\(.package) \\(.installedVersion) -> \\(.FixedVersion // \"no fix\")\"' ~/exercises/scan-report-flagged.json"},
+    {"check": "verify-critical-detail"}
+  ]
+}

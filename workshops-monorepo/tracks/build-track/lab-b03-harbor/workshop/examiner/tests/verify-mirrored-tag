@@ -1,0 +1,13 @@
+#!/bin/bash
+# The copy must be tracked as a tag resolving to a digest, like any other image here.
+set -uo pipefail
+for _ in $(seq 1 24); do
+  ref=$(oc get imagestream mirrored -o jsonpath='{.status.tags[0].items[0].dockerImageReference}' 2>/dev/null)
+  [ -n "$ref" ] && break
+  sleep 5
+done
+if [ -z "$ref" ]; then
+  echo "❌ The 'mirrored' ImageStream has no tag yet. The copy writes to the registry; the ImageStream picks it up a moment later — this check waits." >&2
+  exit 1
+fi
+echo "✅ Tracked as ${ref##*/} — a promotion between projects is this same operation, with a process around it."

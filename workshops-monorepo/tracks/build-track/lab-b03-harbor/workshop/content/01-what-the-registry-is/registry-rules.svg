@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 450" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="450" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">Where images come from, where yours go, and what PROD will accept</text>
+
+  <!-- catalogs -->
+  <rect x="24" y="50" width="712" height="86" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="380" y="72" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b4a86">Catalogs — images the platform vouches for</text>
+  <text x="44" y="94" font-size="11" fill="#1b4a86">DCS catalog — platform-provided and maintained.   ·   allowed external — reviewed upstream images, mirrored in.</text>
+  <text x="44" y="112" font-size="11" fill="#1b4a86">proxy-cached — pull-through for permitted sources, so the cluster still never reaches out mid-deploy.</text>
+  <text x="44" y="130" font-size="11" font-weight="bold" fill="#2c6a3a">green catalog — already CLEARED for production. The boring route into PROD, and usually the right one.</text>
+
+  <!-- DEV -->
+  <rect x="24" y="156" width="344" height="132" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="196" y="180" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c6a3a">DEV namespace → its Harbor project</text>
+  <text x="44" y="204" font-size="11" fill="#2c6a3a">✓ takes PUSHES, of anything</text>
+  <text x="44" y="224" font-size="11" fill="#2c6a3a">✓ no CVE limitation</text>
+  <text x="44" y="244" font-size="11" fill="#2c6a3a">this is where a build's output lands</text>
+  <text x="44" y="268" font-size="11" fill="#5a6b7b">iterate, push a broken image, push it again</text>
+
+  <!-- PROD -->
+  <rect x="392" y="156" width="344" height="132" rx="8" fill="#fdeeee" stroke="#c0504d" stroke-width="2"/>
+  <text x="564" y="180" text-anchor="middle" font-size="13" font-weight="bold" fill="#8a2f2c">PROD namespace → its Harbor project</text>
+  <text x="412" y="204" font-size="11" fill="#8a2f2c">✗ takes NO pushes at all</text>
+  <text x="412" y="224" font-size="11" fill="#8a2f2c">✓ pulls only below CVE severity 9</text>
+  <text x="412" y="244" font-size="11" fill="#8a2f2c">no path in that skipped the review</text>
+  <text x="412" y="268" font-size="11" fill="#5a6b7b">unfixable finding? the exception process</text>
+
+  <!-- promotion arrow -->
+  <line x1="368" y1="222" x2="388" y2="222" stroke="#5a6b7b" stroke-width="2" stroke-dasharray="5,4"/>
+  <polygon points="388,222 380,218 380,226" fill="#5a6b7b"/>
+
+  <!-- promotion -->
+  <rect x="24" y="304" width="712" height="66" rx="8" fill="#fdf4e8" stroke="#c08a2d" stroke-width="2"/>
+  <text x="380" y="326" text-anchor="middle" font-size="13" font-weight="bold" fill="#7a5410">Promotion = mirror between projects, same digest, requested through ITSM</text>
+  <text x="44" y="348" font-size="11" fill="#7a5410">Technically it is the skopeo copy you will run in this lab: read there, write here, nothing rebuilt and nothing unpacked.</text>
+  <text x="44" y="364" font-size="11" fill="#7a5410">What makes it a promotion is the process around it — and that the destination refuses every other route in.</text>
+
+  <!-- digest -->
+  <rect x="24" y="386" width="712" height="48" rx="8" fill="#ffffff" stroke="#c5ced6" stroke-width="2"/>
+  <text x="44" y="408" font-size="11" fill="#1b2b3a"><tspan font-weight="bold">A scan verdict belongs to a DIGEST, not a tag.</tspan>  That is why floating tags like :latest are refused — if the tag can move,</text>
+  <text x="44" y="426" font-size="11" fill="#1b2b3a">the thing that was scanned and the thing that runs are not provably the same bytes.</text>
+</svg>

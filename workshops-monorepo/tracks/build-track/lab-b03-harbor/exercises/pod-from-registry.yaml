@@ -1,0 +1,22 @@
+# A Pod running an image straight from the registry, to prove the pull path works from
+# your namespace. On DCS the same manifest names a Harbor project instead.
+# Apply with: envsubst < pod-from-registry.yaml | oc apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: from-registry
+  labels:
+    app: from-registry
+spec:
+  containers:
+  - name: app
+    image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+    ports:
+    - containerPort: 8080
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi

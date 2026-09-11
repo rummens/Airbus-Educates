@@ -1,0 +1,12 @@
+#!/bin/bash
+# A registry-to-registry copy: read there, write here, same digests, no daemon.
+set -uo pipefail
+for _ in $(seq 1 24); do          # ~120s
+  oc get imagestream mirrored >/dev/null 2>&1 && break
+  sleep 5
+done
+if ! oc get imagestream mirrored >/dev/null 2>&1; then
+  echo "❌ No 'mirrored' image in your namespace's registry. If skopeo reported an authentication error, the --dest-creds are the session token; if it reported TLS, --dest-tls-verify=false is needed for the in-cluster registry." >&2
+  exit 1
+fi
+echo "✅ The image was copied into your namespace's registry as 'mirrored'."

@@ -1,0 +1,13 @@
+#!/bin/bash
+# Each Critical finding must be readable as package + installed + fixed version — that
+# triple is what turns a report into a decision.
+set -uo pipefail
+f="$HOME/exercises/scan-report-flagged.json"
+[ -f "$f" ] || f="exercises/scan-report-flagged.json"
+lines=$(jq -r '.vulnerabilities[] | select(.severity=="Critical") | "\(.id) \(.package)"' "$f" 2>/dev/null | grep -c .)
+if [ "${lines:-0}" -lt 1 ] 2>/dev/null; then
+  echo "❌ No Critical vulnerabilities could be listed from the report. Check the jq filter selects .severity==\"Critical\"." >&2
+  exit 1
+fi
+fixable=$(jq -r '[.vulnerabilities[] | select(.severity=="Critical") | select(.FixedVersion != null and .FixedVersion != "")] | length' "$f" 2>/dev/null)
+echo "✅ Listed ${lines} Critical finding(s), ${fixable:-0} of them with a fixed version available — the ones a rebuild on a newer base would clear."

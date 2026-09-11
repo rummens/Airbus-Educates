@@ -1,0 +1,21 @@
+#!/bin/bash
+# The clean report's verdict is four numbers, and none of them is Critical.
+set -uo pipefail
+f="$HOME/exercises/scan-report.json"
+[ -f "$f" ] || f="exercises/scan-report.json"
+if [ ! -f "$f" ]; then
+  echo "❌ Could not find scan-report.json in your exercises. The session content may not have downloaded." >&2
+  exit 1
+fi
+crit=$(jq -r '.summary.severityCount.Critical' "$f" 2>/dev/null)
+high=$(jq -r '.summary.severityCount.High' "$f" 2>/dev/null)
+fix=$(jq -r '.summary.fixable' "$f" 2>/dev/null)
+if [ -z "$crit" ] || [ "$crit" = "null" ]; then
+  echo "❌ Could not read .summary.severityCount from the report. Is jq available, and is the file intact?" >&2
+  exit 1
+fi
+if [ "$crit" != "0" ] || [ "$high" != "0" ]; then
+  echo "❌ The 'clean' report shows Critical=${crit} High=${high}; this fixture is supposed to be the one that passes the gate." >&2
+  exit 1
+fi
+echo "✅ The clean image reports Critical=0 and High=0 (${fix} of its findings fixable) — it would pass the PROD gate."

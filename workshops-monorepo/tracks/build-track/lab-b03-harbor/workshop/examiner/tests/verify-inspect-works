@@ -1,0 +1,14 @@
+#!/bin/bash
+# skopeo reads the registry API directly: metadata without pulling, and without a daemon.
+set -uo pipefail
+out=$(skopeo inspect "docker://${DCS_REGISTRY}/samples/hello-dcs:1.0" 2>/dev/null)
+if [ -z "$out" ]; then
+  echo "❌ skopeo returned nothing for ${DCS_REGISTRY}/samples/hello-dcs:1.0. If this session cannot reach that registry, neither can a deploy — check the value of \$DCS_REGISTRY." >&2
+  exit 1
+fi
+case "$out" in
+  *'"Digest"'*) ;;
+  *) echo "❌ The response has no Digest field. Got: $(printf '%s' "$out" | head -c 160)" >&2; exit 1 ;;
+esac
+layers=$(printf '%s' "$out" | grep -c 'sha256:')
+echo "✅ Read the image's metadata without pulling it (${layers} digest reference(s) in the response)."

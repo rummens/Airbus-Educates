@@ -1,0 +1,118 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b03-harbor
+  labels:
+    academy.dcs/track: build
+    academy.dcs/order: "30"
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/icon: database
+    academy.dcs/details: |
+      **The registry is not a URL in your manifest. It is the thing that decides what may
+      run.**
+
+      You inspect an image without pulling it, copy one between registries with `skopeo`
+      (no Docker daemon involved), and read a real vulnerability report field by field.
+
+      Then the rules that matter on DCS: the catalogs, the Harbor project your namespace
+      may get, and the asymmetry that shapes everything — **DEV takes pushes, PROD takes
+      none and pulls only below the CVE threshold**.
+
+      Ends on the only two ways an image reaches PROD: promotion by mirror, or the green
+      catalog of already-cleared images.
+
+      > **⚠️ Watch out:** no `docker` and no `podman` anywhere in this lab. `skopeo` talks
+      > to registries directly, which is why it is the tool you get.
+spec:
+  title: "Harbor: Projects, Push & Scan"
+  description: Inspect and copy images with skopeo, read a vulnerability report, and learn the DCS registry rules — catalogs, per-namespace projects, DEV pushes, the PROD CVE gate and how promotion actually works.
+  duration: 30m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Build-and-Run"
+  publish:
+    image: "$(image_repository)/lab-b03-harbor-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b03-harbor/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b03-harbor/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b03-harbor/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/build-track/lab-b03-harbor"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b03-harbor-files:$(workshop_version)"
+    {{- end }}
+  session:
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    - name: SESSION_NAMESPACE
+      value: "$(session_namespace)"
+    namespaces:
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    # Copying an image INTO the cluster's own registry is the closest a training cluster
+    # gets to "push to your DEV project", and it needs the image objects — which the
+    # Educates session role does not grant. Same shape as the build lab's entitlement.
+    objects:
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: image-pusher
+        namespace: $(session_namespace)
+      rules:
+      - apiGroups: ["image.openshift.io"]
+        resources: ["imagestreams", "imagestreams/layers", "imagestreamtags",
+                    "imagestreamimages", "imagestreammappings", "imagestreamimports"]
+        verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: image-pusher
+        namespace: $(session_namespace)
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: image-pusher
+      subjects:
+      - kind: ServiceAccount
+        name: $(service_account)
+        namespace: $(workshop_namespace)
+      - apiGroup: rbac.authorization.k8s.io
+        kind: Group
+        name: system:serviceaccounts:$(session_namespace)
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      slides:
+        enabled: true
+      examiner:
+        enabled: true
+      vcluster:
+        enabled: false
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-b03-harbor&session=$(session_namespace)"

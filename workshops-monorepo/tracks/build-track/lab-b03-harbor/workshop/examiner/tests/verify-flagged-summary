@@ -1,0 +1,16 @@
+#!/bin/bash
+# The flagged report must carry Critical findings — that is what the gate refuses.
+set -uo pipefail
+f="$HOME/exercises/scan-report-flagged.json"
+[ -f "$f" ] || f="exercises/scan-report-flagged.json"
+crit=$(jq -r '.summary.severityCount.Critical' "$f" 2>/dev/null)
+if [ -z "$crit" ] || [ "$crit" = "null" ]; then
+  echo "❌ Could not read the flagged report's severity summary from ${f}." >&2
+  exit 1
+fi
+if [ "$crit" -lt 1 ] 2>/dev/null; then
+  echo "❌ The flagged report shows Critical=${crit}. The point of this fixture is an image the PROD gate refuses." >&2
+  exit 1
+fi
+high=$(jq -r '.summary.severityCount.High' "$f" 2>/dev/null)
+echo "✅ The flagged image reports Critical=${crit} and High=${high} — a PROD project pulls only below CVE severity 9, so it is refused there."
