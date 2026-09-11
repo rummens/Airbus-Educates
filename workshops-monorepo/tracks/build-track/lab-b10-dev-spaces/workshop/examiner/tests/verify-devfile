@@ -5,18 +5,18 @@
 devfile=~/exercises/devfile.yaml
 
 if [ ! -f "$devfile" ]; then
-  echo "devfile.yaml not found at $devfile." >&2
+  echo "❌ No devfile at $devfile. The session content may not have downloaded — reload the dashboard." >&2
   exit 1
 fi
 
 if ! grep -q '\${DCS_REGISTRY}' "$devfile"; then
-  echo "devfile.yaml does not reference \${DCS_REGISTRY} — the dev component image must come from Harbor, not a hardcoded registry." >&2
+  echo "❌ The devfile names no \${DCS_REGISTRY}. On an air-gapped platform a workspace image comes from the platform registry like everything else; a hardcoded public registry would simply not resolve." >&2
   exit 1
 fi
 
 if ! grep -q 'commandLine: python3 server.py' "$devfile"; then
-  echo "devfile.yaml is missing the 'run' command that starts hello-dcs (python3 server.py)." >&2
+  echo "❌ The devfile has no 'run' command starting hello-dcs (python3 server.py). Commands are what turn a workspace into something that can build and run the app rather than just edit it." >&2
   exit 1
 fi
 
-echo "OK: devfile.yaml is present, Harbor-parameterized, and defines the hello-dcs run command."
+echo "✅ The devfile is present, takes its image from the platform registry, and defines the command that runs hello-dcs."
