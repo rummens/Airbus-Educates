@@ -300,7 +300,29 @@ def delete_one(ctx, name, sid, throwaway=False, ref=None):
         oc_delete(ctx, "workshops.training.educates.dev", ws_name)
     # Don't delete the namespace — the workshop controller manages its lifecycle.
     # Deleting it causes the next environment creation to fail ("namespace already exists").
+    #
+    # Do WAIT for the session's namespaces to finish terminating, though. A lab that
+    # provisions peer namespaces through session.objects recreates them under the same
+    # names on the next run, and a namespace still in Terminating makes that a 409 —
+    # which fails the whole session-objects step, silently skipping every object after
+    # the clash. (That is how o04 lost its admission policy and looked like a content
+    # bug for two runs.)
+    wait_for_namespaces_gone(ctx, ws_name)
     print(f"deleted {ws_name} (env, session" + (", throwaway workshop)" if throwaway else ")"))
+
+
+def wait_for_namespaces_gone(ctx, ws_name, timeout=180):
+    """Block until no namespace named after this session is left (Terminating included)."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        r = sh(["oc", "--context", ctx, "get", "namespaces", "--no-headers",
+                "-o", "custom-columns=N:.metadata.name"])
+        left = [n for n in r.stdout.split() if n == ws_name or n.startswith(ws_name + "-")]
+        if not left:
+            return True
+        time.sleep(3)
+    print(f"  warning: namespaces still present after {timeout}s: {' '.join(left)}", file=sys.stderr)
+    return False
 
 
 def deploy_one(args, name, subpath):
