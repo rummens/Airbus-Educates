@@ -18,8 +18,10 @@ Both namespaces are ordinary Kubernetes. What separates them is a label, and the
 
 ```
 oc get namespace $DEV_NS $PROD_NS --show-labels
+oc auth can-i list clusterpolicies      # no — platform-owned
 ```
 
+- You meet platform policy through its **decisions**, not by reading it.
 - `route-requires-prod` — a Route in a DEV-type namespace is denied.
 - `prod-requires-resources` — a container in a PROD-type namespace must declare CPU and memory, requests **and** limits.
 - A representative slice of the real posture, enforced through the cluster's real admission path.

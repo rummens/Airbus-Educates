@@ -1,0 +1,16 @@
+#!/bin/bash
+# The platform's admission policy is cluster-scoped and NOT tenant-readable. Asserting
+# that is asserting the ownership boundary the page teaches: you meet policy through its
+# decisions, not by reading it. (The policy's existence is proved by the refusals on the
+# following pages, which name the rule that produced them.)
+set -uo pipefail
+ans=$(oc auth can-i list clusterpolicies 2>/dev/null | tail -1)
+if [ "$ans" = "no" ]; then
+  echo "✅ Cluster-scoped policy is not readable from your namespace ('no') — platform-owned, as it should be."
+  exit 0
+fi
+if oc get clusterpolicy >/dev/null 2>&1; then
+  echo "⚠️ This session CAN list cluster policies, which a tenant normally cannot. The lab still works, but on a real DCS namespace you would meet the policy only through its decisions." >&2
+  exit 1
+fi
+echo "✅ Listing cluster policies is refused from your namespace — platform-owned, as it should be."

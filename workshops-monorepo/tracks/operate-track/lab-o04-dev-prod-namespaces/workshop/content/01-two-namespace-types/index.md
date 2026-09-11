@@ -35,35 +35,36 @@ delay: 3
 
 ## The policy that reads it
 
-The platform runs an **admission policy** that matches on that label. Read it:
+The platform runs an **admission policy** that matches on that label. It is a cluster-scoped
+object — and you cannot read it:
 
 ```terminal:execute
-command: oc get clusterpolicy -o name | head -5
+command: oc auth can-i list clusterpolicies
 ```
-
-```terminal:execute
-command: oc get clusterpolicy dcs-nstype-$(oc project -q) -o jsonpath='{range .spec.rules[*]}{.name}{"  ->  "}{.validate.message}{"\n"}{end}'
-```
-
-Two rules, and between them they are this lab:
-
-- **`route-requires-prod`** — a Route in a DEV-type namespace is refused.
-- **`prod-requires-resources`** — a container in a PROD-type namespace must declare CPU and
-  memory requests **and** limits.
 
 ```examiner:execute-test
-name: verify-policy-present
-title: Verify the namespace-type policy is active for your session
+name: verify-policy-not-readable
+title: Verify the platform's policy is not yours to read
 timeout: 30
 retries: .INF
 delay: 3
 ```
 
+**`no`** — and that is the correct answer. Platform policy is owned by the platform: you
+cannot read it, edit it, or bypass it. What you *can* do is experience it, precisely and
+repeatably, which is what the rest of this lab does.
+
+Two rules are in play here, and between them they are this lab:
+
+- **`route-requires-prod`** — a Route in a DEV-type namespace is refused.
+- **`prod-requires-resources`** — a container in a PROD-type namespace must declare CPU and
+  memory requests **and** limits.
+
 {{< note >}}
 **📌 This is a representative slice, not the whole DCS posture.** Real PROD namespaces carry
 more rules than these two. They are the two that can be demonstrated end to end inside a
-training session, and they are genuine: the rejections you are about to get come from the
-cluster's real admission path.
+training session, and they are genuine: the refusals you are about to get come from the
+cluster's real admission path, and each one names the rule that produced it.
 {{< /note >}}
 
 ## Why the split exists
