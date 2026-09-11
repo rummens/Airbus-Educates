@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 430" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="430" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">The autoscaling loop: metrics in, replica count out</text>
+
+  <!-- Pods -->
+  <rect x="40" y="60" width="180" height="96" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="130" y="84" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b4a86">Your Pods</text>
+  <text x="130" y="104" text-anchor="middle" font-size="11" fill="#5a6b7b">each requests 100m CPU</text>
+  <text x="130" y="122" text-anchor="middle" font-size="11" fill="#5a6b7b">each reports what it uses</text>
+  <text x="130" y="142" text-anchor="middle" font-size="11" fill="#5a6b7b">e.g. 90m used = 90% of request</text>
+
+  <!-- metrics pipeline -->
+  <rect x="290" y="60" width="180" height="96" rx="8" fill="#f3eef7" stroke="#7a5aa0" stroke-width="2"/>
+  <text x="380" y="84" text-anchor="middle" font-size="13" font-weight="bold" fill="#4a2f6a">Metrics pipeline</text>
+  <text x="380" y="104" text-anchor="middle" font-size="11" fill="#4a2f6a">collects CPU and memory</text>
+  <text x="380" y="122" text-anchor="middle" font-size="11" fill="#4a2f6a">per Pod, every few seconds</text>
+  <text x="380" y="142" text-anchor="middle" font-size="11" fill="#4a2f6a">platform-provided</text>
+
+  <line x1="220" y1="108" x2="285" y2="108" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="285,108 277,104 277,112" fill="#5a6b7b"/>
+
+  <!-- HPA controller -->
+  <rect x="540" y="60" width="180" height="96" rx="8" fill="#fdf4e8" stroke="#c08a2d" stroke-width="2"/>
+  <text x="630" y="84" text-anchor="middle" font-size="13" font-weight="bold" fill="#7a5410">HPA controller</text>
+  <text x="630" y="104" text-anchor="middle" font-size="11" fill="#7a5410">average CPU vs target</text>
+  <text x="630" y="122" text-anchor="middle" font-size="11" fill="#7a5410">target = 50% of the REQUEST</text>
+  <text x="630" y="142" text-anchor="middle" font-size="11" fill="#7a5410">bounded by min and max</text>
+
+  <line x1="470" y1="108" x2="535" y2="108" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="535,108 527,104 527,112" fill="#5a6b7b"/>
+
+  <!-- decision -->
+  <rect x="430" y="196" width="290" height="68" rx="8" fill="#fdf4e8" stroke="#c08a2d" stroke-width="2"/>
+  <text x="575" y="220" text-anchor="middle" font-size="12" font-weight="bold" fill="#7a5410">writes a new replica count</text>
+  <text x="575" y="240" text-anchor="middle" font-size="11" fill="#7a5410">above target: add Pods, at once</text>
+  <text x="575" y="256" text-anchor="middle" font-size="11" fill="#7a5410">below target: remove Pods, after 5 min</text>
+
+  <line x1="630" y1="156" x2="630" y2="192" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="630,192 626,184 634,184" fill="#5a6b7b"/>
+
+  <!-- Deployment -->
+  <rect x="40" y="196" width="290" height="68" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="185" y="220" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c6a3a">Deployment</text>
+  <text x="185" y="240" text-anchor="middle" font-size="11" fill="#2c6a3a">spec.replicas is now the HPA's to set</text>
+  <text x="185" y="256" text-anchor="middle" font-size="11" fill="#2c6a3a">creates or removes Pods as usual</text>
+
+  <line x1="430" y1="230" x2="335" y2="230" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="335,230 343,226 343,234" fill="#5a6b7b"/>
+
+  <line x1="185" y1="196" x2="185" y2="160" stroke="#5a6b7b" stroke-width="2" stroke-dasharray="5,4"/>
+  <polygon points="185,160 181,168 189,168" fill="#5a6b7b"/>
+  <text x="196" y="182" font-size="10" fill="#5a6b7b">more Pods change the average, and the loop runs again</text>
+
+  <!-- ceilings -->
+  <rect x="40" y="300" width="680" height="88" rx="8" fill="#fdeeee" stroke="#c0504d" stroke-width="2"/>
+  <text x="380" y="324" text-anchor="middle" font-size="13" font-weight="bold" fill="#8a2f2c">Two ceilings, and the lower one wins</text>
+  <text x="380" y="346" text-anchor="middle" font-size="11" fill="#8a2f2c">maxReplicas — the ceiling you chose in the HPA</text>
+  <text x="380" y="364" text-anchor="middle" font-size="11" fill="#8a2f2c">the namespace budget — the ceiling you were given; Pods past it are refused at admission</text>
+  <text x="380" y="382" text-anchor="middle" font-size="11" fill="#8a2f2c">No CPU request at all? No denominator, no utilisation, no scaling.</text>
+</svg>

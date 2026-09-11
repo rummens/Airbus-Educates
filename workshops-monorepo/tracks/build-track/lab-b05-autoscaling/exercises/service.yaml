@@ -1,0 +1,13 @@
+# A stable address to drive load at, and the thing new replicas join as they appear.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  selector:
+    app: hello-dcs
+  ports:
+  - port: 8080
+    targetPort: 8080

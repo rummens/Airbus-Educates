@@ -1,0 +1,14 @@
+#!/bin/bash
+# The page reads .spec.behavior to show that an empty value means "defaults apply".
+# Assert the field is readable and that the HPA object is intact either way.
+set -uo pipefail
+if ! oc get hpa hello-dcs >/dev/null 2>&1; then
+  echo "❌ No HPA named 'hello-dcs' to read a behavior field from. Re-apply hpa.yaml." >&2
+  exit 1
+fi
+b=$(oc get hpa hello-dcs -o jsonpath='{.spec.behavior}' 2>/dev/null)
+if [ -z "$b" ]; then
+  echo "✅ The HPA sets no behavior block, so the defaults apply: no delay scaling out, 300s of stabilisation scaling in."
+  exit 0
+fi
+echo "✅ The HPA carries an explicit behavior block: ${b}"

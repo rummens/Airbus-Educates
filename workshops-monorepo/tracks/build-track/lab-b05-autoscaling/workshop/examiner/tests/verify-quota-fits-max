@@ -1,0 +1,24 @@
+#!/bin/bash
+# The page's arithmetic, asserted: a FULL scale-out to maxReplicas must still fit the
+# namespace's CPU limit budget, so the HPA can never be stalled by quota here.
+set -uo pipefail
+max=$(oc get hpa hello-dcs -o jsonpath='{.spec.maxReplicas}' 2>/dev/null)
+lim=$(oc get deployment hello-dcs -o jsonpath='{.spec.template.spec.containers[0].resources.limits.cpu}' 2>/dev/null)
+hard=$(oc get resourcequota -o jsonpath='{.items[0].status.hard.limits\.cpu}' 2>/dev/null)
+if [ -z "$max" ] || [ -z "$lim" ] || [ -z "$hard" ]; then
+  echo "❌ Cannot do the arithmetic: maxReplicas='${max:-<none>}' podLimit='${lim:-<none>}' quotaHard='${hard:-<none>}'. A 'medium' session should have a CPU limit quota, and deployment.yaml sets a CPU limit." >&2
+  exit 1
+fi
+to_m() {                        # millicores, from either '200m' or '2'
+  case "$1" in
+    *m) echo "${1%m}" ;;
+    *)  echo $(( ${1:-0} * 1000 )) ;;
+  esac
+}
+need=$(( $(to_m "$lim") * max ))
+have=$(to_m "$hard")
+if [ "$need" -gt "$have" ] 2>/dev/null; then
+  echo "❌ A full scale-out needs ${need}m CPU (${max} x ${lim}) but the namespace ceiling is ${have}m. The Pods past the budget would be refused at admission and the HPA would report ScalingLimited — lower maxReplicas or the per-Pod limit." >&2
+  exit 1
+fi
+echo "✅ A full scale-out needs ${need}m CPU (${max} x ${lim}) against a ${have}m ceiling — the budget can pay for every replica the HPA may ask for."

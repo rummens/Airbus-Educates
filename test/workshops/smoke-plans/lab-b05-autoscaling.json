@@ -1,0 +1,23 @@
+{
+  "workshop": "lab-b05-autoscaling",
+  "_note": "Two checks need the cluster's Metrics API (Pod metrics). CRC ships with cluster monitoring DISABLED, so `oc adm top` and every HPA utilisation figure read <unknown> there and these two can never pass — they are excluded with a reason rather than silently skipped. On a cluster with user-workload monitoring (real DCS) remove the exclusions and they should pass. imagePullPolicy=Always forces a re-pull of the mutable samples/hello-dcs:1.0 tag.",
+  "exclude": [
+    {"check": "verify-hpa-has-metrics", "reason": "Needs the cluster Metrics API to serve Pod metrics; CRC runs with cluster monitoring disabled, so the HPA's current utilisation is permanently <unknown>. Passes on a cluster with user-workload monitoring enabled."},
+    {"check": "verify-hpa-scaled-up", "reason": "A scale-out decision requires the utilisation figure from the Metrics API; with no metrics the HPA never leaves minReplicas regardless of load. Passes where verify-hpa-has-metrics passes."},
+    {"check": "verify-hpa-scale-event", "reason": "A SuccessfulRescale event only exists if the HPA actually rescaled, which needs the Metrics API. Passes where verify-hpa-has-metrics passes."},
+    {"check": "verify-hpa-still-reading", "reason": "Asserts the HPA still reports a current CPU figure after the load stops — impossible without the Metrics API. Passes where verify-hpa-has-metrics passes."}
+  ],
+  "steps": [
+    {"run": "envsubst < deployment.yaml | oc apply -f - && oc apply -f service.yaml && oc patch deployment/hello-dcs --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/imagePullPolicy\",\"value\":\"Always\"}]' && oc rollout status deploy/hello-dcs --timeout=180s"},
+    {"check": "verify-app-with-requests"},
+    {"run": "oc apply -f hpa.yaml"},
+    {"check": "verify-hpa-created"},
+    {"run": "oc get hpa hello-dcs"},
+    {"run": "end=$(( $(date +%s) + 60 )); for i in $(seq 1 8); do ( while [ \"$(date +%s)\" -lt \"$end\" ]; do curl -s -o /dev/null \"http://hello-dcs.$(oc project -q).svc:8080\"; done ) & done; wait; echo load finished"},
+    {"run": "oc describe hpa hello-dcs | tail -20"},
+    {"run": "oc get hpa hello-dcs -o jsonpath='{.spec.behavior}{\"\\n\"}'"},
+    {"check": "verify-hpa-behavior-read"},
+    {"run": "oc describe quota"},
+    {"check": "verify-quota-fits-max"}
+  ]
+}

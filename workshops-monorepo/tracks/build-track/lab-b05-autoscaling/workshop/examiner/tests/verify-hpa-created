@@ -1,0 +1,21 @@
+#!/bin/bash
+# The HPA exists, owns the right Deployment, and carries the range + CPU target the
+# manifest declares.
+set -uo pipefail
+if ! oc get hpa hello-dcs >/dev/null 2>&1; then
+  echo "❌ No HorizontalPodAutoscaler named 'hello-dcs'. Did the 'oc apply -f hpa.yaml' step run?" >&2
+  exit 1
+fi
+target=$(oc get hpa hello-dcs -o jsonpath='{.spec.scaleTargetRef.kind}/{.spec.scaleTargetRef.name}' 2>/dev/null)
+if [ "$target" != "Deployment/hello-dcs" ]; then
+  echo "❌ The HPA targets '$target', expected 'Deployment/hello-dcs'. An HPA pointed at nothing scales nothing." >&2
+  exit 1
+fi
+min=$(oc get hpa hello-dcs -o jsonpath='{.spec.minReplicas}' 2>/dev/null)
+max=$(oc get hpa hello-dcs -o jsonpath='{.spec.maxReplicas}' 2>/dev/null)
+util=$(oc get hpa hello-dcs -o jsonpath='{.spec.metrics[0].resource.target.averageUtilization}' 2>/dev/null)
+if [ -z "$max" ] || [ -z "$util" ]; then
+  echo "❌ The HPA has no maxReplicas (${max:-<none>}) or no CPU utilisation target (${util:-<none>}) — expected 6 and 50 from hpa.yaml." >&2
+  exit 1
+fi
+echo "✅ The HPA owns $target, may scale ${min:-1} to ${max}, and targets ${util}% CPU of request."

@@ -1,0 +1,27 @@
+# The autoscaler. autoscaling/v2 is the current API: `metrics` is a list, so CPU is
+# one entry among several possible ones (memory, or a custom metric).
+#
+# averageUtilization: 50 means "hold average CPU at 50% of each Pod's REQUEST".
+# With requests.cpu=100m, that target is 50m per Pod — the HPA adds replicas when the
+# average goes above it and removes them when it stays below.
+#
+# maxReplicas is a deliberate ceiling: 6 replicas x 200m CPU limit = 1.2 CPU, inside
+# the namespace's 2 CPU limit budget, so a full scale-out cannot be refused by quota.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hello-dcs
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hello-dcs
+  minReplicas: 1
+  maxReplicas: 6
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50

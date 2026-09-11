@@ -1,0 +1,91 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b05-autoscaling
+  labels:
+    academy.dcs/track: build
+    academy.dcs/order: "50"
+    # No Route/Ingress created here (in-cluster only) → dev namespace.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/icon: trending-up
+    academy.dcs/details: |
+      **Setting the replica count by hand only works while you are watching.**
+
+      A **HorizontalPodAutoscaler** moves that number for you: it reads your Pods' CPU
+      use, compares it with the `requests` you set, and adds or removes replicas to hold
+      a target utilisation.
+
+      You create one, watch it read live metrics, put the app under load from your own
+      terminal and see it scale out — then look at why it scales *in* so much more
+      slowly, and what happens when the namespace budget, not the load, is the ceiling.
+
+      Closes with **VPA**, the other autoscaler: the one that tunes `requests` instead of
+      replica count.
+
+      > **⚠️ Watch out:** an HPA on CPU cannot work at all without CPU `requests`. That is
+      > the first thing this lab checks.
+spec:
+  title: "Autoscaling"
+  description: Let a HorizontalPodAutoscaler own the replica count — read live CPU metrics against your requests, drive the app under load and watch it scale out, then understand scale-in, the quota ceiling and where VPA fits.
+  duration: 20m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Build-and-Run"
+  publish:
+    image: "$(image_repository)/lab-b05-autoscaling-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b05-autoscaling/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b05-autoscaling/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b05-autoscaling/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/build-track/lab-b05-autoscaling"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b05-autoscaling-files:$(workshop_version)"
+    {{- end }}
+  session:
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      # medium: 2 CPU / 2Gi on the limit side. The HPA's maxReplicas (6) is chosen so a
+      # full scale-out still fits — the lab reasons about that ceiling explicitly.
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      slides:
+        enabled: true
+      examiner:
+        enabled: true
+      # The HPA reads the session namespace's own Pod metrics; a vcluster would put the
+      # workload somewhere the cluster's metrics pipeline does not serve.
+      vcluster:
+        enabled: false
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-b05-autoscaling&session=$(session_namespace)"

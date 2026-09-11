@@ -1,0 +1,10 @@
+#!/bin/bash
+# The scale decision must be on the record, with the metric that caused it — the
+# event trail is what you read when an HPA surprises you.
+set -uo pipefail
+ev=$(oc describe hpa hello-dcs 2>/dev/null | grep -c "SuccessfulRescale")
+if [ "${ev:-0}" -lt 1 ] 2>/dev/null; then
+  echo "❌ No SuccessfulRescale event on the HPA yet — it has not changed the replica count. Has the load step run long enough for a scale-out? This check keeps retrying." >&2
+  exit 1
+fi
+echo "✅ The HPA recorded ${ev} rescale event(s), each naming the metric that triggered it."
