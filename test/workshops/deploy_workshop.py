@@ -32,7 +32,24 @@ def _repo_root():
     return pathlib.Path(__file__).resolve().parents[2]   # test/workshops/x.py -> repo root
 
 REPO_ROOT = _repo_root()
-DEFAULT_BASE = "tracks/core-track"
+
+
+def _tracks_root():
+    """Repo-relative path of the directory holding the track folders.
+
+    The monorepo is mirrored to GitLab as its own repo (tracks/ at the root) but lives
+    in this repo under workshops-monorepo/. Both layouts have to resolve, or the tools
+    silently find no workshops at all — which is exactly how coverage_check ran as a
+    no-op for months.
+    """
+    for rel in ("tracks", "workshops-monorepo/tracks"):
+        if (REPO_ROOT / rel).is_dir():
+            return rel
+    return "tracks"
+
+
+TRACKS_ROOT = _tracks_root()
+DEFAULT_BASE = f"{TRACKS_ROOT}/core-track"
 
 
 def _default_context():
@@ -195,7 +212,7 @@ def resolve_targets(name, base):
 
 def all_workshop_paths():
     """Every workshop in the monorepo, across all tracks → {name: repo_relative_subpath}."""
-    root = REPO_ROOT / "tracks"
+    root = REPO_ROOT / TRACKS_ROOT
     out = {}
     if root.is_dir():
         for track in sorted(root.iterdir()):
