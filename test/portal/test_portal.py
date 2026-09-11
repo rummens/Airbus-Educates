@@ -471,6 +471,24 @@ def test_track_trophy_ignores_optional_labs(db):
     assert earned["Academy Master"] is False                 # that one does count every lab
 
 
+def test_open_tracks_are_remembered_across_visits(client):
+    """Opening a lab and coming back used to collapse every track, so a learner working
+    through one track reopened it after every lab. The page remembers which were open."""
+    body = client.get("/").data.decode()
+    assert "dcs.academy.openTracks" in body                  # the stored key
+    assert "localStorage.setItem(OPEN_KEY" in body           # saved on toggle
+    assert "localStorage.getItem(OPEN_KEY" in body           # restored on load
+    # Restoring must not fight an explicit deep link, and must not run before there is
+    # something to restore into.
+    assert "if (!want) {" in body
+    # Every rendered track <details> carries the id the restore matches on. (Tiles carry
+    # a data-track of their own, so count the details tags rather than the attribute.)
+    _, catalog = body.split('id="catalog"', 1)
+    details = re.findall(r"<details class=\"track[^>]*>", catalog, re.S)
+    assert details, "no tracks rendered"
+    assert all("data-track=" in d for d in details)
+
+
 def test_banner_renders_on_landing(client):
     feedback.set_setting("banner", "Scheduled maintenance tonight")
     assert b"Scheduled maintenance tonight" in client.get("/").data

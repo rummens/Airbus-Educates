@@ -16,6 +16,23 @@ global:
     host: ""
     pullSecret: ""
 
+# A shortcut to the Academy from the OpenShift console's masthead. ConsoleLink is a
+# cluster-scoped CR the console reads directly, so this needs no plugin and no code.
+#
+#   location  ApplicationMenu (the grid "shortcuts" menu, grouped by `section`),
+#             HelpMenu, UserMenu, or NamespaceDashboard.
+#   href      defaults to this release's own Route.
+#   imageURL  loaded by the learner's BROWSER; an unreachable one just means no icon.
+consoleLink:
+  enabled: true
+  # Defaults to <chart>-<namespace> so two installs on one cluster cannot collide.
+  name: ""
+  text: "DCS Academy"
+  href: ""
+  location: ApplicationMenu
+  section: "Digital Container Service"
+  imageURL: ""
+
 image:
   repository: ghcr.io/rummens/dcs-academy-portal
   tag: dev

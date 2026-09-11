@@ -1,0 +1,31 @@
+{{- if and .Values.enabled .Values.consoleLink.enabled }}
+# A shortcut to the Academy from the OpenShift web console.
+#
+# ConsoleLink is a cluster-scoped CR the console reads directly — no plugin, no
+# sidecar. With location: ApplicationMenu it appears under the grid icon in the
+# masthead (the "shortcuts" menu), grouped under `section`, so a learner already in
+# the console can reach the labs without being told a URL.
+#
+# Cluster-scoped, so the name carries the release to avoid colliding with another
+# install of this chart on the same cluster.
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: {{ .Values.consoleLink.name | default (printf "%s-%s" .Chart.Name .Release.Namespace) }}
+  labels:
+    {{- include "portal.labels" . | nindent 4 }}
+spec:
+  text: {{ .Values.consoleLink.text | quote }}
+  href: {{ .Values.consoleLink.href | default (printf "https://%s/" (include "portal.authHostname" .)) | quote }}
+  location: {{ .Values.consoleLink.location }}
+  {{- if eq .Values.consoleLink.location "ApplicationMenu" }}
+  applicationMenu:
+    section: {{ .Values.consoleLink.section | quote }}
+    {{- with .Values.consoleLink.imageURL }}
+    # The console loads this from the BROWSER, so it must be reachable by the learner
+    # (or a data: URI). An unreachable URL renders the link without an icon rather
+    # than failing, so this is safe to leave pointing at the portal's own logo.
+    imageURL: {{ . | quote }}
+    {{- end }}
+  {{- end }}
+{{- end }}

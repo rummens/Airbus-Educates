@@ -156,6 +156,30 @@
     });
     if (hit) hit.scrollIntoView({behavior:'smooth', block:'start'});
   }
+
+  // Remember which tracks were open. Opening a lab's page and coming back used to
+  // collapse everything, so a learner working through one track had to reopen it (and
+  // re-close the others) after every single lab.
+  //
+  // A ?track= deep link still wins: it is an explicit instruction about what to show.
+  // Storage is per-browser and best-effort — a private window or blocked site data just
+  // means the server-rendered default (first track open) stands.
+  const OPEN_KEY = 'dcs.academy.openTracks';
+  const saveOpen = () => {
+    try {
+      const open = Array.from(tracks).filter(tr => tr.open).map(tr => tr.dataset.track);
+      localStorage.setItem(OPEN_KEY, JSON.stringify(open));
+    } catch (e) { /* storage unavailable: the default stands */ }
+  };
+  if (!want) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(OPEN_KEY) || 'null');
+      // Only restore a real previous state; no entry at all leaves the default alone.
+      if (Array.isArray(saved)) tracks.forEach(tr => { tr.open = saved.includes(tr.dataset.track); });
+    } catch (e) { /* unreadable entry: the default stands */ }
+  }
+  // Attached AFTER restoring, so restoring does not immediately rewrite what it read.
+  tracks.forEach(tr => tr.addEventListener('toggle', saveOpen));
 })();
 </script>
 {% endblock %}
