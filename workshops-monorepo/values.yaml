@@ -187,3 +187,11 @@ envGuard:
   # Educates build reports a different ready phase (a functioning env that already backs
   # a live session is treated as ready regardless, so this rarely needs changing).
   readyPhases: "Running"
+
+# Apple-Silicon CRC cannot run OpenSSL's aarch64 capability probe under
+# Virtualization.framework (SIGILL, exit code 132) — it kills any Python container
+# that opens a TLS connection, i.e. the env-guard hooks and the catalog rescan.
+# "0" skips the probe (software crypto). Empty = omit the env var. CRC-only; set in
+# argocd/envs/platform-crc.yaml, which this app already reads.
+openssl:
+  armcap: ""

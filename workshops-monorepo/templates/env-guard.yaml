@@ -95,6 +95,11 @@ spec:
             - { name: REAPER_DRY_RUN,       value: {{ .Values.envGuard.dryRun | quote }} }
             - { name: REAPER_DEBUG,         value: {{ .Values.envGuard.debug | quote }} }
             - { name: REAPER_GRACE_SECONDS, value: {{ .Values.envGuard.graceSeconds | quote }} }
+            {{- if (.Values.openssl.armcap | toString) }}
+            # Same OpenSSL aarch64 cap-probe skip as the portal Deployment — this container runs
+            # the same Python (kubernetes client → TLS), so it SIGILLs on Apple-Silicon CRC too.
+            - { name: OPENSSL_armcap, value: {{ .Values.openssl.armcap | quote }} }
+            {{- end }}
           resources:
             requests: { cpu: 10m, memory: 64Mi }
             limits:   { cpu: 200m, memory: 192Mi }
@@ -144,6 +149,11 @@ spec:
             - { name: VALIDATE_MODE,            value: {{ .Values.envGuard.mode | quote }} }
             - { name: VALIDATE_SETTLE_SECONDS,  value: {{ .Values.envGuard.settleSeconds | quote }} }
             - { name: VALIDATE_READY_PHASES,    value: {{ .Values.envGuard.readyPhases | quote }} }
+            {{- if (.Values.openssl.armcap | toString) }}
+            # Same OpenSSL aarch64 cap-probe skip as the portal Deployment — this container runs
+            # the same Python (kubernetes client → TLS), so it SIGILLs on Apple-Silicon CRC too.
+            - { name: OPENSSL_armcap, value: {{ .Values.openssl.armcap | quote }} }
+            {{- end }}
           resources:
             requests: { cpu: 10m, memory: 64Mi }
             limits:   { cpu: 200m, memory: 192Mi }

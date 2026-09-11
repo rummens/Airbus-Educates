@@ -88,6 +88,11 @@ spec:
             - name: CA_BUNDLE
               value: /etc/pki/rescan-ca/ca-bundle.crt
             {{- end }}
+            {{- if (.Values.openssl.armcap | toString) }}
+            # Same OpenSSL aarch64 cap-probe skip as the portal Deployment — this
+            # container talks TLS from Python, so it SIGILLs on Apple-Silicon CRC too.
+            - { name: OPENSSL_armcap, value: {{ .Values.openssl.armcap | quote }} }
+            {{- end }}
           {{- if .Values.catalogRescan.trustedCA.enabled }}
           volumeMounts:
             - name: trusted-ca
