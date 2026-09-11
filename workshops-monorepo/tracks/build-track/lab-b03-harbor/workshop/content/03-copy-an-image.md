@@ -20,7 +20,7 @@ credential:
 ```terminal:execute
 command: |-
   skopeo copy --dest-tls-verify=false \
-    --dest-creds "$(oc whoami):$(oc whoami -t)" \
+    --dest-creds "unused:$(oc whoami -t)" \
     docker://${DCS_REGISTRY}/samples/hello-dcs:1.0 \
     docker://image-registry.openshift-image-registry.svc:5000/${SESSION_NAMESPACE}/mirrored:1.0
 ```
@@ -40,10 +40,16 @@ What that command actually did:
 3. Preserved the **digest** of each layer — nothing was rebuilt, and nothing was unpacked.
 
 {{< note >}}
-**📌 `--dest-creds "$(oc whoami):$(oc whoami -t)"`.** A registry wants a username and password;
-your OpenShift token works as the password. On {{< param product_short >}} this is where a
-Harbor **robot account** goes instead — a credential issued to a system, not a person, scoped
-to one project.
+**📌 `--dest-creds "unused:$(oc whoami -t)"`.** A registry wants a username and a password, and
+the cluster's registry only checks the **token** — the username is ignored, so `unused` is as
+good as anything.
+
+Do not be tempted by `$(oc whoami)` there: for a ServiceAccount that expands to
+`system:serviceaccount:<ns>:<name>`, and those colons break `user:password` parsing with an
+unhelpful "authentication required".
+
+On {{< param product_short >}} this is where a Harbor **robot account** goes instead — a
+credential issued to a system, not a person, scoped to one project.
 {{< /note >}}
 
 ## See it arrive

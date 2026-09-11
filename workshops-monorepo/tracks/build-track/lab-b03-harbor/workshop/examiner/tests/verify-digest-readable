@@ -1,7 +1,7 @@
 #!/bin/bash
 # The digest is the image's real identity — readable on its own.
 set -uo pipefail
-d=$(skopeo inspect "docker://${DCS_REGISTRY}/samples/hello-dcs:1.0" --format '{{ "{{" }} .Digest {{ "}}" }}' 2>/dev/null | tr -d ' \r')
+d=$(skopeo inspect "docker://${DCS_REGISTRY}/samples/hello-dcs:1.0" --format '{{.Digest}}' 2>/dev/null | tr -d ' \r')
 case "$d" in
   sha256:*) echo "✅ The tag :1.0 currently resolves to ${d} — that digest is what a scan verdict attaches to." ; exit 0 ;;
 esac

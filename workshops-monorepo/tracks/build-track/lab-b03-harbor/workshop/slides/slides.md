@@ -50,13 +50,13 @@ One command moves an image between registries. This is the operation behind ever
 
 ```
 skopeo copy --dest-tls-verify=false \
-  --dest-creds "$(oc whoami):$(oc whoami -t)" \
+  --dest-creds "unused:$(oc whoami -t)" \
   docker://$DCS_REGISTRY/samples/hello-dcs:1.0 \
   docker://image-registry.openshift-image-registry.svc:5000/$SESSION_NAMESPACE/mirrored:1.0
 ```
 
 - Read there, write here. Layer digests preserved; nothing rebuilt, nothing unpacked.
-- Credentials: your token here — a Harbor **robot account** on DCS, scoped to one project.
+- Credentials: the **token** only — the username is ignored, and `$(oc whoami)` breaks it (colons) — a Harbor **robot account** on DCS, scoped to one project.
 - A promotion is this, plus a process, plus a destination that refuses every other route.
 
 ---
