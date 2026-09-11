@@ -20,13 +20,35 @@ The old Developer and Security tracks were moved to `workshops-monorepo/_superse
 
 ## What needs you
 
-1. **Rebuild and push the portal image.** Two learner-visible changes are in the image and
+1. **`git push`.** Commit `6f1d457` (OpenSSL ARM cap-probe skipped in every portal-image
+   Job) is committed but **not pushed** — the push is the deploy trigger. Until it lands,
+   the ArgoCD app `dcs-academy-tracks-and-workshops` stays OutOfSync and the new tracks'
+   Workshop/ConsoleLab CRs are not on the cluster. Details below under *The sync blocker*.
+2. **Rebuild and push the portal image.** Two learner-visible changes are in the image and
    not yet on the cluster: the **Optional** badge (and its numbering/trophy behaviour), and
    the catalog remembering which tracks were open. `images/build.sh dcs-academy-portal`.
-2. **The ConsoleLink** ships with the next ArgoCD sync — nothing to do, just worth knowing it
+3. **The ConsoleLink** ships with the next ArgoCD sync — nothing to do, just worth knowing it
    will appear in the console masthead.
-3. **Durations** are authored estimates, not observed medians. Worth tuning after the first
+4. **Durations** are authored estimates, not observed medians. Worth tuning after the first
    real cohort.
+
+## The sync blocker (diagnosed and fixed, awaiting a push)
+
+Symptom: both new tracks were complete and green in git, but `oc get workshops` showed no
+`lab-b02`, `lab-b03`, `lab-b10` and none of the five `tour-*` CRs, and the Argo app sat
+`OutOfSync` retrying.
+
+Cause: the PostSync hook Job `dcs-academy-workshops-env-reconcile` died with **exit code
+132 (SIGILL)**. That is the known Apple-Silicon CRC failure — OpenSSL's aarch64
+capability probe crashes under Virtualization.framework. The portal *Deployment* has had
+`OPENSSL_armcap=0` for a long time; the three other containers running the same image did
+not: both env-guard hooks, the catalog-rescan Job and the session-reaper CronJob (whose
+every run had also been failing, unnoticed, for the same reason).
+
+Fix: the env var is now emitted in all of them, gated on `.Values.openssl.armcap`, which
+`argocd/envs/platform-crc.yaml` already sets to `"0"` and every other cluster leaves empty
+— a no-op off CRC. Verified by running `python3 -m portal.reap` in a one-off pod with the
+env set: exit 0, full reconcile output.
 
 ## Things learned the hard way (do not re-derive)
 
