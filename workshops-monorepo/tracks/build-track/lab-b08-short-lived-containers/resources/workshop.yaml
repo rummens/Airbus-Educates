@@ -1,0 +1,86 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b08-short-lived-containers
+  labels:
+    academy.dcs/track: build
+    academy.dcs/order: "80"
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/icon: list-checks
+    academy.dcs/details: |
+      **Not every container should run forever.**
+
+      A migration has to finish. A report runs nightly. A setup step must complete before
+      the app starts. A log shipper lives beside it.
+
+      This lab covers the four shapes a Deployment cannot express: **Jobs** that run to
+      completion, **CronJobs** that schedule them, **init containers** that must finish
+      first, and **sidecars** — which on modern Kubernetes are the same API as an init
+      container plus one line.
+
+      You also make a Job fail on purpose, to see it give up after `backoffLimit`
+      attempts instead of crash-looping forever the way a Deployment would.
+
+      > **💡 Tip:** the difference between an init container and a sidecar is
+      > `restartPolicy: Always`. That is genuinely the whole difference.
+spec:
+  title: "Short-Lived & Helper Containers"
+  description: Jobs that run to completion, CronJobs that schedule them, and the two helper containers that share a Pod with your app — init containers that must finish first, and sidecars that run alongside.
+  duration: 25m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Build-and-Run"
+  publish:
+    image: "$(image_repository)/lab-b08-short-lived-containers-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b08-short-lived-containers/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b08-short-lived-containers/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b08-short-lived-containers/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/build-track/lab-b08-short-lived-containers"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b08-short-lived-containers-files:$(workshop_version)"
+    {{- end }}
+  session:
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      slides:
+        enabled: true
+      examiner:
+        enabled: true
+      vcluster:
+        enabled: false
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-b08-short-lived-containers&session=$(session_namespace)"

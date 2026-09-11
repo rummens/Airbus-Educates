@@ -1,0 +1,16 @@
+#!/bin/bash
+# The failing Job must reach a VERDICT — Failed after its retries — rather than
+# restarting forever the way a Deployment would.
+set -uo pipefail
+for _ in $(seq 1 36); do          # ~180s: two attempts plus the backoff delay between them
+  cond=$(oc get job db-migrate-broken -o jsonpath='{range .status.conditions[?(@.type=="Failed")]}{.status}{end}' 2>/dev/null)
+  if [ "$cond" = "True" ]; then
+    f=$(oc get job db-migrate-broken -o jsonpath='{.status.failed}' 2>/dev/null)
+    echo "✅ Job db-migrate-broken gave up after ${f:-?} failed attempt(s) and is marked Failed."
+    exit 0
+  fi
+  sleep 5
+done
+f=$(oc get job db-migrate-broken -o jsonpath='{.status.failed}' 2>/dev/null)
+echo "❌ Job db-migrate-broken is not marked Failed yet (${f:-0} failed attempt(s) so far). backoffLimit: 1 means two attempts with a backoff delay between them, so this takes a moment. Check: oc describe job db-migrate-broken" >&2
+exit 1

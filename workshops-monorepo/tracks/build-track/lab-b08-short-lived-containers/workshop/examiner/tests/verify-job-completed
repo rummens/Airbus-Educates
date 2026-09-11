@@ -1,0 +1,19 @@
+#!/bin/bash
+# A Job is Complete when the required number of Pods exited 0. Waits internally: the
+# work takes a few seconds and CI runs a grader once.
+set -uo pipefail
+for _ in $(seq 1 24); do          # ~120s
+  s=$(oc get job db-migrate -o jsonpath='{.status.succeeded}' 2>/dev/null)
+  if [ "${s:-0}" -ge 1 ] 2>/dev/null; then
+    echo "✅ Job db-migrate completed: ${s} successful Pod(s)."
+    exit 0
+  fi
+  f=$(oc get job db-migrate -o jsonpath='{.status.failed}' 2>/dev/null)
+  if [ "${f:-0}" -gt 0 ] 2>/dev/null; then
+    echo "❌ Job db-migrate has ${f} failed attempt(s) and no success yet. Read why: oc logs job/db-migrate" >&2
+    exit 1
+  fi
+  sleep 5
+done
+echo "❌ Job db-migrate has not completed after 2 minutes. Did 'envsubst < job-migrate.yaml | oc apply -f -' run? Check: oc describe job db-migrate" >&2
+exit 1

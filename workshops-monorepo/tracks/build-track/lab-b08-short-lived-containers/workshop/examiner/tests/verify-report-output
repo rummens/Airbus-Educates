@@ -1,0 +1,12 @@
+#!/bin/bash
+# The output must be the CronJob's template running, not something else — this is what
+# makes --from=cronjob a real test of the schedule's payload.
+set -uo pipefail
+out=$(oc logs job/report-now 2>/dev/null)
+case "$out" in
+  *"rows processed"*)
+    echo "✅ The run produced the CronJob template's report output."
+    exit 0 ;;
+esac
+echo "❌ Expected the report output ('rows processed') from the CronJob's template, got: $(echo "${out:-<empty>}" | tr '\n' ' ' | cut -c1-160)" >&2
+exit 1

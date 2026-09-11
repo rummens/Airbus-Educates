@@ -1,0 +1,42 @@
+# A CronJob is a Job factory on a schedule. The schedule here is 03:00 daily, chosen so
+# it will NOT fire during the lab — you trigger a run by hand instead, which is also how
+# you would test a new CronJob in real life.
+#
+#   concurrencyPolicy: Forbid — if the previous run is still going when the next is due,
+#                        skip it rather than run two at once. Allow (the default) and
+#                        Replace are the alternatives.
+#   successfulJobsHistoryLimit / failedJobsHistoryLimit — how many finished Jobs to keep
+#                        for inspection. The default keeps 3 and 1.
+#   suspend            — pause the schedule without deleting anything.
+# Apply with: envsubst < cronjob-report.yaml | oc apply -f -
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nightly-report
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: report
+            image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+            command:
+            - sh
+            - -c
+            - |
+              echo "report for $(date +%Y-%m-%d)"
+              echo "rows processed: 42"
+            resources:
+              requests:
+                cpu: 50m
+                memory: 64Mi
+              limits:
+                cpu: 100m
+                memory: 128Mi

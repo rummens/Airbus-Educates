@@ -1,0 +1,39 @@
+# A Job: a Pod that is SUPPOSED to end. Kubernetes considers it successful when the
+# required number of Pods have exited 0, and it will not restart a finished Pod the way
+# a Deployment would.
+#
+#   restartPolicy: Never  — a failed attempt becomes a new Pod, so each attempt's logs
+#                           survive for you to read. (OnFailure restarts the container
+#                           in place instead, which overwrites them.)
+#   backoffLimit: 2       — how many retries before the Job is marked Failed.
+#   ttlSecondsAfterFinished — the finished Job deletes itself after this long, so
+#                           completed Jobs do not pile up in the namespace.
+# Apply with: envsubst < job-migrate.yaml | oc apply -f -
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate
+spec:
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: migrate
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        command:
+        - sh
+        - -c
+        - |
+          echo "migration starting"
+          sleep 5
+          echo "applied 3 changes"
+          echo "migration complete"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi

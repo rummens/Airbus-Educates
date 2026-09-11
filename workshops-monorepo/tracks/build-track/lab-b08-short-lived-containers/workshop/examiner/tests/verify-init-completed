@@ -1,0 +1,27 @@
+#!/bin/bash
+# The init container must have RUN AND FINISHED: terminated with exit 0, while the app
+# container is running. That ordering is the guarantee an init container exists for.
+set -uo pipefail
+pod=$(oc get pod -l app=hello-dcs -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+if [ -z "$pod" ]; then
+  echo "❌ No Pod for hello-dcs. Apply deployment-with-helpers.yaml first." >&2
+  exit 1
+fi
+code=$(oc get pod "$pod" -o jsonpath='{range .status.initContainerStatuses[?(@.name=="setup")]}{.state.terminated.exitCode}{end}' 2>/dev/null)
+if [ -z "$code" ]; then
+  state=$(oc get pod "$pod" -o jsonpath='{range .status.initContainerStatuses[?(@.name=="setup")]}{.state}{end}' 2>/dev/null)
+  echo "❌ Init container 'setup' has not terminated (state: ${state:-unknown}). The app container cannot start until it finishes." >&2
+  exit 1
+fi
+if [ "$code" != "0" ]; then
+  echo "❌ Init container 'setup' exited ${code}, not 0. A failing init container stops the app from ever starting — read it: oc logs ${pod} -c setup" >&2
+  exit 1
+fi
+out=$(oc logs "$pod" -c setup 2>/dev/null)
+case "$out" in
+  *"setup done"*)
+    echo "✅ Init container 'setup' ran to completion (exit 0) before the app started."
+    exit 0 ;;
+esac
+echo "❌ Init container 'setup' exited 0 but its log does not end with 'setup done'. Got: $(echo "${out:-<empty>}" | tr '\n' ' ' | cut -c1-140)" >&2
+exit 1

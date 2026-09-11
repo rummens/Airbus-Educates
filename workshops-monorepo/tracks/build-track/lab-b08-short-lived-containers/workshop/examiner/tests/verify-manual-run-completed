@@ -1,0 +1,13 @@
+#!/bin/bash
+# The hand-triggered Job — created FROM the CronJob's own template — must complete.
+set -uo pipefail
+for _ in $(seq 1 24); do          # ~120s
+  s=$(oc get job report-now -o jsonpath='{.status.succeeded}' 2>/dev/null)
+  if [ "${s:-0}" -ge 1 ] 2>/dev/null; then
+    echo "✅ The manually triggered Job report-now completed."
+    exit 0
+  fi
+  sleep 5
+done
+echo "❌ Job 'report-now' has not completed after 2 minutes. Did 'oc create job report-now --from=cronjob/nightly-report' run? Check: oc describe job report-now" >&2
+exit 1

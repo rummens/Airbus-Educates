@@ -1,0 +1,21 @@
+#!/bin/bash
+# The whole point of same-Pod helpers: the APP container can read what the helpers
+# wrote into the shared volume — one from a container that already exited, one from a
+# container still running next to it.
+set -uo pipefail
+pod=$(oc get pod -l app=hello-dcs -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+setup=$(oc exec "$pod" -c hello-dcs -- cat /work/setup.txt 2>/dev/null)
+if [ -z "$setup" ]; then
+  echo "❌ The app container cannot read /work/setup.txt. The init container writes it into the shared emptyDir — if it is missing, the containers are not sharing the 'work' volume." >&2
+  exit 1
+fi
+for _ in $(seq 1 12); do          # ~60s: the sidecar appends every 10s
+  beat=$(oc exec "$pod" -c hello-dcs -- sh -c 'wc -l < /work/heartbeat.log' 2>/dev/null | tr -d ' \r')
+  [ "${beat:-0}" -ge 1 ] 2>/dev/null && break
+  sleep 5
+done
+if [ "${beat:-0}" -lt 1 ] 2>/dev/null; then
+  echo "❌ /work/heartbeat.log has no lines yet. The sidecar appends one every 10 seconds; if it stays empty the sidecar is not running or not writing to the shared volume." >&2
+  exit 1
+fi
+echo "✅ The app container reads both: '${setup}' from the exited init container, and ${beat} line(s) from the running sidecar."

@@ -1,0 +1,16 @@
+#!/bin/bash
+# The reason the work failed must be readable from the Job's logs — that is the payoff
+# of keeping the failed Pods.
+set -uo pipefail
+out=$(oc logs job/db-migrate-broken 2>/dev/null)
+case "$out" in
+  *"cannot reach the database"*)
+    echo "✅ The failure reason is in the Job's logs: 'cannot reach the database'."
+    exit 0 ;;
+esac
+if [ -z "$out" ]; then
+  echo "❌ No logs from job/db-migrate-broken. The failed Pods are kept, so the reason should be readable — check: oc get pods -l job-name=db-migrate-broken" >&2
+  exit 1
+fi
+echo "❌ Expected the failure reason in the logs, got: $(echo "$out" | tr '\n' ' ' | cut -c1-160)" >&2
+exit 1

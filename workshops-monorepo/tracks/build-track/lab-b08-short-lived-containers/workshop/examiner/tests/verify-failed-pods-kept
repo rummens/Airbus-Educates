@@ -1,0 +1,10 @@
+#!/bin/bash
+# restartPolicy: Never makes each attempt a NEW Pod, so every attempt's logs survive.
+# Both attempts must still be listed.
+set -uo pipefail
+n=$(oc get pods -l job-name=db-migrate-broken --no-headers 2>/dev/null | wc -l | tr -d ' ')
+if [ "${n:-0}" -lt 2 ] 2>/dev/null; then
+  echo "❌ Found ${n:-0} Pod(s) for db-migrate-broken, expected 2 — the first attempt plus one retry. With restartPolicy: Never each attempt is a separate Pod that is kept; if you see one, the Job may still be retrying." >&2
+  exit 1
+fi
+echo "✅ Both attempts are still listed as separate Pods (${n}), so each one's logs survive."

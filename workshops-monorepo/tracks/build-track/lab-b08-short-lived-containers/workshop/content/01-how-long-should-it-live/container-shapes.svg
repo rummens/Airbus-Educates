@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 470" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="470" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">One question: how long is this container supposed to run?</text>
+
+  <!-- Deployment -->
+  <rect x="24" y="48" width="344" height="96" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="40" y="70" font-size="13" font-weight="bold" fill="#1b4a86">Forever — Deployment</text>
+  <text x="40" y="90" font-size="11" fill="#1b4a86">It exits, the platform starts it again.</text>
+  <text x="40" y="108" font-size="11" fill="#1b4a86">Keeps exiting? CrashLoopBackOff, and no verdict.</text>
+  <text x="40" y="128" font-size="11" fill="#8a2f2c">Wrong for a migration: success means exit 0.</text>
+
+  <!-- Job -->
+  <rect x="392" y="48" width="344" height="96" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="408" y="70" font-size="13" font-weight="bold" fill="#2c6a3a">Until done — Job</text>
+  <text x="408" y="90" font-size="11" fill="#2c6a3a">Exit 0 → Complete. The Pod is KEPT, so you can read it.</text>
+  <text x="408" y="108" font-size="11" fill="#2c6a3a">Fails → retries up to backoffLimit, then Failed.</text>
+  <text x="408" y="128" font-size="11" fill="#2c6a3a">Giving up is the feature: somebody gets an answer.</text>
+
+  <!-- CronJob -->
+  <rect x="24" y="160" width="712" height="72" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="40" y="182" font-size="13" font-weight="bold" fill="#2c6a3a">On a schedule — CronJob: a Job factory</text>
+  <text x="40" y="202" font-size="11" fill="#2c6a3a">Each fire creates a Job, which creates a Pod. The finished Jobs it keeps are last night's evidence.</text>
+  <text x="40" y="220" font-size="11" fill="#2c6a3a">concurrencyPolicy decides what happens when the last run is still going. suspend pauses without deleting.</text>
+
+  <!-- The Pod -->
+  <rect x="24" y="248" width="712" height="196" rx="8" fill="#ffffff" stroke="#c5ced6" stroke-width="2"/>
+  <text x="380" y="272" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b2b3a">Beside the app — two helpers, one Pod, one shared volume</text>
+
+  <rect x="48" y="288" width="200" height="72" rx="6" fill="#fdf4e8" stroke="#c08a2d" stroke-width="2"/>
+  <text x="148" y="310" text-anchor="middle" font-size="12" font-weight="bold" fill="#7a5410">init container</text>
+  <text x="148" y="328" text-anchor="middle" font-size="10" fill="#7a5410">runs FIRST, to completion</text>
+  <text x="148" y="344" text-anchor="middle" font-size="10" fill="#7a5410">no restartPolicy</text>
+
+  <rect x="280" y="288" width="200" height="72" rx="6" fill="#fdf4e8" stroke="#c08a2d" stroke-width="2"/>
+  <text x="380" y="310" text-anchor="middle" font-size="12" font-weight="bold" fill="#7a5410">sidecar</text>
+  <text x="380" y="328" text-anchor="middle" font-size="10" fill="#7a5410">starts first, KEEPS running</text>
+  <text x="380" y="344" text-anchor="middle" font-size="10" font-weight="bold" fill="#7a5410">restartPolicy: Always</text>
+
+  <rect x="512" y="288" width="200" height="72" rx="6" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="612" y="310" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b4a86">app container</text>
+  <text x="612" y="328" text-anchor="middle" font-size="10" fill="#1b4a86">starts once init has finished</text>
+  <text x="612" y="344" text-anchor="middle" font-size="10" fill="#1b4a86">runs beside the sidecar</text>
+
+  <line x1="248" y1="324" x2="276" y2="324" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="276,324 268,320 268,328" fill="#5a6b7b"/>
+  <line x1="480" y1="324" x2="508" y2="324" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="508,324 500,320 500,328" fill="#5a6b7b"/>
+
+  <rect x="48" y="376" width="664" height="30" rx="6" fill="#eef3ee" stroke="#4a9a5a"/>
+  <text x="380" y="396" text-anchor="middle" font-size="11" fill="#2c6a3a">shared volume — how a helper hands work to the app: same Pod, same disk, same network</text>
+
+  <text x="380" y="428" text-anchor="middle" font-size="11" font-weight="bold" fill="#1b2b3a">Both helpers are declared under initContainers. One line, restartPolicy: Always, is the entire difference.</text>
+</svg>

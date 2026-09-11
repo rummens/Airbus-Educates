@@ -1,0 +1,17 @@
+#!/bin/bash
+# The sidecar must still be RUNNING beside the app — that is what restartPolicy: Always
+# on an init container buys, and what separates it from 'setup'.
+set -uo pipefail
+pod=$(oc get pod -l app=hello-dcs -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+running=$(oc get pod "$pod" -o jsonpath='{range .status.initContainerStatuses[?(@.name=="heartbeat")]}{.state.running.startedAt}{end}' 2>/dev/null)
+if [ -z "$running" ]; then
+  term=$(oc get pod "$pod" -o jsonpath='{range .status.initContainerStatuses[?(@.name=="heartbeat")]}{.state.terminated.reason}{end}' 2>/dev/null)
+  echo "❌ The 'heartbeat' container is not running (state: ${term:-unknown}). Without restartPolicy: Always it would run to completion like an init container instead of staying alongside the app." >&2
+  exit 1
+fi
+appready=$(oc get pod "$pod" -o jsonpath='{range .status.containerStatuses[?(@.name=="hello-dcs")]}{.ready}{end}' 2>/dev/null)
+if [ "$appready" != "true" ]; then
+  echo "❌ The sidecar is running but the app container is not ready (ready=${appready:-?}) — they are supposed to be running together." >&2
+  exit 1
+fi
+echo "✅ The sidecar has been running since ${running}, alongside a ready app container."

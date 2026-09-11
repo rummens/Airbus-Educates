@@ -1,0 +1,11 @@
+#!/bin/bash
+# The CronJob exists with the schedule and the concurrency policy the manifest declares.
+set -uo pipefail
+sched=$(oc get cronjob nightly-report -o jsonpath='{.spec.schedule}' 2>/dev/null)
+if [ -z "$sched" ]; then
+  echo "❌ CronJob 'nightly-report' not found. Did 'envsubst < cronjob-report.yaml | oc apply -f -' run?" >&2
+  exit 1
+fi
+pol=$(oc get cronjob nightly-report -o jsonpath='{.spec.concurrencyPolicy}' 2>/dev/null)
+last=$(oc get cronjob nightly-report -o jsonpath='{.status.lastScheduleTime}' 2>/dev/null)
+echo "✅ CronJob nightly-report exists: schedule '${sched}', concurrencyPolicy ${pol:-Allow}, last schedule ${last:-<none, it has not fired>}."

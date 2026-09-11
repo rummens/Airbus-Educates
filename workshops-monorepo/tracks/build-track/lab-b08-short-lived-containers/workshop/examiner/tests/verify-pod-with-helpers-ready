@@ -1,0 +1,22 @@
+#!/bin/bash
+# The app Pod must be Ready, and must actually carry both helper containers.
+set -uo pipefail
+for _ in $(seq 1 24); do          # ~120s
+  ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  [ "${ready:-0}" -ge 1 ] 2>/dev/null && break
+  sleep 5
+done
+if [ "${ready:-0}" -lt 1 ] 2>/dev/null; then
+  echo "❌ hello-dcs has no ready replica after 2 minutes. An init container that never finishes blocks the app container from starting — check: oc describe pod -l app=hello-dcs" >&2
+  exit 1
+fi
+names=$(oc get pod -l app=hello-dcs -o jsonpath='{.items[0].spec.initContainers[*].name}' 2>/dev/null)
+case "$names" in
+  *setup*) ;;
+  *) echo "❌ The Pod has no init container named 'setup' (found: ${names:-none}). Did deployment-with-helpers.yaml apply?" >&2; exit 1 ;;
+esac
+case "$names" in
+  *heartbeat*) ;;
+  *) echo "❌ The Pod has no 'heartbeat' container among its initContainers (found: ${names:-none}). A native sidecar is declared there, with restartPolicy: Always." >&2; exit 1 ;;
+esac
+echo "✅ The Pod is ready and carries both helpers: ${names}."

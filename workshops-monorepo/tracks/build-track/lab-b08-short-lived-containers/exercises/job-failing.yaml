@@ -1,0 +1,31 @@
+# The same shape, but the work fails. With backoffLimit: 1 the Job makes two attempts
+# in total (the first, plus one retry) and is then marked Failed — it does NOT retry
+# forever, which is the difference between a Job and a crash-looping Deployment.
+# Apply with: envsubst < job-failing.yaml | oc apply -f -
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrate-broken
+spec:
+  backoffLimit: 1
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: migrate
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        command:
+        - sh
+        - -c
+        - |
+          echo "migration starting"
+          echo "cannot reach the database" >&2
+          exit 1
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi

@@ -1,0 +1,99 @@
+# The app, plus the two kinds of helper container that live in the SAME Pod.
+#
+# Both are declared under `initContainers`, and one line tells them apart:
+#
+#   setup      — no restartPolicy. A classic INIT CONTAINER: it runs to completion
+#                BEFORE the app container is started. Use it for work that must be
+#                finished first — fetching config, preparing a volume, waiting for a
+#                dependency. If it fails, the app never starts.
+#
+#   heartbeat  — restartPolicy: Always. That makes it a SIDECAR: it is started before
+#                the app, and it KEEPS RUNNING alongside it for the life of the Pod.
+#                Same API as an init container, different lifetime. Use it for log
+#                shippers, proxies, metric exporters.
+#
+# The two share an emptyDir with the app container, which is how a helper hands work to
+# the app: same Pod, same volume.
+# Apply with: envsubst < deployment-with-helpers.yaml | oc apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-dcs
+  template:
+    metadata:
+      labels:
+        app: hello-dcs
+    spec:
+      initContainers:
+      - name: setup
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        command:
+        - sh
+        - -c
+        - |
+          echo "preparing the workspace"
+          echo "prepared at $(date -u +%H:%M:%S) by $HOSTNAME" > /work/setup.txt
+          echo "setup done"
+        volumeMounts:
+        - name: work
+          mountPath: /work
+        resources:
+          requests:
+            cpu: 25m
+            memory: 32Mi
+          limits:
+            cpu: 50m
+            memory: 64Mi
+      - name: heartbeat
+        # The one line that turns an init container into a sidecar.
+        restartPolicy: Always
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        command:
+        - sh
+        - -c
+        - |
+          while true; do
+            echo "heartbeat $(date -u +%H:%M:%S)" >> /work/heartbeat.log
+            sleep 10
+          done
+        volumeMounts:
+        - name: work
+          mountPath: /work
+        resources:
+          requests:
+            cpu: 25m
+            memory: 32Mi
+          limits:
+            cpu: 50m
+            memory: 64Mi
+      containers:
+      - name: hello-dcs
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: work
+          mountPath: /work
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+      volumes:
+      - name: work
+        emptyDir: {}

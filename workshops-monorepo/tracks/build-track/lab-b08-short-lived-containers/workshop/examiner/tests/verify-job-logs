@@ -1,0 +1,16 @@
+#!/bin/bash
+# The Job's own output must show the work finished — the Pod is kept precisely so this
+# can be read after the fact.
+set -uo pipefail
+out=$(oc logs job/db-migrate 2>/dev/null)
+if [ -z "$out" ]; then
+  echo "❌ No logs from job/db-migrate. Its Pod is kept after completion, so logs should be readable — check: oc get pods -l job-name=db-migrate" >&2
+  exit 1
+fi
+case "$out" in
+  *"migration complete"*)
+    echo "✅ The Job's output ends with the migration reporting complete."
+    exit 0 ;;
+esac
+echo "❌ Expected 'migration complete' in the Job's output, got: $(echo "$out" | tr '\n' ' ' | cut -c1-160)" >&2
+exit 1
