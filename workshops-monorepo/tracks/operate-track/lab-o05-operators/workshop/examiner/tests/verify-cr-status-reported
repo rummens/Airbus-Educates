@@ -1,0 +1,15 @@
+#!/bin/bash
+# An operator reports back through the CR's own status. Any phase proves the loop ran;
+# the phase's VALUE depends on the environment (see verify-cr-healthy's note).
+DB_NS="${DB_NS:-$(oc project -q)-db}"
+set -uo pipefail
+for _ in $(seq 1 12); do          # ~60s
+  phase=$(oc get cluster.postgresql.cnpg.io sample-db -n "$DB_NS" -o jsonpath='{.status.phase}' 2>/dev/null)
+  [ -n "$phase" ] && break
+  sleep 5
+done
+if [ -z "$phase" ]; then
+  echo "❌ sample-db reports no status.phase. Nothing is reconciling it — an object of a kind no controller watches just sits there, which is the other half of the lesson." >&2
+  exit 1
+fi
+echo "✅ The Cluster reports status.phase '${phase}' — the operator writing back about work you never did."

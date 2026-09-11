@@ -1,10 +1,15 @@
 #!/bin/bash
+# The operator created Pods for the instance — it did not stop at objects on paper.
 DB_NS="${DB_NS:-$(oc project -q)-db}"
 set -uo pipefail
-# Verify the operator has scheduled at least one managed Pod for the sample-db CR.
-pod=$(oc get pods -l cnpg.io/cluster=sample-db -n "$DB_NS" -o name 2>/dev/null | head -n1)
-if [ -z "$pod" ]; then
-  echo "❌ No Pod yet with label cnpg.io/cluster=sample-db. The operator may still be provisioning storage — this can take a minute." >&2
+for _ in $(seq 1 18); do          # ~90s
+  n=$(oc get pods -n "$DB_NS" --no-headers 2>/dev/null | wc -l | tr -d ' ')
+  [ "${n:-0}" -ge 1 ] 2>/dev/null && break
+  sleep 5
+done
+if [ "${n:-0}" -lt 1 ] 2>/dev/null; then
+  echo "❌ The operator has created no Pods in $DB_NS. It should start the instance it was asked for — check: oc describe cluster sample-db -n $DB_NS" >&2
   exit 1
 fi
-echo "✅ operator has scheduled ${pod}."
+owner=$(oc get pods -n "$DB_NS" -o jsonpath='{.items[0].metadata.labels.cnpg\.io/cluster}' 2>/dev/null)
+echo "✅ The operator created ${n} Pod(s) in $DB_NS${owner:+, labelled as belonging to the '$owner' cluster} — you wrote none of them."

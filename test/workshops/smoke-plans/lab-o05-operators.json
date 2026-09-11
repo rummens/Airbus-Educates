@@ -1,6 +1,6 @@
 {
   "workshop": "lab-o05-operators",
-  "_note": "Needs an operator installed cluster-wide \u2014 CloudNativePG here (v1.30.0 on the test cluster). Two RBAC realities shaped this lab: a tenant may NOT list cluster-scoped CRDs, so the API is read through discovery (oc api-resources / oc explain); and the Educates session role knows nothing about postgresql.cnpg.io, so session.objects grants the kind in the session's own namespace \u2014 the shape a real entitlement takes. The CR sets no imageName: the operator picks the operand image, which is the ownership point AND what lets the manifest run anywhere. Verified: a 1-instance Cluster reaches 'Cluster in healthy state' in about 40 seconds. The instance is created in a PEER namespace ($DB_NS), not the session namespace: an Educates session namespace's security policy stops the CNPG operand from executing its binary (\"exec container process /controller/manager: Permission denied\"), while a normal namespace runs it \u2014 both observed on the test cluster.",
+  "_note": "Needs an operator installed cluster-wide \u2014 CloudNativePG here (v1.30.0 on the test cluster). Two RBAC realities shaped this lab: a tenant may NOT list cluster-scoped CRDs, so the API is read through discovery (oc api-resources / oc explain); and the Educates session role knows nothing about postgresql.cnpg.io, so session.objects grants the kind in the session's own namespace \u2014 the shape a real entitlement takes. The CR sets no imageName: the operator picks the operand image, which is the ownership point AND what lets the manifest run anywhere. Verified: a 1-instance Cluster reaches 'Cluster in healthy state' in about 40 seconds. The instance is created in a PEER namespace ($DB_NS), not the session namespace: an Educates session namespace's security policy stops the CNPG operand from executing its binary (\"exec container process /controller/manager: Permission denied\"), while a normal namespace runs it \u2014 both observed on the test cluster. The lab asserts the RECONCILE, not a booted database: Educates' own SCC (educates-restricted, runAsUser MustRunAsNonRoot) never assigns the operand a UID, so PostgreSQL cannot exec in ANY namespace Educates manages \u2014 including session.objects ones. A real tenant namespace uses restricted-v2 and the same CR boots. The page says so plainly.",
   "steps": [
     {
       "run": "oc api-resources --api-group=postgresql.cnpg.io"
@@ -21,7 +21,7 @@
       "check": "verify-cr-created"
     },
     {
-      "run": "oc get cluster sample-db -n $DB_NS -o wide"
+      "run": "oc get cluster,pods,pvc,svc,secret -n $DB_NS"
     },
     {
       "check": "verify-cr-healthy"
@@ -31,6 +31,12 @@
     },
     {
       "check": "verify-pod-scheduled"
+    },
+    {
+      "run": "oc get cluster.postgresql.cnpg.io sample-db -n $DB_NS -o jsonpath='{.status.phase}{\"\\n\"}'"
+    },
+    {
+      "check": "verify-cr-status-reported"
     }
   ]
 }

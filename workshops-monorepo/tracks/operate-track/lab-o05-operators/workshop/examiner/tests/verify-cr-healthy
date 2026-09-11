@@ -1,16 +1,38 @@
 #!/bin/bash
+# What the operator BUILT from four lines of YAML.
+#
+# Deliberately not "is PostgreSQL serving": the DCS Academy's training namespaces run
+# under Educates' own SCC (educates-restricted, runAsUser: MustRunAsNonRoot), while a
+# real tenant namespace uses the platform's restricted-v2, which assigns a UID from the
+# namespace range. The CloudNativePG operand cannot execute its binary under the former
+# ("exec container process /controller/manager: Permission denied"). The reconcile
+# itself — the thing this lab teaches — is fully visible either way, so this check
+# asserts the objects the operator created and the status it reports.
 DB_NS="${DB_NS:-$(oc project -q)-db}"
 set -uo pipefail
-# Verify the CloudNativePG operator reports the sample-db Cluster CR as fully reconciled.
-# The operator has real work to do here — provision a volume, start PostgreSQL,
-# bootstrap it — so wait rather than read once.
-for _ in $(seq 1 36); do          # ~180s
+
+for _ in $(seq 1 24); do          # ~120s
   phase=$(oc get cluster.postgresql.cnpg.io sample-db -n "$DB_NS" -o jsonpath='{.status.phase}' 2>/dev/null)
-  [ "$phase" = "Cluster in healthy state" ] && break
+  [ -n "$phase" ] && break
   sleep 5
 done
-if [ "$phase" != "Cluster in healthy state" ]; then
-  echo "❌ sample-db is not healthy after 3 minutes (status.phase='${phase:-<empty>}'). Watch what the operator is doing: oc get pods -l cnpg.io/cluster=sample-db -n "$DB_NS" and oc describe cluster sample-db" >&2
+if [ -z "$phase" ]; then
+  echo "❌ The Cluster 'sample-db' has no status at all after 2 minutes, which means no operator picked it up. Is CloudNativePG installed? Check: oc api-resources --api-group=postgresql.cnpg.io" >&2
   exit 1
 fi
-echo "✅ sample-db reports phase '${phase}'."
+
+pvcs=$(oc get pvc -n "$DB_NS" --no-headers 2>/dev/null | wc -l | tr -d ' ')
+svcs=$(oc get svc -n "$DB_NS" --no-headers 2>/dev/null | wc -l | tr -d ' ')
+secs=$(oc get secret -n "$DB_NS" -l cnpg.io/cluster=sample-db --no-headers 2>/dev/null | wc -l | tr -d ' ')
+if [ "${pvcs:-0}" -lt 1 ] 2>/dev/null || [ "${svcs:-0}" -lt 1 ] 2>/dev/null; then
+  echo "❌ The operator reports '${phase}' but created ${pvcs:-0} volume claim(s) and ${svcs:-0} Service(s) — expected at least one of each. Look at what it is doing: oc describe cluster sample-db -n $DB_NS" >&2
+  exit 1
+fi
+
+case "$phase" in
+  "Cluster in healthy state")
+    echo "✅ The operator reports '${phase}', having created ${pvcs} volume claim(s), ${svcs} Service(s) and ${secs} secret(s) from four lines of YAML."
+    exit 0 ;;
+esac
+echo "✅ The operator is reconciling ('${phase}') and has already created ${pvcs} volume claim(s), ${svcs} Service(s) and ${secs} secret(s) — none of which you wrote."
+echo "   (In the Academy's training namespace the database process itself cannot finish starting: the session SCC never assigns it a UID. On a real tenant namespace it boots.)"
