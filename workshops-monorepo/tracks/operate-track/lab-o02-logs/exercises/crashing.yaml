@@ -1,0 +1,39 @@
+# A container that logs, then exits non-zero — on purpose. It gives you something
+# whose PREVIOUS logs are worth reading: once it restarts, the output that explains
+# the failure belongs to a container instance that no longer exists.
+# Apply with: envsubst < crashing.yaml | oc apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flaky
+  labels:
+    app: flaky
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flaky
+  template:
+    metadata:
+      labels:
+        app: flaky
+    spec:
+      containers:
+      - name: flaky
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        command:
+        - sh
+        - -c
+        - |
+          echo "starting up"
+          echo "config loaded from /etc/flaky/config.yaml"
+          echo "FATAL: cannot reach the database at db.internal:5432" >&2
+          sleep 5
+          exit 1
+        resources:
+          requests:
+            cpu: 25m
+            memory: 32Mi
+          limits:
+            cpu: 50m
+            memory: 64Mi

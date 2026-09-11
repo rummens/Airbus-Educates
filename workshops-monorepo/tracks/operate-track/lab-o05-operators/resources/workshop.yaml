@@ -61,6 +61,10 @@ spec:
         url: "$(image_repository)/lab-o05-operators-files:$(workshop_version)"
     {{- end }}
   session:
+    env:
+    # The namespace the operator-managed database lives in (see session.objects).
+    - name: DB_NS
+      value: "$(session_namespace)-db"
     namespaces:
       # The operator provisions a StatefulSet with its own PVC for the database
       # instance, so the namespace needs room for more than the CR itself.
@@ -69,19 +73,46 @@ spec:
         policy: restricted
         token:
           enabled: true
-    # A tenant may only touch the operator kinds the platform entitles them to. The
-    # Educates session role knows nothing about postgresql.cnpg.io, so without this the
-    # learner cannot create the very object the lab is about. Granting it per session, in
-    # the session's own namespace, is exactly the shape a real entitlement takes.
+    # The database lives in a PEER namespace, not in the session namespace.
     #
-    # The subject must be the session's ServiceAccount, which lives in the WORKSHOP
-    # namespace — binding the session namespace's SA group matches nothing.
+    # Why: an Educates training session namespace runs under the workshop's own security
+    # policy, and the operand the operator starts cannot execute its binary there
+    # ("exec container process /controller/manager: Permission denied"). A normal
+    # namespace with the platform's standard restricted posture runs it fine — verified
+    # on the test cluster. Operator-provisioned workloads belong in a normal namespace,
+    # which is also how a tenant would really use one.
+    #
+    # The learner is granted the operator's kinds THERE, plus edit, bound to the session
+    # ServiceAccount (which lives in the WORKSHOP namespace — binding the session
+    # namespace's SA group matches nothing).
     objects:
+    - apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: $(session_namespace)-db
+        labels:
+          app.kubernetes.io/part-of: dcs-academy-o05
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: session-edit
+        namespace: $(session_namespace)-db
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: edit
+      subjects:
+      - kind: ServiceAccount
+        name: $(service_account)
+        namespace: $(workshop_namespace)
+      - apiGroup: rbac.authorization.k8s.io
+        kind: Group
+        name: system:serviceaccounts:$(session_namespace)
     - apiVersion: rbac.authorization.k8s.io/v1
       kind: Role
       metadata:
         name: cnpg-instance-owner
-        namespace: $(session_namespace)
+        namespace: $(session_namespace)-db
       rules:
       - apiGroups: ["postgresql.cnpg.io"]
         resources: ["clusters", "clusters/status", "backups", "scheduledbackups", "poolers"]
@@ -90,7 +121,7 @@ spec:
       kind: RoleBinding
       metadata:
         name: cnpg-instance-owner
-        namespace: $(session_namespace)
+        namespace: $(session_namespace)-db
       roleRef:
         apiGroup: rbac.authorization.k8s.io
         kind: Role

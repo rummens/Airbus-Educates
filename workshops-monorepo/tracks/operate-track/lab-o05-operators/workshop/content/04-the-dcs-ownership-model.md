@@ -60,7 +60,7 @@ You don't need a new command to see the boundary — it's the same `oc get` from
 read with this split in mind:
 
 ```terminal:execute
-command: oc get cluster.postgresql.cnpg.io sample-db
+command: oc get cluster.postgresql.cnpg.io sample-db -n $DB_NS
 ```
 
 ```examiner:execute-test

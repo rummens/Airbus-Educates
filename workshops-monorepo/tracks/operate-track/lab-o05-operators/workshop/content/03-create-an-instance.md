@@ -50,8 +50,16 @@ configures the operator with the operand image it is allowed to run, from the
 decision — that is "the platform owns the operator", in one field.
 {{< /note >}}
 
+{{< note >}}
+**📌 Why `-n $DB_NS`.** The database goes in a namespace next to your session's, not in the
+session namespace itself. A training session runs under the workshop's own security policy,
+and the operand the operator starts cannot execute there. A normal namespace with the
+platform's standard posture runs it fine — which is also where a real tenant would put a
+database.
+{{< /note >}}
+
 ```terminal:execute
-command: oc apply -f sample-cr.yaml
+command: oc apply -f sample-cr.yaml -n $DB_NS
 ```
 
 ```examiner:execute-test
@@ -66,7 +74,7 @@ Look at it immediately — the object exists, but the Operator hasn't had time t
 it yet:
 
 ```terminal:execute
-command: oc get cluster.postgresql.cnpg.io sample-db
+command: oc get cluster.postgresql.cnpg.io sample-db -n $DB_NS
 ```
 
 ```examiner:execute-test
@@ -116,7 +124,7 @@ session: 2
 Back in the upper pane, check the CR again:
 
 ```terminal:execute
-command: oc get cluster.postgresql.cnpg.io sample-db
+command: oc get cluster.postgresql.cnpg.io sample-db -n $DB_NS
 ```
 
 ```examiner:execute-test
@@ -134,7 +142,7 @@ extracts a single value from an object instead of printing the whole thing — u
 time you want one fact, not a full `-o yaml` dump:
 
 ```terminal:execute
-command: oc get cluster.postgresql.cnpg.io sample-db -o jsonpath='{.status.phase}'
+command: oc get cluster.postgresql.cnpg.io sample-db -o jsonpath='{.status.phase}' -n $DB_NS
 ```
 
 ```examiner:execute-test

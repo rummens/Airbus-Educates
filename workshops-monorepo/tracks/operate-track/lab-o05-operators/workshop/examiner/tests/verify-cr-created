@@ -1,6 +1,8 @@
 #!/bin/bash
+DB_NS="${DB_NS:-$(oc project -q)-db}"
+set -uo pipefail
 # Verify the sample-db Cluster CR was created (does not require reconciliation yet).
-if ! oc get cluster.postgresql.cnpg.io sample-db >/dev/null 2>&1; then
+if ! oc get cluster.postgresql.cnpg.io sample-db -n "$DB_NS" >/dev/null 2>&1; then
   echo "❌ Custom resource 'sample-db' (cluster.postgresql.cnpg.io) not found in $(oc project -q 2>/dev/null). Did you apply sample-cr.yaml with envsubst?" >&2
   exit 1
 fi

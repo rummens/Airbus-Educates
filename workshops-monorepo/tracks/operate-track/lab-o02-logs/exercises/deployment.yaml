@@ -1,0 +1,37 @@
+# The app writing to stdout, which is the only thing a container should do with logs.
+# Whatever it prints, the container runtime captures — that is what `oc logs` reads.
+# Apply with: envsubst < deployment.yaml | oc apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-dcs
+  template:
+    metadata:
+      labels:
+        app: hello-dcs
+    spec:
+      containers:
+      - name: hello-dcs
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi

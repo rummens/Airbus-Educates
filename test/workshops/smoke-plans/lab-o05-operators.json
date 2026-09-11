@@ -1,6 +1,6 @@
 {
   "workshop": "lab-o05-operators",
-  "_note": "Needs an operator installed cluster-wide \u2014 CloudNativePG here (v1.30.0 on the test cluster). Two RBAC realities shaped this lab: a tenant may NOT list cluster-scoped CRDs, so the API is read through discovery (oc api-resources / oc explain); and the Educates session role knows nothing about postgresql.cnpg.io, so session.objects grants the kind in the session's own namespace \u2014 the shape a real entitlement takes. The CR sets no imageName: the operator picks the operand image, which is the ownership point AND what lets the manifest run anywhere. Verified: a 1-instance Cluster reaches 'Cluster in healthy state' in about 40 seconds.",
+  "_note": "Needs an operator installed cluster-wide \u2014 CloudNativePG here (v1.30.0 on the test cluster). Two RBAC realities shaped this lab: a tenant may NOT list cluster-scoped CRDs, so the API is read through discovery (oc api-resources / oc explain); and the Educates session role knows nothing about postgresql.cnpg.io, so session.objects grants the kind in the session's own namespace \u2014 the shape a real entitlement takes. The CR sets no imageName: the operator picks the operand image, which is the ownership point AND what lets the manifest run anywhere. Verified: a 1-instance Cluster reaches 'Cluster in healthy state' in about 40 seconds. The instance is created in a PEER namespace ($DB_NS), not the session namespace: an Educates session namespace's security policy stops the CNPG operand from executing its binary (\"exec container process /controller/manager: Permission denied\"), while a normal namespace runs it \u2014 both observed on the test cluster.",
   "steps": [
     {
       "run": "oc api-resources --api-group=postgresql.cnpg.io"
@@ -15,19 +15,19 @@
       "check": "verify-api-resource-present"
     },
     {
-      "run": "oc apply -f sample-cr.yaml"
+      "run": "oc apply -f sample-cr.yaml -n $DB_NS"
     },
     {
       "check": "verify-cr-created"
     },
     {
-      "run": "oc get cluster sample-db -o wide"
+      "run": "oc get cluster sample-db -n $DB_NS -o wide"
     },
     {
       "check": "verify-cr-healthy"
     },
     {
-      "run": "oc get pods -l cnpg.io/cluster=sample-db"
+      "run": "oc get pods -l cnpg.io/cluster=sample-db -n $DB_NS"
     },
     {
       "check": "verify-pod-scheduled"
