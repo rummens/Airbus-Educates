@@ -29,7 +29,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
 1. What's the difference between a **Role** and a **ClusterRole**?
 
 {{< note >}}
-**Answer:** A Role's permissions apply only inside the namespace it's created in. A
+**❓ Answer:** A Role's permissions apply only inside the namespace it's created in. A
 ClusterRole grants the same kind of permissions cluster-wide — and can also be bound
 namespace-by-namespace via a RoleBinding when the same permission set is reused in several
 namespaces (the built-in `view` role works this way). See the
@@ -39,7 +39,7 @@ namespaces (the built-in `view` role works this way). See the
 2. What does a **RoleBinding** actually connect?
 
 {{< note >}}
-**Answer:** A subject (User, Group, or ServiceAccount) to a Role or ClusterRole, inside one
+**❓ Answer:** A subject (User, Group, or ServiceAccount) to a Role or ClusterRole, inside one
 namespace. The Role/ClusterRole alone grants nothing to anyone until a binding names a
 subject for it.
 {{< /note >}}
@@ -47,7 +47,7 @@ subject for it.
 3. How do you test whether **another** subject — not yourself — has a given permission?
 
 {{< note >}}
-**Answer:** `oc auth can-i <verb> <resource> --as=<subject>` — e.g.
+**❓ Answer:** `oc auth can-i <verb> <resource> --as=<subject>` — e.g.
 `--as=system:serviceaccount:<namespace>:<name>` for a ServiceAccount. It asks the same
 `can-i` question on that subject's behalf, without needing to authenticate as them.
 {{< /note >}}

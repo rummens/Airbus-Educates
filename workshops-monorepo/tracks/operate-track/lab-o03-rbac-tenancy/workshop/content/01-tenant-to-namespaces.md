@@ -23,7 +23,7 @@ and Namespace. If you've heard someone describe Namespace → Project → Tenant
 distinct layers, that's wrong — correct it to Tenant → Namespaces.
 
 {{< note >}}
-If you've worked with VMs: think of a Tenant as the department that owns a block of
+**📌 Note:** If you've worked with VMs: think of a Tenant as the department that owns a block of
 resource-pool quota, and a Namespace as one resource pool carved out of it. The department
 (Tenant) is the accountable unit; the resource pool (Namespace) is where workloads actually
 run.

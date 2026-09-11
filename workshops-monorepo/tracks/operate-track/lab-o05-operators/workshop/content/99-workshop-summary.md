@@ -32,7 +32,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
 1. What does an Operator's reconciliation loop actually do?
 
 {{< note >}}
-**Answer:** It continuously compares the actual state of the cluster to the desired
+**❓ Answer:** It continuously compares the actual state of the cluster to the desired
 state declared in a Custom Resource, and acts to close any gap — not just once at
 creation, but for as long as the Operator runs.
 {{< /note >}}
@@ -40,7 +40,7 @@ creation, but for as long as the Operator runs.
 2. What's the difference between a CRD and a CR?
 
 {{< note >}}
-**Answer:** A CRD (CustomResourceDefinition) defines a new resource *type* — like
+**❓ Answer:** A CRD (CustomResourceDefinition) defines a new resource *type* — like
 `Cluster` for CloudNativePG. A CR (Custom Resource) is an *instance* of that type, the
 same way a specific Deployment is an instance of the built-in Deployment type. The
 Operator is installed once and defines the CRD; you create as many CRs as you need.
@@ -50,7 +50,7 @@ Operator is installed once and defines the CRD; you create as many CRs as you ne
    platform, or you?
 
 {{< note >}}
-**Answer:** You do. The platform owns installing and upgrading the CloudNativePG
+**❓ Answer:** You do. The platform owns installing and upgrading the CloudNativePG
 Operator and its CRDs — that part was already done before this lab started. Everything
 about the instance itself — sizing, configuration, data, backups, upgrading it when you
 choose to, and responding when something goes wrong — is yours. This is the core

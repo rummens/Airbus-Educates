@@ -31,7 +31,7 @@ Put together, the chain that produces every `can-i` answer looks like this:
 ![Subject, binding, role and rules chain](rbac-chain.svg)
 
 {{< note >}}
-On {{< param product_short >}}, tenants manage Roles and RoleBindings **within their own
+**📌 Note:** On {{< param product_short >}}, tenants manage Roles and RoleBindings **within their own
 namespaces**. ClusterRoles and ClusterRoleBindings are platform-managed and read-only to
 tenants — you can inspect them (as below), but you won't create your own cluster-scoped
 RBAC objects.

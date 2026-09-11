@@ -41,7 +41,7 @@ underlying pieces correct on your behalf.
 ![A Custom Resource declares desired state; the Operator reconciles it into managed workloads](operator-loop.svg)
 
 {{< note >}}
-The reconciliation loop never stops. If someone (or something) deletes a Pod the Operator
+**📌 Note:** The reconciliation loop never stops. If someone (or something) deletes a Pod the Operator
 manages, or changes a setting out of band, the next reconciliation pass puts it back —
 the same self-healing idea as a Deployment, just applied to a whole application instead
 of one workload.

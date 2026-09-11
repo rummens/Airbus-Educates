@@ -44,7 +44,7 @@ never runs anywhere real; and `oc apply` needs *something* already built to poin
 at.
 
 {{< note >}}
-The **operator** that runs Dev Spaces on your cluster is platform-managed, just
+**📌 Note:** The **operator** that runs Dev Spaces on your cluster is platform-managed, just
 like every other DCS-provided service — you consume Dev Spaces, you don't install
 or upgrade it. That's the same ownership split you'll see named explicitly for
 every operator-based service later in this course.
@@ -56,7 +56,7 @@ A teammate says "I built my image, why do I need Dev Spaces at all?" What's the
 honest answer?
 
 {{< note >}}
-**Answer:** They don't need it for *that* build — BuildConfig (the **Building Images with BuildConfigs** lab) already turned
+**❓ Answer:** They don't need it for *that* build — BuildConfig (the **Building Images with BuildConfigs** lab) already turned
 finished source into an image, and `oc apply` (the **Deploy Your First App** lab/the **From Docker to Kubernetes on DCS** lab) already runs it. Dev
 Spaces earns its keep **before** that point: while the code is still being
 written, it's the fastest way to edit-and-run without waiting on an image build

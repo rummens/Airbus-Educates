@@ -18,7 +18,7 @@ url: {{< param dcs_devspaces_url >}}
 ```
 
 {{< note >}}
-**Whether this tab shows a live Dev Spaces login screen depends on your cluster.**
+**📌 Whether this tab shows a live Dev Spaces login screen depends on your cluster.**
 Dev Spaces is installed per-cluster by the platform team (see the previous page) —
 not every DCS environment has it provisioned yet. Either way, the walkthrough below
 is the real flow: it's what happens the moment you click through it.
@@ -69,7 +69,7 @@ dashboard — point it at the devfile (by URL, or by pasting its contents) and c
    command available as a one-click action — all backed by the Pod from step 2.
 
 {{< note >}}
-**A live workspace's Pod is a completely ordinary Pod** — on a cluster where Dev
+**📌 A live workspace's Pod is a completely ordinary Pod** — on a cluster where Dev
 Spaces is provisioned, you could watch it land with `oc get pods -w` in your own
 namespace from the Educates terminal, the same way you've watched every other Pod
 in this course. Nothing about steps 2–4 is magic; it's the same Deployment-like
@@ -83,7 +83,7 @@ Before moving on: which of the four steps above is the one where your actual
 *code* becomes visible inside the workspace?
 
 {{< note >}}
-**Answer:** Step 3 — cloning the project. Steps 1 and 2 only set up the *environment*
+**❓ Answer:** Step 3 — cloning the project. Steps 1 and 2 only set up the *environment*
 (the devfile and the container); your source doesn't exist inside the workspace
 until the project is cloned onto its shared volume.
 {{< /note >}}

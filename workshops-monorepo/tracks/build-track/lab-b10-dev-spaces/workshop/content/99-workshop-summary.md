@@ -38,7 +38,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
    course and OpenShift Dev Spaces?
 
 {{< note >}}
-**Answer:** The Educates editor is scaffolding for *this training session only* —
+**❓ Answer:** The Educates editor is scaffolding for *this training session only* —
 it has no connection to real source control and disappears when the session
 ends. Dev Spaces is a real, platform-provided development environment your
 organisation runs day to day, backed by an actual Pod in your namespace.
@@ -48,7 +48,7 @@ organisation runs day to day, backed by an actual Pod in your namespace.
    that expressed in the devfile?
 
 {{< note >}}
-**Answer:** Harbor, like every other DCS image — the devfile's `components[].container.image`
+**❓ Answer:** Harbor, like every other DCS image — the devfile's `components[].container.image`
 is `${DCS_REGISTRY}/devspaces/udi:latest`, never a hardcoded or public registry.
 {{< /note >}}
 
@@ -56,7 +56,7 @@ is `${DCS_REGISTRY}/devspaces/udi:latest`, never a hardcoded or public registry.
    change run, the way the **Building Images with BuildConfigs** lab's BuildConfig does?
 
 {{< note >}}
-**Answer:** A workspace runs the cloned source directly (`python3 server.py`)
+**❓ Answer:** A workspace runs the cloned source directly (`python3 server.py`)
 from disk — there's no image in the loop. BuildConfig exists for the opposite
 case: turning *finished* source into a deployable image once you're done
 iterating.
@@ -66,7 +66,7 @@ iterating.
    answer?
 
 {{< note >}}
-**Answer:** No — they solve different problems. Dev Spaces is where you *write
+**❓ Answer:** No — they solve different problems. Dev Spaces is where you *write
 and iterate on* code; `oc apply` (the **Deploy Your First App** lab/the **From Docker to Kubernetes on DCS** lab) is how a *built* image ends up
 running in a real namespace. A workspace never deploys anything by itself.
 {{< /note >}}
@@ -75,7 +75,7 @@ running in a real namespace. A workspace never deploys anything by itself.
    platform team?
 
 {{< note >}}
-**Answer:** The platform team, via an Operator. You consume Dev Spaces (launch
+**❓ Answer:** The platform team, via an Operator. You consume Dev Spaces (launch
 workspaces, develop in them); you never manage its installation or lifecycle —
 the same ownership split as every other DCS-provided platform service.
 {{< /note >}}
@@ -92,7 +92,7 @@ cloning straight from your tenant's own GitLab into a Dev Spaces workspace,
 instead of the provided sample repo used here.
 
 {{< note >}}
-**A provisioning note, for the record.** This workshop's devfile clones from
+**📌 A provisioning note, for the record.** This workshop's devfile clones from
 `${WORKSPACE_SOURCE_REPO}` — a small, in-platform git repository reachable
 without external egress. The concrete air-gapped hosting for that repo (a
 mirror into the tenant's GitLab vs. a small in-cluster git service) is the same

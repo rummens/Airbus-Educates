@@ -79,7 +79,7 @@ catalog OLM installs from: browse available Operators, pick one, and OLM handles
 rest.
 
 {{< note >}}
-On {{< param product_short >}}, OperatorHub is **curated and air-gapped** — the same
+**📌 Note:** On {{< param product_short >}}, OperatorHub is **curated and air-gapped** — the same
 model as the [Harbor image registry]({{< param dcs_docs_base_url >}}/registry/overview):
 only Operators the platform has vetted and mirrored are offered, and installation is a
 platform action, not something a tenant triggers themselves. That's why this lab never

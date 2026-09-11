@@ -110,7 +110,7 @@ session: 2
 ```
 
 {{< note >}}
-Provisioning storage and starting PostgreSQL for the first time takes a minute or two —
+**📌 Note:** Provisioning storage and starting PostgreSQL for the first time takes a minute or two —
 this is not stuck, the Operator is working through its own reconciliation steps
 (allocate storage, start the container, initialise the database, elect a primary). The
 check below polls until it's done, so there's nothing to do but wait and watch the lower

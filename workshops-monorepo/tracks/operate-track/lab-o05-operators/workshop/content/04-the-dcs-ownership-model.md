@@ -29,7 +29,7 @@ not as managed/aaS. The split is exact:
   is yours.
 
 {{< note >}}
-Contrast this with a managed database-as-a-service from a cloud provider, where the
+**📌 Note:** Contrast this with a managed database-as-a-service from a cloud provider, where the
 *provider* owns day-2 operations — sizing, patching, backup verification, incident
 response — for the instance itself, not just the software that runs it. On
 {{< param product_short >}}, that line sits one level up: the platform's
