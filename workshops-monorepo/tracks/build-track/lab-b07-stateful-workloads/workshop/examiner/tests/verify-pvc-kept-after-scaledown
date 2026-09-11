@@ -6,8 +6,17 @@ if [ "${want:-0}" -ne 2 ] 2>/dev/null; then
   echo "❌ The StatefulSet is set to ${want:-?} replicas, expected 2. Did 'oc scale statefulset/hello-dcs --replicas=2' run?" >&2
   exit 1
 fi
-if oc get pod hello-dcs-2 >/dev/null 2>&1; then
-  echo "❌ Pod 'hello-dcs-2' still exists — scale-down removes the HIGHEST ordinal first, so it should be gone. It may still be terminating; this check keeps retrying." >&2
+# Wait for the Pod to finish terminating. `oc scale` returns as soon as the spec is
+# updated, and graceful shutdown takes a few more seconds — CI runs a check once, so
+# the waiting has to happen in here rather than in the caller's retries.
+gone=""
+for _ in $(seq 1 24); do          # ~120s
+  if ! oc get pod hello-dcs-2 >/dev/null 2>&1; then gone=yes; break; fi
+  sleep 5
+done
+if [ -z "$gone" ]; then
+  phase=$(oc get pod hello-dcs-2 -o jsonpath='{.status.phase}' 2>/dev/null)
+  echo "❌ Pod 'hello-dcs-2' is still here after 2 minutes (phase=${phase:-?}). Scale-down removes the HIGHEST ordinal first, so it should be the one to go. Check: oc get statefulset hello-dcs" >&2
   exit 1
 fi
 phase=$(oc get pvc data-hello-dcs-2 -o jsonpath='{.status.phase}' 2>/dev/null)
