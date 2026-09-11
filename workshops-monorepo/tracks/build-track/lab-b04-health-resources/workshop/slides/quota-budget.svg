@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 320" font-family="sans-serif">
+  <rect x="0" y="0" width="820" height="320" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="410" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">Four Pods, One Shared Budget</text>
+
+  <!-- Pods stacking in -->
+  <g font-size="11" fill="#1b4a86">
+    <rect x="40" y="60" width="130" height="46" rx="6" fill="#e8f0f7" stroke="#3b7dd8"/>
+    <text x="105" y="80" text-anchor="middle" font-weight="bold">Pod 1</text>
+    <text x="105" y="95" text-anchor="middle" fill="#5a6b7b">limit: 512Mi / 500m</text>
+
+    <rect x="40" y="116" width="130" height="46" rx="6" fill="#e8f0f7" stroke="#3b7dd8"/>
+    <text x="105" y="136" text-anchor="middle" font-weight="bold">Pod 2</text>
+    <text x="105" y="151" text-anchor="middle" fill="#5a6b7b">limit: 512Mi / 500m</text>
+
+    <rect x="40" y="172" width="130" height="46" rx="6" fill="#e8f0f7" stroke="#3b7dd8"/>
+    <text x="105" y="192" text-anchor="middle" font-weight="bold">Pod 3</text>
+    <text x="105" y="207" text-anchor="middle" fill="#5a6b7b">limit: 512Mi / 500m</text>
+
+    <rect x="40" y="228" width="130" height="46" rx="6" fill="#e8f0f7" stroke="#3b7dd8"/>
+    <text x="105" y="248" text-anchor="middle" font-weight="bold">Pod 4</text>
+    <text x="105" y="263" text-anchor="middle" fill="#5a6b7b">limit: 512Mi / 500m</text>
+  </g>
+
+  <!-- arrow into the bucket -->
+  <g stroke="#5a6b7b" stroke-width="2" fill="#5a6b7b">
+    <line x1="172" y1="164" x2="270" y2="164"/><polygon points="270,164 262,160 262,168"/>
+  </g>
+
+  <!-- the budget bucket -->
+  <rect x="290" y="56" width="220" height="224" rx="8" fill="#ffffff" stroke="#8aa0b4" stroke-width="2"/>
+  <text x="400" y="80" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b2b3a">medium budget</text>
+  <text x="400" y="98" text-anchor="middle" font-size="11" fill="#5a6b7b">ResourceQuota, this namespace</text>
+
+  <!-- fill level: 100% full, tinted to show "at capacity" -->
+  <rect x="300" y="112" width="200" height="158" fill="#f7e9c9" stroke="#c9a94a"/>
+  <text x="400" y="150" text-anchor="middle" font-size="14" font-weight="bold" fill="#8a6d1a">limits.memory</text>
+  <text x="400" y="170" text-anchor="middle" font-size="18" font-weight="bold" fill="#8a6d1a">2Gi / 2Gi</text>
+  <text x="400" y="188" text-anchor="middle" font-size="11" fill="#8a6d1a">100% used</text>
+
+  <text x="400" y="216" text-anchor="middle" font-size="14" font-weight="bold" fill="#8a6d1a">limits.cpu</text>
+  <text x="400" y="236" text-anchor="middle" font-size="18" font-weight="bold" fill="#8a6d1a">2 / 2</text>
+  <text x="400" y="254" text-anchor="middle" font-size="11" fill="#8a6d1a">100% used</text>
+
+  <!-- output side: requests, well under -->
+  <g stroke="#5a6b7b" stroke-width="2" fill="#5a6b7b">
+    <line x1="510" y1="164" x2="580" y2="164"/><polygon points="580,164 572,160 572,168"/>
+  </g>
+  <rect x="590" y="90" width="196" height="150" rx="6" fill="#eef3ee" stroke="#4a9a5a"/>
+  <text x="688" y="114" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c6a3a">requests, same 4 Pods</text>
+  <text x="688" y="140" text-anchor="middle" font-size="16" font-weight="bold" fill="#2c6a3a">512Mi / 2Gi</text>
+  <text x="688" y="158" text-anchor="middle" font-size="11" fill="#2c6a3a">25% used</text>
+  <text x="688" y="182" text-anchor="middle" font-size="16" font-weight="bold" fill="#2c6a3a">200m / 2</text>
+  <text x="688" y="200" text-anchor="middle" font-size="11" fill="#2c6a3a">10% used</text>
+  <text x="688" y="222" text-anchor="middle" font-size="10" fill="#5a6b7b">scheduling headroom</text>
+
+  <text x="410" y="304" text-anchor="middle" font-size="11" fill="#5a6b7b">No Pod sets its own resources yet, so each draws the namespace's LimitRange defaults — the same default, times four replicas, is what fills the budget.</text>
+</svg>

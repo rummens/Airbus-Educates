@@ -1,0 +1,13 @@
+#!/bin/bash
+# Verify one Pod is being held out of rotation by the deliberately broken readiness probe.
+set -uo pipefail
+
+desired=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+
+if [ "${ready:-0}" -ge "${desired:-4}" ] 2>/dev/null; then
+  echo "❌ hello-dcs still shows ${ready:-0}/${desired:-4} ready — expected fewer once the broken readiness probe takes effect. Did the 'oc set probe ... /this-path-does-not-exist' step run? It needs ~20s to roll out and start failing." >&2
+  exit 1
+fi
+
+echo "✅ hello-dcs is at ${ready:-0}/${desired:-4} ready — the Pod failing readiness is held out of rotation."

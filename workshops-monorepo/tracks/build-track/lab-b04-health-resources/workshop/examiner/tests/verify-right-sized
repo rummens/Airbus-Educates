@@ -1,0 +1,28 @@
+#!/bin/bash
+# Verify hello-dcs is fully ready with explicit, right-sized (not oversized) resources.
+set -uo pipefail
+
+desired=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+if [ "${ready:-0}" -lt "${desired:-4}" ] 2>/dev/null; then
+  echo "❌ hello-dcs is at ${ready:-0}/${desired:-4} ready — did 'envsubst < deployment-probes.yaml | oc apply -f -' run and finish rolling out? This check keeps retrying." >&2
+  exit 1
+fi
+
+cpu_req=$(oc get deployment hello-dcs -o jsonpath='{.spec.template.spec.containers[0].resources.requests.cpu}' 2>/dev/null)
+if [ -z "$cpu_req" ]; then
+  echo "❌ The container sets no cpu request — expected an explicit, right-sized one (50m in the manifest), not a reliance on the LimitRange defaults." >&2
+  exit 1
+fi
+
+cpu_num="${cpu_req%m}"
+if [ "$cpu_num" = "$cpu_req" ]; then
+  # No 'm' suffix - value is whole cores, convert to millicores.
+  cpu_num=$((cpu_req * 1000))
+fi
+if [ "${cpu_num:-0}" -gt 200 ] 2>/dev/null; then
+  echo "❌ The cpu request is '$cpu_req', which is not meaningfully smaller than the oversized 700m. Expected the manifest's modest 50m." >&2
+  exit 1
+fi
+
+echo "✅ hello-dcs is ${ready}/${desired} ready with an explicit, right-sized cpu request of '$cpu_req'."

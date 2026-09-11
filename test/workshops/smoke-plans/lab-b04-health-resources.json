@@ -1,0 +1,27 @@
+{
+  "workshop": "lab-b04-health-resources",
+  "_note": "The quota arithmetic is the lab: four Pods on the namespace LimitRange defaults fill the medium budget's limit side exactly, then the oversized manifest is refused at admission. imagePullPolicy=Always forces a re-pull of the mutable samples/hello-dcs:1.0 tag. The readiness-break steps need ~20s each to roll out and start failing, so their checks poll.",
+  "steps": [
+    {"run": "envsubst < deployment-base.yaml | oc apply -f - && oc apply -f service.yaml && oc patch deployment/hello-dcs --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/imagePullPolicy\",\"value\":\"Always\"}]' && oc rollout status deploy/hello-dcs --timeout=180s"},
+    {"check": "verify-app-deployed"},
+    {"run": "oc scale deploy/hello-dcs --replicas=4 && oc rollout status deploy/hello-dcs --timeout=180s"},
+    {"check": "verify-scaled", "args": ["4"]},
+    {"check": "verify-quota-present"},
+    {"run": "envsubst < deployment-oversized.yaml | oc apply -f -"},
+    {"check": "verify-oversized-pending"},
+    {"run": "oc get events --sort-by=.lastTimestamp | tail -20"},
+    {"check": "verify-quota-event-visible"},
+    {"run": "envsubst < deployment-probes.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=240s"},
+    {"check": "verify-right-sized"},
+    {"check": "verify-quota-headroom"},
+    {"check": "verify-probes-configured"},
+    {"check": "verify-endpoints-ready"},
+    {"run": "oc set probe deployment/hello-dcs --readiness --get-url=http://:8080/this-path-does-not-exist"},
+    {"check": "verify-readiness-broken"},
+    {"check": "verify-endpoints-reduced"},
+    {"run": "envsubst < deployment-probes.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=240s"},
+    {"check": "verify-readiness-restored"},
+    {"run": "oc get pods -l app=hello-dcs -o name | head -n 1 > /tmp/deleted-pod.txt && oc delete \"$(cat /tmp/deleted-pod.txt)\""},
+    {"check": "verify-pod-replaced"}
+  ]
+}

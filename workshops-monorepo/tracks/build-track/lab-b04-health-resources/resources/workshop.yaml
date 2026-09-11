@@ -1,0 +1,100 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b04-health-resources
+  labels:
+    academy.dcs/track: build
+    academy.dcs/order: "40"
+    # No Route/Ingress created here (in-cluster only) → dev namespace.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/icon: gauge
+    academy.dcs/details: |
+      **One replica with no probes and no resource numbers is a demo, not a service.**
+
+      You scale the sample app to four replicas and read what that actually costs against
+      your namespace budget. Then you apply a deliberately oversized manifest, watch the
+      **quota reject it**, and fix it by right-sizing `requests` and `limits`.
+
+      With the app fitting its budget, you add **liveness** and **readiness** probes, break
+      readiness on purpose to see one replica quarantined while the others keep serving,
+      and finally delete a Pod by hand to watch the platform put it back.
+
+      > **💡 Tip:** your session namespace carries a real quota, sized so you can hit it on
+      > purpose. Hitting it is the lesson, not an accident.
+spec:
+  title: "Health & Resources"
+  description: Scale the sample app, hit your namespace quota on purpose, right-size its requests and limits, then give it liveness and readiness probes and watch the platform keep it alive.
+  duration: 25m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Build-and-Run"
+  publish:
+    image: "$(image_repository)/lab-b04-health-resources-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b04-health-resources/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b04-health-resources/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b04-health-resources/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/build-track/lab-b04-health-resources"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b04-health-resources-files:$(workshop_version)"
+    {{- end }}
+  session:
+    # DCS_REGISTRY: single terminal source for the sample-image registry (Plane 3).
+    # Keep in sync with dcs_registry in workshop/config.yaml. The exercise manifests
+    # carry ${DCS_REGISTRY} and are applied via `envsubst < f.yaml | oc apply -f -`.
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      # medium is deliberately tight: four Pods on the LimitRange defaults fill the
+      # limit side of this budget exactly, and the oversized manifest (page 02) is
+      # sized to exceed it. The budget IS the lesson, not an obstacle.
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      # A slide deck (workshop/slides/index.html renders workshop/slides/slides.md)
+      # gives a visual, one-slide-per-page overview. Each content page links to its
+      # slide with /slides/#<id>. The same files are served outside a session by the
+      # portal's Slides button.
+      slides:
+        enabled: true
+      examiner:
+        enabled: true
+      # The namespace budget IS the quota being taught, so the learner must work
+      # directly against it, not against a vcluster's separately-budgeted namespace.
+      vcluster:
+        enabled: false
+    # Feedback tab is pre-declared so it is ALWAYS visible, not created only on the
+    # last page. Completion/trophies still fire solely when the form is SUBMITTED
+    # (portal POST /feedback), so a permanently-visible tab does not mark the lab
+    # done early. Page 98 opens this tab; it no longer creates it.
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-b04-health-resources&session=$(session_namespace)"

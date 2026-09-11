@@ -1,0 +1,26 @@
+# The starting point: hello-dcs as one replica, with NO resources block and NO
+# probes — the way an app usually arrives. Because it sets no requests/limits of
+# its own, every Pod it creates draws the namespace LimitRange defaults, which is
+# what makes the quota arithmetic on page 01 visible.
+# Apply with: envsubst < deployment-base.yaml | oc apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-dcs
+  template:
+    metadata:
+      labels:
+        app: hello-dcs
+    spec:
+      containers:
+      - name: hello-dcs
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        ports:
+        - containerPort: 8080

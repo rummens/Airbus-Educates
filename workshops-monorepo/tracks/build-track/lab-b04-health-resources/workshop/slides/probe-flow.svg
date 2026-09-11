@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 300" font-family="sans-serif">
+  <rect x="0" y="0" width="820" height="300" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="410" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">Same Pod, Two Different Questions</text>
+
+  <!-- Pod -->
+  <rect x="30" y="110" width="140" height="80" rx="6" fill="#ffffff" stroke="#8aa0b4" stroke-width="2"/>
+  <text x="100" y="140" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b2b3a">Pod</text>
+  <text x="100" y="158" text-anchor="middle" font-size="10" fill="#5a6b7b">hello-dcs</text>
+  <text x="100" y="174" text-anchor="middle" font-size="10" fill="#5a6b7b">container</text>
+
+  <!-- Readiness path -->
+  <g stroke="#3b7dd8" stroke-width="2" fill="#3b7dd8">
+    <line x1="172" y1="130" x2="250" y2="80"/><polygon points="250,80 240,80 244,70"/>
+  </g>
+  <rect x="252" y="40" width="220" height="72" rx="6" fill="#e8f0f7" stroke="#3b7dd8"/>
+  <text x="362" y="62" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b4a86">readinessProbe: GET /</text>
+  <text x="362" y="80" text-anchor="middle" font-size="10" fill="#1b4a86">"can it take traffic right now?"</text>
+  <text x="362" y="96" text-anchor="middle" font-size="10" fill="#5a6b7b">checked repeatedly, whole Pod life</text>
+
+  <g stroke="#3b7dd8" stroke-width="2" fill="#3b7dd8">
+    <line x1="472" y1="76" x2="560" y2="76"/><polygon points="560,76 552,72 552,80"/>
+  </g>
+  <rect x="562" y="40" width="220" height="72" rx="6" fill="#eef3ee" stroke="#4a9a5a"/>
+  <text x="672" y="62" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c6a3a">Service Endpoints</text>
+  <text x="672" y="80" text-anchor="middle" font-size="10" fill="#2c6a3a">fail → removed from endpoints</text>
+  <text x="672" y="96" text-anchor="middle" font-size="10" fill="#2c6a3a">pass → added back, gets traffic</text>
+
+  <!-- Liveness path -->
+  <g stroke="#c9822a" stroke-width="2" fill="#c9822a">
+    <line x1="172" y1="170" x2="250" y2="220"/><polygon points="250,220 240,220 244,230"/>
+  </g>
+  <rect x="252" y="188" width="220" height="72" rx="6" fill="#faf1e2" stroke="#c9822a"/>
+  <text x="362" y="210" text-anchor="middle" font-size="12" font-weight="bold" fill="#8a5a10">livenessProbe: GET /healthz</text>
+  <text x="362" y="228" text-anchor="middle" font-size="10" fill="#8a5a10">"is it still alive in there?"</text>
+  <text x="362" y="244" text-anchor="middle" font-size="10" fill="#5a6b7b">checked repeatedly, whole Pod life</text>
+
+  <g stroke="#c9822a" stroke-width="2" fill="#c9822a">
+    <line x1="472" y1="224" x2="560" y2="224"/><polygon points="560,224 552,220 552,228"/>
+  </g>
+  <rect x="562" y="188" width="220" height="72" rx="6" fill="#faf1e2" stroke="#c9822a"/>
+  <text x="672" y="210" text-anchor="middle" font-size="12" font-weight="bold" fill="#8a5a10">kubelet</text>
+  <text x="672" y="228" text-anchor="middle" font-size="10" fill="#8a5a10">fail repeatedly → container killed</text>
+  <text x="672" y="244" text-anchor="middle" font-size="10" fill="#8a5a10">and restarted in place</text>
+
+  <text x="410" y="288" text-anchor="middle" font-size="11" fill="#5a6b7b">Readiness gates traffic without touching the container; liveness recovers a hung container by restarting it.</text>
+</svg>

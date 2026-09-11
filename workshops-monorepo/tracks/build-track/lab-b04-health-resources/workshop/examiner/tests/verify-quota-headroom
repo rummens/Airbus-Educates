@@ -1,0 +1,29 @@
+#!/bin/bash
+# After right-sizing, the namespace budget must have real headroom on the limit side —
+# the whole point of the exercise (it was Used == Hard two pages earlier).
+set -uo pipefail
+q=$(oc get resourcequota -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+if [ -z "$q" ]; then
+  echo "❌ No ResourceQuota in this namespace, so there is no budget to read. A 'medium' budget session should always carry one." >&2
+  exit 1
+fi
+used=$(oc get resourcequota "$q" -o jsonpath='{.status.used.limits\.memory}' 2>/dev/null)
+hard=$(oc get resourcequota "$q" -o jsonpath='{.status.hard.limits\.memory}' 2>/dev/null)
+if [ -z "$used" ] || [ -z "$hard" ]; then
+  echo "❌ Quota '$q' does not track limits.memory (used='${used:-<none>}' hard='${hard:-<none>}'), so headroom cannot be read here." >&2
+  exit 1
+fi
+to_mi() {                       # normalise Ki/Mi/Gi (and bare bytes) to MiB
+  case "$1" in
+    *Gi) echo $(( ${1%Gi} * 1024 )) ;;
+    *Mi) echo "${1%Mi}" ;;
+    *Ki) echo $(( ${1%Ki} / 1024 )) ;;
+    *)   echo $(( ${1:-0} / 1048576 )) ;;
+  esac
+}
+u=$(to_mi "$used"); h=$(to_mi "$hard")
+if [ "${u:-0}" -ge "${h:-0}" ] 2>/dev/null; then
+  echo "❌ limits.memory is still ${used} of ${hard} — no headroom. Did 'envsubst < deployment-probes.yaml | oc apply -f -' finish rolling out? The right-sized template should leave about three quarters of the budget free." >&2
+  exit 1
+fi
+echo "✅ limits.memory is ${used} of ${hard} — the same four replicas now leave real headroom."

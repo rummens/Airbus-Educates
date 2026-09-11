@@ -1,0 +1,15 @@
+# A stable in-cluster address for the app, so the readiness page has an endpoint
+# list to watch: a Pod that passes its readiness probe joins this Service's
+# endpoints, and one that fails is taken out of them.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  selector:
+    app: hello-dcs
+  ports:
+  - port: 8080
+    targetPort: 8080
