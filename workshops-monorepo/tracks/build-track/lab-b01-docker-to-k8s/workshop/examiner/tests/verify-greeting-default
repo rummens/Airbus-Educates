@@ -1,5 +1,8 @@
 #!/bin/bash
-# Before the ConfigMap is wired in, GREETING must be unset in the container.
+# Before the ConfigMap is wired in, the app must still be serving the greeting its
+# IMAGE ships with — not the migrated compose value. (The image sets GREETING itself,
+# so the variable is never empty; what matters is whose value it is.)
+MIGRATED="Migrated from docker-compose"
 if ! oc get deploy hello-dcs >/dev/null 2>&1; then
   echo "❌ Deployment 'hello-dcs' not found — apply it on the previous page first." >&2
   exit 1
@@ -9,9 +12,8 @@ if oc get deploy hello-dcs -o yaml 2>/dev/null | grep -q "hello-dcs-config"; the
   exit 0
 fi
 val=$(oc exec deploy/hello-dcs -- sh -c 'printf "%s" "${GREETING:-}"' 2>/dev/null)
-if [ -z "$val" ]; then
-  echo "✅ GREETING is not set in the container — the app is on its built-in default."
-  exit 0
+if [ "$val" = "$MIGRATED" ]; then
+  echo "❌ The container already serves '$MIGRATED', so the value did not come from the image. Unset the override with: oc set env deploy/hello-dcs GREETING-" >&2
+  exit 1
 fi
-echo "❌ Expected GREETING to be unset at this point, found '$val'. If you set it by hand, unset it with: oc set env deploy/hello-dcs GREETING-" >&2
-exit 1
+echo "✅ The app is still on its image default greeting ('${val:-<empty>}') — the compose value has not arrived yet."

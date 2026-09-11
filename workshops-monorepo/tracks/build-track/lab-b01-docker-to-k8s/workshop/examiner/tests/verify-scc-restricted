@@ -6,8 +6,10 @@ if [ -z "$scc" ]; then
   echo "⚠️ No SCC annotation found on the hello-dcs Pod. Vanilla Kubernetes has no SCCs, so this check only means something on OpenShift." >&2
   exit 1
 fi
+# The name varies by cluster: 'restricted-v2' on stock OpenShift, 'educates-restricted'
+# where Educates supplies its own. Either is the restricted posture this page describes.
 case "$scc" in
-  restricted*)
+  *restricted*)
     echo "✅ The Pod was admitted under the '$scc' SCC — no root, no privileged containers."
     exit 0 ;;
 esac

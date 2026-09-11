@@ -423,8 +423,15 @@ def main():
     p.add_argument("--vcluster", action="store_true", help="run in a per-session vcluster")
     p.add_argument("--image", default="ghcr.io/rummens/dcs-workshop-base:develop",
                    help="workshop container image; pass '' to use the default base-environment")
-    p.add_argument("--registry", default="registry.dcs.aircloud.common.airbusds.corp/dcs-internal-images/dcs-academy",
-                   help="DCS_REGISTRY value for exercise image refs; pass '' to omit")
+    # SMOKE_REGISTRY lets a cluster that cannot reach the real Harbor (CRC, any
+    # local run) point the exercise manifests at a reachable mirror without adding
+    # a flag to smoke_test.py / run_track.sh, which do not take one:
+    #   export SMOKE_REGISTRY=ghcr.io/rummens
+    p.add_argument("--registry",
+                   default=os.environ.get("SMOKE_REGISTRY")
+                   or "registry.dcs.aircloud.common.airbusds.corp/dcs-internal-images/dcs-academy",
+                   help="DCS_REGISTRY value for exercise image refs; pass '' to omit "
+                        "(default: $SMOKE_REGISTRY, else the DCS Harbor)")
     p.add_argument("--wait", type=int, default=300, help="seconds to wait for Running (0=don't)")
     p.add_argument("--delete", action="store_true", help="tear down instead of deploy")
     p.add_argument("--throwaway", action="store_true",

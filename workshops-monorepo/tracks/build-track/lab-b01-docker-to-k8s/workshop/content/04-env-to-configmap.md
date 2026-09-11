@@ -23,20 +23,24 @@ name: Slides
 url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/configmap
 ```
 
-## Before: nothing is set
+## Before: whose value is it?
 
-The Deployment you applied never set `GREETING`, so check what the container actually sees
-right now:
+The Deployment you applied set no configuration at all. Check what the container actually
+sees right now:
 
 ```terminal:execute
-command: oc exec deploy/hello-dcs -- sh -c 'echo "GREETING=[${GREETING:-<unset>}]"'
+command: oc exec deploy/hello-dcs -- printenv GREETING
 ```
 
-You should see `GREETING=[<unset>]` — the app is running on its built-in default.
+You get a greeting — but it is the one **baked into the image** with a `Dockerfile` `ENV`
+line, not the one the compose file set.
+
+That is the problem with configuration living inside an image: changing it means building a
+new image.
 
 ```examiner:execute-test
 name: verify-greeting-default
-title: Verify GREETING is not set in the container yet
+title: Verify the app is still on its image default greeting
 timeout: 10
 retries: 3
 delay: 2
