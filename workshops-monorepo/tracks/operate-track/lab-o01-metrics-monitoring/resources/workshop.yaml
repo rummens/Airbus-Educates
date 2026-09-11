@@ -88,6 +88,27 @@ spec:
       - apiGroups: ["monitoring.coreos.com"]
         resources: ["servicemonitors", "podmonitors", "prometheusrules"]
         verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    # The metrics query endpoint authorizes each query by asking "may this identity GET
+    # PODS in the namespace being asked about". The session role does grant that, but the
+    # proxy caches its decisions, and a query issued before the session's RBAC has settled
+    # is refused — and then stays refused for the cache's lifetime. An explicit view
+    # binding makes the answer unambiguous from the first request.
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: metrics-reader
+        namespace: $(session_namespace)
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: view
+      subjects:
+      - kind: ServiceAccount
+        name: $(service_account)
+        namespace: $(workshop_namespace)
+      - apiGroup: rbac.authorization.k8s.io
+        kind: Group
+        name: system:serviceaccounts:$(session_namespace)
     - apiVersion: rbac.authorization.k8s.io/v1
       kind: RoleBinding
       metadata:

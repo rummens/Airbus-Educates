@@ -21,7 +21,7 @@ for _ in $(seq 1 18); do          # ~180s
   sleep 10
 done
 case "$body" in
-  *Forbidden*) echo "❌ The query endpoint refused the request for your OWN namespace. It authorizes on 'get pods' there, so this points at the session's permissions rather than at monitoring." >&2 ;;
+  *Forbidden*) echo "❌ The query endpoint still refuses the request for your OWN namespace after 3 minutes. It authorizes on 'get pods' there and caches that decision, so a refusal from before the session's RBAC settled can linger — but not this long. Check: oc auth can-i get pods" >&2 ;;
   *'"result":[]'*) echo "❌ The query succeeded but returned no series after 3 minutes. The ServiceMonitor is probably selecting nothing (check its selector and port name), or user-workload monitoring is not running on this cluster." >&2 ;;
   *) echo "❌ No usable answer from $URL. Got: $(printf '%s' "${body:-<empty>}" | cut -c1-200)" >&2 ;;
 esac
