@@ -1,0 +1,20 @@
+#!/bin/bash
+# Both replicas ready, and named by ordinal rather than by generated suffix.
+set -uo pipefail
+want=$(oc get statefulset hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+if [ -z "$want" ]; then
+  echo "❌ StatefulSet 'hello-dcs' not found. Did 'envsubst < statefulset.yaml | oc apply -f -' run?" >&2
+  exit 1
+fi
+ready=$(oc get statefulset hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+if [ "${ready:-0}" -lt "$want" ] 2>/dev/null; then
+  echo "❌ ${ready:-0} of ${want} replicas are ready. A StatefulSet starts them IN ORDER — hello-dcs-0 must be Ready before hello-dcs-1 is created — so this is slower than a Deployment. This check keeps retrying." >&2
+  exit 1
+fi
+for i in $(seq 0 $(( want - 1 ))); do
+  if ! oc get pod "hello-dcs-$i" >/dev/null 2>&1; then
+    echo "❌ Expected a Pod named 'hello-dcs-$i' (ordinal names are the point), but it does not exist." >&2
+    exit 1
+  fi
+done
+echo "✅ ${ready} replicas ready, named hello-dcs-0 … hello-dcs-$(( want - 1 )) by ordinal."

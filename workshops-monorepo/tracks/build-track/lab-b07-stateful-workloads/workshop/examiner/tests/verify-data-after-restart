@@ -1,0 +1,17 @@
+#!/bin/bash
+# The replacement Pod must have re-attached the SAME claim, with the marker the
+# previous Pod wrote — nothing restored it, the claim belongs to the ordinal.
+set -uo pipefail
+val=$(oc exec hello-dcs-0 -- cat /opt/app-root/src/data/owner.txt 2>/dev/null | tr -d '\r')
+if [ -z "$val" ]; then
+  echo "❌ hello-dcs-0's volume has no marker file. Expected the one written before the delete — an empty volume means a NEW claim was bound instead of data-hello-dcs-0." >&2
+  exit 1
+fi
+case "$val" in
+  *hello-dcs-0*)
+    claim=$(oc get pod hello-dcs-0 -o jsonpath='{.spec.volumes[?(@.name=="data")].persistentVolumeClaim.claimName}' 2>/dev/null)
+    echo "✅ hello-dcs-0 came back with claim ${claim:-data-hello-dcs-0} and its data intact: '${val}'."
+    exit 0 ;;
+esac
+echo "❌ hello-dcs-0's volume says '${val}', expected the marker naming hello-dcs-0. A different value means it was bound to another replica's claim." >&2
+exit 1

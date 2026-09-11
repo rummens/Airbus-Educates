@@ -1,0 +1,90 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-b07-stateful-workloads
+  labels:
+    academy.dcs/track: build
+    academy.dcs/order: "70"
+    # In-cluster only, no Route → dev namespace.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/icon: database
+    academy.dcs/details: |
+      **A Deployment's replicas are interchangeable. Some workloads are not.**
+
+      A database replica, a queue broker, anything with its own data on disk: it needs the
+      **same name** and the **same volume** back after a restart.
+
+      That is a **StatefulSet**: ordered names, a **PersistentVolumeClaim per replica**, a
+      per-Pod DNS record, and a rollout that goes one Pod at a time.
+
+      You build one, write a different marker into each replica's own volume, delete a Pod
+      and watch the same identity and the same data come back — then scale down and find
+      the volume deliberately left behind.
+
+      > **⚠️ Watch out:** scaling a StatefulSet down does **not** delete its volumes. That
+      > is a feature, and it is also how you quietly fill a storage quota.
+spec:
+  title: "Stateful Workloads"
+  description: Build a StatefulSet with a volume per replica — stable names, per-Pod DNS, ordered rollout — then prove identity and data survive a Pod deletion, and see what scaling down leaves behind.
+  duration: 25m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "B-Build-and-Run"
+  publish:
+    image: "$(image_repository)/lab-b07-stateful-workloads-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b07-stateful-workloads/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b07-stateful-workloads/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/build-track/lab-b07-stateful-workloads/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/build-track/lab-b07-stateful-workloads"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-b07-stateful-workloads-files:$(workshop_version)"
+    {{- end }}
+  session:
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    namespaces:
+      # Two replicas, each with its own 1Gi PVC, plus one more on scale-up: medium
+      # covers it. The storage side of the budget is read in the lab.
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      slides:
+        enabled: true
+      examiner:
+        enabled: true
+      # Real PVCs from the cluster's own storage class, and per-Pod cluster DNS — both
+      # belong to the session namespace, not to a nested cluster.
+      vcluster:
+        enabled: false
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-b07-stateful-workloads&session=$(session_namespace)"

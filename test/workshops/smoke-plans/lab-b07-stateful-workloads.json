@@ -1,0 +1,31 @@
+{
+  "workshop": "lab-b07-stateful-workloads",
+  "_note": "Volumes come from the cluster's default storage class; the claim template names none, so the lab is portable. On a WaitForFirstConsumer class a claim stays Pending until its Pod is scheduled, which is why the PVC checks poll. verify-pvc-kept-after-scaledown asserts the claim SURVIVES scale-down (the Kubernetes default) — a cluster configured with a persistentVolumeClaimRetentionPolicy that deletes it makes the check fail loudly, which is correct since the page's claim would not hold there. imagePullPolicy is not patched here: a StatefulSet's Pod template edit would trigger an ordered rollout mid-lab.",
+  "steps": [
+    {"run": "oc apply -f service-headless.yaml"},
+    {"check": "verify-headless-service"},
+    {"run": "envsubst < statefulset.yaml | oc apply -f - && oc rollout status statefulset/hello-dcs --timeout=300s"},
+    {"check": "verify-statefulset-ready"},
+    {"run": "oc get pods -l app=hello-dcs -o custom-columns=NAME:.metadata.name,STATUS:.status.phase"},
+    {"run": "oc get pvc -o custom-columns=NAME:.metadata.name,STATUS:.status.phase,CAPACITY:.status.capacity.storage"},
+    {"check": "verify-pvc-per-replica"},
+    {"run": "getent hosts hello-dcs-0.hello-dcs.$(oc project -q).svc.cluster.local"},
+    {"check": "verify-pod-dns-identity"},
+    {"run": "for i in 0 1; do oc exec hello-dcs-$i -- sh -c 'echo \"written by $HOSTNAME\" > /opt/app-root/src/data/owner.txt'; done; echo wrote markers"},
+    {"run": "for i in 0 1; do printf 'hello-dcs-%s: ' \"$i\"; oc exec hello-dcs-$i -- cat /opt/app-root/src/data/owner.txt; done"},
+    {"check": "verify-marker-per-replica"},
+    {"run": "oc get pod hello-dcs-0 -o custom-columns=NAME:.metadata.name,UID:.metadata.uid,IP:.status.podIP"},
+    {"run": "oc delete pod hello-dcs-0 && oc rollout status statefulset/hello-dcs --timeout=180s"},
+    {"check": "verify-identity-after-restart"},
+    {"run": "oc exec hello-dcs-0 -- cat /opt/app-root/src/data/owner.txt"},
+    {"check": "verify-data-after-restart"},
+    {"run": "oc scale statefulset/hello-dcs --replicas=3 && oc rollout status statefulset/hello-dcs --timeout=300s"},
+    {"check": "verify-scaled-up-with-pvc"},
+    {"run": "oc get pods,pvc -l app=hello-dcs"},
+    {"run": "oc scale statefulset/hello-dcs --replicas=2 && oc rollout status statefulset/hello-dcs --timeout=180s"},
+    {"run": "oc get pods -l app=hello-dcs && oc get pvc"},
+    {"check": "verify-pvc-kept-after-scaledown"},
+    {"run": "oc describe quota"},
+    {"check": "verify-storage-quota-read"}
+  ]
+}

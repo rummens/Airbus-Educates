@@ -1,0 +1,23 @@
+#!/bin/bash
+# Each replica must have written ITS OWN name into ITS OWN volume. If the replicas
+# shared one volume, the second write would have overwritten the first and both would
+# read the same value — so this check is what proves the volumes are separate.
+set -uo pipefail
+want=$(oc get statefulset hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+want="${want:-2}"
+seen=""
+for i in $(seq 0 $(( want - 1 ))); do
+  pod="hello-dcs-$i"
+  val=$(oc exec "$pod" -- cat /opt/app-root/src/data/owner.txt 2>/dev/null | tr -d '\r')
+  if [ -z "$val" ]; then
+    echo "❌ ${pod} has no marker at /opt/app-root/src/data/owner.txt. Did the write loop above run? If it failed with 'Permission denied', the volume is root-owned — the manifest's fsGroup: 1001 is what fixes that." >&2
+    exit 1
+  fi
+  case "$val" in
+    *"$pod"*) ;;
+    *) echo "❌ ${pod}'s volume says '${val}', which does not name that Pod. If two replicas report the same owner they are sharing one volume, which volumeClaimTemplates is supposed to prevent." >&2
+       exit 1 ;;
+  esac
+  seen="$seen $val"
+done
+echo "✅ Every replica wrote its own name into its own volume:${seen}"

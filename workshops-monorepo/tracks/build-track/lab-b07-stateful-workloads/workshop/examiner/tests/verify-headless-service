@@ -1,0 +1,13 @@
+#!/bin/bash
+# A StatefulSet's per-Pod DNS comes from a HEADLESS Service: no cluster IP.
+set -uo pipefail
+cip=$(oc get svc hello-dcs -o jsonpath='{.spec.clusterIP}' 2>/dev/null)
+if [ -z "$cip" ]; then
+  echo "❌ Service 'hello-dcs' not found. Did 'oc apply -f service-headless.yaml' run? The StatefulSet names it in spec.serviceName, so it has to exist first." >&2
+  exit 1
+fi
+if [ "$cip" != "None" ]; then
+  echo "❌ Service 'hello-dcs' has cluster IP '${cip}', expected 'None'. Without clusterIP: None there are no per-Pod DNS records and the replicas have no stable names." >&2
+  exit 1
+fi
+echo "✅ The headless Service 'hello-dcs' exists with no cluster IP — per-Pod DNS records can be created."

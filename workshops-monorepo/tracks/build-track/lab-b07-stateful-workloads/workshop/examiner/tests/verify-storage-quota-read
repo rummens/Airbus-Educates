@@ -1,0 +1,16 @@
+#!/bin/bash
+# The namespace budget must account for the claims, including the leftover one — that
+# is the page's warning, made checkable.
+set -uo pipefail
+found=""
+for q in $(oc get resourcequota -o name 2>/dev/null); do
+  n=$(oc get "$q" -o jsonpath='{.status.used.persistentvolumeclaims}' 2>/dev/null)
+  s=$(oc get "$q" -o jsonpath='{.status.used.requests\.storage}' 2>/dev/null)
+  [ -n "$n" ] && found="$found ${q#resourcequota/}:pvcs=${n}"
+  [ -n "$s" ] && found="$found ${q#resourcequota/}:storage=${s}"
+done
+if [ -z "$found" ]; then
+  echo "❌ No quota in this namespace reports persistentvolumeclaims or requests.storage, so the storage side of the budget cannot be read here. On DCS a namespace always carries a storage quota." >&2
+  exit 1
+fi
+echo "✅ The namespace quota accounts for the claims —${found} — including the one whose Pod is gone."

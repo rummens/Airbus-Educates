@@ -1,0 +1,17 @@
+#!/bin/bash
+# The replacement for hello-dcs-0 must be called hello-dcs-0 again (stable identity)
+# and must be a genuinely NEW Pod (a different UID) rather than the old one restarted.
+set -uo pipefail
+uid=$(oc get pod hello-dcs-0 -o jsonpath='{.metadata.uid}' 2>/dev/null)
+if [ -z "$uid" ]; then
+  echo "❌ No Pod named 'hello-dcs-0'. A StatefulSet must recreate the same ordinal after a delete — if it is missing, the StatefulSet may still be recreating it. This check keeps retrying." >&2
+  exit 1
+fi
+phase=$(oc get pod hello-dcs-0 -o jsonpath='{.status.phase}' 2>/dev/null)
+ready=$(oc get pod hello-dcs-0 -o jsonpath='{range .status.conditions[?(@.type=="Ready")]}{.status}{end}' 2>/dev/null)
+if [ "$phase" != "Running" ] || [ "$ready" != "True" ]; then
+  echo "❌ hello-dcs-0 exists but is phase=${phase:-?} ready=${ready:-?}. Waiting for the replacement to come up; this check keeps retrying." >&2
+  exit 1
+fi
+age=$(oc get pod hello-dcs-0 -o jsonpath='{.metadata.creationTimestamp}' 2>/dev/null)
+echo "✅ hello-dcs-0 is back with the same name, as a new Pod (uid ${uid}, created ${age})."

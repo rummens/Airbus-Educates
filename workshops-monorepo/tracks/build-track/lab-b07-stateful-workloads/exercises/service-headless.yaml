@@ -1,0 +1,18 @@
+# The headless Service a StatefulSet needs. `clusterIP: None` is what makes cluster
+# DNS answer per Pod, which is what gives each replica a stable name:
+#   hello-dcs-0.hello-dcs.<namespace>.svc.cluster.local
+# The StatefulSet points at it by name through spec.serviceName.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  clusterIP: None
+  selector:
+    app: hello-dcs
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
