@@ -8,6 +8,6 @@ description: "See what your app is doing with metrics and logs, and learn the pl
 order: 25            # after Build & Run, before Security (30)
 icon: gauge          # FA-style icon name the portal vendors
 
-# Not published yet: the labs are still being authored. The catalog greys the track
-# out and refuses to start a session. Flip to `available` when they are ready.
-availability: disabled
+# Published 5 labs, all live-verified 2026-09-11. Every lab's examiner checks pass end to end against a real
+# cluster; see dcs-academy/planning/course-module-o.md.
+availability: available

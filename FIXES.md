@@ -6,6 +6,11 @@ synced `main`; workshop content is live on the next session start.
 
 ## 2026-09-11
 
+- **Two new tracks are live: Build & Run (10 labs) and Operate & Observe (5 labs).** Build & Run follows one app from a Docker mental model to an image you built, a registry that governs it, and a workload that is sized, autoscaled, reachable, stateful and survivable. Operate & Observe covers metrics, logs, RBAC and tenancy, DEV versus PROD namespaces, and operators. Every lab was run end to end against a real cluster before publishing.
+- The catalog remembers which tracks you had open. Opening a lab and coming back no longer collapses everything, so working through one track no longer means reopening it after every lab.
+- **DCS Academy** now appears in the OpenShift console's shortcuts menu, so you can get to the labs from the console without a link.
+- **From Docker to Kubernetes** explains Security Context Constraints properly now: you ask for a root container, read the platform's refusal, and find out which constraints your namespace may use and what that means for images you build.
+- The sample app now publishes its own metrics, which is what the new Metrics lab scrapes.
 - Optional labs are now marked as such in the catalog: they carry an **Optional** badge, they are left out of the "Lab 3 of 8" counter, and you no longer need them for a track's trophy. **What is DCS?** is the first lab marked this way — skip it and come back whenever you like.
 
 ## 2026-08-25
