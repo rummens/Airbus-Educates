@@ -30,9 +30,10 @@ minutes:
 
 ```terminal:execute
 command: |-
+  url="http://hello-dcs.$(oc project -q).svc:8080"
   end=$(( $(date +%s) + 120 ))
   for i in $(seq 1 8); do
-    ( while [ "$(date +%s)" -lt "$end" ]; do curl -s -o /dev/null "http://hello-dcs.$(oc project -q).svc:8080"; done ) &
+    ( while [ "$(date +%s)" -lt "$end" ]; do curl -s -o /dev/null "$url"; done ) &
   done
   wait
   echo "load finished"
@@ -40,6 +41,9 @@ command: |-
 
 What that does:
 
+- **`url=…` first** — the address is resolved **once**, before the loops start. Leaving
+  `$(oc project -q)` inside the loop would start an `oc` process per request, and the load
+  would be your terminal working hard rather than the app.
 - **`for i in $(seq 1 8)`** — eight independent loops, so requests overlap instead of
   queuing behind one another.
 - **`( … ) &`** — each loop runs in the background.

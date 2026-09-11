@@ -21,7 +21,7 @@
       "check": "verify-hpa-has-metrics"
     },
     {
-      "run": "end=$(( $(date +%s) + 120 )); for i in $(seq 1 8); do ( while [ \"$(date +%s)\" -lt \"$end\" ]; do curl -s -o /dev/null \"http://hello-dcs.$(oc project -q).svc:8080\"; done ) & done; wait; echo load finished"
+      "run": "url=\"http://hello-dcs.$(oc project -q).svc:8080\"; end=$(( $(date +%s) + 120 )); for i in $(seq 1 8); do ( while [ \"$(date +%s)\" -lt \"$end\" ]; do curl -s -o /dev/null \"$url\"; done ) & done; wait; echo load finished"
     },
     {
       "check": "verify-hpa-scaled-up"

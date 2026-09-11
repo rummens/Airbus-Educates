@@ -51,13 +51,15 @@ oc describe hpa hello-dcs
 No load tool needed: eight parallel request loops from the terminal will push a 100m request past a 50% target.
 
 ```
+url="http://hello-dcs.$(oc project -q).svc:8080"
 for i in $(seq 1 8); do
   ( while [ "$(date +%s)" -lt "$end" ]; do
-      curl -s -o /dev/null "http://hello-dcs.$(oc project -q).svc:8080"
+      curl -s -o /dev/null "$url"
     done ) &
 done; wait
 ```
 
+- Resolve the URL **once**, outside the loop: an `oc` call per request loads your terminal, not the app.
 - The HPA samples every ~15s and scales out at most once per interval.
 - Expect the first extra Pod after roughly half a minute.
 - Nobody runs `oc scale` — the HPA writes the count, the Deployment does the rest.
