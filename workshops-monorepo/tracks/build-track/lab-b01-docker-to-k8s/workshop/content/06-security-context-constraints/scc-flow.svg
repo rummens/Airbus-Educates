@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 430" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="430" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">One question, asked of every Pod, before anything is created</text>
+
+  <rect x="24" y="52" width="200" height="76" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="124" y="76" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b4a86">your Pod asks</text>
+  <text x="124" y="96" text-anchor="middle" font-size="10" fill="#1b4a86">runAsUser · privileged</text>
+  <text x="124" y="112" text-anchor="middle" font-size="10" fill="#1b4a86">capabilities · hostPath · ports</text>
+
+  <line x1="224" y1="90" x2="266" y2="90" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="266,90 258,86 258,94" fill="#5a6b7b"/>
+
+  <rect x="270" y="52" width="220" height="76" rx="8" fill="#fdf4e8" stroke="#c08a2d" stroke-width="2"/>
+  <text x="380" y="76" text-anchor="middle" font-size="12" font-weight="bold" fill="#7a5410">checked against every SCC</text>
+  <text x="380" y="96" text-anchor="middle" font-size="10" fill="#7a5410">your identity is allowed to use</text>
+  <text x="380" y="112" text-anchor="middle" font-size="10" fill="#7a5410">(you may read none of them)</text>
+
+  <line x1="490" y1="76" x2="532" y2="66" stroke="#4a9a5a" stroke-width="2"/>
+  <polygon points="532,66 524,64 525,72" fill="#4a9a5a"/>
+  <line x1="490" y1="104" x2="532" y2="150" stroke="#c0504d" stroke-width="2"/>
+  <polygon points="532,150 524,142 518,150" fill="#c0504d"/>
+
+  <rect x="536" y="40" width="200" height="66" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="636" y="62" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c6a3a">one admits it</text>
+  <text x="636" y="80" text-anchor="middle" font-size="10" fill="#2c6a3a">the Pod is stamped with that SCC</text>
+  <text x="636" y="96" text-anchor="middle" font-size="10" fill="#2c6a3a">and given a UID to run as</text>
+
+  <rect x="536" y="120" width="200" height="66" rx="8" fill="#fdeeee" stroke="#c0504d" stroke-width="2"/>
+  <text x="636" y="142" text-anchor="middle" font-size="12" font-weight="bold" fill="#8a2f2c">none admits it</text>
+  <text x="636" y="160" text-anchor="middle" font-size="10" fill="#8a2f2c">nothing is created at all</text>
+  <text x="636" y="176" text-anchor="middle" font-size="10" fill="#8a2f2c">the error names every refusal</text>
+
+  <!-- two refusals -->
+  <rect x="24" y="204" width="712" height="90" rx="8" fill="#ffffff" stroke="#c5ced6" stroke-width="2"/>
+  <text x="380" y="228" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b2b3a">Two refusals, and telling them apart is the skill</text>
+  <text x="44" y="252" font-size="11" fill="#1b2b3a"><tspan font-weight="bold">"Invalid value: 0: must be in the ranges …"</tspan>  — an SCC you MAY use, refusing what you asked. Fix the workload.</text>
+  <text x="44" y="274" font-size="11" fill="#1b2b3a"><tspan font-weight="bold">"not usable by user or serviceaccount"</tspan>  — an SCC that would have allowed it, and is not yours. Do not go hunting for it.</text>
+
+  <!-- what you get -->
+  <rect x="24" y="308" width="712" height="106" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="380" y="332" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c6a3a">What the admitted container actually gets — and what your image must survive</text>
+  <text x="44" y="356" font-size="11" fill="#2c6a3a">uid=1001, or an ARBITRARY uid from the namespace range. Never 0, and never one you may assume.</text>
+  <text x="44" y="376" font-size="11" fill="#2c6a3a">gid=0 — the root GROUP, always. Make everything the app writes group-writable; that is the only identity you can rely on.</text>
+  <text x="44" y="396" font-size="11" fill="#2c6a3a">Write only to a mounted volume or the image's own home. Listen above port 1024. Never USER root.</text>
+</svg>

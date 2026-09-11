@@ -1,20 +1,72 @@
 {
   "workshop": "lab-b01-docker-to-k8s",
-  "_note": "The learner fills the image placeholder in the editor; the smoke runner does the same substitution with sed before applying. imagePullPolicy=Always forces a re-pull of the mutable samples/hello-dcs:1.0 tag. verify-scc-restricted is environment-sensitive: CRC's portless session SCC may differ from a real DCS session, so it is expected to be informative rather than green everywhere.",
+  "_note": "The learner fills the image placeholder in the editor; the smoke runner does the same substitution with sed before applying. imagePullPolicy=Always forces a re-pull of the mutable samples/hello-dcs:1.0 tag. verify-scc-restricted is environment-sensitive: CRC's portless session SCC may differ from a real DCS session, so it is expected to be informative rather than green everywhere. The SCC page asks for a root container on purpose: the refusal message names every SCC and why each said no, which is the lesson. verify-root-rejected therefore asserts an ABSENCE \u2014 a 'rootme' Pod existing would mean the cluster admits root containers.",
   "steps": [
-    {"check": "verify-compose-readable"},
-    {"run": "sed -i 's|REPLACE_WITH_HARBOR_IMAGE|${DCS_REGISTRY}/samples/hello-dcs:1.0|' deployment.yaml && envsubst < deployment.yaml | oc apply -f - && oc patch deployment/hello-dcs --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/imagePullPolicy\",\"value\":\"Always\"}]' && oc rollout status deploy/hello-dcs --timeout=180s"},
-    {"check": "verify-deployment-image"},
-    {"check": "verify-deployment-ready"},
-    {"check": "verify-greeting-default"},
-    {"run": "oc apply -f service.yaml"},
-    {"check": "verify-service"},
-    {"run": "curl -s -o /dev/null -w 'HTTP %{http_code}\\n' \"http://hello-dcs.$(oc project -q).svc:8080\""},
-    {"check": "verify-service-dns"},
-    {"run": "oc apply -f configmap.yaml"},
-    {"check": "verify-configmap"},
-    {"run": "oc set env deploy/hello-dcs --from=configmap/hello-dcs-config && oc rollout status deploy/hello-dcs --timeout=150s"},
-    {"check": "verify-greeting-configured"},
-    {"check": "verify-scc-restricted"}
+    {
+      "check": "verify-compose-readable"
+    },
+    {
+      "run": "sed -i 's|REPLACE_WITH_HARBOR_IMAGE|${DCS_REGISTRY}/samples/hello-dcs:1.0|' deployment.yaml && envsubst < deployment.yaml | oc apply -f - && oc patch deployment/hello-dcs --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/imagePullPolicy\",\"value\":\"Always\"}]' && oc rollout status deploy/hello-dcs --timeout=180s"
+    },
+    {
+      "check": "verify-deployment-image"
+    },
+    {
+      "check": "verify-deployment-ready"
+    },
+    {
+      "check": "verify-greeting-default"
+    },
+    {
+      "run": "oc apply -f service.yaml"
+    },
+    {
+      "check": "verify-service"
+    },
+    {
+      "run": "curl -s -o /dev/null -w 'HTTP %{http_code}\\n' \"http://hello-dcs.$(oc project -q).svc:8080\""
+    },
+    {
+      "check": "verify-service-dns"
+    },
+    {
+      "run": "oc apply -f configmap.yaml"
+    },
+    {
+      "check": "verify-configmap"
+    },
+    {
+      "run": "oc set env deploy/hello-dcs --from=configmap/hello-dcs-config && oc rollout status deploy/hello-dcs --timeout=150s"
+    },
+    {
+      "check": "verify-greeting-configured"
+    },
+    {
+      "check": "verify-scc-restricted"
+    },
+    {
+      "run": "cat <<'YAML' | oc apply -f - 2>&1 | tail -4 || true\napiVersion: v1\nkind: Pod\nmetadata:\n  name: rootme\nspec:\n  containers:\n  - name: c\n    image: ${DCS_REGISTRY}/samples/hello-dcs:1.0\n    securityContext:\n      runAsUser: 0\nYAML"
+    },
+    {
+      "check": "verify-root-rejected"
+    },
+    {
+      "run": "oc get scc 2>&1 | tail -2 || true"
+    },
+    {
+      "run": "for s in restricted-v2 anyuid privileged; do printf '%-14s %s\\n' \"$s\" \"$(oc auth can-i use scc/$s 2>/dev/null | tail -1)\"; done"
+    },
+    {
+      "check": "verify-scc-boundary"
+    },
+    {
+      "run": "oc exec deploy/hello-dcs -- id"
+    },
+    {
+      "check": "verify-runtime-identity"
+    },
+    {
+      "run": "oc delete pod rootme --ignore-not-found"
+    }
   ]
 }

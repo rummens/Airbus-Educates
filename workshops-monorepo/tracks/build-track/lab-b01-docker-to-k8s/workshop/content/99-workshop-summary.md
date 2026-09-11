@@ -23,6 +23,8 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
    `oc set env --from`, and watched the rollout serve the migrated value.
 5. **Identified** the four lines {{< param product_short >}} rejects, and the control behind
    each.
+6. **Met the SCC properly**: asked for root, read the refusal, found which constraints are
+   yours to use, and saw the uid and group your container actually runs as.
 
 ## Check Your Understanding
 
@@ -54,7 +56,17 @@ the **restricted SCC**); and the host bind mount of `/var/run/docker.sock` (no h
 storage is always a namespace-scoped Volume).
 {{< /note >}}
 
-4. If the `hello-dcs` image already runs as UID 1001, why did `user: root` matter at all?
+4. A colleague's image is refused here with "not usable by user or serviceaccount". What does
+   that message tell you to do?
+
+{{< note >}}
+**❓ Answer:** **not** to go looking for the permission. That wording means an SCC which would
+have allowed the request exists but is not yours — the permissive ones belong to the platform.
+The fix is in the image or the manifest. ("Invalid value" is the other case: an SCC you *may*
+use, refusing one specific ask.)
+{{< /note >}}
+
+5. If the `hello-dcs` image already runs as UID 1001, why did `user: root` matter at all?
 
 {{< note >}}
 **❓ Answer:** it changed nothing about this image — the image already fixes it. The point is

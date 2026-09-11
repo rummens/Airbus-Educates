@@ -1,0 +1,15 @@
+#!/bin/bash
+# Asserting an ABSENCE: a Pod asking to run as UID 0 must never have been created.
+# A Pod here would mean this cluster admits root containers, and the page's whole
+# argument would not hold.
+set -uo pipefail
+if oc get pod rootme >/dev/null 2>&1; then
+  scc=$(oc get pod rootme -o jsonpath='{.metadata.annotations.openshift\.io/scc}' 2>/dev/null)
+  echo "❌ The Pod 'rootme' EXISTS (admitted under '${scc:-unknown}'). This cluster allowed a container to request UID 0, so it is not enforcing the restricted posture this page describes." >&2
+  exit 1
+fi
+if ! oc get deployment hello-dcs >/dev/null 2>&1; then
+  echo "❌ There is no app in this namespace, so a missing 'rootme' proves nothing yet. Run the earlier pages first." >&2
+  exit 1
+fi
+echo "✅ No 'rootme' Pod exists — the request for UID 0 was refused at admission, before anything was created."

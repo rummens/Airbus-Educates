@@ -1,0 +1,19 @@
+#!/bin/bash
+# The tenant's side of the SCC story: you may USE the restricted one, you may not use
+# the permissive ones, and you may not read the objects at all.
+set -uo pipefail
+restricted=""
+for s in restricted-v2 educates-restricted restricted; do
+  [ "$(oc auth can-i use scc/$s 2>/dev/null | tail -1)" = "yes" ] && { restricted="$s"; break; }
+done
+if [ -z "$restricted" ]; then
+  echo "❌ You may not use any restricted SCC (tried restricted-v2, educates-restricted, restricted). Something is wrong with this session's permissions — a tenant always gets the baseline constraint." >&2
+  exit 1
+fi
+for s in anyuid privileged; do
+  if [ "$(oc auth can-i use scc/$s 2>/dev/null | tail -1)" = "yes" ]; then
+    echo "⚠️ You may use scc/$s, which a tenant normally may not. The lab still reads correctly, but on a real DCS namespace the permissive SCCs are the platform's." >&2
+    exit 1
+  fi
+done
+echo "✅ You may use scc/${restricted} and not anyuid or privileged — the constraint everyone gets, without the escape hatches."

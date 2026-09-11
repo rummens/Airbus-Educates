@@ -91,6 +91,27 @@ Four compose lines never became a manifest, because DCS refuses them. This is th
 
 ---
 
+<!-- id: scc -->
+## The control behind three of them
+
+An SCC asks one question of every Pod: may this workload ask for what it is asking for? The fastest way to learn it is to be refused.
+
+```
+oc apply -f - <<< 'runAsUser: 0'      # refused at admission
+oc auth can-i use scc/restricted-v2   # yes
+oc auth can-i use scc/anyuid          # no
+oc exec deploy/hello-dcs -- id        # uid=1001 gid=0(root)
+```
+
+- **"Invalid value"** — an SCC you may use, refusing your request. Fix the workload.
+- **"not usable by user or serviceaccount"** — an SCC that is not yours. Stop looking.
+- You run as a **non-root, possibly arbitrary UID**, always in **group 0**.
+- So: never `USER root`, make written files group-writable, write only where you own, listen above 1024.
+
+![A Pod is checked against every SCC its identity may use; none admits it and nothing is created](scc-flow.svg)
+
+---
+
 <!-- id: next -->
 ## What's next
 
