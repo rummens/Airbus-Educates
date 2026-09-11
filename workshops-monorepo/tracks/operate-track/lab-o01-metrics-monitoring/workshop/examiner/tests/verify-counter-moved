@@ -1,0 +1,18 @@
+#!/bin/bash
+# The counter must have counted the traffic the page generated.
+set -uo pipefail
+ns=$(oc project -q 2>/dev/null)
+val=$(curl -s --max-time 10 "http://hello-dcs.${ns}.svc:8080/metrics" 2>/dev/null \
+      | awk -F' ' '/^hello_dcs_requests_total\{path="\/"\}/ {print $2}' | head -1)
+if [ -z "$val" ]; then
+  echo "❌ No hello_dcs_requests_total{path=\"/\"} sample found. Did the traffic loop run? Check the raw output: curl -s http://hello-dcs.${ns}.svc:8080/metrics" >&2
+  exit 1
+fi
+# The Service load-balances, so one replica sees roughly half the requests — any
+# non-zero count proves the counter is counting.
+int=${val%%.*}
+if [ "${int:-0}" -lt 1 ] 2>/dev/null; then
+  echo "❌ The request counter is still ${val}. Run the traffic loop above — note the Service spreads requests across both replicas, so this reads one Pod's share." >&2
+  exit 1
+fi
+echo "✅ The replica you reached has counted ${val} request(s) on '/'."

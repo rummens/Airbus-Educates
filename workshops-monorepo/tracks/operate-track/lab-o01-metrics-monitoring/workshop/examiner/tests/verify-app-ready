@@ -1,0 +1,19 @@
+#!/bin/bash
+# Two ready replicas behind a Service whose port is NAMED — a ServiceMonitor refers to
+# ports by name, so an unnamed port cannot be scraped at all.
+set -uo pipefail
+for _ in $(seq 1 24); do
+  ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  [ "${ready:-0}" -ge 2 ] 2>/dev/null && break
+  sleep 5
+done
+if [ "${ready:-0}" -lt 2 ] 2>/dev/null; then
+  echo "❌ hello-dcs has ${ready:-0} ready replicas, expected 2. Did the apply step run? The image may still be pulling." >&2
+  exit 1
+fi
+port=$(oc get svc hello-dcs -o jsonpath='{.spec.ports[0].name}' 2>/dev/null)
+if [ -z "$port" ]; then
+  echo "❌ The Service's port has no name. A ServiceMonitor selects a port BY NAME, so an unnamed port can never be scraped — re-apply service.yaml." >&2
+  exit 1
+fi
+echo "✅ ${ready} replicas ready behind a Service with a named port ('${port}')."

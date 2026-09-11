@@ -1,0 +1,23 @@
+#!/bin/bash
+# The failure mode this lab warns about: a selector that matches nothing reports no
+# error and produces no data. Assert it really selects the Service, and that the
+# Service really has the port the monitor names.
+set -uo pipefail
+key=$(oc get servicemonitor hello-dcs -o jsonpath='{.spec.selector.matchLabels.app}' 2>/dev/null)
+if [ -z "$key" ]; then
+  echo "❌ The ServiceMonitor's selector has no 'app' label to match on." >&2
+  exit 1
+fi
+svcs=$(oc get svc -l "app=${key}" -o name 2>/dev/null | wc -l | tr -d ' ')
+if [ "${svcs:-0}" -lt 1 ] 2>/dev/null; then
+  echo "❌ The selector app=${key} matches NO Service in this namespace. Nothing will ever be scraped, and nothing will report an error — that is the trap. Compare with: oc get svc --show-labels" >&2
+  exit 1
+fi
+want=$(oc get servicemonitor hello-dcs -o jsonpath='{.spec.endpoints[0].port}' 2>/dev/null)
+have=$(oc get svc -l "app=${key}" -o jsonpath='{range .items[*].spec.ports[*]}{.name} {end}' 2>/dev/null)
+case " $have " in
+  *" $want "*) ;;
+  *) echo "❌ The monitor asks for port '${want}' but the matched Service exposes port name(s): ${have:-<none>}. A name mismatch scrapes nothing, silently." >&2
+     exit 1 ;;
+esac
+echo "✅ The selector matches ${svcs} Service, and that Service exposes the named port '${want}'."

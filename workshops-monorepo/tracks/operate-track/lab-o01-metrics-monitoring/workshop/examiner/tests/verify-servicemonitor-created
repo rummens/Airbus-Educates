@@ -1,0 +1,14 @@
+#!/bin/bash
+# The ServiceMonitor exists, names a port, and asks for /metrics.
+set -uo pipefail
+if ! oc get servicemonitor hello-dcs >/dev/null 2>&1; then
+  echo "❌ No ServiceMonitor named 'hello-dcs'. Did 'oc apply -f servicemonitor.yaml' run? If it was refused, this namespace is not entitled to monitoring.coreos.com objects." >&2
+  exit 1
+fi
+port=$(oc get servicemonitor hello-dcs -o jsonpath='{.spec.endpoints[0].port}' 2>/dev/null)
+path=$(oc get servicemonitor hello-dcs -o jsonpath='{.spec.endpoints[0].path}' 2>/dev/null)
+if [ -z "$port" ]; then
+  echo "❌ The ServiceMonitor names no port. It must refer to the Service's port BY NAME." >&2
+  exit 1
+fi
+echo "✅ ServiceMonitor 'hello-dcs' scrapes port '${port}' at '${path:-/metrics}'."

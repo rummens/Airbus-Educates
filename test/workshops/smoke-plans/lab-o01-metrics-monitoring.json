@@ -1,0 +1,22 @@
+{
+  "workshop": "lab-o01-metrics-monitoring",
+  "_note": "Needs (a) cluster monitoring WITH user-workload monitoring enabled, and (b) a hello-dcs image that serves /metrics — the endpoint was added on 2026-09-11, so an older image makes verify-metrics-endpoint fail with the greeting instead of exposition format. Measured beforehand: the Thanos TENANCY port (9092, namespace param) authorizes on `get pods` in the namespace asked about, so a session needs no platform grant for its own metrics and is refused for anyone else's. The public thanos-querier route is the cluster-wide port and would need one; it is deliberately not used. ServiceMonitor creation needs the RBAC granted in session.objects — the Educates session role has no monitoring.coreos.com rules.",
+  "steps": [
+    {"run": "envsubst < deployment.yaml | oc apply -f - && oc apply -f service.yaml && oc rollout status deploy/hello-dcs --timeout=240s"},
+    {"check": "verify-app-ready"},
+    {"run": "curl -s \"http://hello-dcs.$(oc project -q).svc:8080/metrics\" | head -12"},
+    {"check": "verify-metrics-endpoint"},
+    {"run": "url=\"http://hello-dcs.$(oc project -q).svc:8080\"; for i in $(seq 1 60); do curl -s -o /dev/null \"$url\"; done; echo sent 60; curl -s \"$url/metrics\" | grep hello_dcs_requests_total"},
+    {"check": "verify-counter-moved"},
+    {"run": "oc apply -f servicemonitor.yaml"},
+    {"check": "verify-servicemonitor-created"},
+    {"run": "oc get servicemonitor hello-dcs -o jsonpath='{.spec.selector.matchLabels}{\"\\n\"}'; oc get svc -l app=hello-dcs"},
+    {"check": "verify-selector-matches"},
+    {"run": "TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token); curl -sk -H \"Authorization: Bearer $TOKEN\" --get \"$THANOS_URL/api/v1/query\" --data-urlencode \"namespace=$(oc project -q)\" --data-urlencode 'query=hello_dcs_up' | head -c 300; echo"},
+    {"check": "verify-metric-queryable"},
+    {"run": "TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token); curl -sk -H \"Authorization: Bearer $TOKEN\" --get \"$THANOS_URL/api/v1/query\" --data-urlencode \"namespace=$(oc project -q)\" --data-urlencode 'query=sum by (pod) (rate(hello_dcs_requests_total[5m]))' | head -c 300; echo"},
+    {"check": "verify-promql-rate"},
+    {"run": "TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token); curl -sk -o /dev/null -w 'HTTP %{http_code}\\n' -H \"Authorization: Bearer $TOKEN\" --get \"$THANOS_URL/api/v1/query\" --data-urlencode 'namespace=openshift-monitoring' --data-urlencode 'query=up'"},
+    {"check": "verify-cross-namespace-refused"}
+  ]
+}

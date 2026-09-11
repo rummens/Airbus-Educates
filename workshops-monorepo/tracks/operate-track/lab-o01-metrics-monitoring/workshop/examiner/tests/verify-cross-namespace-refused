@@ -1,0 +1,21 @@
+#!/bin/bash
+# Tenancy in the metrics path: the same token, asking about a namespace the session
+# may not read Pods in, must be REFUSED. A success here would mean the query endpoint
+# is not tenant-scoped on this cluster, and the page's claim would be wrong.
+set -uo pipefail
+TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token 2>/dev/null)
+URL="${THANOS_URL:-https://thanos-querier.openshift-monitoring.svc:9092}"
+code=$(curl -sk -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" --max-time 15 \
+        --get "$URL/api/v1/query" \
+        --data-urlencode "namespace=openshift-monitoring" \
+        --data-urlencode 'query=up' 2>/dev/null)
+case "$code" in
+  403|401)
+    echo "✅ The query about another namespace was refused (HTTP ${code}) — the metrics boundary is the RBAC boundary."
+    exit 0 ;;
+  200)
+    echo "❌ The query about openshift-monitoring SUCCEEDED. This session can read metrics outside its own namespace, so the tenancy claim on this page does not hold on this cluster — worth reporting." >&2
+    exit 1 ;;
+esac
+echo "❌ Expected 403 (or 401) for a cross-namespace query, got HTTP '${code:-none}'. If this is 000 the endpoint was unreachable, which is a different problem." >&2
+exit 1

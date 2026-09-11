@@ -1,0 +1,123 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-o01-metrics-monitoring
+  labels:
+    academy.dcs/track: operate
+    academy.dcs/order: "10"
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/icon: activity
+    academy.dcs/details: |
+      **The platform already measures your Pods. It cannot measure what your app is doing
+      unless the app says so.**
+
+      You expose metrics from the app, ask to be scraped with a **ServiceMonitor**, and
+      then query your own series back — from the terminal, with PromQL, against the
+      platform's tenant query endpoint.
+
+      The last part is the one worth remembering: ask about **your** namespace and you get
+      an answer; ask about somebody else's and you get **Forbidden**. Tenancy is enforced
+      in the metrics path, not just in the API.
+
+      > **💡 Tip:** you never configure Prometheus here. You create one object in your own
+      > namespace and the platform's monitoring finds it.
+spec:
+  title: "Metrics & Monitoring"
+  description: Expose your app's own metrics, ask to be scraped with a ServiceMonitor, and query the series back with PromQL through the platform's tenant-scoped endpoint.
+  duration: 25m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "O-Operate-and-Observe"
+  publish:
+    image: "$(image_repository)/lab-o01-metrics-monitoring-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o01-metrics-monitoring/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o01-metrics-monitoring/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o01-metrics-monitoring/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/operate-track/lab-o01-metrics-monitoring"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-o01-metrics-monitoring-files:$(workshop_version)"
+    {{- end }}
+  session:
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    # The in-cluster tenancy endpoint of the platform's query layer. Port 9092 injects a
+    # namespace matcher and authorizes on `get pods` in the namespace being asked about —
+    # which is why a tenant needs no extra grant to read their OWN metrics, and cannot
+    # read anyone else's. The public route is the CLUSTER-wide port and does require a
+    # platform grant; it is deliberately not used here.
+    - name: THANOS_URL
+      value: "https://thanos-querier.openshift-monitoring.svc:9092"
+    namespaces:
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    # A ServiceMonitor is how a tenant asks to be scraped, and the Educates session role
+    # has no rules for monitoring.coreos.com at all. Granted here in the session's own
+    # namespace, bound to the session ServiceAccount (which lives in the WORKSHOP
+    # namespace — binding the session namespace's SA group matches nothing).
+    objects:
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: servicemonitor-author
+        namespace: $(session_namespace)
+      rules:
+      - apiGroups: ["monitoring.coreos.com"]
+        resources: ["servicemonitors", "podmonitors", "prometheusrules"]
+        verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: servicemonitor-author
+        namespace: $(session_namespace)
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: Role
+        name: servicemonitor-author
+      subjects:
+      - kind: ServiceAccount
+        name: $(service_account)
+        namespace: $(workshop_namespace)
+      - apiGroup: rbac.authorization.k8s.io
+        kind: Group
+        name: system:serviceaccounts:$(session_namespace)
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      slides:
+        enabled: true
+      examiner:
+        enabled: true
+      # Scraping is namespace-scoped and the query endpoint authorizes per namespace; a
+      # vcluster would put the workload where the platform's monitoring does not look.
+      vcluster:
+        enabled: false
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-o01-metrics-monitoring&session=$(session_namespace)"

@@ -1,0 +1,16 @@
+#!/bin/bash
+# The app must serve valid Prometheus exposition format: HELP/TYPE lines and samples.
+set -uo pipefail
+ns=$(oc project -q 2>/dev/null)
+out=$(curl -s --max-time 10 "http://hello-dcs.${ns}.svc:8080/metrics" 2>/dev/null)
+if [ -z "$out" ]; then
+  echo "❌ Nothing came back from /metrics. Is the Service resolving and are the Pods ready? Try: curl -s http://hello-dcs.${ns}.svc:8080/healthz" >&2
+  exit 1
+fi
+case "$out" in
+  *"# TYPE hello_dcs_requests_total counter"*) ;;
+  *) echo "❌ /metrics did not return Prometheus exposition format. Got: $(echo "$out" | head -2 | tr '\n' ' ' | cut -c1-160). If this looks like the app's greeting, the running image predates the /metrics endpoint and needs rebuilding." >&2
+     exit 1 ;;
+esac
+n=$(echo "$out" | grep -c '^hello_dcs_')
+echo "✅ /metrics serves exposition format with ${n} sample line(s), including the HELP and TYPE metadata."
