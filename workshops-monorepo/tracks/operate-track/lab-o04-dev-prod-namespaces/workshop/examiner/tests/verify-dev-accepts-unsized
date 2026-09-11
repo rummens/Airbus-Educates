@@ -1,0 +1,14 @@
+#!/bin/bash
+# DEV admits a workload with no resources block at all — the permissive half of the split.
+set -uo pipefail
+for _ in $(seq 1 24); do
+  ready=$(oc get deployment hello-dcs -n "$DEV_NS" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+  [ "${ready:-0}" -ge 1 ] 2>/dev/null && break
+  sleep 5
+done
+if [ "${ready:-0}" -lt 1 ] 2>/dev/null; then
+  echo "❌ hello-dcs is not ready in $DEV_NS (${ready:-0} replicas). DEV should accept the unsized manifest without complaint — if the apply was refused, read the message: that would mean the namespace is labelled prod." >&2
+  exit 1
+fi
+res=$(oc get deployment hello-dcs -n "$DEV_NS" -o jsonpath='{.spec.template.spec.containers[0].resources}' 2>/dev/null)
+echo "✅ DEV accepted the unsized workload (${ready} ready; declared resources: ${res:-none})."

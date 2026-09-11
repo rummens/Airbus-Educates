@@ -1,0 +1,18 @@
+#!/bin/bash
+# The admission policy for THIS session must exist and be ready, with both rules.
+set -uo pipefail
+name="dcs-nstype-$(oc project -q 2>/dev/null)"
+if ! oc get clusterpolicy "$name" >/dev/null 2>&1; then
+  echo "❌ No ClusterPolicy named '$name'. It is created with the session and scoped to it; without it, DEV and PROD behave identically and this lab teaches nothing." >&2
+  exit 1
+fi
+rules=$(oc get clusterpolicy "$name" -o jsonpath='{range .spec.rules[*]}{.name} {end}' 2>/dev/null)
+for r in route-requires-prod prod-requires-resources; do
+  case "$rules" in *"$r"*) ;; *) echo "❌ The policy is missing the '$r' rule (found: ${rules:-none})." >&2; exit 1 ;; esac
+done
+ready=$(oc get clusterpolicy "$name" -o jsonpath='{range .status.conditions[?(@.type=="Ready")]}{.status}{end}' 2>/dev/null)
+if [ "$ready" != "True" ]; then
+  echo "❌ Policy '$name' is not Ready (condition: ${ready:-unknown}). A policy that is not ready enforces nothing; this check keeps retrying." >&2
+  exit 1
+fi
+echo "✅ Policy '$name' is Ready with both rules: ${rules}"

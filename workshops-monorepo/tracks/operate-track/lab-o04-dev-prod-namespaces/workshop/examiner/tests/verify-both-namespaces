@@ -1,0 +1,16 @@
+#!/bin/bash
+# Two peer namespaces, one of each type, labelled for this session.
+set -uo pipefail
+for ns in "$DEV_NS" "$PROD_NS"; do
+  if ! oc get namespace "$ns" >/dev/null 2>&1; then
+    echo "❌ Namespace '$ns' does not exist. Both are created with the session — if one is missing, the session did not provision correctly." >&2
+    exit 1
+  fi
+done
+d=$(oc get namespace "$DEV_NS" -o jsonpath='{.metadata.labels.dcs\.airbus/namespace-type}' 2>/dev/null)
+p=$(oc get namespace "$PROD_NS" -o jsonpath='{.metadata.labels.dcs\.airbus/namespace-type}' 2>/dev/null)
+if [ "$d" != "dev" ] || [ "$p" != "prod" ]; then
+  echo "❌ Expected namespace-type labels dev and prod, found '${d:-none}' and '${p:-none}'. That label is what the policy matches on — without it neither rule applies." >&2
+  exit 1
+fi
+echo "✅ $DEV_NS is type '$d' and $PROD_NS is type '$p'."

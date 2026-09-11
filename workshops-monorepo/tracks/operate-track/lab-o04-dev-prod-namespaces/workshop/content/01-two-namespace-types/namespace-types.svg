@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 440" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="440" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">One label, one policy, two different answers</text>
+
+  <!-- the manifests -->
+  <rect x="250" y="48" width="260" height="62" rx="8" fill="#ffffff" stroke="#5a6b7b" stroke-width="2"/>
+  <text x="380" y="70" text-anchor="middle" font-size="12" font-weight="bold" fill="#1b2b3a">the same two manifests</text>
+  <text x="380" y="88" text-anchor="middle" font-size="11" fill="#5a6b7b">a Deployment with no resources block</text>
+  <text x="380" y="104" text-anchor="middle" font-size="11" fill="#5a6b7b">a Route naming no host</text>
+
+  <line x1="300" y1="110" x2="200" y2="150" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="200,150 208,144 210,152" fill="#5a6b7b"/>
+  <line x1="460" y1="110" x2="560" y2="150" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="560,150 550,152 552,144" fill="#5a6b7b"/>
+
+  <!-- DEV -->
+  <rect x="24" y="154" width="330" height="150" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="189" y="178" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b4a86">DEV-type namespace</text>
+  <text x="189" y="196" text-anchor="middle" font-size="10" fill="#5a6b7b">dcs.airbus/namespace-type: dev</text>
+  <text x="44" y="222" font-size="12" fill="#2c6a3a">✓ unsized Deployment — admitted</text>
+  <text x="44" y="244" font-size="11" fill="#5a6b7b">   takes the LimitRange defaults</text>
+  <text x="44" y="268" font-size="12" fill="#8a2f2c">✗ Route — refused</text>
+  <text x="44" y="288" font-size="11" fill="#8a2f2c">   "A Route needs a PROD-type namespace."</text>
+
+  <!-- PROD -->
+  <rect x="406" y="154" width="330" height="150" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="571" y="178" text-anchor="middle" font-size="13" font-weight="bold" fill="#2c6a3a">PROD-type namespace</text>
+  <text x="571" y="196" text-anchor="middle" font-size="10" fill="#5a6b7b">dcs.airbus/namespace-type: prod</text>
+  <text x="426" y="222" font-size="12" fill="#8a2f2c">✗ unsized Deployment — refused</text>
+  <text x="426" y="244" font-size="11" fill="#8a2f2c">   at oc apply, with the failing path named</text>
+  <text x="426" y="268" font-size="12" fill="#2c6a3a">✓ sized Deployment, and the Route</text>
+  <text x="426" y="288" font-size="11" fill="#2c6a3a">   published on the platform's edge</text>
+
+  <!-- policy -->
+  <rect x="24" y="322" width="712" height="98" rx="8" fill="#fdf4e8" stroke="#c08a2d" stroke-width="2"/>
+  <text x="380" y="346" text-anchor="middle" font-size="13" font-weight="bold" fill="#7a5410">One admission policy reads the label and decides both</text>
+  <text x="44" y="370" font-size="11" fill="#7a5410">route-requires-prod — a Route in a DEV-type namespace is denied.</text>
+  <text x="44" y="390" font-size="11" fill="#7a5410">prod-requires-resources — a container in a PROD-type namespace must declare CPU and memory, requests and limits.</text>
+  <text x="44" y="410" font-size="11" fill="#7a5410">DEV trusts you to move fast. PROD makes you prove the workload is ready before it is admitted.</text>
+</svg>

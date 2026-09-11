@@ -1,0 +1,24 @@
+# The app as people usually write it first: no resources block at all. Perfectly
+# deployable in a DEV-type namespace, and refused by a PROD-type one.
+# Apply with: envsubst < hello-dcs-unsized.yaml | oc apply -f - -n <namespace>
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-dcs
+  labels:
+    app: hello-dcs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-dcs
+  template:
+    metadata:
+      labels:
+        app: hello-dcs
+    spec:
+      containers:
+      - name: hello-dcs
+        image: ${DCS_REGISTRY}/samples/hello-dcs:1.0
+        ports:
+        - containerPort: 8080

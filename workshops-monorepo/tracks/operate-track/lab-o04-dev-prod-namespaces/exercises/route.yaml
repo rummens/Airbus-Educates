@@ -1,0 +1,17 @@
+# The same Route manifest is applied twice in this lab: once in the DEV-type
+# namespace, where the platform refuses it, and once in the PROD-type namespace,
+# where it is admitted and gets a real host. Nothing about the manifest changes —
+# only the namespace it is applied to.
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: hello-dcs
+spec:
+  to:
+    kind: Service
+    name: hello-dcs
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

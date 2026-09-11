@@ -1,0 +1,195 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-o04-dev-prod-namespaces
+  labels:
+    academy.dcs/track: operate
+    academy.dcs/order: "40"
+    # The lab's PROD-type peer namespace is where the Route is created; the session
+    # namespace itself stays dev.
+    dcs.airbus.com/lifecycle: dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    academy.dcs/icon: shield
+    academy.dcs/details: |
+      **Two namespaces, the same manifest, two different answers.**
+
+      DEV and PROD namespaces on DCS are not separated by a naming convention. They
+      differ in **policy posture**: PROD enforces rules that DEV does not, and only PROD
+      may publish a **Route**.
+
+      This session gives you one of each. You apply the same unsized Deployment to both
+      and watch PROD refuse it, then the same Route to both and watch DEV refuse that.
+      Neither refusal is a bug — you read the policy that produced it.
+
+      Ends on **promotion**: why the answer is a new apply to PROD rather than an edit in
+      place, and where the image has to come from.
+
+      > **💡 Tip:** the error messages here are the lesson. Read them before you fix
+      > anything.
+spec:
+  title: "DEV vs PROD Namespaces"
+  description: The same manifest, applied to a DEV and a PROD namespace, with two different answers — what PROD enforces that DEV does not, why only PROD may publish a Route, and how work is promoted between them.
+  duration: 25m
+  difficulty: intermediate
+  labels:
+    - name: module
+      value: "O-Operate-and-Observe"
+  publish:
+    image: "$(image_repository)/lab-o04-dev-prod-namespaces-files:$(workshop_version)"
+    files:
+    - directory:
+        path: .
+      includePaths:
+      - /workshop/**
+      - /exercises/**
+      - /README.md
+  workshop:
+    image: "{{ .Values.workshopImages.base }}"
+    files:
+    {{- if .Values.workshopContent.useGit }}
+    - git:
+        url: "{{ .Values.workshopContent.gitUrl }}"
+        ref: "{{ .Values.workshopContent.gitRef }}"
+      includePaths:
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o04-dev-prod-namespaces/workshop/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o04-dev-prod-namespaces/exercises/**"
+      - "{{ .Values.workshopContent.tracksRoot }}/operate-track/lab-o04-dev-prod-namespaces/README.md"
+      newRootPath: "{{ trimPrefix "/" .Values.workshopContent.tracksRoot }}/operate-track/lab-o04-dev-prod-namespaces"
+    {{- else }}
+    - image:
+        url: "$(image_repository)/lab-o04-dev-prod-namespaces-files:$(workshop_version)"
+    {{- end }}
+  session:
+    env:
+    - name: DCS_REGISTRY
+      value: "harbor.example.dcs/dcs-academy"
+    - name: DEV_NS
+      value: "$(session_namespace)-dev"
+    - name: PROD_NS
+      value: "$(session_namespace)-prod"
+    namespaces:
+      budget: medium
+      security:
+        policy: restricted
+        token:
+          enabled: true
+    # Two peer namespaces — one of each type — plus the policy that makes them differ.
+    #
+    # NO vcluster: Kyverno runs on the host cluster, so enforcement here is the real
+    # admission path rather than a nested imitation. (The superseded version of this
+    # lab put Kyverno inside a vcluster, which assumed a vcluster ships the Kyverno
+    # CRDs and controller — it does not.)
+    #
+    # The ClusterPolicy is cluster-scoped, so its name AND its namespaceSelector are
+    # scoped to this session: concurrent sessions cannot collide, and no namespace
+    # outside this session is ever matched.
+    objects:
+    - apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: $(session_namespace)-dev
+        labels:
+          dcs.airbus/namespace-type: dev
+          dcs.academy/session: $(session_namespace)
+          app.kubernetes.io/part-of: dcs-academy-o04
+    - apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: $(session_namespace)-prod
+        labels:
+          dcs.airbus/namespace-type: prod
+          dcs.academy/session: $(session_namespace)
+          app.kubernetes.io/part-of: dcs-academy-o04
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: session-edit
+        namespace: $(session_namespace)-dev
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        # `edit` covers routes on OpenShift (route.openshift.io/routes: create, …),
+        # so no extra Role is needed for the Route steps.
+        name: edit
+      subjects:
+      - apiGroup: rbac.authorization.k8s.io
+        kind: Group
+        name: system:serviceaccounts:$(session_namespace)
+    - apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: session-edit
+        namespace: $(session_namespace)-prod
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: edit
+      subjects:
+      - apiGroup: rbac.authorization.k8s.io
+        kind: Group
+        name: system:serviceaccounts:$(session_namespace)
+    - apiVersion: kyverno.io/v1
+      kind: ClusterPolicy
+      metadata:
+        name: dcs-nstype-$(session_namespace)
+        annotations:
+          policies.kyverno.io/title: DCS Namespace-Type Policy (DEV vs PROD)
+          policies.kyverno.io/description: >-
+            A representative slice of the DCS PROD posture: a Route is only admitted in
+            a PROD-type namespace, and a PROD-type namespace additionally requires every
+            container to declare CPU and memory requests and limits. DEV-type namespaces
+            get neither restriction.
+      spec:
+        validationFailureAction: Enforce
+        background: false
+        rules:
+        - name: route-requires-prod
+          match:
+            any:
+            - resources:
+                kinds: ["Route"]
+                namespaceSelector:
+                  matchLabels:
+                    dcs.academy/session: $(session_namespace)
+                    dcs.airbus/namespace-type: dev
+          validate:
+            message: "A Route needs a PROD-type namespace. This namespace is DEV-type."
+            deny: {}
+        - name: prod-requires-resources
+          match:
+            any:
+            - resources:
+                kinds: ["Pod"]
+                namespaceSelector:
+                  matchLabels:
+                    dcs.academy/session: $(session_namespace)
+                    dcs.airbus/namespace-type: prod
+          validate:
+            message: "PROD requires every container to declare CPU and memory requests and limits."
+            pattern:
+              spec:
+                containers:
+                - resources:
+                    requests:
+                      cpu: "?*"
+                      memory: "?*"
+                    limits:
+                      cpu: "?*"
+                      memory: "?*"
+    applications:
+      terminal:
+        enabled: true
+        layout: split
+      editor:
+        enabled: true
+      slides:
+        enabled: true
+      examiner:
+        enabled: true
+      vcluster:
+        enabled: false
+    dashboards:
+    - name: Feedback
+      url: "$(ingress_protocol)://academy.$(ingress_domain)/form?workshop=lab-o04-dev-prod-namespaces&session=$(session_namespace)"

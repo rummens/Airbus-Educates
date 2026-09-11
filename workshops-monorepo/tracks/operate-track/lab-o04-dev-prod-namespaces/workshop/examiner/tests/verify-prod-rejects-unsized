@@ -1,0 +1,15 @@
+#!/bin/bash
+# PROD must have refused the unsized manifest AT ADMISSION: no Deployment exists, or
+# the one that exists is the sized one from the next step.
+set -uo pipefail
+if ! oc get deployment hello-dcs -n "$PROD_NS" >/dev/null 2>&1; then
+  echo "✅ Nothing was created in $PROD_NS — the unsized manifest was refused at admission, before any object existed."
+  exit 0
+fi
+req=$(oc get deployment hello-dcs -n "$PROD_NS" -o jsonpath='{.spec.template.spec.containers[0].resources.requests.cpu}' 2>/dev/null)
+if [ -n "$req" ]; then
+  echo "✅ The only Deployment in $PROD_NS declares resources (cpu ${req}) — the unsized one never got in."
+  exit 0
+fi
+echo "❌ A Deployment WITHOUT resources exists in $PROD_NS. A PROD-type namespace should have refused it at admission — the policy is not enforcing on this namespace." >&2
+exit 1

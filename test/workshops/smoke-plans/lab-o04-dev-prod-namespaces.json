@@ -1,0 +1,28 @@
+{
+  "workshop": "lab-o04-dev-prod-namespaces",
+  "_note": "Two of the checks assert ABSENCES, because that is what an admission policy produces: no Route in the DEV namespace, and no unsized Deployment in PROD. On a cluster without Kyverno (or with the policy not Ready) both would find the object present and fail loudly, which is the correct signal — the lab would be teaching something untrue there. The Kyverno ClusterPolicy is created per session by session.objects and scoped to this session's two namespaces by label, so concurrent sessions cannot collide. The refused applies use `|| true` so the plan continues past an expected failure.",
+  "steps": [
+    {"run": "oc get namespace $DEV_NS $PROD_NS --show-labels"},
+    {"check": "verify-both-namespaces"},
+    {"run": "oc get clusterpolicy dcs-nstype-$(oc project -q) -o jsonpath='{range .spec.rules[*]}{.name}{\"  ->  \"}{.validate.message}{\"\\n\"}{end}'"},
+    {"check": "verify-policy-present"},
+    {"run": "envsubst < hello-dcs-unsized.yaml | oc apply -f - -n $DEV_NS && oc rollout status deploy/hello-dcs -n $DEV_NS --timeout=180s"},
+    {"check": "verify-dev-accepts-unsized"},
+    {"run": "oc apply -f service.yaml -n $DEV_NS"},
+    {"check": "verify-dev-service"},
+    {"run": "oc apply -f route.yaml -n $DEV_NS || true"},
+    {"check": "verify-dev-route-blocked"},
+    {"run": "envsubst < hello-dcs-unsized.yaml | oc apply -f - -n $PROD_NS || true"},
+    {"check": "verify-prod-rejects-unsized"},
+    {"run": "envsubst < hello-dcs-sized.yaml | oc apply -f - -n $PROD_NS && oc rollout status deploy/hello-dcs -n $PROD_NS --timeout=180s"},
+    {"check": "verify-prod-accepts-sized"},
+    {"run": "oc apply -f service.yaml -n $PROD_NS && oc apply -f route.yaml -n $PROD_NS"},
+    {"check": "verify-prod-route-created"},
+    {"run": "oc get route hello-dcs -n $PROD_NS -o jsonpath='{.spec.host}{\"\\n\"}'"},
+    {"check": "verify-prod-route-host"},
+    {"run": "oc get deploy hello-dcs -n $DEV_NS -o jsonpath='{.spec.template.spec.containers[0].resources}{\"\\n\"}'; oc get deploy hello-dcs -n $PROD_NS -o jsonpath='{.spec.template.spec.containers[0].resources}{\"\\n\"}'"},
+    {"check": "verify-both-running"},
+    {"run": "oc delete deploy,svc hello-dcs -n $DEV_NS --ignore-not-found"},
+    {"check": "verify-dev-cleaned"}
+  ]
+}

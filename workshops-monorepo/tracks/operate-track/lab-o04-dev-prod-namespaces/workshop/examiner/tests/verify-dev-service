@@ -1,0 +1,10 @@
+#!/bin/bash
+# Something for the Route to point at, in DEV.
+set -uo pipefail
+for _ in $(seq 1 18); do
+  n=$(oc get endpoints hello-dcs -n "$DEV_NS" -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null | wc -w | tr -d ' ')
+  [ "${n:-0}" -ge 1 ] 2>/dev/null && { echo "✅ The Service in $DEV_NS has ${n} endpoint(s)."; exit 0; }
+  sleep 5
+done
+echo "❌ The Service in $DEV_NS has no endpoints. Did 'oc apply -f service.yaml -n \$DEV_NS' run, and is the Deployment ready?" >&2
+exit 1

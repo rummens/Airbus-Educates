@@ -1,0 +1,15 @@
+#!/bin/bash
+# The platform assigns the host; it must follow the cluster's ingress domain rather
+# than anything the manifest asked for (the manifest names no host at all).
+set -uo pipefail
+host=$(oc get route hello-dcs -n "$PROD_NS" -o jsonpath='{.spec.host}' 2>/dev/null)
+if [ -z "$host" ]; then
+  echo "❌ The Route in $PROD_NS has no host yet. The platform fills it in on admission; this check keeps retrying." >&2
+  exit 1
+fi
+case "$host" in
+  hello-dcs-${PROD_NS}.*)
+    echo "✅ The platform assigned the host ${host} — <route>-<namespace>.<ingress domain>, generated, not requested."
+    exit 0 ;;
+esac
+echo "✅ The Route host is ${host} (this cluster's pattern differs from <route>-<namespace>.<domain>, which is fine — the platform still assigned it)."

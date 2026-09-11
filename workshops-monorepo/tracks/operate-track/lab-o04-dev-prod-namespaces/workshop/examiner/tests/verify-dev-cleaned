@@ -1,0 +1,17 @@
+#!/bin/bash
+# The DEV attempt is removed; PROD keeps running.
+set -uo pipefail
+for _ in $(seq 1 12); do
+  oc get deployment hello-dcs -n "$DEV_NS" >/dev/null 2>&1 || break
+  sleep 5
+done
+if oc get deployment hello-dcs -n "$DEV_NS" >/dev/null 2>&1; then
+  echo "❌ The Deployment is still present in $DEV_NS. Run: oc delete deploy,svc hello-dcs -n \$DEV_NS" >&2
+  exit 1
+fi
+p=$(oc get deployment hello-dcs -n "$PROD_NS" -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+if [ "${p:-0}" -lt 1 ] 2>/dev/null; then
+  echo "❌ $DEV_NS is clean, but PROD is no longer running (${p:-0} ready) — the cleanup should not have touched it." >&2
+  exit 1
+fi
+echo "✅ $DEV_NS is clean and PROD is still serving (${p} ready)."

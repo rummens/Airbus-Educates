@@ -1,0 +1,10 @@
+#!/bin/bash
+# The SAME Route manifest DEV refused is admitted here.
+set -uo pipefail
+for _ in $(seq 1 18); do
+  host=$(oc get route hello-dcs -n "$PROD_NS" -o jsonpath='{.spec.host}' 2>/dev/null)
+  [ -n "$host" ] && { echo "✅ The Route was admitted in $PROD_NS with host ${host}."; exit 0; }
+  sleep 5
+done
+echo "❌ No Route with a host in $PROD_NS. Did 'oc apply -f route.yaml -n \$PROD_NS' run? A PROD-type namespace should admit the same manifest DEV refused." >&2
+exit 1
