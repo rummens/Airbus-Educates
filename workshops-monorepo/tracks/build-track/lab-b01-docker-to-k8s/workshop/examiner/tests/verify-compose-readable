@@ -1,0 +1,12 @@
+#!/bin/bash
+# The page's read-only step: the compose source must be present to work from.
+f="$HOME/exercises/docker-compose.yml"
+if [ ! -f "$f" ]; then
+  echo "❌ Expected the compose file at ~/exercises/docker-compose.yml, found nothing. The session content may not have downloaded — reload the dashboard." >&2
+  exit 1
+fi
+if ! grep -q "hello-dcs" "$f"; then
+  echo "❌ ~/exercises/docker-compose.yml exists but does not define the hello-dcs service. Expected the lab's own compose file." >&2
+  exit 1
+fi
+echo "✅ The compose file for hello-dcs is in your session and readable."

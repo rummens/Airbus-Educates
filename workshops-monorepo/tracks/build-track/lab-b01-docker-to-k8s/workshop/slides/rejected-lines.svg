@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 420" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="420" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">Four compose lines DCS refuses — and the control that refuses them</text>
+
+  <text x="185" y="52" text-anchor="middle" font-size="12" font-weight="bold" fill="#5a6b7b">In the compose file</text>
+  <text x="575" y="52" text-anchor="middle" font-size="12" font-weight="bold" fill="#5a6b7b">The DCS control</text>
+
+  <!-- Row 1: external + floating tag -->
+  <rect x="40" y="62" width="290" height="66" rx="8" fill="#fdeeee" stroke="#c0504d" stroke-width="2"/>
+  <text x="185" y="86" text-anchor="middle" font-size="12" font-weight="bold" fill="#8a2f2c">image: docker.io/...:latest</text>
+  <text x="185" y="104" text-anchor="middle" font-size="11" fill="#8a2f2c">an external registry</text>
+  <text x="185" y="120" text-anchor="middle" font-size="11" fill="#8a2f2c">and a floating tag</text>
+
+  <line x1="330" y1="95" x2="425" y2="95" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="425,95 417,91 417,99" fill="#5a6b7b"/>
+
+  <rect x="430" y="62" width="290" height="66" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="575" y="86" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c6a3a">Air-gapped, Harbor only</text>
+  <text x="575" y="104" text-anchor="middle" font-size="11" fill="#2c6a3a">mirrored images, pinned versions</text>
+  <text x="575" y="120" text-anchor="middle" font-size="11" fill="#2c6a3a">so a build is reproducible and scannable</text>
+
+  <!-- Row 2: user root -->
+  <rect x="40" y="142" width="290" height="56" rx="8" fill="#fdeeee" stroke="#c0504d" stroke-width="2"/>
+  <text x="185" y="166" text-anchor="middle" font-size="12" font-weight="bold" fill="#8a2f2c">user: root</text>
+  <text x="185" y="184" text-anchor="middle" font-size="11" fill="#8a2f2c">run the container as UID 0</text>
+
+  <line x1="330" y1="170" x2="425" y2="170" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="425,170 417,166 417,174" fill="#5a6b7b"/>
+
+  <rect x="430" y="142" width="290" height="56" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="575" y="166" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c6a3a">Restricted SCC</text>
+  <text x="575" y="184" text-anchor="middle" font-size="11" fill="#2c6a3a">no UID 0; an arbitrary UID is assigned</text>
+
+  <!-- Row 3: privileged -->
+  <rect x="40" y="212" width="290" height="56" rx="8" fill="#fdeeee" stroke="#c0504d" stroke-width="2"/>
+  <text x="185" y="236" text-anchor="middle" font-size="12" font-weight="bold" fill="#8a2f2c">privileged: true</text>
+  <text x="185" y="254" text-anchor="middle" font-size="11" fill="#8a2f2c">every device and capability</text>
+
+  <line x1="330" y1="240" x2="425" y2="240" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="425,240 417,236 417,244" fill="#5a6b7b"/>
+
+  <rect x="430" y="212" width="290" height="56" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="575" y="236" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c6a3a">Restricted SCC</text>
+  <text x="575" y="254" text-anchor="middle" font-size="11" fill="#2c6a3a">one capability granted explicitly, never all</text>
+
+  <!-- Row 4: host mount -->
+  <rect x="40" y="282" width="290" height="66" rx="8" fill="#fdeeee" stroke="#c0504d" stroke-width="2"/>
+  <text x="185" y="306" text-anchor="middle" font-size="12" font-weight="bold" fill="#8a2f2c">volumes: /var/run/docker.sock</text>
+  <text x="185" y="324" text-anchor="middle" font-size="11" fill="#8a2f2c">a host path, straight into the node</text>
+  <text x="185" y="340" text-anchor="middle" font-size="11" fill="#8a2f2c">(and control of its other containers)</text>
+
+  <line x1="330" y1="315" x2="425" y2="315" stroke="#5a6b7b" stroke-width="2"/>
+  <polygon points="425,315 417,311 417,319" fill="#5a6b7b"/>
+
+  <rect x="430" y="282" width="290" height="66" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="575" y="306" text-anchor="middle" font-size="12" font-weight="bold" fill="#2c6a3a">No hostPath volumes</text>
+  <text x="575" y="324" text-anchor="middle" font-size="11" fill="#2c6a3a">storage is a namespace-scoped Volume,</text>
+  <text x="575" y="340" text-anchor="middle" font-size="11" fill="#2c6a3a">provisioned by the platform</text>
+
+  <text x="380" y="382" text-anchor="middle" font-size="12" fill="#1b2b3a">A naive lift-and-shift assumes one trusted host. A shared, air-gapped platform cannot give you one.</text>
+  <text x="380" y="402" text-anchor="middle" font-size="11" fill="#5a6b7b">The three lines that DID translate became a Deployment, a Service and a ConfigMap.</text>
+</svg>

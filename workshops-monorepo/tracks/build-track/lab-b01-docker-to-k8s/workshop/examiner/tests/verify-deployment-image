@@ -1,0 +1,20 @@
+#!/bin/bash
+# The image placeholder must be replaced with the real registry reference.
+img=$(oc get deploy hello-dcs -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null)
+if [ -z "$img" ]; then
+  echo "❌ Deployment 'hello-dcs' not found in $(oc project -q). Did the 'envsubst < deployment.yaml | oc apply -f -' step run?" >&2
+  exit 1
+fi
+case "$img" in
+  *REPLACE_WITH_HARBOR_IMAGE*)
+    echo "❌ The Deployment still carries the placeholder image ($img). Replace REPLACE_WITH_HARBOR_IMAGE in deployment.yaml, then apply it again." >&2
+    exit 1 ;;
+  *'${DCS_REGISTRY}'*)
+    echo "❌ The image is still the literal \${DCS_REGISTRY} string ($img) — it was applied without envsubst. Re-run: envsubst < deployment.yaml | oc apply -f -" >&2
+    exit 1 ;;
+  */samples/hello-dcs:1.0)
+    echo "✅ The Deployment pulls $img from the DCS registry."
+    exit 0 ;;
+esac
+echo "❌ Expected an image ending in /samples/hello-dcs:1.0, found '$img'." >&2
+exit 1

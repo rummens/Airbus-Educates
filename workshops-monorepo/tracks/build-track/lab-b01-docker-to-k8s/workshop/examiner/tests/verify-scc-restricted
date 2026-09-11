@@ -1,0 +1,15 @@
+#!/bin/bash
+# The running Pod must have been admitted under a restricted SCC — the control that
+# rejects `user: root` and `privileged: true` in the compose file.
+scc=$(oc get pod -l app=hello-dcs -o jsonpath='{.items[0].metadata.annotations.openshift\.io/scc}' 2>/dev/null)
+if [ -z "$scc" ]; then
+  echo "⚠️ No SCC annotation found on the hello-dcs Pod. Vanilla Kubernetes has no SCCs, so this check only means something on OpenShift." >&2
+  exit 1
+fi
+case "$scc" in
+  restricted*)
+    echo "✅ The Pod was admitted under the '$scc' SCC — no root, no privileged containers."
+    exit 0 ;;
+esac
+echo "❌ Expected a restricted SCC, the Pod was admitted under '$scc'. On DCS every tenant workload runs restricted; a looser SCC means this cluster is not configured like DCS." >&2
+exit 1

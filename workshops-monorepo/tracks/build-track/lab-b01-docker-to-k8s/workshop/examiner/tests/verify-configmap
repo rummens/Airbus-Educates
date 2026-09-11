@@ -1,0 +1,8 @@
+#!/bin/bash
+# Verify the ConfigMap migrated from the compose `environment:` block exists.
+if oc get configmap hello-dcs-config >/dev/null 2>&1; then
+  echo "✅ The hello-dcs-config ConfigMap exists."
+  exit 0
+fi
+echo "❌ ConfigMap 'hello-dcs-config' not found in $(oc project -q). Run the 'oc apply -f configmap.yaml' step above." >&2
+exit 1

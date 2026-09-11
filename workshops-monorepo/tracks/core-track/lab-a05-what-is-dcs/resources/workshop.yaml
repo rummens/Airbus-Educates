@@ -12,6 +12,9 @@ metadata:
     # platform introduction before the hands-on labs. Still not a hard prereq — anyone
     # who prefers to start by doing can skip ahead and come back.
     academy.dcs/order: "7"
+    # Optional: the catalog badges it and leaves it out of the "Lab N of M" counter
+    # and the track trophy, so skipping ahead costs the learner nothing.
+    academy.dcs/optional: "true"
     # No Route/Ingress here (concept lab) → dev namespace, like the rest of Core.
     dcs.airbus.com/lifecycle: dev
   annotations:
