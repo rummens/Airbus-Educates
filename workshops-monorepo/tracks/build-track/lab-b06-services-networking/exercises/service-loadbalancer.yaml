@@ -1,0 +1,17 @@
+# Also applied on purpose. A LoadBalancer Service asks the INFRASTRUCTURE for an
+# external address. That request needs a provider to answer it (a cloud LB
+# controller, or something like MetalLB on-prem). Where nothing answers, the Service
+# is created and its EXTERNAL-IP stays <pending> forever — which is exactly what you
+# will see here.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-dcs-lb
+spec:
+  type: LoadBalancer
+  selector:
+    app: hello-dcs
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080

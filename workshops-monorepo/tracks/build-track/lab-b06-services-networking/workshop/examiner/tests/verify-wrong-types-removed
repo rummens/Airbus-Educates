@@ -1,0 +1,12 @@
+#!/bin/bash
+# Both unsupported Services must be gone: a permanently pending LoadBalancer left
+# behind is exactly the confusing artefact the page warns about.
+set -uo pipefail
+left=""
+oc get svc hello-dcs-nodeport >/dev/null 2>&1 && left="$left hello-dcs-nodeport"
+oc get svc hello-dcs-lb >/dev/null 2>&1 && left="$left hello-dcs-lb"
+if [ -n "$left" ]; then
+  echo "❌ Still present:${left}. Run the delete step above: oc delete svc hello-dcs-nodeport hello-dcs-lb" >&2
+  exit 1
+fi
+echo "✅ Both unsupported Services are gone; the ClusterIP, headless and alias Services remain."

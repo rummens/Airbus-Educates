@@ -1,0 +1,14 @@
+#!/bin/bash
+# The ClusterIP Service must exist with a real virtual IP and both Pods behind it.
+set -uo pipefail
+cip=$(oc get svc hello-dcs -o jsonpath='{.spec.clusterIP}' 2>/dev/null)
+if [ -z "$cip" ] || [ "$cip" = "None" ]; then
+  echo "❌ Service 'hello-dcs' has no cluster IP (got '${cip:-<none>}'). Did 'oc apply -f service-clusterip.yaml' run? A ClusterIP Service must have one." >&2
+  exit 1
+fi
+n=$(oc get endpoints hello-dcs -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null | wc -w | tr -d ' ')
+if [ "${n:-0}" -lt 2 ] 2>/dev/null; then
+  echo "❌ The Service has ${n:-0} endpoint(s), expected 2 — one per ready Pod. Endpoints follow readiness, so check: oc get pods -l app=hello-dcs" >&2
+  exit 1
+fi
+echo "✅ Service hello-dcs has cluster IP ${cip} with ${n} endpoints behind it."

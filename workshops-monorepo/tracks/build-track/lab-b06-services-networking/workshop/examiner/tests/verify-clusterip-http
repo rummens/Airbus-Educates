@@ -1,0 +1,10 @@
+#!/bin/bash
+# The app must actually answer through the Service name, not just resolve.
+set -uo pipefail
+ns=$(oc project -q 2>/dev/null)
+code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 "http://hello-dcs.${ns}.svc:8080" 2>/dev/null)
+if [ "$code" != "200" ]; then
+  echo "❌ Expected HTTP 200 from hello-dcs.${ns}.svc:8080, got '${code:-none}'. Check the Service has endpoints and both Pods are Ready." >&2
+  exit 1
+fi
+echo "✅ The app answered HTTP 200 through the Service name."

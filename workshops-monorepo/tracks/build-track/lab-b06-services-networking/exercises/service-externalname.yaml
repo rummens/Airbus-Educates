@@ -1,0 +1,15 @@
+# An ExternalName Service: no selector, no endpoints, no proxying. It is a CNAME in
+# cluster DNS, so in-cluster clients use one stable name and the thing behind it can
+# move without touching them.
+#
+# The target here is the Kubernetes API service, purely because it is guaranteed to
+# resolve on any cluster — in real use this is a host that lives outside your
+# namespace, and on an air-gapped platform reaching it still needs the destination to
+# be allowed through the managed egress proxy.
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-alias
+spec:
+  type: ExternalName
+  externalName: kubernetes.default.svc.cluster.local

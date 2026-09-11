@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 470" font-family="sans-serif">
+  <rect x="0" y="0" width="760" height="470" fill="#f5f7fa" stroke="#c5ced6"/>
+  <text x="380" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b2b3a">Five Service types, and what DNS answers for each</text>
+
+  <!-- ClusterIP -->
+  <rect x="30" y="52" width="340" height="96" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="46" y="74" font-size="13" font-weight="bold" fill="#2c6a3a">ClusterIP — the default</text>
+  <text x="46" y="94" font-size="11" fill="#2c6a3a">One virtual IP in front of every ready Pod.</text>
+  <text x="46" y="112" font-size="11" fill="#2c6a3a">DNS answers: 1 address (the Service's own)</text>
+  <text x="46" y="130" font-size="11" fill="#2c6a3a">Load-balanced. For in-cluster traffic.</text>
+  <text x="352" y="94" text-anchor="end" font-size="22" fill="#4a9a5a">✓</text>
+
+  <!-- Headless -->
+  <rect x="390" y="52" width="340" height="96" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="406" y="74" font-size="13" font-weight="bold" fill="#2c6a3a">Headless — clusterIP: None</text>
+  <text x="406" y="94" font-size="11" fill="#2c6a3a">No virtual IP, nothing proxying.</text>
+  <text x="406" y="112" font-size="11" fill="#2c6a3a">DNS answers: 1 address PER ready Pod</text>
+  <text x="406" y="130" font-size="11" fill="#2c6a3a">For addressing one specific replica.</text>
+  <text x="712" y="94" text-anchor="end" font-size="22" fill="#4a9a5a">✓</text>
+
+  <!-- ExternalName -->
+  <rect x="30" y="164" width="700" height="80" rx="8" fill="#eef3ee" stroke="#4a9a5a" stroke-width="2"/>
+  <text x="46" y="186" font-size="13" font-weight="bold" fill="#2c6a3a">ExternalName — an alias</text>
+  <text x="46" y="206" font-size="11" fill="#2c6a3a">No selector, no endpoints, no proxy. A CNAME in cluster DNS.</text>
+  <text x="46" y="224" font-size="11" fill="#2c6a3a">One stable in-cluster name for something that lives elsewhere. A name is not access: egress is still deny-by-default.</text>
+  <text x="712" y="196" text-anchor="end" font-size="22" fill="#4a9a5a">✓</text>
+
+  <!-- NodePort -->
+  <rect x="30" y="260" width="340" height="88" rx="8" fill="#fdeeee" stroke="#c0504d" stroke-width="2"/>
+  <text x="46" y="282" font-size="13" font-weight="bold" fill="#8a2f2c">NodePort</text>
+  <text x="46" y="302" font-size="11" fill="#8a2f2c">The same port on EVERY node.</text>
+  <text x="46" y="320" font-size="11" fill="#8a2f2c">Created, and given a port — but shared</text>
+  <text x="46" y="338" font-size="11" fill="#8a2f2c">infrastructure, and no route in from outside.</text>
+  <text x="352" y="302" text-anchor="end" font-size="22" fill="#c0504d">✗</text>
+
+  <!-- LoadBalancer -->
+  <rect x="390" y="260" width="340" height="88" rx="8" fill="#fdeeee" stroke="#c0504d" stroke-width="2"/>
+  <text x="406" y="282" font-size="13" font-weight="bold" fill="#8a2f2c">LoadBalancer</text>
+  <text x="406" y="302" font-size="11" fill="#8a2f2c">Asks the infrastructure for an address.</text>
+  <text x="406" y="320" font-size="11" fill="#8a2f2c">On-prem, nobody answers: EXTERNAL-IP</text>
+  <text x="406" y="338" font-size="11" fill="#8a2f2c">stays &lt;pending&gt;. Healthy, and useless.</text>
+  <text x="712" y="302" text-anchor="end" font-size="22" fill="#c0504d">✗</text>
+
+  <!-- Route -->
+  <rect x="30" y="364" width="700" height="84" rx="8" fill="#e8f0f7" stroke="#3b7dd8" stroke-width="2"/>
+  <text x="46" y="386" font-size="13" font-weight="bold" fill="#1b4a86">Route — the supported way out on DCS</text>
+  <text x="46" y="406" font-size="11" fill="#1b4a86">Your Service keeps its in-cluster job; the Route names a host on the platform's domain;</text>
+  <text x="46" y="424" font-size="11" fill="#1b4a86">the platform's controlled external load balancer is the only edge traffic may enter through.</text>
+  <text x="46" y="442" font-size="11" fill="#1b4a86">Needs a PROD-type namespace.</text>
+</svg>

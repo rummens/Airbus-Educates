@@ -1,0 +1,16 @@
+#!/bin/bash
+# Resolving the alias must follow the CNAME through to the target: the target's own
+# name appears in the answer, and an address comes back.
+set -uo pipefail
+ns=$(oc project -q 2>/dev/null)
+target=$(oc get svc api-alias -o jsonpath='{.spec.externalName}' 2>/dev/null)
+out=$(getent hosts "api-alias.${ns}.svc.cluster.local" 2>/dev/null)
+if [ -z "$out" ]; then
+  echo "❌ The alias api-alias.${ns}.svc.cluster.local did not resolve at all. An ExternalName only creates a name — if its target does not resolve either, nothing comes back." >&2
+  exit 1
+fi
+if ! echo "$out" | grep -q "${target%.}"; then
+  echo "❌ The answer does not mention the alias target ${target}. Got: ${out}" >&2
+  exit 1
+fi
+echo "✅ The alias resolved through its CNAME to ${target}: ${out}"

@@ -1,0 +1,14 @@
+#!/bin/bash
+# The NodePort Service is created and IS given a node port — the page's point is that
+# being created is not the same as being usable here.
+set -uo pipefail
+np=$(oc get svc hello-dcs-nodeport -o jsonpath='{.spec.ports[0].nodePort}' 2>/dev/null)
+if [ -z "$np" ]; then
+  echo "❌ Service 'hello-dcs-nodeport' has no nodePort (or does not exist). Did 'oc apply -f service-nodeport.yaml' run? If the platform refused it outright, read the error — that is a finding worth reporting." >&2
+  exit 1
+fi
+if [ "$np" -lt 30000 ] || [ "$np" -gt 32767 ] 2>/dev/null; then
+  echo "❌ The assigned node port is ${np}, outside the usual 30000-32767 range." >&2
+  exit 1
+fi
+echo "✅ The NodePort Service was created and given node port ${np} — a port on every node in the cluster, which is exactly the problem."

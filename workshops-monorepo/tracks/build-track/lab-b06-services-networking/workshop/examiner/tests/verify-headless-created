@@ -1,0 +1,13 @@
+#!/bin/bash
+# A headless Service is defined by having NO cluster IP.
+set -uo pipefail
+cip=$(oc get svc hello-dcs-peers -o jsonpath='{.spec.clusterIP}' 2>/dev/null)
+if [ -z "$cip" ]; then
+  echo "❌ Service 'hello-dcs-peers' not found. Did 'oc apply -f service-headless.yaml' run?" >&2
+  exit 1
+fi
+if [ "$cip" != "None" ]; then
+  echo "❌ hello-dcs-peers has cluster IP '${cip}', expected 'None'. Without clusterIP: None it is an ordinary ClusterIP Service and DNS will not answer per Pod." >&2
+  exit 1
+fi
+echo "✅ hello-dcs-peers is headless: its cluster IP is None."

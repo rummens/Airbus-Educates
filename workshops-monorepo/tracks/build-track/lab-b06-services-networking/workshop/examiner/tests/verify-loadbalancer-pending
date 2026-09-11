@@ -1,0 +1,14 @@
+#!/bin/bash
+# The claim on the page, asserted: with no provider to fulfil it, the LoadBalancer
+# Service is created and its external address never arrives.
+set -uo pipefail
+if ! oc get svc hello-dcs-lb >/dev/null 2>&1; then
+  echo "❌ Service 'hello-dcs-lb' not found. Did 'oc apply -f service-loadbalancer.yaml' run?" >&2
+  exit 1
+fi
+ing=$(oc get svc hello-dcs-lb -o jsonpath='{.status.loadBalancer.ingress[*].ip}{.status.loadBalancer.ingress[*].hostname}' 2>/dev/null)
+if [ -n "$ing" ]; then
+  echo "⚠️ This cluster DID give the LoadBalancer an address (${ing}) — something is fulfilling the request here, unlike an on-prem DCS cluster. Read the page's reasoning rather than this result." >&2
+  exit 1
+fi
+echo "✅ The LoadBalancer Service exists with no external address — the request has nobody to answer it, and it will stay that way."

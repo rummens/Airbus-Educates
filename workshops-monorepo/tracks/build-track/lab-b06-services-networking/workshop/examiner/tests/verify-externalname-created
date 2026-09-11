@@ -1,0 +1,14 @@
+#!/bin/bash
+# An ExternalName Service is an alias: a type, a target, and no endpoints of its own.
+set -uo pipefail
+t=$(oc get svc api-alias -o jsonpath='{.spec.type}' 2>/dev/null)
+target=$(oc get svc api-alias -o jsonpath='{.spec.externalName}' 2>/dev/null)
+if [ "$t" != "ExternalName" ]; then
+  echo "❌ Service 'api-alias' has type '${t:-<missing>}', expected ExternalName. Did 'oc apply -f service-externalname.yaml' run?" >&2
+  exit 1
+fi
+if [ -z "$target" ]; then
+  echo "❌ api-alias sets no externalName, so there is nothing for it to alias." >&2
+  exit 1
+fi
+echo "✅ api-alias is an ExternalName Service aliasing ${target}."

@@ -1,0 +1,9 @@
+#!/bin/bash
+# Two ready replicas, so every Service on the later pages has more than one endpoint.
+set -uo pipefail
+ready=$(oc get deployment hello-dcs -o jsonpath='{.status.readyReplicas}' 2>/dev/null)
+if [ "${ready:-0}" -lt 2 ] 2>/dev/null; then
+  echo "❌ hello-dcs has ${ready:-0} ready replicas, expected 2. Did the apply step above run? The image may still be pulling — this check keeps retrying." >&2
+  exit 1
+fi
+echo "✅ hello-dcs is running ${ready} ready replicas."

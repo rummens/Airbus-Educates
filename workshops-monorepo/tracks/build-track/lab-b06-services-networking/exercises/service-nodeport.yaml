@@ -1,0 +1,16 @@
+# Applied on purpose, to see what it does and does not get you. A NodePort opens the
+# same port on EVERY node in the cluster — shared infrastructure, outside any tenant
+# boundary — and on DCS nothing from outside is allowed to reach a node directly: the
+# platform's controlled external load balancer is the only edge.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-dcs-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: hello-dcs
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080

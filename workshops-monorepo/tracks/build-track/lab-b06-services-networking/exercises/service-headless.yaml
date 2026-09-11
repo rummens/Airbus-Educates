@@ -1,0 +1,17 @@
+# A HEADLESS Service: same selector, but clusterIP: None. No virtual IP and no
+# load-balancing — DNS returns one A record per ready Pod instead, so the client
+# chooses. This is what a StatefulSet uses to give each replica its own name.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-dcs-peers
+  labels:
+    app: hello-dcs
+spec:
+  clusterIP: None
+  selector:
+    app: hello-dcs
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080

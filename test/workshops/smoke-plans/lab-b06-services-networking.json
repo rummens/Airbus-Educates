@@ -1,0 +1,30 @@
+{
+  "workshop": "lab-b06-services-networking",
+  "_note": "DNS answers are the subject, so the checks resolve names with `getent hosts` — the session image has no nslookup/dig/host. verify-loadbalancer-pending asserts the ABSENCE of an external address, which is the on-prem truth: a cluster that does fulfil LoadBalancer Services (a cloud LB controller, MetalLB) makes it fail loudly, and that is the right signal since the page's claim would no longer hold there. imagePullPolicy=Always forces a re-pull of the mutable samples/hello-dcs:1.0 tag.",
+  "steps": [
+    {"run": "envsubst < deployment.yaml | oc apply -f - && oc patch deployment/hello-dcs --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/imagePullPolicy\",\"value\":\"Always\"}]' && oc rollout status deploy/hello-dcs --timeout=180s"},
+    {"check": "verify-app-ready"},
+    {"run": "oc apply -f service-clusterip.yaml"},
+    {"check": "verify-clusterip-endpoints"},
+    {"run": "oc get svc hello-dcs -o wide && oc get endpoints hello-dcs"},
+    {"run": "getent hosts hello-dcs.$(oc project -q).svc.cluster.local"},
+    {"check": "verify-clusterip-single-ip"},
+    {"run": "curl -s -o /dev/null -w 'HTTP %{http_code}\\n' \"http://hello-dcs.$(oc project -q).svc:8080\""},
+    {"check": "verify-clusterip-http"},
+    {"run": "oc apply -f service-headless.yaml"},
+    {"check": "verify-headless-created"},
+    {"run": "oc get svc -o wide"},
+    {"run": "getent hosts hello-dcs-peers.$(oc project -q).svc.cluster.local"},
+    {"check": "verify-headless-per-pod"},
+    {"run": "oc apply -f service-externalname.yaml"},
+    {"check": "verify-externalname-created"},
+    {"run": "getent hosts api-alias.$(oc project -q).svc.cluster.local"},
+    {"check": "verify-externalname-resolves"},
+    {"run": "oc apply -f service-nodeport.yaml && oc get svc hello-dcs-nodeport"},
+    {"check": "verify-nodeport-assigned"},
+    {"run": "oc apply -f service-loadbalancer.yaml && oc get svc hello-dcs-lb"},
+    {"check": "verify-loadbalancer-pending"},
+    {"run": "oc delete svc hello-dcs-nodeport hello-dcs-lb"},
+    {"check": "verify-wrong-types-removed"}
+  ]
+}

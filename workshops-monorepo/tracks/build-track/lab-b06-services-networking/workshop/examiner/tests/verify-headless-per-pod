@@ -1,0 +1,18 @@
+#!/bin/bash
+# The headless name must resolve to ONE ADDRESS PER READY POD, and those addresses
+# must be the Pod IPs — not any Service's virtual IP.
+set -uo pipefail
+ns=$(oc project -q 2>/dev/null)
+podips=$(oc get pods -l app=hello-dcs --field-selector=status.phase=Running -o jsonpath='{range .items[*]}{.status.podIP}{"\n"}{end}' 2>/dev/null | grep -c .)
+ips=$(getent hosts "hello-dcs-peers.${ns}.svc.cluster.local" 2>/dev/null | awk '{print $1}' | sort -u)
+n=$(echo "$ips" | grep -c .)
+if [ "${n:-0}" -lt 2 ] 2>/dev/null; then
+  echo "❌ DNS returned ${n:-0} address(es) for the headless Service, expected one per ready Pod (${podips}). Got: $(echo $ips). DNS records follow readiness, so this check keeps retrying while Pods come up." >&2
+  exit 1
+fi
+cip=$(oc get svc hello-dcs -o jsonpath='{.spec.clusterIP}' 2>/dev/null)
+if echo "$ips" | grep -qx "$cip"; then
+  echo "❌ One of the returned addresses (${cip}) is the ClusterIP Service's virtual IP — the headless name should resolve to Pod IPs only." >&2
+  exit 1
+fi
+echo "✅ The headless name resolves to ${n} Pod addresses, none of them a Service virtual IP."

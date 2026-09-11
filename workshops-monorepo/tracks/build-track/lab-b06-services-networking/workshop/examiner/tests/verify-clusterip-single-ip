@@ -1,0 +1,17 @@
+#!/bin/bash
+# Cluster DNS must answer the ClusterIP Service's name with EXACTLY ONE address, and
+# that address must be the Service's own virtual IP — not a Pod IP.
+set -uo pipefail
+ns=$(oc project -q 2>/dev/null)
+cip=$(oc get svc hello-dcs -o jsonpath='{.spec.clusterIP}' 2>/dev/null)
+ips=$(getent hosts "hello-dcs.${ns}.svc.cluster.local" 2>/dev/null | awk '{print $1}')
+n=$(echo "$ips" | grep -c . )
+if [ "${n:-0}" -ne 1 ] 2>/dev/null; then
+  echo "❌ DNS returned ${n:-0} address(es) for hello-dcs.${ns}.svc.cluster.local, expected exactly 1. Got: $(echo $ips). A ClusterIP Service always resolves to its own single virtual IP." >&2
+  exit 1
+fi
+if [ "$ips" != "$cip" ]; then
+  echo "❌ DNS returned ${ips} but the Service's cluster IP is ${cip} — expected them to be the same address." >&2
+  exit 1
+fi
+echo "✅ DNS answers with exactly one address, ${ips}, which is the Service's own cluster IP."
