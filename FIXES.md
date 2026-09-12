@@ -7,6 +7,13 @@ synced `main`; workshop content is live on the next session start.
 ## 2026-09-12
 
 - **Five optional console companions are live**, each sitting right after the lab it follows: Builds, Health & resources and Autoscaling in Build & Run, Metrics and Logs in Operate & Observe. They are guided tours of the OpenShift console for topics you have already done in the terminal — every step names the `oc` command it stands in for, and says what the console is genuinely better at.
+- **The console labs highlight the right thing again.** In the five optional console companions, most steps were pointing at links that were not on the page you were standing on, so nothing lit up and you had to press Continue. Every step was re-checked against a real console, and all of them now highlight what they are talking about.
+- **Health & resources in the console** is rebuilt and about twice as long. It now walks the **Workloads** and **Administration** menus and says what each groups together, opens a Pod that is Running and never Ready so you can read its **Conditions**, and opens your namespace's **ResourceQuota** and **LimitRange** themselves to read Used against Max and the defaults an unsized container gets. It also says plainly that a DCS namespace has exactly one of each.
+- **Builds in the console** now starts a build from the **Actions** menu and follows the run it creates to its log and to the ImageStream tag it produced.
+- **Metrics in the console** adds **Targets**, which is where you find out whether the platform is reaching your app at all, and follows the link from there to the ServiceMonitor that put it in the list.
+- **Logs in the console** adds the Pod's details page and the **Events** tab, which is where a log that stops without explanation usually explains itself.
+- **Harbor** gains a page on asking for your Harbor project. It is a Kubernetes object like everything else: you apply a `Project` and Crossplane's Harbor provider builds it, with the DEV and PROD rules visible as fields you can read.
+- **The labs read less like a brochure.** Descriptions, catalog text and page prose across both new tracks were rewritten in a plainer voice, and the Dev Spaces and Operators labs lost some leftover references to labs that no longer exist under those names.
 
 ## 2026-09-11
 

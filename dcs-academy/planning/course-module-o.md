@@ -18,11 +18,15 @@ Created 2026-09-11 in the split described in
 
 | Order | Console lab | Pairs with | Duration |
 |---|---|---|---|
-| 15 | Metrics in the console | Metrics & Monitoring | 8m |
-| 25 | Logs in the console | Logs | 6m |
+| 15 | Metrics in the console | Metrics & Monitoring | 10m |
+| 25 | Logs in the console | Logs | 8m |
 
-The metrics tour is where a **graph over a time range** finally beats an instant value, and
-the logs tour is where pausing a stream and selecting text beats `-f` in a terminal.
+The metrics tour is where a graph over a time range beats an instant value, and where
+**Targets** answers "is the platform even reaching my app" in one page. The logs tour pairs a
+paused, searchable log with the **Events** tab that explains what the log does not.
+
+Both were rebuilt on 2026-09-12 after a review found most highlights broken, and every step
+was verified against a real console.
 
 ## The through-line
 

@@ -1,6 +1,6 @@
 # DCS Academy — Session Handoff
 
-**Last updated:** 2026-09-11 (overnight session). Read this first, then
+**Last updated:** 2026-09-12. Read this first, then
 [tasks.md](tasks.md).
 
 ## Where things stand
@@ -11,8 +11,8 @@
 |---|---|---|
 | Core (`core`) | 8 | unchanged — frozen baseline |
 | Console (`console`) | 9 | unchanged — frozen baseline |
-| **Build & Run (`build`)** | 10 + 3 console companions | **published**, every lab green on CRC |
-| **Operate & Observe (`operate`)** | 5 + 2 console companions | **published**, every lab green on CRC |
+| **Build & Run (`build`)** | 10 + 3 console companions | **published**; terminal labs green on CRC, console companions rebuilt 2026-09-12 |
+| **Operate & Observe (`operate`)** | 5 + 2 console companions | **published**; terminal labs green on CRC, console companions rebuilt 2026-09-12 |
 | Security (`security`) | — | superseded, awaiting a replan |
 
 The old Developer and Security tracks were moved to `workshops-monorepo/_superseded/`
@@ -20,19 +20,46 @@ The old Developer and Security tracks were moved to `workshops-monorepo/_superse
 
 ## What needs you
 
-1. **`git push`.** Commit `6f1d457` (OpenSSL ARM cap-probe skipped in every portal-image
-   Job) is committed but **not pushed** — the push is the deploy trigger. Until it lands,
-   the ArgoCD app `dcs-academy-tracks-and-workshops` stays OutOfSync and the new tracks'
-   Workshop/ConsoleLab CRs are not on the cluster. Details below under *The sync blocker*.
-2. **Rebuild and push the portal image.** Two learner-visible changes are in the image and
-   not yet on the cluster: the **Optional** badge (and its numbering/trophy behaviour), and
-   the catalog remembering which tracks were open. `images/build.sh dcs-academy-portal`.
-3. **The ConsoleLink** ships with the next ArgoCD sync — nothing to do, just worth knowing it
-   will appear in the console masthead.
-4. **Durations** are authored estimates, not observed medians. Worth tuning after the first
-   real cohort.
+1. **`git push`.** Everything below is committed and unpushed. The push is the deploy trigger.
+2. **Re-verify on a cluster.** CRC was stopped part-way through this session, so three things
+   are written and gate-checked but **not live-verified**:
+   - **b03 page 03** (Harbor project via Crossplane) and its `verify-project-requested` check.
+     The no-provider branch is the one that will run on CRC.
+   - **tour-b04-health**'s paired workshop, which now also creates a bare Pod `lab-probe`
+     whose readiness probe points at a closed port. The tour reads its Conditions.
+   - **tour-b02 / b05 / o01 / o02** after their last edits. b04, b02, b05 and o02 were walked
+     end to end before CRC stopped; o01 was re-edited afterwards.
+   `cd test/workshops && ./smoke_test.py lab-b03-harbor` covers the first one.
+3. **Clean up the probe leftovers** when CRC comes back. This session created scratch
+   namespaces `probe-b02`, `probe-b04`, `probe-b05`, `probe-o01`, `probe-o02` and five
+   ConsoleLabs named `zz-*`, none of which are in git:
+   `oc delete ns probe-b02 probe-b04 probe-b05 probe-o01 probe-o02` and
+   `oc get consolelabs -o name | grep zz- | xargs -r oc delete`.
+4. **Rebuild and push the portal image** if the Optional badge and the remembered track state
+   are not visible: `images/build.sh dcs-academy-portal`, then restart the portal Deployment
+   (`pullPolicy: Always` does not re-pull without one).
 
-## The sync blocker (diagnosed and fixed, awaiting a push)
+## How the console labs are verified
+
+The engine resolves an `href` target with `document.querySelector('a[href="…"]')`, so a step
+whose value is not the exact URL the console renders highlights nothing, silently. Two forms
+are in play on OpenShift 4.22:
+
+- **sidebar links and details-page tabs** use the GVK path
+  (`/k8s/ns/<ns>/core~v1~ResourceQuota`, `/k8s/ns/<ns>/deployments/lab-app/yaml`);
+- **table rows** use the legacy plural (`/k8s/ns/<ns>/resourcequotas/compute-resources`).
+
+The nav section ids are `qs-nav-home`, `qs-nav-workloads`, `qs-nav-networking`,
+`qs-nav-storage`, `qs-nav-builds`, `qs-nav-monitoring` (labelled **Observe**),
+`qs-nav-compute`, `qs-nav-usermanagement`, `qs-nav-administration`. There is no
+`qs-nav-observe`.
+
+To check a lab, apply it under a scratch name, create a namespace holding the objects its
+paired workshop provisions, and walk it with Playwright from the console-plugin repo
+(`tests/e2e`, `CONSOLE_URL` + `CONSOLE_PASSWORD`), asserting `.academy-guidance__spotlight` is
+visible on each step before pressing Continue. That harness is what found the breakage.
+
+## The sync blocker (fixed and deployed on 2026-09-12)
 
 Symptom: both new tracks were complete and green in git, but `oc get workshops` showed no
 `lab-b02`, `lab-b03`, `lab-b10` and none of the five `tour-*` CRs, and the Argo app sat
@@ -46,9 +73,10 @@ not: both env-guard hooks, the catalog-rescan Job and the session-reaper CronJob
 every run had also been failing, unnoticed, for the same reason).
 
 Fix: the env var is now emitted in all of them, gated on `.Values.openssl.armcap`, which
-`argocd/envs/platform-crc.yaml` already sets to `"0"` and every other cluster leaves empty
-— a no-op off CRC. Verified by running `python3 -m portal.reap` in a one-off pod with the
-env set: exit 0, full reconcile output.
+`argocd/envs/platform-crc.yaml` already sets to `"0"` and every other cluster leaves empty,
+so it is a no-op off CRC. After the push, the app synced, all 20 new Workshop CRs and 5
+ConsoleLabs reached the cluster, and a manual run of the session-reaper CronJob succeeded
+(`our_envs=35 desired_workshops=35 stale=0`).
 
 ## Things learned the hard way (do not re-derive)
 

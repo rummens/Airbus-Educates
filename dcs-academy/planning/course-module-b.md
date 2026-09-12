@@ -17,7 +17,7 @@ the workload it becomes — sized, autoscaled, reachable, stateful, and survivab
 |---|---|---|---|
 | 10 | [From Docker to Kubernetes](workshop-plans/lab-b01-docker-to-k8s.md) | 25m | 22/22 |
 | 20 | [Build Your Image on DCS](workshop-plans/lab-b02-build-your-image.md) | 25m | 19/19 |
-| 30 | [Harbor: Projects, Push & Scan](workshop-plans/lab-b03-harbor.md) | 30m | 18/18 |
+| 30 | [Harbor: Projects, Push & Scan](workshop-plans/lab-b03-harbor.md) | 35m | 18/18 |
 | 40 | [Health & Resources](workshop-plans/lab-b04-health-resources.md) | 25m | 21/21 |
 | 50 | [Autoscaling](workshop-plans/lab-b05-autoscaling.md) | 20m | 15/15 |
 | 60 | [Services & Cluster Networking](workshop-plans/lab-b06-services-networking.md) | 20m | 24/24 |
@@ -33,12 +33,18 @@ the catalog badges it and leaves it out of the required path and the track troph
 
 | Order | Console lab | Pairs with | Duration |
 |---|---|---|---|
-| 25 | Builds in the console | Build Your Image on DCS | 8m |
-| 45 | Health & resources in the console | Health & Resources | 8m |
-| 55 | Autoscaling in the console | Autoscaling | 7m |
+| 25 | Builds in the console | Build Your Image on DCS | 10m |
+| 45 | Health & resources in the console | Health & Resources | 12m |
+| 55 | Autoscaling in the console | Autoscaling | 8m |
 
 They apply the concepts and introduce none: every step names the `oc` command it stands in
-for, and says what the console is actually better at.
+for, and says what the console is better at.
+
+Rebuilt on 2026-09-12 after a review found most highlights broken. Every `href` target is now
+the form the console actually renders (sidebar and tab links use the GVK path, table rows the
+legacy plural), each step's target exists on the page the previous step leaves the learner on,
+and the menus themselves are taught rather than passed through. Verified by walking each lab
+in a real console and asserting the spotlight resolves on every step.
 
 ## Decisions that shaped the track
 
@@ -49,7 +55,9 @@ for, and says what the console is actually better at.
   removed by dropping the dependency: the learner's session files are the input, and the
   objects are identical to a git-source build.
 - **b03 separates mechanics from policy** and says which is which. `skopeo` is exercised for
-  real; the DEV/PROD project rules and the scan gate are taught, with fixtures.
+  real; the DEV/PROD project rules and the scan gate are taught, with fixtures. The Harbor
+  project itself is **requested as a Crossplane `Project`**, applied for real where the
+  provider exists and read back as a manifest where it does not.
 - **b08 folds three topics into one** (Jobs, CronJobs, init containers and sidecars) because
   they answer one question: how long is this container supposed to run?
 - **b10 is optional** and marked as such in the catalog: Dev Spaces is operator-provided and
