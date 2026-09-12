@@ -40,14 +40,14 @@ delay: 10
 ServiceMonitor, so an empty `result` right after is normal. The check waits.
 {{< /note >}}
 
-You get JSON: a `result` array, one entry per **series**, each with its `metric` labels and a
-`value`. Note the labels the platform added — `namespace`, `pod`, `service` — on top of the
-ones your app set.
+You get JSON: a `result` array, one entry per **series**, each with its `metric` labels and
+a `value`. The platform added `namespace`, `pod` and `service` on top of the labels your app
+set.
 
 ## Ask a real question
 
-A counter's value is not interesting; its **rate** is. How many requests per second has each
-Pod served over the last five minutes?
+A counter's value is rarely interesting; its **rate** is. How many requests per second has
+each Pod served over the last five minutes?
 
 ```terminal:execute
 command: |-
@@ -70,11 +70,12 @@ delay: 10
 
 Read the query from the inside out:
 
-1. **`hello_dcs_requests_total[5m]`** — every sample of that metric in the last five minutes.
-2. **`rate(...)`** — the per-second increase across that window.
-3. **`sum by (pod) (...)`** — collapse the label combinations, keeping one number per Pod.
+1. **`hello_dcs_requests_total[5m]`** is every sample of that metric in the last five
+   minutes.
+2. **`rate(...)`** is the per-second increase across that window.
+3. **`sum by (pod) (...)`** collapses the label combinations, keeping one number per Pod.
 
-That is the shape of nearly every dashboard panel you will ever read.
+That is the shape of most dashboard panels you will read.
 
 ## Now ask about somebody else
 
@@ -97,8 +98,7 @@ retries: .INF
 delay: 5
 ```
 
-**Forbidden.** The endpoint authorizes every query against the namespace you named, using the
-same permissions that decide whether you may read Pods there.
+**Forbidden.** The endpoint authorizes every query against the namespace you named, using
+the same permissions that decide whether you may read Pods there.
 
-That is worth sitting with: **tenancy is enforced in the metrics path too**, not only in the
-API. Your metrics are yours, and so is the boundary around them.
+**Tenancy is enforced in the metrics path as well as in the API.**

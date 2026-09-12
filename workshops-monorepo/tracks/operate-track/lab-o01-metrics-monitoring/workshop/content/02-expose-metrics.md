@@ -29,7 +29,7 @@ delay: 3
 
 ## Read the format
 
-That output is the whole contract — plain text, three kinds of line:
+That output is the whole contract: plain text, with three kinds of line.
 
 ```
 # HELP hello_dcs_requests_total Requests served, by path.
@@ -37,16 +37,18 @@ That output is the whole contract — plain text, three kinds of line:
 hello_dcs_requests_total{path="/"} 12
 ```
 
-- **`# HELP`** — what the metric means, for whoever reads it later.
-- **`# TYPE`** — `counter` (only goes up), `gauge` (goes up and down), and a couple more.
-- **the sample** — the metric **name**, its **labels** in braces, and the value.
+- **`# HELP`** says what the metric means, for whoever reads it later.
+- **`# TYPE`** says `counter` (only goes up), `gauge` (goes up and down), or one of a couple
+  of others.
+- **the sample** is the metric **name**, its **labels** in braces, and the value.
 
 Labels are what make one metric useful: `path="/"` and `path="/healthz"` are separate series
 of the same metric, and you can sum, filter or split by them later.
 
 {{< note >}}
-**💡 Tip:** a **counter** never goes down, so its raw value is not interesting. What you want
-is how fast it rises — `rate(...)` — which is why counters are named `_total` by convention.
+**💡 Tip:** a **counter** never goes down, so its raw value is rarely interesting. What you
+want is how fast it rises, which is `rate(...)`. That is why counters are named `_total` by
+convention.
 {{< /note >}}
 
 ## Generate some traffic
@@ -69,7 +71,7 @@ retries: .INF
 delay: 3
 ```
 
-The counter for `path="/"` has moved. Note that the two replicas each count **their own**
-requests — you are looking at one of them, whichever the Service picked.
+The counter for `path="/"` has moved. The two replicas each count **their own** requests,
+and you are looking at whichever one the Service picked.
 
-That is normal, and it is why the next step collects from **all** endpoints rather than one.
+That is why the next step collects from **all** endpoints rather than from one.

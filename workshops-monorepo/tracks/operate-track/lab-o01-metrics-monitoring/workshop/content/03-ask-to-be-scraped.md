@@ -18,13 +18,13 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/se
 file: ~/exercises/servicemonitor.yaml
 ```
 
-Three fields carry it, and two of them are where mistakes live:
+Three fields carry it, and two of them are where the mistakes are:
 
-- **`selector.matchLabels`** — which **Service** to scrape. It matches the *Service's* labels,
-  not the Pods'.
-- **`endpoints.port`** — the Service's port **by name**. A numeric port here does not work,
-  and an unnamed Service port cannot be scraped at all.
-- **`interval`** — how often. Every sample costs storage that somebody pays for.
+- **`selector.matchLabels`** picks which **Service** to scrape. It matches the *Service's*
+  labels, not the Pods'.
+- **`endpoints.port`** names the Service's port **by name**. A numeric port does not work, and
+  an unnamed Service port cannot be scraped at all.
+- **`interval`** sets how often. Every sample costs storage that somebody pays for.
 
 ```terminal:execute
 command: oc apply -f servicemonitor.yaml
@@ -40,8 +40,8 @@ delay: 3
 
 {{< note >}}
 **📌 Note:** you were able to create that because your namespace is entitled to
-`monitoring.coreos.com` objects. Being able to *ask* is itself a permission — the **RBAC &
-Tenancy** lab is where that idea came from.
+`monitoring.coreos.com` objects. Being able to ask is itself a permission, which is the
+subject of the **RBAC & Tenancy** lab.
 {{< /note >}}
 
 ## Confirm it is selecting something
@@ -63,7 +63,7 @@ delay: 3
 ```
 
 If the labels on the left do not appear on a Service on the right, nothing will ever be
-scraped — and nothing will tell you so.
+scraped, and nothing will tell you so.
 
 {{< warning >}}
 **⚠️ Watch out:** a ServiceMonitor never reports an error for selecting nothing. No error, no

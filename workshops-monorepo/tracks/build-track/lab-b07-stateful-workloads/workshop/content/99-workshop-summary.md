@@ -2,7 +2,7 @@
 title: Summary
 ---
 
-You built a workload whose replicas are **somebody** — with names, disks and an order.
+You built a workload whose replicas have names, disks and an order of their own.
 
 Open the closing slide (📊 **Slides** tab):
 
@@ -31,8 +31,8 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
 
 {{< note >}}
 **❓ Answer:** its **DNS name** and its **volume**. The claim is bound to the ordinal
-(`data-hello-dcs-0`), so a Pod called `hello-dcs-0` gets that disk back, and clients that
-addressed `hello-dcs-0.hello-dcs...` keep reaching the same member.
+(`data-hello-dcs-0`), so a Pod called `hello-dcs-0` gets that disk back, and clients
+addressing `hello-dcs-0.hello-dcs...` keep reaching the same member.
 {{< /note >}}
 
 2. You scale a StatefulSet from 3 to 2. What happened to replica 2's data?

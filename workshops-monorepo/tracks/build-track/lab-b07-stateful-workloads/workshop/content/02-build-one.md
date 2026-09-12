@@ -2,7 +2,8 @@
 title: Build One
 ---
 
-A StatefulSet needs a **headless Service** first — that is what gives each Pod a DNS name.
+A StatefulSet needs a **headless Service** first, because that is what gives each Pod a DNS
+name.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -40,9 +41,9 @@ file: ~/exercises/statefulset.yaml
 
 Three fields do the work that a Deployment has no equivalent for:
 
-- **`serviceName: hello-dcs`** — where the per-Pod DNS names come from.
-- **`volumeClaimTemplates`** — a claim **per replica**, not one shared volume.
-- **`replicas: 2`** — created in order, `hello-dcs-0` before `hello-dcs-1`.
+- **`serviceName: hello-dcs`** is where the per-Pod DNS names come from.
+- **`volumeClaimTemplates`** creates a claim **per replica**, not one shared volume.
+- **`replicas: 2`** are created in order, `hello-dcs-0` before `hello-dcs-1`.
 
 Watch the Pods appear in the **lower** pane before you apply it:
 
@@ -79,8 +80,8 @@ volume is provisioned and each Pod becomes Ready before the next one starts.
 command: oc get pods -l app=hello-dcs -o custom-columns=NAME:.metadata.name,STATUS:.status.phase,NODE:.spec.nodeName
 ```
 
-`hello-dcs-0` and `hello-dcs-1` — **ordinals**, not the random suffixes a Deployment's
-ReplicaSet generates.
+`hello-dcs-0` and `hello-dcs-1`. They are **ordinals**, not the random suffixes a
+Deployment's ReplicaSet generates.
 
 ## One volume each
 
@@ -90,8 +91,8 @@ command: oc get pvc -o custom-columns=NAME:.metadata.name,STATUS:.status.phase,C
 
 Two claims, created from the one template:
 
-- **`data-hello-dcs-0`** — replica 0's own disk.
-- **`data-hello-dcs-1`** — replica 1's own disk.
+- **`data-hello-dcs-0`** is replica 0's own disk.
+- **`data-hello-dcs-1`** is replica 1's own disk.
 
 The name is `<template>-<statefulset>-<ordinal>`, which is how each claim finds its way back
 to the same replica.
@@ -104,4 +105,4 @@ retries: .INF
 delay: 3
 ```
 
-Next: prove the identity is real.
+Next, check that the identity is real.

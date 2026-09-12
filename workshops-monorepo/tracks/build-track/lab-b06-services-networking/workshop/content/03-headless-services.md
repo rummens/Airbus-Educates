@@ -2,12 +2,11 @@
 title: Headless Services
 ---
 
-Sometimes a single address is exactly wrong. A database client that must talk to **replica 2**,
-or a peer-to-peer cluster where members find each other — those need to address Pods
-individually.
+Some clients need to address a specific Pod: a database client that must talk to **replica
+2**, or a peer-to-peer cluster whose members find each other.
 
-Setting `clusterIP: None` makes a **headless** Service: no virtual IP, no load balancing. DNS
-answers with the Pods themselves.
+Setting `clusterIP: None` makes a **headless** Service. There is no virtual IP and no load
+balancing, and DNS answers with the Pods themselves.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -57,8 +56,8 @@ This time you get **one line per ready Pod**:
 10.217.0.102    hello-dcs-peers.<your-namespace>.svc.cluster.local
 ```
 
-Those are **Pod** IPs. Nothing is proxying: the client resolved the name and now talks
-straight to a Pod it chose.
+Those are **Pod** IPs. Nothing is proxying, so the client resolved the name and talks
+straight to the Pod it chose.
 
 ```examiner:execute-test
 name: verify-headless-per-pod
@@ -73,12 +72,12 @@ delay: 2
 A headless Service is also how a **StatefulSet** gives each replica a **stable name**:
 `<pod>.<service>.<namespace>.svc.cluster.local`, so `db-0` stays `db-0` across restarts.
 
-That is the next lab. Here, notice only that Pod IPs are not stable — the *names* a
-StatefulSet builds on top of this are.
+That is the next lab. What matters here is that Pod IPs are not stable, while the *names*
+a StatefulSet builds on top of this are.
 
 {{< warning >}}
-**⚠️ Watch out:** a headless Service gives you no load balancing and no failover. The client
-chose that Pod, so the client owns the retry when it disappears.
+**⚠️ Watch out:** a headless Service gives you no load balancing and no failover. The
+client chose that Pod, so the client owns the retry when it disappears.
 {{< /warning >}}
 
-Next: a Service that points at nothing in your namespace at all.
+Next, a Service that points at nothing in your namespace at all.

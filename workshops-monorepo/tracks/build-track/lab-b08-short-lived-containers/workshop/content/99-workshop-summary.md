@@ -2,7 +2,7 @@
 title: Summary
 ---
 
-Four shapes a Deployment cannot express, all of them ordinary once you have run them.
+You have run the four shapes a Deployment cannot express.
 
 Open the closing slide (📊 **Slides** tab):
 
@@ -18,8 +18,8 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
    with both attempts preserved for inspection.
 3. **Created** a CronJob, **triggered** it by hand with `--from=cronjob/…`, and **suspended**
    it without deleting anything.
-4. **Ran** an init container to completion before the app started, and a **sidecar** alongside
-   it — separated by one line, `restartPolicy: Always`.
+4. **Ran** an init container to completion before the app started, and a **sidecar**
+   alongside it, separated by one line, `restartPolicy: Always`.
 5. **Read**, from the app container, a file written by a container that had already exited.
 
 ## Check Your Understanding
@@ -28,8 +28,8 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
 
 {{< note >}}
 **❓ Answer:** a successful migration **exits 0**, and a Deployment's job is to restart a
-container that exits — so it would run the migration again, forever. A Job expects the Pod to
-end and records whether it succeeded.
+container that exits, so it would run the migration again. A Job expects the Pod to end and
+records whether it succeeded.
 {{< /note >}}
 
 2. A Job's Pod fails. What decides whether it is retried, and what happens when the retries

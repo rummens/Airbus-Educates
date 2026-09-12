@@ -2,8 +2,8 @@
 title: Shutting Down Well
 ---
 
-A Pod being taken away is not an event, it is a **sequence**. Most dropped requests during
-maintenance come from an app that ignored part of it.
+A Pod being taken away is a **sequence** rather than a single event. Most dropped requests
+during maintenance come from an app that ignored part of it.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -20,8 +20,8 @@ When a Pod is marked for deletion, two things start **at the same time**:
    it;
 2. the container's shutdown begins — `preStop` first, then `SIGTERM`.
 
-Those are not instant and they are not coordinated. Traffic already in flight, and routing
-that has not caught up yet, can still arrive after shutdown has started.
+Neither is instant, and they are not coordinated with each other. Traffic already in
+flight, and routing that has not caught up, can still arrive after shutdown has started.
 
 Then the clock: after `terminationGracePeriodSeconds`, anything still running gets `SIGKILL`.
 
@@ -39,10 +39,10 @@ retries: .INF
 delay: 3
 ```
 
-- **`preStop: sleep 10`** — runs **before** `SIGTERM`. Its job is to cover the race above:
-  keep serving for a few seconds while the endpoint removal propagates.
-- **`terminationGracePeriodSeconds: 30`** — the total budget for all of it. `preStop` comes
-  out of this, not on top of it.
+- **`preStop: sleep 10`** runs **before** `SIGTERM`. It covers the race above by keeping the
+  container serving for a few seconds while the endpoint removal propagates.
+- **`terminationGracePeriodSeconds: 30`** is the total budget for all of it. `preStop` comes
+  out of this rather than on top of it.
 
 ## Time a real deletion
 
@@ -64,26 +64,25 @@ retries: .INF
 delay: 3
 ```
 
-That was not instant, and the number is probably close to the **full 30 seconds** rather than
-the 10 you might expect from `preStop`.
+That was not instant, and the number is probably close to the **full 30 seconds** rather
+than the 10 you might expect from `preStop`.
 
 ## Why the full grace period
 
 `hello-dcs` is a small Python web server that does **not** handle `SIGTERM`. So:
 
 1. `preStop` sleeps its 10 seconds;
-2. `SIGTERM` arrives — and the process ignores it;
+2. `SIGTERM` arrives, and the process ignores it;
 3. the kubelet waits out the rest of the grace period;
 4. `SIGKILL` ends it.
 
-A well-behaved app shortens step 3 to nothing: it catches `SIGTERM`, stops accepting new
-connections, finishes the requests it already has, and exits. The Pod disappears **early**,
-and nobody notices the maintenance.
+An app that handles `SIGTERM` removes step 3 entirely: it stops accepting new connections,
+finishes the requests it already has, and exits. The Pod disappears **early**.
 
 {{< note >}}
-**💡 Tip:** this is a property of your **image**, not of your manifest. `preStop` and the grace
-period give an app room to shut down well; they cannot make an app that ignores `SIGTERM`
-behave.
+**💡 Tip:** this is a property of your **image**, not of your manifest. `preStop` and the
+grace period give an app room to shut down cleanly; they cannot make an app that ignores
+`SIGTERM` do it.
 {{< /note >}}
 
 ## The replacement
@@ -100,13 +99,13 @@ retries: .INF
 delay: 3
 ```
 
-Back to three, exactly as in **Health & Resources** — but now you know what the 30 seconds in
+Back to three, exactly as in **Health & Resources**, and now you know what the 30 seconds in
 the middle were spent on.
 
 {{< warning >}}
-**⚠️ Watch out:** a grace period that is too **short** is worse than one that is too long.
+**⚠️ Watch out:** a grace period that is too **short** costs more than one that is too long.
 `SIGKILL` in the middle of a request drops it, and in the middle of a write can leave state
-half-finished. Size it from what your app actually needs to finish.
+half-finished. Size it from what your app needs to finish.
 {{< /warning >}}
 
-Next: making sure the platform's maintenance cannot reach all your replicas at once.
+Next, making sure the platform's maintenance cannot reach all your replicas at once.

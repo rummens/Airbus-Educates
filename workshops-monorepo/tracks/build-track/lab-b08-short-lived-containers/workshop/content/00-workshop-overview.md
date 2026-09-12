@@ -2,16 +2,14 @@
 title: "Short-Lived & Helper Containers"
 ---
 
-Everything you have deployed so far was meant to run **forever**. A Deployment's whole job
-is to notice that a container stopped and start it again.
+Everything you have deployed so far was meant to run **forever**. A Deployment's job is to
+notice that a container stopped and start it again.
 
-That is wrong for a lot of real work.
+A lot of real work is not shaped like that. A database migration has to **finish**. A report
+runs **nightly**. A setup step has to complete **before** the app starts. A log shipper runs
+**beside** it.
 
-A database migration has to **finish**. A report runs **nightly**. A setup step must
-complete **before** the app starts. A log shipper lives **beside** it.
-
-This lab covers the shapes a Deployment cannot express, on
-**{{< param product_name >}}**.
+This lab covers those four shapes on **{{< param product_name >}}**.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the
@@ -31,7 +29,7 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- The Core lab **Deploy Your First App** — Deployments, Pods and reading logs.
+- The Core lab **Deploy Your First App**, for Deployments, Pods and reading logs.
 - Helpful: **Health & Resources**, since every container here still gets requests and limits.
 
 {{< note >}}

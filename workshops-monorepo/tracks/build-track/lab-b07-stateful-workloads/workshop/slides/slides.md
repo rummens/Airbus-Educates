@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Stateful Workloads
 
-A Deployment's replicas are interchangeable. A database replica is not — it needs the same name and the same disk back.
+A Deployment's replicas are interchangeable. A database replica is not: it needs the same name and the same disk back.
 
 **In this lab:** identity vs interchangeability · build a StatefulSet · per-Pod DNS and per-replica data · survive a delete · what scaling leaves behind.
 
@@ -14,7 +14,7 @@ Digital Container Service · DCS Academy
 <!-- id: identity -->
 ## Identity, not interchangeability
 
-The question is not "does it need storage" — a Deployment can mount a volume. The question is whether a replica **is somebody**.
+The question is not whether it needs storage, because a Deployment can mount a volume. It is whether one replica is **distinguishable** from another.
 
 - **Stable identity** — `hello-dcs-0`, and the replacement is `hello-dcs-0` too.
 - **Stable storage** — one claim per replica, bound to the **ordinal**, not the Pod.
@@ -28,7 +28,7 @@ The question is not "does it need storage" — a Deployment can mount a volume. 
 <!-- id: build -->
 ## Build one
 
-A headless Service first — that is where the per-Pod DNS names come from — then the StatefulSet that names it.
+A headless Service first, because that is where the per-Pod DNS names come from, then the StatefulSet that names it.
 
 ```
 oc apply -f service-headless.yaml
@@ -99,8 +99,8 @@ oc get pvc
 <!-- id: next -->
 ## What's next
 
-You have replicas with names, disks and an order — the shape a clustered app needs.
+You have replicas with names, disks and an order, which is the shape a clustered app needs.
 
-**Next lab — Short-Lived & Helper Containers:** the other shapes. **Jobs** and **CronJobs** that run to completion, **init containers** that must finish first, and **sidecars** that run alongside.
+**Next lab, Short-Lived & Helper Containers:** the other shapes. **Jobs** and **CronJobs** that run to completion, **init containers** that must finish first, and **sidecars** that run alongside.
 
 Digital Container Service · DCS Academy

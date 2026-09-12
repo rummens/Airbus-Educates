@@ -51,8 +51,9 @@ delay: 2
 
 Two things exist now, and they are worth telling apart:
 
-- the **Service** — one name, one virtual IP, unchanging;
-- its **endpoints** — the list of ready Pod IPs behind it, which changes as Pods come and go.
+- the **Service** is one name and one virtual IP, and it does not change;
+- its **endpoints** are the list of ready Pod IPs behind it, which changes as Pods come and
+  go.
 
 ```terminal:execute
 command: oc get svc hello-dcs -o wide && oc get endpoints hello-dcs
@@ -67,7 +68,7 @@ Cluster DNS gives every Service a name of the form
 command: getent hosts hello-dcs.$(oc project -q).svc.cluster.local
 ```
 
-You get **exactly one** address, and it is the Service's `CLUSTER-IP` — not a Pod IP:
+You get **exactly one** address, and it is the Service's `CLUSTER-IP`, not a Pod IP:
 
 ```
 10.217.5.253    hello-dcs.<your-namespace>.svc.cluster.local
@@ -81,8 +82,8 @@ retries: .INF
 delay: 2
 ```
 
-That is the whole point of the type: clients resolve **one** address that never changes, and
-the platform forwards each connection to one of the ready Pods.
+That is what the type is for. Clients resolve **one** address that never changes, and the
+platform forwards each connection to one of the ready Pods.
 
 ## Use it
 
@@ -99,8 +100,9 @@ delay: 2
 ```
 
 {{< note >}}
-**📌 Note:** the short form `hello-dcs:8080` works too from inside the same namespace — the
-resolver appends the rest. The long name is used here so it is obvious what is being asked.
+**📌 Note:** the short form `hello-dcs:8080` also works from inside the same namespace,
+because the resolver appends the rest. The long name is used here so it is obvious what is
+being asked.
 {{< /note >}}
 
-Next: what happens when you take the virtual IP away.
+Next, what happens when you take the virtual IP away.

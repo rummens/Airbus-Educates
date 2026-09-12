@@ -18,17 +18,17 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/cr
 file: ~/exercises/cronjob-report.yaml
 ```
 
-The schedule is `0 3 * * *` — 03:00 daily, so it will **not** fire while you are here. That is
-deliberate: you are about to trigger it by hand instead, which is also how you would test a
-new CronJob before trusting it overnight.
+The schedule is `0 3 * * *`, 03:00 daily, so it will **not** fire while you are here. You
+trigger it by hand instead, which is also how you would test a new CronJob before trusting it
+overnight.
 
 Three fields decide how it behaves when reality gets messy:
 
-- **`concurrencyPolicy: Forbid`** — if the previous run is still going when the next is due,
-  **skip** it. The alternatives are `Allow` (the default — two runs at once) and `Replace`.
-- **`successfulJobsHistoryLimit` / `failedJobsHistoryLimit`** — how many finished Jobs to keep
-  so you can inspect them. Defaults are 3 and 1.
-- **`suspend`** — pause the schedule without deleting anything.
+- **`concurrencyPolicy: Forbid`** skips the next run if the previous one is still going. The
+  alternatives are `Allow`, the default, which permits two runs at once, and `Replace`.
+- **`successfulJobsHistoryLimit` / `failedJobsHistoryLimit`** decide how many finished Jobs
+  are kept for inspection. The defaults are 3 and 1.
+- **`suspend`** pauses the schedule without deleting anything.
 
 ```terminal:execute
 command: envsubst < cronjob-report.yaml | oc apply -f - && oc get cronjob nightly-report
@@ -42,7 +42,7 @@ retries: .INF
 delay: 3
 ```
 
-`LAST SCHEDULE` reads `<none>` — it has never fired.
+`LAST SCHEDULE` reads `<none>`, because it has never fired.
 
 ## Trigger a run by hand
 
@@ -53,7 +53,7 @@ command: oc create job report-now --from=cronjob/nightly-report && oc wait --for
 ```
 
 `--from=cronjob/<name>` copies the CronJob's `jobTemplate`, so you are testing the **real**
-template rather than a lookalike you wrote by hand.
+template rather than a copy you wrote by hand.
 
 ```examiner:execute-test
 name: verify-manual-run-completed
@@ -91,12 +91,13 @@ retries: .INF
 delay: 3
 ```
 
-`SUSPEND` now reads `True`. The definition, its history and its schedule are all intact — it
-simply will not fire. Set it back to `false` to resume.
+`SUSPEND` now reads `True`. The definition, its history and its schedule are all intact, and
+it will not fire. Set it back to `false` to resume.
 
 {{< warning >}}
-**⚠️ Watch out:** a suspended CronJob does **not** catch up on missed runs when you resume it.
-If the work must happen eventually, a schedule is not a queue.
+**⚠️ Watch out:** a suspended CronJob does **not** catch up on missed runs when you resume
+it. A schedule is not a queue: if the work has to happen eventually, something else has to
+track that.
 {{< /warning >}}
 
-Next: the containers that share a Pod with your app.
+Next, the containers that share a Pod with your app.

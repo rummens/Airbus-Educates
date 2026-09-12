@@ -7,11 +7,10 @@ the app starts. A log shipper lives beside it.
 
 This lab covers the four shapes a Deployment cannot express: **Jobs** that run to completion,
 **CronJobs** that schedule them, **init containers** that must finish first, and **sidecars**
-that run alongside — which on current Kubernetes are the same API as an init container plus
-one line.
+that run alongside, which on current Kubernetes are an init container with one extra line.
 
-You also fail a Job on purpose, to watch it reach a verdict after its retries instead of
-crash-looping forever, with every attempt's logs preserved.
+You also fail a Job on purpose and watch it reach a verdict after its retries instead of
+crash-looping, with every attempt's logs preserved.
 
 > **💡 Tip:** the difference between an init container and a sidecar is `restartPolicy: Always`.
 > That is genuinely the whole difference.

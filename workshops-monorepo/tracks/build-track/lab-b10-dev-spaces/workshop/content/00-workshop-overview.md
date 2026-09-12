@@ -1,14 +1,13 @@
 ---
-title: "Cloud Development with OpenShift Dev Spaces"
+title: "Dev Spaces"
 ---
 
-Welcome to this workshop, part of **{{< param product_name >}}**. So far you've
-deployed a ready-made image straight to your namespace (the **Deploy Your First App** lab, reinforced in **From
-Docker to Kubernetes on DCS**), and connected git as a **build source** so the
-cluster turns your code into an image (**Building Images with BuildConfigs**). Neither
-of those lets you edit and run your code *while it's inside the cluster*. This
-workshop closes that gap, and answers one question: **how do I develop *on*
-{{< param product_short >}}, not just deploy to it?**
+So far this track has deployed a ready-made image into your namespace
+(**Deploy Your First App**, then **From Docker to Kubernetes**) and used your files as a
+**build source** so the cluster turns them into an image (**Build Your Image on DCS**).
+
+Neither lets you edit code and run it while it is inside the cluster. This lab covers the
+tool that does: **OpenShift Dev Spaces**.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the
@@ -30,11 +29,10 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-This workshop assumes you've completed **From Docker to Kubernetes on DCS**
-(`lab-b01-docker-to-k8s`) and are comfortable with `oc apply`-style deployment and
-basic [git](https://git-scm.com/doc) usage. It builds directly on **Building
-Images with BuildConfigs** (`lab-b02-image-buildconfigs`) for contrast, but does not
-require you to have completed it first.
+This lab assumes **From Docker to Kubernetes** (`lab-b01-docker-to-k8s`), comfort with
+`oc apply`, and basic [git](https://git-scm.com/doc) usage. It contrasts itself with
+**Build Your Image on DCS** (`lab-b02-build-your-image`), which you do not have to have done
+first.
 
 ## Your Environment
 

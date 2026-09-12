@@ -2,20 +2,20 @@
 
 **A Deployment's replicas are interchangeable. Some workloads are not.**
 
-A database replica, a queue broker, a cache with its own data on disk — each needs the same
-name and the same volume back after a restart. That is a **StatefulSet**.
+A database replica, a queue broker or a cache with its own data on disk needs the same name
+and the same volume back after a restart. That is what a **StatefulSet** provides.
 
 You create the headless Service it needs, apply a StatefulSet with a **PersistentVolumeClaim
 per replica**, and watch replica 0 become ready before replica 1 is even created.
 
-Then you prove the guarantees: address one specific replica by its own DNS name, write
+Then you check the guarantees. Address one specific replica by its own DNS name, write
 different data into each replica's disk, delete a Pod, and watch the same identity **and** the
 same data come back.
 
-Last, scaling — where the asymmetry lives. Scale up and a new disk is provisioned; scale down
-and the disk is deliberately **kept**.
+Last, scaling. Scale up and a new disk is provisioned; scale down and the disk is
+deliberately **kept**.
 
-> **⚠️ Watch out:** scaling down does not delete volumes. That is a feature, and it is also how
+> **⚠️ Watch out:** scaling down does not delete volumes. That is deliberate, and it is also how
 > a storage quota fills up quietly.
 
 - **Track:** Build & Run

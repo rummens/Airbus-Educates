@@ -2,8 +2,8 @@
 title: Summary
 ---
 
-The platform can move your Pods whenever it needs to. After this lab it can do that without
-costing you anything.
+The platform can move your Pods whenever it needs to. You have now told it how much of your
+app has to stay up while it does.
 
 Open the closing slide (📊 **Slides** tab):
 

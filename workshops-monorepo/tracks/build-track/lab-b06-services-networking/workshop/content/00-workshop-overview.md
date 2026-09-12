@@ -2,14 +2,14 @@
 title: "Services & Cluster Networking"
 ---
 
-"Just expose it" hides at least five different answers.
+"Just expose it" has five different answers on Kubernetes.
 
-A [**Service**](https://kubernetes.io/docs/concepts/services-networking/service/) is not one
-thing: the `type` field changes what gets created, what lands in DNS, and whether anything
-outside the cluster can reach it at all.
+The `type` field on a
+[**Service**](https://kubernetes.io/docs/concepts/services-networking/service/) changes what
+gets created, what lands in DNS, and whether anything outside the cluster can reach it.
 
-This lab walks the types a tenant can actually use on **{{< param product_name >}}**, and the
-two that look right and are not.
+This lab covers the types a tenant can use on **{{< param product_name >}}**, and the two
+that look right and are not.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the
@@ -29,11 +29,11 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- The Core lab **Expose Your App** — you have created a Service and a Route once.
+- The Core lab **Expose Your App**, so you have created a Service and a Route once.
 - Helpful: **Health & Resources**, for readiness probes, since endpoints follow readiness.
 
-This lab is the depth behind Core's happy path: there you exposed an app, here you find out
-what the alternatives were and why the platform chose for you.
+Core exposed an app by the shortest path. This lab covers the alternatives, and why the
+platform picked that one for you.
 
 {{< note >}}
 **📌 Note:** nothing is carried over from another lab. You deploy the app here, in your own

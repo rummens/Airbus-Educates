@@ -2,8 +2,8 @@
 title: Identity and Data
 ---
 
-Two Pods with tidy names prove nothing yet. Now address one **specific** replica, and give
-each one data of its own.
+Two Pods with ordinal names prove nothing on their own. Address one **specific** replica,
+and give each one data of its own.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -21,7 +21,8 @@ The headless Service gives every Pod a name of the form
 command: getent hosts hello-dcs-0.hello-dcs.$(oc project -q).svc.cluster.local
 ```
 
-One address comes back, and it is **that Pod's** IP — not a Service IP, and not replica 1's.
+One address comes back, and it is **that Pod's** IP, not a Service IP and not replica
+1's.
 
 ```examiner:execute-test
 name: verify-pod-dns-identity
@@ -31,11 +32,13 @@ retries: .INF
 delay: 3
 ```
 
-This is the point of the whole exercise: a client can say *"connect to replica 0"* and mean it.
+That is what the per-Pod name is for: a client can say "connect to replica 0" and mean
+it.
 
 {{< note >}}
-**💡 Tip:** the Service name on its own (`hello-dcs.<namespace>.svc`) still resolves to **both**
-Pod addresses, as any headless Service does. The per-Pod name is the addition.
+**💡 Tip:** the Service name on its own (`hello-dcs.<namespace>.svc`) still resolves to
+**both** Pod addresses, as any headless Service does. The per-Pod name is what a StatefulSet
+adds.
 {{< /note >}}
 
 ## Write something different into each volume
@@ -80,6 +83,6 @@ delay: 3
 ```
 
 If those two Pods shared one volume, the second write would have overwritten the first and
-both would read the same. They do not share.
+both would read the same thing. They do not share.
 
-Next: delete one and see what comes back.
+Next, delete one and see what comes back.

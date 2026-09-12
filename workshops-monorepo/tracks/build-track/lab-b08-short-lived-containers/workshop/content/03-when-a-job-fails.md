@@ -2,10 +2,10 @@
 title: When a Job Fails
 ---
 
-A Deployment whose container keeps exiting will keep restarting it forever —
-`CrashLoopBackOff`, and no verdict.
+A Deployment whose container keeps exiting restarts it forever, which shows up as
+`CrashLoopBackOff` and never resolves.
 
-A Job reaches a **verdict**. That is the difference worth seeing.
+A Job reaches a **verdict** instead.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -20,8 +20,8 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/fa
 file: ~/exercises/job-failing.yaml
 ```
 
-Same shape as before, except the command writes an error and exits 1 — and `backoffLimit: 1`,
-so it makes **two attempts in total** before giving up.
+Same shape as before, except that the command writes an error and exits 1, and
+`backoffLimit: 1` means **two attempts in total** before it gives up.
 
 ```terminal:execute
 command: envsubst < job-failing.yaml | oc apply -f - && oc wait --for=condition=failed job/db-migrate-broken --timeout=180s
@@ -44,8 +44,8 @@ delay: 5
 command: oc get pods -l job-name=db-migrate-broken
 ```
 
-**Two Pods**, both `Error`. Because `restartPolicy: Never` makes each attempt a new Pod, both
-attempts survive for you to inspect — the first failure is not overwritten by the retry.
+**Two Pods**, both `Error`. `restartPolicy: Never` makes each attempt a new Pod, so both
+attempts survive for you to inspect and the first failure is not overwritten by the retry.
 
 ```terminal:execute
 command: oc describe job db-migrate-broken | tail -20
@@ -67,9 +67,9 @@ delay: 3
 command: oc logs job/db-migrate-broken | tail -5
 ```
 
-`cannot reach the database` — the actual reason, from the attempt that produced it.
+`cannot reach the database`, from the attempt that produced it.
 
-A Job that gives up is **better** than one that retries forever:
+A Job that gives up beats one that retries forever:
 
 - somebody gets a clear failure instead of a Pod quietly restarting all night;
 - the logs of every attempt are still there;
@@ -84,9 +84,9 @@ delay: 3
 ```
 
 {{< warning >}}
-**⚠️ Watch out:** `backoffLimit` counts **retries**, not total attempts, and the delay between
-them doubles (10s, 20s, 40s…). A large limit on a slow-failing Job can keep it alive far
+**⚠️ Watch out:** `backoffLimit` counts **retries**, not total attempts, and the delay
+between them doubles (10s, 20s, 40s…). A large limit on a slow-failing Job keeps it alive much
 longer than you expect.
 {{< /warning >}}
 
-Next: put a Job on a schedule.
+Next, put a Job on a schedule.

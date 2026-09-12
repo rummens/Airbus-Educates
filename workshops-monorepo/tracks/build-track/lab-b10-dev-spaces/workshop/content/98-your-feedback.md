@@ -19,7 +19,7 @@ name: Feedback
 are done — then come back here for the wrap-up.
 {{< /note >}}
 
-Return to the workshop when you've submitted:
+Return to the workshop when you have submitted:
 
 ```dashboard:open-dashboard
 name: Terminal

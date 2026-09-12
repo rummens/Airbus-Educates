@@ -15,11 +15,11 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/sh
 
 ## Forever: a Deployment
 
-You know this one. The container exits, the platform starts it again — and if it keeps
-exiting, you get `CrashLoopBackOff`.
+You know this one. The container exits, the platform starts it again, and if it keeps
+exiting you get `CrashLoopBackOff`.
 
-For a migration script that is exactly wrong: a successful migration **exits 0**, and a
-Deployment would helpfully run it again.
+That is the wrong behaviour for a migration script. A successful migration **exits 0**, and a
+Deployment would run it again.
 
 ## Until it is done: a Job
 
@@ -27,8 +27,8 @@ A [**Job**](https://kubernetes.io/docs/concepts/workloads/controllers/job/) runs
 expects it to **end**. Exit 0 and the Job is `Complete`; fail and it retries up to
 `backoffLimit`, then gives up and reports `Failed`.
 
-Giving up is the feature. A migration that cannot work will not work on the fortieth attempt
-either, and a Job that stops tells you so.
+Giving up is the useful part. A migration that cannot work will not work on the fortieth
+attempt either, and a Job that stops says so.
 
 ## Until it is done, again and again: a CronJob
 
@@ -40,20 +40,20 @@ it leaves behind are how you inspect what happened last night.
 
 Both of these live in the **same Pod** as your app and share its network and volumes:
 
-- an **init container** runs to completion **before** the app container starts — fetch
-  config, prepare a volume, wait for a dependency;
-- a **sidecar** starts before the app and **keeps running** next to it — a log shipper, a
+- an **init container** runs to completion **before** the app container starts: fetch config,
+  prepare a volume, wait for a dependency;
+- a **sidecar** starts before the app and **keeps running** next to it: a log shipper, a
   proxy, a metrics exporter.
 
-Here is the part people find surprising: on current Kubernetes a **native sidecar is declared
-as an init container**, with one extra line — `restartPolicy: Always`. That single field is
-the whole difference between "finish first" and "run alongside".
+On current Kubernetes a **native sidecar is declared as an init container**, with one extra
+line, `restartPolicy: Always`. That field is the whole difference between "finish first" and
+"run alongside".
 
 {{< note >}}
 **📌 Why declare a sidecar as an init container at all?** Because init containers have
 guaranteed ordering. A sidecar declared this way is **started before** the app container and
-**stopped after** it, which is what a log shipper or proxy actually needs — an ordinary
-container in the `containers:` list gets neither guarantee.
+**stopped after** it, which is what a log shipper or proxy needs. An ordinary container in the
+`containers:` list gets neither guarantee.
 {{< /note >}}
 
-Next: run one to completion.
+Next, run one to completion.

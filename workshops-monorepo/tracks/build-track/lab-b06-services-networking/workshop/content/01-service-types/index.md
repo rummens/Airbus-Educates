@@ -16,14 +16,15 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ty
 
 ## The five
 
-- **ClusterIP** — one stable virtual IP, load-balanced across ready Pods. The default, and
-  what you want for in-cluster traffic.
-- **Headless** (`clusterIP: None`) — no virtual IP. DNS returns **one record per ready Pod**,
-  so the client picks. For clients that must address a *specific* replica.
-- **ExternalName** — no selector, no endpoints, no proxying. A **CNAME** in cluster DNS, so
-  one stable in-cluster name can point at something that lives elsewhere.
-- **NodePort** — the same port opened on **every node** in the cluster.
-- **LoadBalancer** — asks the infrastructure for an external address. Needs a provider that
+- **ClusterIP** gives one stable virtual IP, load-balanced across ready Pods. It is the
+  default, and what you want for in-cluster traffic.
+- **Headless** (`clusterIP: None`) has no virtual IP. DNS returns **one record per ready
+  Pod** and the client picks, which is what a client that must address a *specific* replica
+  needs.
+- **ExternalName** has no selector, no endpoints and no proxying. It is a **CNAME** in cluster
+  DNS, so one stable in-cluster name can point at something that lives elsewhere.
+- **NodePort** opens the same port on **every node** in the cluster.
+- **LoadBalancer** asks the infrastructure for an external address, and needs a provider that
   answers.
 
 ## What that means here
@@ -32,17 +33,17 @@ On {{< param product_short >}} you use the first three. The last two exist in th
 can create them, but:
 
 - a **NodePort** puts a port on shared nodes, outside your tenant boundary, and nothing from
-  outside is allowed to reach a node directly anyway — the platform's **controlled external
-  load balancer** is the only edge, by security requirement;
+  outside is allowed to reach a node directly. The platform's **controlled external load
+  balancer** is the only edge, and that is a security requirement;
 - a **LoadBalancer** has no provider to answer it on an on-prem cluster, so it never gets an
   address.
 
 The supported way out is a [**Route**]({{< param dcs_docs_base_url >}}/concepts/networking),
-which the Core **Expose Your App** lab covers — and which needs a **PROD-type** namespace.
+which the Core **Expose Your App** lab covers, and which needs a **PROD-type** namespace.
 
 {{< note >}}
-**💡 Tip:** you will prove both of those claims yourself on the last page, rather than taking
-them on trust.
+**💡 Tip:** you apply both of those types yourself on the last page and read what
+happens.
 {{< /note >}}
 
-Next: the default type, and what DNS actually returns for it.
+Next, the default type, and what DNS returns for it.

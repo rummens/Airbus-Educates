@@ -2,7 +2,7 @@
 title: Two Kinds of Disruption
 ---
 
-Your Pod can stop for two very different reasons, and they need different answers.
+Your Pod can stop for two different reasons, and they need different answers.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -27,14 +27,14 @@ Nothing negotiates with these. Your defences are the ones from earlier labs:
 
 A node is **drained** for maintenance. The cluster is upgraded. A rebalance moves workloads.
 
-These are planned, and planned actions can wait. That is what a
+These are planned, and a planned action can wait. That is what a
 [**PodDisruptionBudget**](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/)
-(PDB) is for: it tells the platform *how much of your app must stay up while it works*.
+(PDB) is for: it tells the platform how much of your app must stay up while it works.
 
 {{< note >}}
 **📌 On {{< param product_short >}} you never run the drain.** Node maintenance is the
-platform's job. Your PDB is how you constrain it without being in the room — which is exactly
-why it has to be written before the maintenance window, not during it.
+platform's job, and your PDB is how you constrain it without being in the room. That is why it
+has to exist before the maintenance window rather than during it.
 {{< /note >}}
 
 ## Both paths end in shutdown
@@ -43,9 +43,9 @@ Whichever reason ends a Pod, the ending itself is the same sequence: the Pod lea
 Service's endpoints, `preStop` runs, `SIGTERM` arrives, and after the grace period `SIGKILL`
 follows.
 
-An app that handles that sequence well is one nobody notices being moved. An app that ignores
-it drops requests every time the platform touches it — and you will measure exactly what that
-costs, two pages from now.
+An app that handles that sequence well can be moved without anyone noticing. An app that
+ignores it drops requests every time the platform touches it, and you measure what that costs
+two pages from now.
 
 ## What this lab does
 

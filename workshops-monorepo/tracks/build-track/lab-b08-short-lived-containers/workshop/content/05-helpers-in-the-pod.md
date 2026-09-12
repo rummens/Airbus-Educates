@@ -18,16 +18,16 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/he
 file: ~/exercises/deployment-with-helpers.yaml
 ```
 
-Look at where the three are declared. Two of them — `setup` and `heartbeat` — are both under
-**`initContainers`**, and exactly one line separates them:
+Look at where the three are declared. Two of them, `setup` and `heartbeat`, are both under
+**`initContainers`**, and one line separates them:
 
 - **`setup`** has no `restartPolicy`. It is an ordinary **init container**: it runs to
   completion, and only then is the app container started.
-- **`heartbeat`** has **`restartPolicy: Always`**. That makes it a **sidecar**: started before
-  the app, and kept running beside it for the life of the Pod.
+- **`heartbeat`** has **`restartPolicy: Always`**, which makes it a **sidecar**: started
+  before the app, and kept running beside it for the life of the Pod.
 
 They share an `emptyDir` called `work` with the app container, which is how a helper hands
-something to the app: same Pod, same volume.
+something over: same Pod, same volume.
 
 ## Apply it and watch the order
 
@@ -90,8 +90,8 @@ retries: .INF
 delay: 3
 ```
 
-The app sees a file written by a container that had already **exited** before it started, and
-a log still being appended to by one running **next to** it.
+The app sees a file written by a container that had already **exited** before it started,
+and a log still being appended to by one running **next to** it.
 
 ```examiner:execute-test
 name: verify-sidecar-still-running
@@ -103,14 +103,14 @@ delay: 3
 
 ## When to reach for which
 
-- **Init container** — the app cannot start correctly without this being done first.
-  Migrations, fetching config, waiting for a dependency. If it fails, the app never starts,
-  which is usually what you want.
-- **Sidecar** — the app should not know or care that this is happening. Shipping logs,
-  exposing metrics, terminating TLS.
+- **Init container:** the app cannot start correctly unless this is done first. Migrations,
+  fetching config, waiting for a dependency. If it fails the app never starts, which is
+  usually what you want.
+- **Sidecar:** the app does not need to know this is happening. Shipping logs, exposing
+  metrics, terminating TLS.
 
 {{< warning >}}
-**⚠️ Watch out:** every container in the Pod draws its own `requests` and `limits` from the
-namespace budget. Three containers in one Pod is three sets of numbers — a sidecar on fifty
+**⚠️ Watch out:** every container in the Pod takes its own `requests` and `limits` from the
+namespace budget. Three containers in one Pod is three sets of numbers, and a sidecar on fifty
 replicas is fifty more containers to pay for.
 {{< /warning >}}

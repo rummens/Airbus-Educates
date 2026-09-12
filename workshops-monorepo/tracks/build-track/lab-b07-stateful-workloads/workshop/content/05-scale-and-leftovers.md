@@ -2,8 +2,8 @@
 title: Scaling, and What It Leaves
 ---
 
-Scaling a StatefulSet is not symmetric with scaling a Deployment, and the asymmetry is on
-purpose.
+Scaling a StatefulSet up and down are not symmetric operations, and the difference is
+deliberate.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -30,14 +30,14 @@ delay: 3
 command: oc get pods,pvc -l app=hello-dcs
 ```
 
-`hello-dcs-2` appeared **after** the others were Ready, and `data-hello-dcs-2` was provisioned
-from the same template. Scaling out a stateful app means provisioning storage, which is why
-it is slower than scaling a stateless one.
+`hello-dcs-2` appeared **after** the others were Ready, and `data-hello-dcs-2` was
+provisioned from the same template. Scaling out a stateful app means provisioning storage,
+which is why it is slower than scaling a stateless one.
 
 {{< note >}}
-**📌 Note:** the `oc get pvc` output is not label-filtered the way the Pods are — claims from a
-`volumeClaimTemplate` carry the template's labels, not necessarily the app's. Drop the `-l` if
-you want to see every claim in the namespace.
+**📌 Note:** the `oc get pvc` output is not label-filtered the way the Pods are, because
+claims from a `volumeClaimTemplate` carry the template's labels rather than the app's. Drop
+the `-l` to see every claim in the namespace.
 {{< /note >}}
 
 ## Scale down: the disk stays
@@ -46,7 +46,7 @@ you want to see every claim in the namespace.
 command: oc scale statefulset/hello-dcs --replicas=2 && oc rollout status statefulset/hello-dcs --timeout=120s
 ```
 
-The highest ordinal goes first — `hello-dcs-2` is the one removed.
+The highest ordinal goes first, so `hello-dcs-2` is the one removed.
 
 ```terminal:execute
 command: oc get pods -l app=hello-dcs && oc get pvc
@@ -62,18 +62,18 @@ retries: .INF
 delay: 3
 ```
 
-That is deliberate, and it is the right default:
+That is deliberate:
 
-- scaling down is often **temporary**, and the data belongs to replica 2, not to the Pod that
-  happened to be running;
+- scaling down is often **temporary**, and the data belongs to replica 2 rather than to the
+  Pod that happened to be running;
 - scale back to 3 and `hello-dcs-2` gets **its own data back**;
 - deleting a volume is irreversible, so the platform will not do it as a side effect of a
   replica count.
 
 {{< warning >}}
-**⚠️ Watch out:** this is also how a storage quota fills up silently. A StatefulSet that has
-been scaled up and down a few times leaves claims nobody is watching. They count against your
-namespace's storage budget until somebody deletes them by hand.
+**⚠️ Watch out:** this is also how a storage quota fills up without anyone noticing. A
+StatefulSet that has been scaled up and down a few times leaves claims behind, and they count
+against your namespace's storage budget until somebody deletes them.
 {{< /warning >}}
 
 ## Check the storage side of the budget

@@ -36,7 +36,7 @@ text: |2
 
 This is a **Universal Developer Image (UDI)** — a general-purpose toolchain
 container (compilers, `git`, common language runtimes) that Red Hat ships for Dev
-Spaces. On DCS it's mirrored into Harbor like every other image: notice the
+Spaces. On DCS it is mirrored into Harbor like every other image: notice the
 component's `image` is `${DCS_REGISTRY}/devspaces/udi:latest`, never a public
 registry — the exact same `${DCS_REGISTRY}` placeholder every prior lab's
 manifests have used, resolved from Harbor at workspace start, air-gapped end to
@@ -61,13 +61,13 @@ text: |2
 
 `group.kind: run` marks this as the workspace's default "run" action — it shows up
 as a one-click command in the Dev Spaces IDE, so you never have to remember the
-exact invocation. It's the same `python3 server.py` entrypoint the `hello-dcs`
-container image runs in production — you're not running a different app, you're
+exact invocation. It is the same `python3 server.py` entrypoint the `hello-dcs`
+container image runs in production — you are not running a different app, you are
 running the same app's source, live.
 
 ## See the placeholder resolve
 
-The raw file has `${DCS_REGISTRY}` literally in it — that's deliberate, so the
+The raw file has `${DCS_REGISTRY}` literally in it — that is deliberate, so the
 devfile never hardcodes a registry:
 
 ```terminal:execute
@@ -100,7 +100,7 @@ Now resolve it the way the session does, substituting the real registry host:
 command: envsubst < ~/exercises/devfile.yaml | grep 'image:'
 ```
 
-The before/after tells the whole story: the file you'll hand to Dev Spaces never
+The before/after tells the whole story: the file you will hand to Dev Spaces never
 names a specific registry, but at workspace-creation time it resolves to your
 platform's real Harbor path — no rebuild, no edit, on any DCS cluster.
 
@@ -110,4 +110,4 @@ title: Verify devfile.yaml is present and Harbor-parameterized
 timeout: 5
 ```
 
-With the devfile understood, it's time to use it.
+With the devfile understood, it is time to use it.

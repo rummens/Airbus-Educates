@@ -1,6 +1,6 @@
 {
   "workshop": "lab-b03-harbor",
-  "_note": "Registry MECHANICS are exercised for real (skopeo inspect, --config, and a genuine registry-to-registry copy into the cluster's own registry using the session token as credentials); registry POLICY is taught, because a training cluster has no Harbor with a scanner attached. The scan reports are fixtures in the shape Harbor's scanner produces, read with jq \u2014 the fields and the gate arithmetic are what transfer, and the lab says so where it matters. skopeo ships in dcs-workshop-base; there is no docker or podman anywhere, by design. The copy's credentials are \"unused:$(oc whoami -t)\": the registry only checks the token, and $(oc whoami) would expand to system:serviceaccount:<ns>:<name>, whose colons break user:password parsing with an unhelpful 'authentication required'.",
+  "_note": "Registry MECHANICS are exercised for real (skopeo inspect, --config, and a genuine registry-to-registry copy into the cluster's own registry using the session token as credentials); registry POLICY is taught, because a training cluster has no Harbor with a scanner attached. The scan reports are fixtures in the shape Harbor's scanner produces, read with jq \u2014 the fields and the gate arithmetic are what transfer, and the lab says so where it matters. skopeo ships in dcs-workshop-base; there is no docker or podman anywhere, by design. The copy's credentials are \"unused:$(oc whoami -t)\": the registry only checks the token, and $(oc whoami) would expand to system:serviceaccount:<ns>:<name>, whose colons break user:password parsing with an unhelpful 'authentication required'. The Harbor project request is a Crossplane Project (project.harbor.crossplane.io/v1alpha1); this cluster has no Harbor and no provider, so request-project.sh reads the manifest back instead of creating anything, and the check validates the request either way.",
   "steps": [
     {
       "run": "envsubst < pod-from-registry.yaml | oc apply -f - && oc wait --for=condition=Ready pod/from-registry --timeout=240s"
@@ -25,6 +25,12 @@
     },
     {
       "check": "verify-config-readable"
+    },
+    {
+      "run": "bash ~/exercises/request-project.sh"
+    },
+    {
+      "check": "verify-project-requested"
     },
     {
       "run": "skopeo copy --dest-tls-verify=false --dest-creds \"unused:$(oc whoami -t)\" docker://${DCS_REGISTRY}/samples/hello-dcs:1.0 docker://image-registry.openshift-image-registry.svc:5000/${SESSION_NAMESPACE}/mirrored:1.0"

@@ -2,8 +2,8 @@
 title: Spreading Replicas
 ---
 
-Three replicas on **one** node is not three replicas. It is one node's failure away from an
-outage, and one drain away from a full restart.
+Three replicas on **one** node is one node's failure away from an outage, and one drain
+away from a full restart.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -18,8 +18,8 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/sp
 command: oc get pods -l app=hello-dcs -o custom-columns=NAME:.metadata.name,NODE:.spec.nodeName,STATUS:.status.phase
 ```
 
-Read the **NODE** column. The scheduler packs workloads by default: it is trying to use the
-cluster efficiently, not to protect you.
+Read the **NODE** column. The scheduler packs workloads by default, because it is
+optimising for efficient use of the cluster rather than for your availability.
 
 ## Ask to be spread
 
@@ -29,11 +29,11 @@ file: ~/exercises/deployment-spread.yaml
 
 Two mechanisms, both asking for the same thing:
 
-- **`topologySpreadConstraints`** — keep the number of Pods per **topology domain** within
-  `maxSkew` of each other. `topologyKey: kubernetes.io/hostname` means per node;
+- **`topologySpreadConstraints`** keeps the number of Pods per **topology domain** within
+  `maxSkew` of each other. `topologyKey: kubernetes.io/hostname` means per node, and
   `topology.kubernetes.io/zone` would mean per failure domain.
-- **`podAntiAffinity`** (preferred) — the older phrasing: *prefer not to place two of these
-  together*.
+- **`podAntiAffinity`** (preferred) is the older phrasing for the same idea: prefer not to
+  place two of these together.
 
 ```terminal:execute
 command: envsubst < deployment-spread.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=180s
@@ -51,10 +51,10 @@ delay: 3
 
 The single most important field here is `whenUnsatisfiable`:
 
-- **`ScheduleAnyway`** (used here) — a **preference**. If the spread cannot be honoured, the
+- **`ScheduleAnyway`**, used here, is a **preference**. If the spread cannot be honoured the
   Pod still runs, just not where you hoped.
-- **`DoNotSchedule`** — a **requirement**. The spread is guaranteed, and a Pod that cannot
-  satisfy it stays **Pending** — forever, if the cluster has nowhere to put it.
+- **`DoNotSchedule`** is a **requirement**. The spread is guaranteed, and a Pod that cannot
+  satisfy it stays **Pending**, indefinitely if the cluster has nowhere to put it.
 
 ```terminal:execute
 command: oc get pods -l app=hello-dcs -o custom-columns=NAME:.metadata.name,NODE:.spec.nodeName,STATUS:.status.phase
@@ -69,24 +69,23 @@ delay: 3
 ```
 
 {{< note >}}
-**📌 If every Pod is on the same node** — a single-node training or test cluster has nowhere
-to spread to. `ScheduleAnyway` is exactly why they are all `Running` regardless. Swap in
-`DoNotSchedule` on such a cluster and two of the three would sit `Pending` forever, which is
-the trade-off made visible.
+**📌 If every Pod is on the same node**, a single-node training or test cluster has nowhere
+to spread to. `ScheduleAnyway` is why they are all `Running` anyway. Swap in `DoNotSchedule`
+on such a cluster and two of the three would sit `Pending`.
 {{< /note >}}
 
 ## Choosing
 
-- **`ScheduleAnyway`** for most apps: better placement when it is available, never a Pod that
-  cannot start.
-- **`DoNotSchedule`** when being co-located is genuinely unacceptable — a quorum member whose
-  peers must not share a failure domain — and you accept Pending as the alternative.
+- **`ScheduleAnyway`** for most apps: better placement when it is available, and never a Pod
+  that cannot start.
+- **`DoNotSchedule`** when being co-located is unacceptable, for example a quorum member whose
+  peers must not share a failure domain, and you accept Pending as the alternative.
 
 {{< warning >}}
 **⚠️ Watch out:** spreading interacts with your **quota** and the cluster's free capacity. A
-hard spread on a busy cluster is a slow, mysterious rollout: Pods stay Pending with a scheduler
-event nobody reads. Check `oc describe pod` before blaming the platform.
+hard spread on a busy cluster produces a slow rollout with Pods stuck Pending, and the reason
+is in a scheduler event. Check `oc describe pod` first.
 {{< /warning >}}
 
-Together with the budget and a clean shutdown, that is the set: the platform can do its
-maintenance, and your users do not find out.
+With the budget and a clean shutdown, that is the set. The platform can do its maintenance
+without your users seeing it.

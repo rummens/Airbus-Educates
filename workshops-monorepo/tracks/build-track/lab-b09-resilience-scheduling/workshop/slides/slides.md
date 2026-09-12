@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Resilience & Scheduling
 
-The platform will move your Pods — drains, upgrades, rebalancing. None of it asks permission. This lab is how you state your terms.
+The platform will move your Pods: drains, upgrades, rebalancing. None of it asks permission. This lab is how you state your terms.
 
 **In this lab:** two kinds of disruption · a PodDisruptionBudget · timing a real shutdown · spreading replicas.
 
@@ -28,7 +28,7 @@ They need different answers, and only one of them can be negotiated with.
 <!-- id: pdb -->
 ## A budget for maintenance
 
-The useful part of a PDB is its **status** — and almost nobody looks at it.
+The useful part of a PDB is its **status**, and it is easy to miss.
 
 ```
 oc apply -f pdb.yaml
@@ -48,7 +48,7 @@ HEALTHY:.status.currentHealthy,EXPECTED:.status.expectedPods
 <!-- id: shutdown -->
 ## Shutting down well
 
-Deletion is a sequence, not an event — and two of its steps race.
+Deletion is a sequence rather than an event, and two of its steps race.
 
 ```
 pod=$(oc get pods -l app=hello-dcs -o name | head -1)
@@ -67,7 +67,7 @@ echo $(( end - start ))
 <!-- id: spread -->
 ## Spreading replicas
 
-Three replicas on one node is one node's failure away from an outage. The scheduler packs by default — it is optimising, not protecting you.
+Three replicas on one node is one node's failure away from an outage. The scheduler packs by default, because it optimises for cluster use rather than for your availability.
 
 ```
 topologySpreadConstraints:
@@ -86,7 +86,7 @@ topologySpreadConstraints:
 <!-- id: next -->
 ## What's next
 
-That is the Build & Run track: built, configured, sized, autoscaled, reachable, stateful where it must be — and now survivable.
+That is the Build & Run track: an app built on the cluster, sized, autoscaled, reachable, stateful where it has to be, and able to survive maintenance.
 
 **Operate & Observe** takes it from here: metrics and logs for the app you just made resilient, the tenancy and RBAC model underneath it, and the DEV to PROD promotion path.
 

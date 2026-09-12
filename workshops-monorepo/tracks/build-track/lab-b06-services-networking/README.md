@@ -1,17 +1,16 @@
 # Services & Cluster Networking
 
-**"Just expose it" hides at least five different answers.**
+**"Just expose it" has five different answers on Kubernetes.**
 
 A Service is not one thing. The `type` field changes what gets built, what lands in DNS, and
-whether anything outside the cluster can reach it at all.
+whether anything outside the cluster can reach it.
 
-You walk the types a tenant actually uses on DCS — **ClusterIP**, **headless**,
-**ExternalName** — resolving each one through cluster DNS by hand so you can see what came
-back and why.
+You work through the types a tenant uses on DCS, **ClusterIP**, **headless** and
+**ExternalName**, resolving each one through cluster DNS by hand to see what comes back.
 
-Then the two that look like the obvious way out: you apply a **NodePort** and a
-**LoadBalancer**, watch exactly what each does and does not buy you here, and learn why the
-platform hands you a **Route** instead.
+Then the two that look like the obvious way out. You apply a **NodePort** and a
+**LoadBalancer**, read what each does here, and find out why the platform hands you a
+**Route** instead.
 
 > **💡 Tip:** the headless Service you meet here is the same one a StatefulSet needs in the
 > next lab.

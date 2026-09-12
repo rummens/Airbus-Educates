@@ -89,7 +89,7 @@ The track has now used a git repository four different ways. Knowing which one y
 ---
 
 <!-- id: next -->
-## What's next
+## What is next
 
 That is **Build & Run** complete: from a Docker mental model to an image you built, a registry that governs it, and a workload that is sized, scaled, reachable, stateful and survivable.
 

@@ -2,12 +2,13 @@
 title: "Metrics & Monitoring"
 ---
 
-**{{< param product_name >}}** already measures your Pods: CPU, memory, restarts. You get that
-for free, and it tells you nothing about what your application is actually doing.
+**{{< param product_name >}}** already measures your Pods: CPU, memory and restarts. You get
+that without asking, and it says nothing about what your application is doing.
 
 How many requests? How many of them failed? How long did they take?
 
-Only the app knows — so the app has to **say so**, and something has to come and collect it.
+Only the app knows, so the app has to **publish** those numbers, and something has to collect
+them.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the
@@ -27,8 +28,8 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- **Services & Cluster Networking** — a ServiceMonitor selects a **Service**, by label and by
-  port name.
+- **Services & Cluster Networking**, because a ServiceMonitor selects a **Service** by label
+  and by port name.
 - Helpful: **Health & Resources**, since the platform metrics you already have come from there.
 
 {{< note >}}

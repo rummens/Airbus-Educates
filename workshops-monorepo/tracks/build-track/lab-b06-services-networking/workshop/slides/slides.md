@@ -14,7 +14,7 @@ Digital Container Service · DCS Academy
 <!-- id: types -->
 ## The types, and which you get
 
-Every Service has a selector and ports. The `type` decides what the platform builds around them — and what DNS answers.
+Every Service has a selector and ports. The `type` decides what the platform builds around them, and what DNS answers.
 
 - **ClusterIP** — one virtual IP, load-balanced. The default.
 - **Headless** — `clusterIP: None`: one DNS record per ready Pod.
@@ -63,7 +63,7 @@ getent hosts hello-dcs-peers.$(oc project -q).svc.cluster.local
 <!-- id: externalname -->
 ## ExternalName
 
-No selector, no endpoints, no proxy — an alias in cluster DNS, so your code keeps one name while the thing behind it moves.
+No selector, no endpoints, no proxy. An alias in cluster DNS, so your code keeps one name while the thing behind it moves.
 
 ```
 oc apply -f service-externalname.yaml

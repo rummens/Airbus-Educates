@@ -17,11 +17,11 @@ file: ~/exercises/job-migrate.yaml
 
 Three fields are worth knowing before you run it:
 
-- **`restartPolicy: Never`** — a failed attempt becomes a **new Pod**, so each attempt keeps
-  its own logs. `OnFailure` restarts the container in place and overwrites them.
-- **`backoffLimit: 2`** — retry twice, then mark the Job `Failed`.
-- **`ttlSecondsAfterFinished: 600`** — the finished Job deletes itself after ten minutes, so
-  completed Jobs do not accumulate.
+- **`restartPolicy: Never`** makes a failed attempt a **new Pod**, so each attempt keeps its
+  own logs. `OnFailure` restarts the container in place and overwrites them.
+- **`backoffLimit: 2`** retries twice, then marks the Job `Failed`.
+- **`ttlSecondsAfterFinished: 600`** deletes the finished Job after ten minutes, so completed
+  Jobs do not accumulate.
 
 ## Run it
 
@@ -29,8 +29,8 @@ Three fields are worth knowing before you run it:
 command: envsubst < job-migrate.yaml | oc apply -f - && oc wait --for=condition=complete job/db-migrate --timeout=120s
 ```
 
-`oc wait` blocks until the Job reports the `complete` condition — which is the honest way to
-wait for work whose duration you do not control.
+`oc wait` blocks until the Job reports the `complete` condition, which is how to wait for
+work whose duration you do not control.
 
 ```examiner:execute-test
 name: verify-job-completed
@@ -68,12 +68,12 @@ retries: .INF
 delay: 3
 ```
 
-`oc logs job/<name>` reads the logs of the Job's Pod without you having to find its generated
-name first.
+`oc logs job/<name>` reads the logs of the Job's Pod without you having to look up its
+generated name.
 
 {{< note >}}
-**💡 Tip:** a Job can also run **several** Pods — `completions` says how many must succeed and
-`parallelism` how many may run at once. Together they turn a Job into a small batch worker.
+**💡 Tip:** a Job can also run **several** Pods. `completions` says how many must succeed
+and `parallelism` how many may run at once, which turns a Job into a small batch worker.
 {{< /note >}}
 
-Next: make one fail.
+Next, make one fail.

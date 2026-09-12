@@ -7,8 +7,8 @@ The platform **will** move your Pods.
 Nodes are drained for maintenance, clusters are upgraded, workloads are rebalanced. None of
 it asks your permission, and all of it is routine.
 
-What you get instead is a way to state your **terms** — and a shutdown path that decides
-whether being moved costs you an outage or nobody notices.
+What you get is a way to state your **terms**, and a shutdown path that decides whether being
+moved costs you an outage.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the
@@ -28,7 +28,8 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- **Health & Resources** — replicas, probes and readiness, which everything here builds on.
+- **Health & Resources**, for replicas, probes and readiness, which everything here builds
+  on.
 - Helpful: **Services & Cluster Networking**, for why endpoints and shutdown interact.
 
 {{< note >}}
@@ -41,8 +42,9 @@ namespace.
 A browser-based session with a split **terminal** and an **editor**, pointed at your own
 namespace. All commands run with `oc`.
 
-You will **not** drain a node — that is the platform's action, not a tenant's. You will do the
-tenant half: declare what the platform must respect, and check that it has understood.
+You will **not** drain a node, because that is the platform's action rather than a
+tenant's. You do the tenant half: declare what the platform must respect, and check that it
+has understood.
 
 ## Time and Difficulty
 

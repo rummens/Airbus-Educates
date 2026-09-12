@@ -2,9 +2,9 @@
 title: Summary
 ---
 
-You looked at what it means to develop **on** **{{< param product_name >}}**, not
-just deploy to it — a devfile, an in-cluster browser IDE, and the fastest possible
-loop from an edited line of code to that line running inside the cluster.
+You have looked at what it means to develop **on** **{{< param product_name >}}** rather
+than only deploy to it: a devfile, an in-cluster browser IDE, and the loop from an edited
+line of code to that line running inside the cluster.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -27,14 +27,14 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
   Deployment has already shown you, triggered by the Che Operator instead of by
   `oc apply`.
 - **Traced** the edit → run → reach loop a workspace gives you, and why it skips
-  the image-build step that the **Building Images with BuildConfigs** lab's BuildConfig deliberately has.
-- **Placed** Dev Spaces, the Educates editor, BuildConfig (the **Building Images with BuildConfigs** lab), and `oc apply`
-  (the **Deploy Your First App** lab/the **From Docker to Kubernetes on DCS** lab) on one timeline: write it, build it, run it — four tools, one job
+  the image-build step that **Build Your Image on DCS**'s BuildConfig deliberately has.
+- **Placed** Dev Spaces, the Educates editor, BuildConfig (**Build Your Image on DCS**), and `oc apply`
+  (**Deploy Your First App**) on one timeline: write it, build it, run it — four tools, one job
   each, never substitutes for one another.
 
 ## Check Your Understanding
 
-1. What's the core difference between the Educates editor you've used all
+1. What is the core difference between the Educates editor you have used all
    course and OpenShift Dev Spaces?
 
 {{< note >}}
@@ -52,22 +52,22 @@ organisation runs day to day, backed by an actual Pod in your namespace.
 is `${DCS_REGISTRY}/devspaces/udi:latest`, never a hardcoded or public registry.
 {{< /note >}}
 
-3. Why doesn't editing code in a workspace require a new image build to see the
-   change run, the way the **Building Images with BuildConfigs** lab's BuildConfig does?
+3. Why does not editing code in a workspace require a new image build to see the
+   change run, the way **Build Your Image on DCS**'s BuildConfig does?
 
 {{< note >}}
 **❓ Answer:** A workspace runs the cloned source directly (`python3 server.py`)
-from disk — there's no image in the loop. BuildConfig exists for the opposite
-case: turning *finished* source into a deployable image once you're done
+from disk — there is no image in the loop. BuildConfig exists for the opposite
+case: turning *finished* source into a deployable image once you are done
 iterating.
 {{< /note >}}
 
-4. A teammate asks whether Dev Spaces replaces `oc apply`. What's the honest
+4. A teammate asks whether Dev Spaces replaces `oc apply`. What is the honest
    answer?
 
 {{< note >}}
 **❓ Answer:** No — they solve different problems. Dev Spaces is where you *write
-and iterate on* code; `oc apply` (the **Deploy Your First App** lab/the **From Docker to Kubernetes on DCS** lab) is how a *built* image ends up
+and iterate on* code; `oc apply` (**Deploy Your First App**) is how a *built* image ends up
 running in a real namespace. A workspace never deploys anything by itself.
 {{< /note >}}
 
@@ -82,11 +82,11 @@ the same ownership split as every other DCS-provided platform service.
 
 ## Next Steps
 
-**Building Images with BuildConfigs** (`lab-b02-image-buildconfigs`) is this
+**Build Your Image on DCS** is this
 lab's twin — it connects the same git repository as a **build source** instead
 of an IDE, so your finished code becomes a Harbor image. From here, **Harbor
 & Image Scanning** (`lab-b04-harbor-scanning`) picks up where your built image
-lands: how it's scanned, and what a vulnerability gate means for what you can
+lands: how it is scanned, and what a vulnerability gate means for what you can
 deploy. Further out, Module F's **GitLab** lab extends this exact workflow —
 cloning straight from your tenant's own GitLab into a Dev Spaces workspace,
 instead of the provided sample repo used here.
@@ -96,8 +96,8 @@ instead of the provided sample repo used here.
 `${WORKSPACE_SOURCE_REPO}` — a small, in-platform git repository reachable
 without external egress. The concrete air-gapped hosting for that repo (a
 mirror into the tenant's GitLab vs. a small in-cluster git service) is the same
-open provisioning question tracked for the **Building Images with BuildConfigs** lab's `${BUILD_SOURCE_REPO}`; both
-resolve to the same answer once that's settled. Likewise, whether the **Dev
+open provisioning question tracked for **Build Your Image on DCS**'s `${BUILD_SOURCE_REPO}`; both
+resolve to the same answer once that is settled. Likewise, whether the **Dev
 Spaces** dashboard tab shows a live instance depends on whether your cluster has
 Dev Spaces and a Harbor-mirrored UDI provisioned yet — the content here is
 written for the real thing either way.

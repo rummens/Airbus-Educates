@@ -14,7 +14,7 @@ Digital Container Service · DCS Academy
 <!-- id: shapes -->
 ## How long should it live?
 
-One question picks the object. A Deployment's whole job is to restart a container that stopped — which is exactly wrong for work that is *supposed* to stop.
+One question picks the object. A Deployment restarts a container that stopped, which is the wrong behaviour for work that is *supposed* to stop.
 
 - **Deployment** — forever. Exits are failures.
 - **Job** — until done. Exit 0 is success, and the Pod is kept so you can read it.
@@ -102,6 +102,6 @@ initContainers:
 
 You can now run work that ends, schedule it, and put helpers beside your app.
 
-**Next lab — Resilience & Scheduling:** PodDisruptionBudgets that survive a node drain, graceful shutdown when the platform sends SIGTERM, and spreading replicas so one node's failure is not your outage.
+**Next lab, Resilience & Scheduling:** PodDisruptionBudgets that survive a node drain, graceful shutdown when the platform sends SIGTERM, and spreading replicas so one node's failure is not your outage.
 
 Digital Container Service · DCS Academy

@@ -5,17 +5,17 @@
 Node maintenance, upgrades and rebalancing are routine, and none of them ask permission. What
 you get is a way to state your terms.
 
-You set a **PodDisruptionBudget** and read from its own status how many Pods the platform may
-take right now — then scale down until that number is **zero**, and see why a budget nobody
-can satisfy is a problem rather than extra safety.
+You set a **PodDisruptionBudget** and read from its status how many Pods the platform may
+take right now, then scale down until that number is **zero** and see why a budget nobody can
+satisfy causes problems rather than adding safety.
 
-Then the half most apps get wrong: **shutdown**. You time a real Pod deletion and find out
-what a container that ignores `SIGTERM` actually costs.
+Then **shutdown**, which most applications get wrong. You time a real Pod deletion and measure
+what a container that ignores `SIGTERM` costs.
 
 Last, **spreading** replicas across nodes, and the trade-off between a spread you prefer and
 one you require.
 
-> **⚠️ Watch out:** you will not drain a node — that is the platform's action. You do the
+> **⚠️ Watch out:** you will not drain a node, because that is the platform's action. You do the
 > tenant half: declare what it must respect, then check it understood.
 
 - **Track:** Build & Run — the last lab

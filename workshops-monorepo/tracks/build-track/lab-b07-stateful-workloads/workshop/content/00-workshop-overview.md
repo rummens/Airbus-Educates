@@ -6,8 +6,8 @@ A [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deploym
 replicas are **interchangeable**. Any Pod can serve any request, and a replacement Pod is as
 good as the one it replaced.
 
-Plenty of workloads are not like that. A database replica, a queue broker, a cache with its
-own data on disk — each needs the **same name** and the **same volume** back after a restart.
+Plenty of workloads are not like that. A database replica, a queue broker or a cache with
+its own data on disk needs the **same name** and the **same volume** back after a restart.
 
 That is what a
 [**StatefulSet**](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/) is for, and this
@@ -33,9 +33,10 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- The Core lab **Store Data** — you have created a PersistentVolumeClaim and mounted it once.
-- **Services & Cluster Networking** — a StatefulSet needs the **headless** Service you met
-  there.
+- The Core lab **Store Data**, so you have created a PersistentVolumeClaim and mounted it
+  once.
+- **Services & Cluster Networking**, because a StatefulSet needs the **headless** Service from
+  that lab.
 
 {{< note >}}
 **📌 Note:** nothing is carried over from another lab. You create the Service, the StatefulSet
