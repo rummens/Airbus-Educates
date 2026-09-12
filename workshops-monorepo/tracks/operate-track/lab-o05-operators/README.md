@@ -20,7 +20,7 @@ its day-2.
 - **Track:** Operate & Observe
 - **Audience:** Advanced
 - **Duration:** ~25 min
-- **Format:** Hands-on, guided — split terminal + editor, in your own OpenShift session namespace
+- **Format:** Hands-on and guided, with a split terminal and editor in your own OpenShift session namespace
 - **Prerequisites:** **Stateful Workloads** helps (the operator builds one for you), and **RBAC & Tenancy** for who-may-do-what.
 
 ## By the end of this lab you'll be able to

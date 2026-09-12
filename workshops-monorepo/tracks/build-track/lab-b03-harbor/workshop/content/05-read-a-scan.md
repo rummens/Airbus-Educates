@@ -2,7 +2,7 @@
 title: Read a Scan
 ---
 
-Harbor scans what it stores. The report is a document you can read — and the gate is
+Harbor scans what it stores. The report is a document you can read, and the gate is
 arithmetic on one field of it.
 
 Open the slide for this page (📊 **Slides** tab):
@@ -37,7 +37,7 @@ delay: 3
 ```
 
 The `summary.severityCount` is the whole verdict in four numbers. This one has **no Critical
-and no High** findings — a Medium and two Low.
+and no High** findings: one Medium and two Low.
 
 Note `fixable`: of the three findings, two have a fixed version available. That distinction
 decides what you can actually do about them.
@@ -56,9 +56,9 @@ retries: .INF
 delay: 3
 ```
 
-**Two Critical, three High.** On {{< param product_short >}} a PROD project pulls only images
-whose findings sit **below CVE severity 9** — Critical is 9.0 and above, so this image is
-refused there. It can live in a DEV project quite happily.
+**Two Critical, three High.** On {{< param product_short >}} a PROD project pulls only
+images whose findings sit **below CVE severity 9**, and Critical means 9.0 and above, so this
+image is refused there. It can sit in a DEV project without any trouble.
 
 ## Look at what is actually wrong
 
@@ -76,19 +76,19 @@ delay: 3
 
 Each line is a decision:
 
-- **A fixed version exists** — rebuild on an updated base, or bump the dependency. This is most
-  of them, most of the time, and it is why `fixable` is the number to look at first.
-- **No fix available** — then it is a conversation: can the component be removed, replaced, or
-  is this the **security exception** path?
+- **A fixed version exists:** rebuild on an updated base, or bump the dependency. That covers
+  most findings most of the time, which is why `fixable` is the number to read first.
+- **No fix available:** then it is a conversation. Can the component be removed or replaced,
+  or is this the **security exception** path?
 
 {{< warning >}}
-**⚠️ Watch out:** a scan result belongs to a **digest**, not a tag. Re-pushing a different image
-under the same tag does not inherit the old verdict — which is the other reason floating tags
-are refused.
+**⚠️ Watch out:** a scan result belongs to a **digest**, not to a tag. Re-pushing a different
+image under the same tag does not inherit the old verdict, which is the other reason floating
+tags are refused.
 {{< /warning >}}
 
 ## The habit worth forming
 
-Read the summary **before** you need it. An image that fails the gate is discovered at
-promotion time, which is the worst possible moment to learn that your base image is two years
-old.
+Read the summary **before** you need it. Otherwise an image that fails the gate is
+discovered at promotion time, which is a late moment to learn that your base image is two
+years old.

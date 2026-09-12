@@ -23,7 +23,7 @@ too.
 - **Track:** Operate & Observe
 - **Audience:** Intermediate
 - **Duration:** ~25 min
-- **Format:** Hands-on, guided — split terminal + editor, in your own OpenShift session namespace
+- **Format:** Hands-on and guided, with a split terminal and editor in your own OpenShift session namespace
 - **Prerequisites:** **Services & Cluster Networking** (a ServiceMonitor selects a Service, by label and port name). Helpful: **Health & Resources**.
 
 ## By the end of this lab you'll be able to

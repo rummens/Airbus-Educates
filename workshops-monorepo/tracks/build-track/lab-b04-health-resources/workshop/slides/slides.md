@@ -16,7 +16,7 @@ Digital Container Service · DCS Academy
 
 Scaling asks DCS to keep several identical copies running. Every copy draws on the same finite namespace budget.
 
-A Pod that sets no `resources` of its own takes the namespace **LimitRange** defaults — and the default *limit* is much larger than the default *request*.
+A Pod that sets no `resources` of its own takes the namespace **LimitRange** defaults, and the default *limit* is much larger than the default *request*.
 
 ```
 oc scale deploy/hello-dcs --replicas=4
@@ -34,7 +34,7 @@ oc describe quota
 <!-- id: quota-reject -->
 ## Hitting the limit
 
-With the limit side fully spent, a template asking for more per Pod cannot land. The quota refuses the Pod at **admission** — before a node is picked, before an image is pulled.
+With the limit side fully spent, a template asking for more per Pod cannot land. The quota refuses the Pod at **admission**, before a node is picked and before an image is pulled.
 
 ```
 envsubst < deployment-oversized.yaml | oc apply -f -
@@ -82,7 +82,7 @@ Two different questions the platform keeps asking a Pod, with two different cons
 <!-- id: self-healing -->
 ## Self-healing
 
-Delete a Pod by hand — no rollout, no manifest — and the count comes back on its own.
+Delete a Pod by hand, with no rollout and no manifest change, and the count comes back on its own.
 
 ```
 oc get pods -l app=hello-dcs -o name | head -n 1
@@ -99,7 +99,7 @@ oc delete pod/<that-one>
 <!-- id: next -->
 ## What's next
 
-Your app now fits its budget and proves its own health — the two things that let the platform keep it alive without you.
+Your app now fits its budget and reports its own health, which is what lets the platform keep it running without you.
 
 **Next lab — Autoscaling:** let a **HorizontalPodAutoscaler** move the replica count as load changes, and see why it cannot work at all without the `requests` you set here.
 

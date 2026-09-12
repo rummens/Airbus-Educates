@@ -3,9 +3,9 @@
 <!-- id: intro -->
 # Harbor: Projects, Push & Scan
 
-The registry is not a string in your manifest. It is where the platform decides what may run.
+On DCS the registry decides what may run. An image it will not serve cannot start.
 
-**In this lab:** catalogs and projects · inspect without pulling · copy between registries · read a scan · how an image reaches PROD.
+**In this lab:** catalogs and projects · asking for a project · inspect without pulling · copy between registries · read a scan · how an image reaches PROD.
 
 Digital Container Service · DCS Academy
 
@@ -14,7 +14,7 @@ Digital Container Service · DCS Academy
 <!-- id: rules -->
 ## Catalogs, projects, and the asymmetry
 
-Three ideas, and the third explains most of the surprises.
+Three rules govern what you may pull and push.
 
 - **Catalogs** — DCS, allowed-external, proxy-cached, and the **green catalog** of cleared images.
 - **Projects** — a tenant may get one, scoped **per namespace** today (per-tenant is the direction).

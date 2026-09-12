@@ -3,7 +3,7 @@ title: Copy It Somewhere Else
 ---
 
 Moving an image between registries is the operation behind mirroring, promotion and every
-air-gapped import. It is one command, and no daemon.
+air-gapped import. It is one command, with no daemon involved.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -38,19 +38,19 @@ What that command actually did:
 
 1. **Read** the manifest and layers from the source registry.
 2. **Wrote** them to the destination registry, under a new name.
-3. Preserved the **digest** of each layer — nothing was rebuilt, and nothing was unpacked.
+3. Preserved the **digest** of each layer. Nothing was rebuilt and nothing was unpacked.
 
 {{< note >}}
-**📌 `--dest-creds "unused:$(oc whoami -t)"`.** A registry wants a username and a password, and
-the cluster's registry only checks the **token** — the username is ignored, so `unused` is as
-good as anything.
+**📌 `--dest-creds "unused:$(oc whoami -t)"`.** A registry wants a username and a password.
+The cluster's registry only checks the **token** and ignores the username, so `unused` works
+as well as anything.
 
 Do not be tempted by `$(oc whoami)` there: for a ServiceAccount that expands to
 `system:serviceaccount:<ns>:<name>`, and those colons break `user:password` parsing with an
 unhelpful "authentication required".
 
-On {{< param product_short >}} this is where a Harbor **robot account** goes instead — a
-credential issued to a system, not a person, scoped to one project.
+On {{< param product_short >}} a Harbor **robot account** goes here instead: a credential
+issued to a system rather than a person, and scoped to one project.
 {{< /note >}}
 
 ## See it arrive
@@ -69,8 +69,8 @@ delay: 5
 
 ## This is what a promotion is
 
-Nothing about that operation is special. A **mirror from a DEV project into a PROD project** is
-exactly this: read here, write there, same digest.
+A **mirror from a DEV project into a PROD project** is exactly the command you just ran:
+read here, write there, same digest.
 
 What makes it a promotion is everything around it:
 

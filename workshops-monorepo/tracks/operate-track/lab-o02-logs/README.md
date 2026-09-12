@@ -21,7 +21,7 @@ secrets that matters far more once every line is centrally kept.
 - **Track:** Operate & Observe
 - **Audience:** Intermediate
 - **Duration:** ~20 min
-- **Format:** Hands-on, guided — split terminal + editor, in your own OpenShift session namespace
+- **Format:** Hands-on and guided, with a split terminal and editor in your own OpenShift session namespace
 - **Prerequisites:** the Core lab **Configure & Troubleshoot Your App**. Helpful: **Metrics & Monitoring**.
 
 ## By the end of this lab you'll be able to

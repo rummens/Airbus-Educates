@@ -28,12 +28,12 @@ delay: 5
 
 Four fields are worth knowing by name:
 
-- **`Digest`** — `sha256:…`, the image's real identity. Content-addressed: the same digest is
-  always the same bytes.
-- **`RepoTags`** — every tag this repository has. Tags **move**; digests do not.
-- **`Layers`** — the filesystem layers, in order. A shared base means shared layers, which is
-  why a rebuild is faster than a first build.
-- **`Labels`** — metadata baked in at build time. `org.opencontainers.image.source` tells you
+- **`Digest`** is `sha256:…`, the image's real identity. It is content-addressed, so the same
+  digest is always the same bytes.
+- **`RepoTags`** lists every tag this repository has. Tags **move**; digests do not.
+- **`Layers`** lists the filesystem layers in order. A shared base means shared layers, which
+  is why a rebuild is faster than a first build.
+- **`Labels`** is metadata baked in at build time. `org.opencontainers.image.source` tells you
   where it came from, when the builder set it.
 
 ## Tags move, digests do not
@@ -56,8 +56,8 @@ will not have changed.
 
 {{< warning >}}
 **⚠️ Watch out:** this is why a floating tag like `latest` is refused on
-{{< param product_short >}}. Not fussiness — a tag that moves means the thing you scanned and
-the thing you run are not provably the same.
+{{< param product_short >}}. A tag that moves means the thing you scanned and the thing you
+run are not provably the same bytes.
 {{< /warning >}}
 
 ## What is inside, without running it
@@ -77,7 +77,7 @@ delay: 5
 `--config` returns what the container will do when it starts: its `User`, `Env`, `Cmd` and
 `ExposedPorts`.
 
-Two of those you now know to check before deploying anything on this platform:
+Two of those are worth checking before you deploy anything here:
 
-- **`User`** — non-root, or the restricted SCC will refuse it.
-- **`Env`** — what is baked in, versus what you are expected to supply.
+- **`User`** must be non-root, or the restricted SCC refuses the Pod.
+- **`Env`** tells you what is baked in, and therefore what you are expected to supply.

@@ -2,11 +2,12 @@
 title: The Mental Model
 ---
 
-Start from the file you already know. The compose file for `hello-dcs` sits in your
-exercises directory — an **image**, a **port mapping**, an **environment variable**, and a
-few lines that only make sense on a single Docker host.
+The compose file for `hello-dcs` is in your exercises directory. It declares an **image**,
+a **port mapping**, an **environment variable**, and a few lines that only mean anything on
+a single Docker host.
 
-Everything in it has a Kubernetes equivalent. This page names them before you touch any YAML.
+Everything in it has a Kubernetes equivalent. This page names them before you touch any
+YAML.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -21,7 +22,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/me
 file: ~/exercises/docker-compose.yml
 ```
 
-The same file, from the terminal, so the check below can confirm it is there to work with:
+The same file from the terminal, so the check below can confirm it is there:
 
 ```terminal:execute
 command: cat docker-compose.yml
@@ -45,13 +46,13 @@ above, then click again.
 
 The biggest shift is not *what* the objects do. It is *how* you describe them.
 
-**Imperative** — `docker run` and `docker compose up` tell the Docker daemon what to do
+**Imperative:** `docker run` and `docker compose up` tell the Docker daemon what to do
 right now, in order.
 
-**Declarative** — Kubernetes takes the state you *want* and keeps working to make reality
-match it. That is why a [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) that
-dies is **replaced** without you running anything. Nobody re-ran a command; the platform
-re-converged on the declared state.
+**Declarative:** Kubernetes takes the state you *want* and keeps working to make reality
+match it. A [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) that dies is
+**replaced** without you running anything, because nobody has to: the platform is still
+converging on the state you declared.
 
 {{< note >}}
 **💡 Tip:** if you have used compose's `restart: always`, self-healing is not new to you.
@@ -71,6 +72,6 @@ Kubernetes applies the same idea to every object, not just to container restarts
 
 ## Next
 
-You will fill in and apply the three manifests already sitting in `~/exercises` —
-`deployment.yaml`, `service.yaml`, `configmap.yaml` — one per row of that table, in the
+You will fill in and apply the three manifests already sitting in `~/exercises`:
+`deployment.yaml`, `service.yaml` and `configmap.yaml`, one per row of that table, in the
 order the compose file lists them.

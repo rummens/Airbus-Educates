@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Build Your Image on DCS
 
-Every lab so far ran an image somebody else built. This one builds yours — with no Docker daemon anywhere.
+Every lab so far ran an image somebody else built. This one builds yours, with no Docker daemon anywhere.
 
 **In this lab:** the three objects · build from your files · deploy what you built · rebuild · what changes on DCS.
 
@@ -72,7 +72,7 @@ oc rollout restart deploy/hello-built
 - Faster the second time: unchanged layers are reused.
 - **A new image restarts nothing.** The Pod keeps what it started with.
 - **Build triggers** start a build on a push; **image triggers** roll out when a tag moves.
-- Automatic promotion is exactly as safe as your build — which is why PROD takes no pushes.
+- An automatic promotion is exactly as safe as the build behind it, which is why PROD takes no pushes.
 
 ---
 
@@ -94,6 +94,6 @@ Three differences, all of them consequences of air-gapping.
 
 You can turn files into a running image without privileged tooling, and you know what makes a new one appear.
 
-**Next lab — Harbor: Projects, Push & Scan:** the registry stops being a URL. Catalogs, the project your namespace gets, what a scan reports, and the gate that decides what PROD will run.
+**Next lab, Harbor: Projects, Push & Scan:** the catalogs, the project your namespace gets and how it is requested, what a scan reports, and the gate that decides what PROD will run.
 
 Digital Container Service · DCS Academy

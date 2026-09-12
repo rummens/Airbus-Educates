@@ -17,11 +17,11 @@ file: ~/exercises/app/Containerfile
 
 Two lines that matter:
 
-- **`FROM {{< param dcs_registry >}}/samples/hello-dcs:1.0`** — the base comes from the
-  platform's registry. On an air-gapped cluster, a `FROM` that names a public registry simply
-  fails: there is nothing to reach.
-- **`ENV GREETING=…`** — your change, baked **into the image**. Unlike `oc set env`, this value
-  ships with the artefact and is the same everywhere it runs.
+- **`FROM {{< param dcs_registry >}}/samples/hello-dcs:1.0`** takes the base from the
+  platform's registry. On an air-gapped cluster a `FROM` that names a public registry fails,
+  because there is nothing to reach.
+- **`ENV GREETING=…`** is your change, baked **into the image**. Unlike `oc set env`, this
+  value ships with the artefact and is the same everywhere it runs.
 
 ## Create the BuildConfig
 
@@ -32,11 +32,13 @@ file: ~/exercises/buildconfig.yaml
 Two objects: an **ImageStream** for the output to land in, and the **BuildConfig** itself.
 Three fields in it are the whole recipe:
 
-- **`source.type: Binary`** — the input is handed over at start time. With a git server the
-  cluster can reach, this would be `git:` instead: same object, same strategy, different source.
-- **`strategy.dockerStrategy.dockerfilePath: Containerfile`** — the default is a file called
-  exactly `Dockerfile`. This project uses the `Containerfile` spelling, so the path is stated.
-- **`output.to`** — the ImageStream tag the finished image is pushed to.
+- **`source.type: Binary`** means the input is handed over at start time. With a git server
+  the cluster can reach, this would be `git:` instead: same object, same strategy, different
+  source.
+- **`strategy.dockerStrategy.dockerfilePath: Containerfile`** names the file to build. The
+  default is a file called exactly `Dockerfile`, and this project uses the `Containerfile`
+  spelling.
+- **`output.to`** is the ImageStream tag the finished image is pushed to.
 
 ```terminal:execute
 command: |-
@@ -54,9 +56,9 @@ delay: 3
 ```
 
 {{< note >}}
-**💡 Tip:** `oc new-build --binary --strategy=docker --name=hello-built` generates the same two
-objects in one line. It assumes `Dockerfile`, though — which is exactly the assumption this
-manifest had to override.
+**💡 Tip:** `oc new-build --binary --strategy=docker --name=hello-built` generates the same
+two objects in one line. It assumes the file is called `Dockerfile`, which is the assumption
+this manifest had to override.
 {{< /note >}}
 
 {{< note >}}
@@ -108,5 +110,5 @@ retries: .INF
 delay: 3
 ```
 
-`hello-built-1` — the first run of that recipe, kept as a record with a status. A failed build
-stays here too, which is exactly what you want when it fails at 3am.
+`hello-built-1` is the first run of that recipe, kept with its status. A failed build stays
+in this list too.

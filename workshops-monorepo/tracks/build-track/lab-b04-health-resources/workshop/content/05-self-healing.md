@@ -5,8 +5,8 @@ title: Self-Healing
 Everything so far has been about **shaping** the desired state: replica count, resource
 numbers, probes.
 
-This page proves {{< param product_short >}} actually **enforces** it. You delete a running
-Pod by hand — no rollout, no manifest — and watch the platform put one back.
+This page shows {{< param product_short >}} **enforcing** it. You delete a running Pod by
+hand, with no rollout and no manifest change, and watch the platform put one back.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -21,7 +21,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/se
 command: oc get pods -l app=hello-dcs
 ```
 
-One of those names is about to disappear for good, and a **new** one will take its place.
+One of those names is about to disappear, and a **new** one will take its place.
 
 ## Watch it happen
 
@@ -44,9 +44,9 @@ command: |-
 
 What that does, piece by piece:
 
-- **`-o name`** — prints `pod/<name>` lines instead of the full table.
-- **`head -n 1`** — keeps one line, so exactly one Pod is targeted.
-- **`> /tmp/deleted-pod.txt`** — saves the name, so the check can prove *that* Pod is gone.
+- **`-o name`** prints `pod/<name>` lines instead of the full table.
+- **`head -n 1`** keeps one line, so exactly one Pod is targeted.
+- **`> /tmp/deleted-pod.txt`** saves the name, so the check can prove *that* Pod is gone.
 
 ```examiner:execute-test
 name: verify-pod-replaced
@@ -62,7 +62,7 @@ delay: 2
 command: oc get pods -l app=hello-dcs
 ```
 
-Still four Pods, `4/4` READY — but one name differs from the list you noted.
+Still four Pods, `4/4` READY, but one name differs from the list you noted.
 
 **You did not create that Pod.** The one you deleted is gone for good; nothing brought it
 back. The Deployment's **ReplicaSet** continuously compares the actual replica count against
@@ -81,5 +81,5 @@ Either direction, the ReplicaSet's only job is to make actual equal desired.
 Nothing here was special-cased for a lab. The same mechanism recovers from a node failure,
 an evicted Pod, or a container that crashes on its own.
 
-That is the practical payoff of this whole lab: a Deployment that fits its budget and proves
-its own health is a Deployment the platform can keep alive without you.
+A Deployment that fits its budget and reports its own health is one the platform can keep
+running without you.

@@ -9,8 +9,8 @@ environment:
   GREETING: "Hello from docker-compose"
 ```
 
-sets the variable inline — fine for one file on one machine, but the value is welded into
-that file instead of living as configuration of its own.
+sets the variable inline. That is fine for one file on one machine, but the value only
+exists inside that file.
 
 On Kubernetes it moves into a
 [**ConfigMap**](https://kubernetes.io/docs/concepts/configuration/configmap/): a named
@@ -32,7 +32,7 @@ sees right now:
 command: oc exec deploy/hello-dcs -- printenv GREETING
 ```
 
-You get a greeting — but it is the one **baked into the image** with a `Dockerfile` `ENV`
+You get a greeting, but it is the one **baked into the image** by a `Dockerfile` `ENV`
 line, not the one the compose file set.
 
 That is the problem with configuration living inside an image: changing it means building a
@@ -74,8 +74,8 @@ A ConfigMap on its own changes nothing. The workload has to **reference** it:
 command: oc set env deploy/hello-dcs --from=configmap/hello-dcs-config
 ```
 
-That writes the reference into the Pod template, which is a change to the desired state — so
-the Deployment **rolls out** a new Pod carrying the variable.
+That writes the reference into the Pod template. The template is part of the desired state,
+so the Deployment **rolls out** a new Pod carrying the variable.
 
 Watch the replacement happen in the **lower** pane. `--watch` keeps printing as Pods come
 and go, and `timeout 30` stops it by itself so nothing is left running:
@@ -100,5 +100,5 @@ delay: 3
 running Pod keeps the value it started with until something triggers a new rollout.
 {{< /warning >}}
 
-Three compose lines, three Kubernetes objects, one running app. Next: the lines that do not
+Three compose lines are now three Kubernetes objects. Next, the lines that do not
 translate at all.

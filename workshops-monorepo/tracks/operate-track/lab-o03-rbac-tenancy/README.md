@@ -19,9 +19,9 @@ setting you can edit.
 > subject's access without you logging in as them.
 
 - **Track:** Operate & Observe
-- **Audience:** Intermediate — no prior RBAC knowledge needed
+- **Audience:** Intermediate. no prior RBAC knowledge needed
 - **Duration:** ~25 min
-- **Format:** Hands-on, guided — split terminal + editor, in your own OpenShift session namespace
+- **Format:** Hands-on and guided, with a split terminal and editor in your own OpenShift session namespace
 - **Prerequisites:** the Core lab **Terms — Namespaces & Tenancy**.
 
 ## By the end of this lab you'll be able to

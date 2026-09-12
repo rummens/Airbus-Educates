@@ -2,8 +2,8 @@
 title: Summary
 ---
 
-You took a `docker-compose.yml` for `hello-dcs` and migrated it onto
-**{{< param product_name >}}** — then worked out which lines could not come along.
+You took a `docker-compose.yml` for `hello-dcs`, migrated it onto
+**{{< param product_name >}}**, and found the lines that could not come with it.
 
 Open the closing slide (📊 **Slides** tab):
 
@@ -14,7 +14,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
 
 ## What You Did
 
-1. **Mapped** the compose model onto Kubernetes objects — container → Pod/Deployment,
+1. **Mapped** the compose model onto Kubernetes objects: container → Pod/Deployment,
    `ports:` → Service, `environment:` → ConfigMap, `volumes:` → Volume.
 2. **Translated** the compose service into a **Deployment**, filled in its registry image,
    and applied it with `envsubst | oc apply -f -`.
@@ -32,8 +32,8 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
    running?
 
 {{< note >}}
-**❓ Answer:** `docker run` is **imperative** — you tell the daemon what to do, once. A
-Deployment is **declarative** — you state the desired end state and the platform keeps
+**❓ Answer:** `docker run` is **imperative**: you tell the daemon what to do, once. A
+Deployment is **declarative**: you state the desired end state and the platform keeps
 reconciling reality to match it. That is why a killed Pod comes back without you running
 anything.
 {{< /note >}}
@@ -60,24 +60,24 @@ storage is always a namespace-scoped Volume).
    that message tell you to do?
 
 {{< note >}}
-**❓ Answer:** **not** to go looking for the permission. That wording means an SCC which would
-have allowed the request exists but is not yours — the permissive ones belong to the platform.
-The fix is in the image or the manifest. ("Invalid value" is the other case: an SCC you *may*
-use, refusing one specific ask.)
+**❓ Answer:** **not** to go looking for the permission. That wording means an SCC which
+would have allowed the request exists but is not yours, and the permissive ones belong to the
+platform. The fix is in the image or the manifest. ("Invalid value" is the other case: an SCC
+you *may* use, refusing one specific ask.)
 {{< /note >}}
 
 5. If the `hello-dcs` image already runs as UID 1001, why did `user: root` matter at all?
 
 {{< note >}}
-**❓ Answer:** it changed nothing about this image — the image already fixes it. The point is
-that a naive lift-and-shift *assumes* root is available, as many Docker images do, and that
-assumption is exactly what the restricted SCC catches.
+**❓ Answer:** it changed nothing about this image, which already runs as 1001. It matters
+because a lift-and-shift *assumes* root is available, as many Docker images do, and that
+assumption is what the restricted SCC catches.
 {{< /note >}}
 
 ## Next Steps
 
 You migrated an image somebody else built.
 
-**Build Your Image on DCS** picks up there: pointing a **BuildConfig** at a git repository so
-the platform builds *your* code into an image and pushes it to the registry — no Docker
-daemon anywhere in sight.
+**Build Your Image on DCS** picks up there. You point a **BuildConfig** at your own files,
+the platform builds them into an image and pushes it to the registry, and no Docker daemon is
+involved anywhere.

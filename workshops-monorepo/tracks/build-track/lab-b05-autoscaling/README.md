@@ -2,16 +2,16 @@
 
 **Setting the replica count by hand only works while you are watching.**
 
-A **HorizontalPodAutoscaler** takes that decision over: it reads your Pods' CPU use,
+A **HorizontalPodAutoscaler** takes that decision over. It reads your Pods' CPU use,
 compares it with the `requests` you set, and moves the replica count to hold a target.
 
 You create one, watch it read live metrics, drive the app under load from your own terminal
 and see it scale out.
 
-Then the interesting half: why scale-**in** is deliberately slow, what a stabilisation window
-is for, and what happens when the **namespace budget** — not the load — is the real ceiling.
+Then why scale-**in** is deliberately slow, what a stabilisation window is for, and what
+happens when the **namespace budget** rather than the load is the real ceiling.
 
-Closes with **VPA**, the other autoscaler: the one that tunes `requests` instead of replica
+The last page covers **VPA**, the other autoscaler, which tunes `requests` instead of replica
 count, and why you do not point both at the same resource.
 
 > **⚠️ Watch out:** an HPA on CPU cannot work at all without CPU `requests`. That is the
@@ -20,7 +20,7 @@ count, and why you do not point both at the same resource.
 - **Track:** Build & Run
 - **Audience:** Intermediate
 - **Duration:** ~20 min
-- **Format:** Hands-on, guided — split terminal + editor, in your own OpenShift session namespace
+- **Format:** Hands-on and guided, with a split terminal and editor in your own OpenShift session namespace
 - **Prerequisites:** **Health & Resources** — this lab builds on the `requests` you set there.
 
 ## By the end of this lab you'll be able to

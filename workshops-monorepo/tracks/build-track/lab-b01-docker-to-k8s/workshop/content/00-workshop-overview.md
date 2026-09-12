@@ -2,15 +2,15 @@
 title: "From Docker to Kubernetes"
 ---
 
-If you run containers today with `docker run` or `docker compose up`, none of that
-knowledge is wasted on **{{< param product_name >}}**.
+If you run containers today with `docker run` or `docker compose up`, that knowledge
+carries over to **{{< param product_name >}}**. Kubernetes gives the same ideas different
+names and a **declarative** shape.
 
-Kubernetes gives the same ideas different names and a **declarative** shape. This lab takes
-a small `docker-compose.yml` for the `hello-dcs` sample and migrates it, piece by piece,
-into the **Deployment**, **Service** and **ConfigMap** you would use on
+This lab takes a small `docker-compose.yml` for the `hello-dcs` sample and moves it, piece
+by piece, into the **Deployment**, **Service** and **ConfigMap** you would use on
 {{< param product_short >}}.
 
-Then it shows you the lines that do not survive the trip, and why the platform refuses them.
+Then the lines that do not come with it, and which control refuses each one.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the
@@ -22,14 +22,14 @@ for the terminal, editor and clickable actions.
 
 By the end of this workshop you will be able to:
 
-- Map compose concepts to Kubernetes objects — container → [Pod](https://kubernetes.io/docs/concepts/workloads/pods/)/[Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/), `ports:` → [Service](https://kubernetes.io/docs/concepts/services-networking/service/), `environment:` → [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/), `volumes:` → [Volume](https://kubernetes.io/docs/concepts/storage/volumes/).
+- Map compose concepts to Kubernetes objects: container → [Pod](https://kubernetes.io/docs/concepts/workloads/pods/)/[Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/), `ports:` → [Service](https://kubernetes.io/docs/concepts/services-networking/service/), `environment:` → [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/), `volumes:` → [Volume](https://kubernetes.io/docs/concepts/storage/volumes/).
 - Explain the difference between an **imperative** `docker run` and a **declarative** Deployment.
 - Turn a compose service into a working Deployment, Service and ConfigMap on {{< param product_short >}}.
 - Name the four compose lines {{< param product_short >}} rejects, and the control behind each.
 
 ## Prerequisites
 
-- The Core labs **Deploy Your First App** and **Configure & Troubleshoot Your App** — you
+- The Core labs **Deploy Your First App** and **Configure & Troubleshoot Your App**. You
   know what a Deployment, Service and ConfigMap *are*, and how a config change rolls out.
 - Comfort reading a `docker run` command or a `docker-compose.yml` file. This lab assumes
   that background rather than teaching it.
@@ -55,4 +55,4 @@ namespace. All commands run with `oc`.
 ## Further Reading
 
 - [Kubernetes Concepts](https://kubernetes.io/docs/concepts/) — the object model this lab maps onto.
-- [Docker Compose file reference](https://docs.docker.com/compose/compose-file/) — the source format you are migrating from.
+- [Docker Compose file reference](https://docs.docker.com/compose/compose-file/) — the format you are migrating from.

@@ -40,9 +40,9 @@ file: ~/exercises/hpa.yaml
 
 Three fields carry the whole behaviour:
 
-- **`scaleTargetRef`** — which Deployment this HPA owns.
-- **`minReplicas` / `maxReplicas`** — the range it may move within (1 to 6 here).
-- **`metrics`** — what it watches. One entry: CPU at **50%** average utilisation.
+- **`scaleTargetRef`** names the Deployment this HPA owns.
+- **`minReplicas` / `maxReplicas`** are the range it may move within, 1 to 6 here.
+- **`metrics`** is what it watches. There is one entry: CPU at **50%** average utilisation.
 
 ```terminal:execute
 command: oc apply -f hpa.yaml
@@ -67,7 +67,7 @@ object in one line. The manifest is here so you can read what that line produces
 command: oc get hpa hello-dcs
 ```
 
-The **TARGETS** column reads `<current>/<target>` — for example `3%/50%`.
+The **TARGETS** column reads `<current>/<target>`, for example `3%/50%`.
 
 ```examiner:execute-test
 name: verify-hpa-has-metrics
@@ -92,4 +92,4 @@ The **Conditions** and **Events** at the bottom are where an HPA explains itself
 `AbleToScale`, `ScalingActive`, and a `ScalingLimited` condition when it wants more replicas
 than `maxReplicas` allows.
 
-An idle app sits at `minReplicas`. Next, give it something to do.
+An idle app sits at `minReplicas`. Next, give it work to do.

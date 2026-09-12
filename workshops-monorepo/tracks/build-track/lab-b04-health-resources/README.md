@@ -5,21 +5,21 @@
 You scale the sample app to four replicas and read what it actually costs against your
 namespace budget.
 
-Then you apply a deliberately oversized manifest and watch the **quota refuse it** — Pods
-never even scheduled — and fix it by right-sizing `requests` and `limits`.
+Then you apply a deliberately oversized manifest and watch the **quota refuse it**, with the
+Pods never scheduled, and fix it by sizing `requests` and `limits` properly.
 
-With the app fitting its budget, you give it **liveness** and **readiness** probes, break
-readiness on purpose to see one replica quarantined while the others keep serving, and delete
-a Pod by hand to watch the platform put it back.
+With the app inside its budget you add **liveness** and **readiness** probes. Breaking
+readiness on purpose takes one replica out of the Service while the others keep serving, and
+deleting a Pod by hand shows the platform putting it back.
 
-> **💡 Tip:** your session namespace carries a real quota, sized so you can hit it on purpose.
-> Hitting it is the lesson, not an accident.
+> **💡 Tip:** your session namespace carries a real quota, sized so that you can reach it.
+> Reaching it is one of the exercises.
 
 - **Track:** Build & Run
-- **Audience:** Intermediate — you have deployed an app and read its logs before
+- **Audience:** Intermediate. You have deployed an app and read its logs before
 - **Duration:** ~25 min
-- **Format:** Hands-on, guided — split terminal + editor, in your own OpenShift session namespace
-- **Prerequisites:** the Core labs **Deploy Your First App** and **Configure & Troubleshoot Your App**. Nothing is carried over technically — this lab deploys its own app.
+- **Format:** Hands-on and guided, with a split terminal and editor in your own OpenShift session namespace
+- **Prerequisites:** the Core labs **Deploy Your First App** and **Configure & Troubleshoot Your App**. Nothing is carried over technically: this lab deploys its own app.
 
 ## By the end of this lab you'll be able to
 

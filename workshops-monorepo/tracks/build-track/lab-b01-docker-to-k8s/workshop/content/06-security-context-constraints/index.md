@@ -55,18 +55,18 @@ unable to validate against any security context constraint:
   provider "privileged": Forbidden: not usable by user or serviceaccount
 ```
 
-Two different refusals are mixed in there, and telling them apart is the skill:
+Two different refusals are mixed in there, and telling them apart is what saves you time:
 
-- **"Invalid value"** — an SCC you *may* use, refusing what you asked for. Fix the workload.
-- **"not usable by user or serviceaccount"** — an SCC that would have allowed it, which you may
-  not use. Do not go looking for that permission; it is not coming.
+- **"Invalid value"** is an SCC you *may* use, refusing what you asked for. Fix the workload.
+- **"not usable by user or serviceaccount"** is an SCC that would have allowed it and which
+  you may not use. Do not go looking for that permission.
 
-Nothing was created. Like the namespace policies in a later lab, an SCC decides at
-**admission**, so there is no half-started Pod to debug.
+Nothing was created. An SCC decides at **admission**, so there is no half-started Pod to
+debug.
 
 ## Which constraints may you use?
 
-You cannot read the SCCs themselves — they are cluster-scoped, and platform-owned:
+You cannot read the SCCs themselves. They are cluster-scoped and platform-owned:
 
 ```terminal:execute
 command: oc get scc 2>&1 | tail -2 || true
@@ -89,8 +89,8 @@ retries: .INF
 delay: 3
 ```
 
-`restricted-v2` **yes**; `anyuid` and `privileged` **no**. That is the whole tenant story: you
-get the constraint everyone gets, and the escape hatches belong to the platform.
+`restricted-v2` **yes**; `anyuid` and `privileged` **no**. You get the constraint every
+tenant gets, and the permissive ones belong to the platform.
 
 ## What your running container actually got
 
@@ -108,10 +108,10 @@ delay: 3
 
 Two things in that output decide whether an image works here at all:
 
-- **`uid=1001`** — not 0. On {{< param product_short >}} the platform may also assign an
+- **`uid=1001`**, not 0. On {{< param product_short >}} the platform may also assign an
   **arbitrary** UID from the namespace's range instead of the image's own, and your process
   must not care which one it gets.
-- **`gid=0(root)`** — the **root group**, always. This is the one people miss: an OpenShift
+- **`gid=0(root)`**, the **root group**, always. This is the one people miss: an OpenShift
   container runs as an unpredictable user but a predictable *group*.
 
 ## What that means for images you build
@@ -121,7 +121,7 @@ Four rules, and they follow directly from the two lines above:
 1. **Never `USER root`.** Declare a non-root user, and do not assume it is the one you get.
 2. **Make files group-writable** (`chgrp 0` + `chmod g=u`) for anything the app writes.
    Group 0 is the only identity you can rely on.
-3. **Write only where you own** — a mounted volume, or the image's own home. `/data` at the
+3. **Write only where you own**: a mounted volume, or the image's own home. `/data` at the
    root of the filesystem will be root-owned and unwritable.
 4. **Do not bind ports below 1024.** That needs a capability you will not be granted; listen
    on 8080 and let a Service map it.
@@ -137,5 +137,5 @@ here. An image that assumes root runs in exactly one of those places.
 command: oc delete pod rootme --ignore-not-found
 ```
 
-Nothing to delete, in fact — the Pod was never created. Running it anyway is a fair habit:
-after a refusal, check rather than assume.
+There is nothing to delete: the Pod was never created. Running the command anyway is a
+reasonable habit after a refusal.

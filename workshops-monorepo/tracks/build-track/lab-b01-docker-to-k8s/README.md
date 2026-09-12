@@ -9,17 +9,17 @@ The container becomes a **Deployment**. The `ports:` line becomes a **Service**.
 `environment:` block becomes a **ConfigMap**. Each step is applied and checked, so the app
 is genuinely running when you finish.
 
-Then you look at what is left over: four compose lines the platform refuses outright — and
-which control rejects each one.
+Then what is left over: four compose lines the platform refuses, and which control rejects
+each one.
 
 > **💡 Tip:** take this lab first if compose is still your mental model. The rest of the
 > Build & Run track assumes the mapping this lab gives you.
 
 - **Track:** Build & Run
-- **Audience:** Intermediate — developers who run containers with Docker today
+- **Audience:** Intermediate. Developers who run containers with Docker today
 - **Duration:** ~25 min
-- **Format:** Hands-on, guided — split terminal + editor, in your own OpenShift session namespace
-- **Prerequisites:** the Core labs **Deploy Your First App** and **Configure & Troubleshoot Your App**. Nothing is carried over technically — this lab creates everything it needs.
+- **Format:** Hands-on and guided, with a split terminal and editor in your own OpenShift session namespace
+- **Prerequisites:** the Core labs **Deploy Your First App** and **Configure & Troubleshoot Your App**. Nothing is carried over technically: this lab creates everything it needs.
 
 ## By the end of this lab you'll be able to
 
@@ -34,6 +34,6 @@ which control rejects each one.
 2. **Translate** the container into a Deployment, with its image pulled from the DCS registry.
 3. **Translate** the port mapping into a Service, and reach it by cluster DNS.
 4. **Translate** the environment variable into a ConfigMap, and watch the rollout serve it.
-5. **Face** the four lines that do not translate, and why the platform says no.
+5. **Read** the four lines that do not translate, and the refusal each one gets.
 
-The last step is the one that changes how you build: the mapping is the easy half.
+The mapping is the easy half. The last step is the one that changes how you build images.

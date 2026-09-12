@@ -2,8 +2,8 @@
 title: Change It, Build It Again
 ---
 
-An image is a snapshot. The moment the source changes, it is out of date — and the whole
-question is what makes a new one appear.
+An image is a snapshot. The moment the source changes it is out of date, and the question
+is what makes a new one appear.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -43,7 +43,7 @@ Faster this time: the base image is already on the node, and unchanged layers ar
 command: oc get builds
 ```
 
-Two builds now — `hello-built-1` and `hello-built-2`. Each is a permanent record of one run,
+Two builds now, `hello-built-1` and `hello-built-2`. Each is a permanent record of one run,
 and `latest` in the ImageStream has moved to the newer image.
 
 ## The running app has not changed
@@ -60,8 +60,8 @@ retries: .INF
 delay: 3
 ```
 
-Still the old greeting. **A new image does not restart anything.** The Deployment is running
-the image it pulled when its Pod started, and nothing has told it otherwise.
+Still the old greeting. **A new image does not restart anything.** The Deployment is
+running the image it pulled when its Pod started, and nothing has told it to look again.
 
 ## Make the new image roll out
 
@@ -87,15 +87,15 @@ Now it says `Rebuilt, and it shows`.
 
 Doing it by hand is fine once. On a real project, two mechanisms connect the pieces:
 
-- **Build triggers** — a push to the source repository starts a Build. On
+- **Build triggers:** a push to the source repository starts a Build. On
   {{< param product_short >}} that is a webhook from your tenant's GitLab, not from the public
   internet.
-- **Image triggers** — a Deployment can watch an ImageStream tag and roll out when it moves.
+- **Image triggers:** a Deployment can watch an ImageStream tag and roll out when it moves.
   That is what turns "a build finished" into "the new version is live" without anybody typing
   `rollout restart`.
 
 {{< warning >}}
-**⚠️ Watch out:** automatic image triggers are exactly as safe as your build. A pipeline that
-builds and immediately promotes puts an untested image into a running app — which is why the
-**DEV vs PROD Namespaces** lab exists, and why PROD does not accept pushes.
+**⚠️ Watch out:** an automatic image trigger is exactly as safe as the build behind it. A
+pipeline that builds and immediately promotes puts an untested image into a running app. That
+is why PROD does not accept pushes, which the **DEV vs PROD Namespaces** lab covers.
 {{< /warning >}}

@@ -2,14 +2,14 @@
 
 **There is no Docker daemon on this platform, and you do not need one.**
 
-A **BuildConfig** builds your image inside the cluster: it takes your files and a
-`Containerfile`, runs the build in a Pod, and pushes the result to a registry — no privileged
-tooling anywhere near your laptop.
+A **BuildConfig** builds your image inside the cluster. It takes your files and a
+`Containerfile`, runs the build in a Pod, and pushes the result to a registry. No privileged
+tooling runs on your laptop.
 
-You create one, feed it the files from your session, watch the build log stream, then deploy
-the image **you** made, referenced by an **ImageStream tag** rather than a registry URL.
+You create one, feed it the files from your session, follow the build log, then deploy the
+image you made, referenced by an **ImageStream tag** rather than a registry URL.
 
-Then a change and a second build — where you find that a new image does **not** restart
+Then a change and a second build, where you find that a new image does **not** restart
 anything, and meet the triggers that connect "a build finished" to "the new version is live".
 
 > **💡 Tip:** a build is a workload like any other. It queues, it has logs, it can fail, and it
@@ -18,7 +18,7 @@ anything, and meet the triggers that connect "a build finished" to "the new vers
 - **Track:** Build & Run
 - **Audience:** Intermediate
 - **Duration:** ~25 min
-- **Format:** Hands-on, guided — split terminal + editor, in your own OpenShift session namespace
+- **Format:** Hands-on and guided, with a split terminal and editor in your own OpenShift session namespace
 - **Prerequisites:** **From Docker to Kubernetes** (why the Docker workflow does not transfer) and the Core lab **Deploy Your First App**.
 
 ## By the end of this lab you'll be able to
@@ -31,7 +31,7 @@ anything, and meet the triggers that connect "a build finished" to "the new vers
 
 ## What you'll do
 
-1. **Create** a BuildConfig and its ImageStream.
+1. **Create** a BuildConfig and its ImageStream from a manifest.
 2. **Build** from the files in your session, and watch the log.
 3. **Deploy** what you built, and prove the values came from the image.
 4. **Change** the source and build again.

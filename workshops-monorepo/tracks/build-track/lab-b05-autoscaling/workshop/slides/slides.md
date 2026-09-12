@@ -16,7 +16,7 @@ Digital Container Service · DCS Academy
 
 A controller running a loop, not a rule that fires once: it reads per-Pod CPU, averages it, compares it with a target, and writes a new replica count.
 
-The target is a percentage **of the Pod's CPU request** — which is why an app with no request can never autoscale on CPU.
+The target is a percentage **of the Pod's CPU request**, which is why an app with no request can never autoscale on CPU.
 
 - 100m requested, 50% target → **50m per Pod**.
 - Average 90m across 4 Pods → 180% of target → scale out.
@@ -94,6 +94,6 @@ HPA changes **how many** Pods. VPA changes **how big** each one asks to be.
 
 The replica count is no longer yours to babysit, and you know which ceiling stops it.
 
-**Next lab — Services & Cluster Networking:** the Service types, cluster DNS, headless Services, and why DCS hands you a Route for anything that has to be reachable from outside.
+**Next lab, Services & Cluster Networking:** the Service types, cluster DNS, headless Services, and why DCS hands you a Route for anything that has to be reachable from outside.
 
 Digital Container Service · DCS Academy

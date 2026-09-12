@@ -2,7 +2,7 @@
 title: Deploy What You Built
 ---
 
-The image exists. Now run it — and reference it the way the platform prefers.
+The image exists. Now run it, and reference it the way the platform prefers.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -62,8 +62,8 @@ retries: .INF
 delay: 3
 ```
 
-`Built on DCS, by me` — and nobody set that at deploy time. It came from the image, which came
-from your build.
+`Built on DCS, by me`, and nobody set that at deploy time. It came from the image, which
+came from your build.
 
-That is the difference this lab is about: **configuration** is attached when you deploy;
-**what is in the image** is decided when you build.
+That is the distinction to take away. **Configuration** is attached when you deploy. **What
+is in the image** is decided when you build.

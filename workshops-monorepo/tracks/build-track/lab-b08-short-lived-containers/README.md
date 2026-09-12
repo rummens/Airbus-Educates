@@ -19,7 +19,7 @@ crash-looping forever, with every attempt's logs preserved.
 - **Track:** Build & Run
 - **Audience:** Intermediate
 - **Duration:** ~25 min
-- **Format:** Hands-on, guided — split terminal + editor, in your own OpenShift session namespace
+- **Format:** Hands-on and guided, with a split terminal and editor in your own OpenShift session namespace
 - **Prerequisites:** the Core lab **Deploy Your First App**. Helpful: **Health & Resources**.
 
 ## By the end of this lab you'll be able to

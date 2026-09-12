@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # From Docker to Kubernetes
 
-The on-ramp to the Build & Run track. You migrate a real `docker-compose.yml` onto DCS, object by object, and then meet the lines the platform refuses.
+The on-ramp to the Build & Run track. You migrate a real `docker-compose.yml` onto DCS object by object, then read the lines the platform refuses.
 
 **In this lab:** the mapping · container to Deployment · ports to Service · environment to ConfigMap · what does not translate.
 
@@ -14,7 +14,7 @@ Digital Container Service · DCS Academy
 <!-- id: mental-model -->
 ## The mental model
 
-Nothing about Docker is wasted here. The objects do the same jobs under different names — what really changes is *how you describe them*.
+The objects do the same jobs under different names. What changes is *how you describe them*.
 
 - **Imperative** — `docker run` tells the daemon what to do, once.
 - **Declarative** — a Deployment states the end state, and the platform keeps reconciling to it.
@@ -30,7 +30,7 @@ Nothing about Docker is wasted here. The objects do the same jobs under differen
 
 A compose service becomes a **Deployment**: the desired number of Pods, the image to run, and the labels that tie them together.
 
-On DCS the image always comes from the platform's own registry — never `docker.io`.
+On DCS the image always comes from the platform's own registry, never `docker.io`.
 
 ```
 envsubst < deployment.yaml | oc apply -f -
@@ -80,7 +80,7 @@ oc set env deploy/hello-dcs --from=configmap/hello-dcs-config
 <!-- id: rejected -->
 ## What does not translate
 
-Four compose lines never became a manifest, because DCS refuses them. This is the half of the migration that changes how you build.
+Four compose lines never became a manifest, because DCS refuses them. This is the half that changes how you build images.
 
 - `image: docker.io/...:latest` — air-gapped platform, Harbor only, and no floating tags.
 - `user: root` — the restricted SCC forbids UID 0 and assigns an arbitrary UID.
@@ -114,6 +114,6 @@ oc auth can-i use scc/anyuid          # no  — "not usable by user or serviceac
 
 You migrated an image somebody else built. Three compose lines became a Deployment, a Service and a ConfigMap; four lines met a platform control.
 
-**Next lab — Build Your Image on DCS:** point a **BuildConfig** at a git repository, let the platform build *your* code into an image, and push it to the registry. No Docker daemon anywhere.
+**Next lab, Build Your Image on DCS:** point a **BuildConfig** at your own files, let the platform build them into an image, and push it to the registry. No Docker daemon anywhere.
 
 Digital Container Service · DCS Academy

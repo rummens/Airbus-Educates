@@ -2,7 +2,7 @@
 title: Scale In, and Ceilings
 ---
 
-Scaling out is the easy half. What an HPA does *next* is where the design decisions are.
+Scaling out is the easy half. What an HPA does next is where the decisions are.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -13,15 +13,15 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/sc
 
 ## Scale-in is deliberately slow
 
-The load has stopped, so CPU has dropped — but the replica count stays up for a while.
+The load has stopped and CPU has dropped, but the replica count stays up for a while.
 
-That is not a bug. The HPA applies a **stabilisation window** of **5 minutes by default**
-before scaling in, and it uses the *highest* recommendation from that window.
+The HPA applies a **stabilisation window** of **5 minutes by default** before scaling in, and
+it uses the *highest* recommendation from that window.
 
-The asymmetry is on purpose:
+The asymmetry is deliberate:
 
-- **Scaling out late** costs you latency during a spike.
-- **Scaling in early** costs you a thrashing app — replicas removed and immediately needed
+- **Scaling out late** costs latency during a spike.
+- **Scaling in early** costs you a thrashing app: replicas removed and immediately needed
   again, with every removal interrupting in-flight requests.
 
 So the controller is quick to add and slow to remove.
@@ -64,18 +64,18 @@ that genuinely tolerates it.
 
 ## The real ceiling is your budget
 
-`maxReplicas: 6` is the ceiling you *chose*. The namespace budget is the ceiling you were
-**given** — and it wins.
+`maxReplicas: 6` is the ceiling you chose. The namespace budget is the ceiling you were
+**given**, and it wins.
 
 Each replica of this app has a **200m CPU / 128Mi** limit, and a `medium` namespace allows
 **2 CPU / 2Gi** on the limit side:
 
-- 6 replicas × 200m = **1.2 CPU** — comfortably inside the budget.
-- The same HPA with `maxReplicas: 20` would ask for 4 CPU, and the Pods past the budget
-  would be **refused at admission**, exactly as in the **Health & Resources** lab.
+- 6 replicas × 200m = **1.2 CPU**, inside the budget.
+- The same HPA with `maxReplicas: 20` would ask for 4 CPU, and the Pods past the budget would
+  be **refused at admission**, exactly as in the **Health & Resources** lab.
 
-The HPA would then report a `ScalingLimited` condition and stall — scaling it wanted, Pods it
-could not get.
+The HPA would then report a `ScalingLimited` condition and stall: it wants replicas it cannot
+get.
 
 ```terminal:execute
 command: oc describe quota
@@ -89,6 +89,6 @@ retries: 3
 delay: 2
 ```
 
-**Set `maxReplicas` from the budget you actually have**, not from the load you imagine. An
-autoscaler that cannot get Pods is worse than an honest replica count, because it looks like
-it is working.
+**Set `maxReplicas` from the budget you have**, not from the load you imagine. An
+autoscaler that cannot get Pods still looks like it is working, which makes it harder to
+diagnose than a fixed replica count.

@@ -6,8 +6,7 @@ Scaling a [**Deployment**](https://kubernetes.io/docs/concepts/workloads/control
 means asking {{< param product_short >}} to keep several identical copies running instead of
 one.
 
-"Several" is not free. Every copy draws on the same **namespace budget**, and that budget is
-finite.
+Each copy draws on the same **namespace budget**, and that budget is finite.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -70,7 +69,7 @@ command: oc get deployment,pods -l app=hello-dcs
 ```
 
 Four Pods, `4/4` READY. {{< param product_short >}} created three more copies from the same
-template, each scheduled and health-tracked on its own.
+template, and each is scheduled and health-tracked on its own.
 
 ## What that costs
 
@@ -78,9 +77,9 @@ None of these Pods states its own resource needs, so each one takes your namespa
 [**LimitRange**](https://kubernetes.io/docs/concepts/policy/limit-range/) defaults for a
 `medium` budget:
 
-- a **request** of 128Mi memory / 50m CPU — what the Pod is guaranteed, and what the
+- a **request** of 128Mi memory / 50m CPU, which is what the Pod is guaranteed and what the
   scheduler counts;
-- a **limit** of 512Mi memory / 500m CPU — the ceiling it may not cross.
+- a **limit** of 512Mi memory / 500m CPU, which is the ceiling it may not cross.
 
 Four Pods at that default limit is **exactly** the whole `medium` budget:
 
@@ -107,5 +106,5 @@ The table shows **Used** against **Hard** per resource. Two things to notice:
 - **`requests.memory` and `requests.cpu`** are nowhere near full, because the default
   *request* is much smaller than the default *limit*.
 
-Nothing is broken — Used equals Hard, not more. But there is now **zero headroom on
-limits**. The next page asks for more than that, on purpose.
+Nothing is broken: Used equals Hard, not more. But there is **no headroom left on limits**.
+The next page asks for more than that on purpose.

@@ -13,7 +13,8 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
 
 ## What You Did
 
-1. **Created** a BuildConfig and its ImageStream with one `oc new-build`.
+1. **Created** an ImageStream and a BuildConfig from a manifest, with the Containerfile
+   path stated explicitly.
 2. **Ran** a build from the files in your session, and watched the log: upload, steps, push.
 3. **Deployed** the result by its **ImageStream tag**, and proved the values were baked in.
 4. **Changed** the source, built again, and found the running app **unchanged**.
@@ -24,15 +25,15 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
 1. What is the difference between a BuildConfig and a Build?
 
 {{< note >}}
-**❓ Answer:** the **BuildConfig** is the recipe — input, strategy, output — and you create it
-once. A **Build** is one run of it, with its own Pod, log and status, kept afterwards as the
-record. Every rebuild is a new Build.
+**❓ Answer:** the **BuildConfig** is the recipe, meaning input, strategy and output, and you
+create it once. A **Build** is one run of it, with its own Pod, log and status, kept
+afterwards as the record. Every rebuild is a new Build.
 {{< /note >}}
 
 2. Your build finished successfully and the app still behaves the old way. What happened?
 
 {{< note >}}
-**❓ Answer:** nothing told the Deployment. A new image does not restart anything — the Pod
+**❓ Answer:** nothing told the Deployment. A new image does not restart anything: the Pod
 keeps the image it started with until a rollout replaces it, by hand or through an image
 trigger.
 {{< /note >}}
@@ -48,13 +49,13 @@ at its first instruction.
 4. Your build pushed to your DEV Harbor project. How does that image reach PROD?
 
 {{< note >}}
-**❓ Answer:** not by pushing — a PROD project accepts none. Either it is **mirrored** from the
-DEV project as a promotion, requested through ITSM, or you use an already-cleared image from
-the **green catalog**. And PROD pulls only images below the CVE threshold.
+**❓ Answer:** not by pushing, because a PROD project accepts none. Either it is **mirrored**
+from the DEV project as a promotion, requested through ITSM, or you use an already-cleared
+image from the **green catalog**. PROD also pulls only images below the CVE threshold.
 {{< /note >}}
 
 ## Next Steps
 
-You have an image and a registry to put it in. **Harbor: Projects, Push & Scan** is where the
-registry stops being a URL: catalogs, the project your namespace gets, what a scan reports, and
-the gate that decides what PROD will run.
+You have an image and a registry to put it in. **Harbor: Projects, Push & Scan** covers the
+registry itself: the catalogs, the project your namespace gets and how it is requested, what a
+scan reports, and the gate that decides what PROD will run.

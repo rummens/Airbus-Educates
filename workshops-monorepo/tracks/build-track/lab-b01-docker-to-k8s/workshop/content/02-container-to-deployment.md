@@ -23,13 +23,13 @@ file: ~/exercises/deployment.yaml
 
 The shape is familiar: `replicas: 1`, a `selector`, and a Pod `template` whose labels match it.
 
-One field is deliberately unfinished — `image:` still reads `REPLACE_WITH_HARBOR_IMAGE`.
+One field is deliberately unfinished: `image:` still reads `REPLACE_WITH_HARBOR_IMAGE`.
 
 {{< note >}}
 **📌 Note:** {{< param product_short >}} is air-gapped, so every image comes from the
 platform's own [Harbor]({{< param dcs_docs_base_url >}}/services/container-registry)
-registry (`{{< param dcs_registry >}}`) — never from `docker.io` like the compose file.
-Page 05 covers exactly why.
+registry (`{{< param dcs_registry >}}`), never from `docker.io` as the compose file does.
+Page 05 covers why.
 {{< /note >}}
 
 ## Fill in the image
@@ -51,8 +51,8 @@ replacement: "${DCS_REGISTRY}/samples/hello-dcs:1.0"
 
 ## Apply it
 
-The manifest now holds a literal `${DCS_REGISTRY}` — a **shell variable**, not a Kubernetes
-feature. `oc apply` does not expand it, so it has to be substituted first.
+The manifest now holds a literal `${DCS_REGISTRY}`. That is a **shell variable**, not a
+Kubernetes feature, and `oc apply` does not expand it, so it has to be substituted first.
 
 `envsubst` does that: it replaces every `${VAR}` in its input with the value from your
 environment, then the `|` pipe hands the finished manifest to `oc apply -f -` (the `-` means
@@ -71,9 +71,9 @@ delay: 2
 ```
 
 {{< warning >}}
-**⚠️ Watch out:** any manifest carrying `${DCS_REGISTRY}` is applied this way — through
-`envsubst` first, never with a plain `oc apply -f`. You will repeat this pattern for the
-rest of the track.
+**⚠️ Watch out:** any manifest carrying `${DCS_REGISTRY}` is applied this way, through
+`envsubst` first, never with a plain `oc apply -f`. The pattern repeats for the rest of the
+track.
 {{< /warning >}}
 
 ## See it running
@@ -87,8 +87,8 @@ command shows the Deployment and its Pod together.
 
 Two things to read in the output:
 
-- **READY 1/1** on the Deployment — the desired replica exists and passed its checks.
-- **Running** on the Pod — the container started.
+- **READY 1/1** on the Deployment: the replica you asked for exists and passed its checks.
+- **Running** on the Pod: the container started.
 
 ```examiner:execute-test
 name: verify-deployment-ready
@@ -103,5 +103,5 @@ delay: 2
 `ContainerCreating` for a few seconds. The check keeps retrying.
 {{< /note >}}
 
-Same result as `docker compose up`, declared in a document instead of run from a command
-line. Next: the port mapping.
+That is the same app `docker compose up` would have started, declared in a file instead of
+typed at a prompt. Next, the port mapping.

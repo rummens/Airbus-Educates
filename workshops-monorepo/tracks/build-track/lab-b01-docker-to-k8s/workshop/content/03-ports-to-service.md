@@ -18,8 +18,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/se
 
 {{< note >}}
 **📌 Why not just use the Pod's IP?** Pods are **replaced** on every rollout and get a new
-IP each time. A Service's name and address stay constant while the Pods behind it come and
-go.
+IP each time. A Service keeps one name and one address while the Pods behind it come and go.
 {{< /note >}}
 
 ## Open the Service manifest
@@ -28,7 +27,7 @@ go.
 file: ~/exercises/service.yaml
 ```
 
-Note `selector: app: hello-dcs` — the same label the Deployment stamps onto its Pods. That
+Note `selector: app: hello-dcs`, the same label the Deployment stamps onto its Pods. That
 is how the Service finds them.
 
 There is no image reference in this file, so no `envsubst` this time.
@@ -60,10 +59,10 @@ command: curl -s -o /dev/null -w 'HTTP %{http_code}\n' "http://hello-dcs.$(oc pr
 
 Each part of that command does one thing:
 
-- **`-s`** — no progress bar.
-- **`-o /dev/null`** — throw the page body away.
-- **`-w 'HTTP %{http_code}\n'`** — print just the status code.
-- **`$(oc project -q)`** — substitute your own namespace name.
+- **`-s`** turns off the progress bar.
+- **`-o /dev/null`** throws the page body away.
+- **`-w 'HTTP %{http_code}\n'`** prints just the status code.
+- **`$(oc project -q)`** substitutes your own namespace name.
 
 ```examiner:execute-test
 name: verify-service-dns
@@ -73,7 +72,8 @@ retries: .INF
 delay: 2
 ```
 
-`HTTP 200` from a name that survives Pod restarts — the compose `ports:` line, translated.
+`HTTP 200`, from a name that outlives the Pods behind it. That is the compose `ports:`
+line, translated.
 
 Nothing is exposed outside the cluster yet. That is a Route, which the Core **Expose Your
 App** lab covers, and which the **Services & Cluster Networking** lab later in this track

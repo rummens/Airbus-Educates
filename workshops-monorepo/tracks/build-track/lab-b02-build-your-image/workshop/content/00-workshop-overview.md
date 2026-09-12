@@ -4,9 +4,9 @@ title: "Build Your Image on DCS"
 
 Every lab so far ran an image somebody else built. This one builds yours.
 
-There is **no Docker daemon** on **{{< param product_name >}}** — not on the cluster, and not
-in this session. Building a container image the usual way needs privileged access to a host,
-which is precisely what a shared platform will not give you.
+There is **no Docker daemon** on **{{< param product_name >}}**, on the cluster or in this
+session. Building an image the usual way needs privileged access to a host, and a shared
+platform does not hand that out.
 
 So the platform builds it **for** you, inside the cluster, from a
 [**BuildConfig**]({{< param dcs_docs_base_url >}}/services/namespace_aas/concepts/buildconfig-and-imagestreams/).
@@ -29,13 +29,13 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- **From Docker to Kubernetes** — you know why the Docker workflow does not transfer, and what
-  the restricted SCC means for an image.
+- **From Docker to Kubernetes**, so you know why the Docker workflow does not transfer and
+  what the restricted SCC means for an image.
 - The Core lab **Deploy Your First App**.
 
 {{< note >}}
 **📌 Note:** your session is entitled to create builds in **your own namespace**. That is a
-grant, like every other permission on this platform — a namespace without it cannot build.
+grant like every other permission on this platform, and a namespace without it cannot build.
 {{< /note >}}
 
 ## Your Environment
@@ -43,8 +43,7 @@ grant, like every other permission on this platform — a namespace without it c
 A browser-based session with a split **terminal** and an **editor**. All commands run with `oc`.
 
 The build's output goes to the **cluster's own registry**. On {{< param product_short >}} it
-goes to your tenant's Harbor project instead — the last page covers what changes and what does
-not.
+goes to your tenant's Harbor project instead, and the last page covers what changes with it.
 
 ## Time and Difficulty
 
@@ -54,4 +53,4 @@ not.
 ## Further Reading
 
 - [Understanding BuildConfigs]({{< param dcs_docs_base_url >}}/services/namespace_aas/concepts/buildconfig-and-imagestreams/) — the object, its strategies and its triggers.
-- [Managing image streams]({{< param dcs_docs_base_url >}}/services/namespace_aas/concepts/buildconfig-and-imagestreams/) — what an ImageStream tracks, and why you reference it rather than a URL.
+- [Managing image streams]({{< param dcs_docs_base_url >}}/services/namespace_aas/concepts/buildconfig-and-imagestreams/) — what an ImageStream tracks, and why you reference it instead of a URL.

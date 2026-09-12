@@ -17,9 +17,9 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/qu
 
 ## Apply the oversized version
 
-`deployment-oversized.yaml` is the same app and the same four replicas, but with explicit
-`requests` and `limits` of **700m CPU / 700Mi memory** per container — far above the default,
-and more than the namespace has left.
+`deployment-oversized.yaml` is the same app and the same four replicas, with explicit
+`requests` and `limits` of **700m CPU / 700Mi memory** per container. That is well above the
+default, and more than the namespace has left.
 
 ```editor:open-file
 file: ~/exercises/deployment-oversized.yaml
@@ -49,7 +49,7 @@ Look at the Pods:
 command: oc get pods -l app=hello-dcs
 ```
 
-Your original Pods are still `Running`, and the rollout is not progressing. Nothing crashed:
+Your original Pods are still `Running` and the rollout is not progressing. Nothing crashed:
 the new Pods were **never scheduled at all**.
 
 ## Read why
@@ -72,8 +72,9 @@ limits.cpu=2,limits.memory=2Gi, limited: limits.cpu=2,limits.memory=2Gi
 Read it left to right:
 
 1. it **requested** 700m / 700Mi for one more Pod;
-2. it was already at its **limited** ceiling (2 CPU / 2Gi, from the last page);
-3. so the create was **refused** — before any node was chosen, before any image was pulled.
+2. the namespace was already at its **limited** ceiling of 2 CPU / 2Gi, from the last page;
+3. so the create was **refused**, before any node was chosen and before any image was
+   pulled.
 
 ```examiner:execute-test
 name: verify-quota-event-visible
@@ -88,7 +89,7 @@ delay: 2
 matters.
 {{< /note >}}
 
-This is the [**ResourceQuota**](https://kubernetes.io/docs/concepts/policy/resource-quotas/)
-doing its job — admission control refusing a request the namespace cannot back.
+That is the [**ResourceQuota**](https://kubernetes.io/docs/concepts/policy/resource-quotas/)
+working as intended: admission control refusing a request the namespace cannot back.
 
-The fix is not a bigger namespace. It is a better-sized Pod.
+The fix is a better-sized Pod, not a bigger namespace.

@@ -2,10 +2,9 @@
 title: Liveness and Readiness
 ---
 
-A right-sized Pod that never tells the platform whether it is working is still a gamble.
-
-Without probes, {{< param product_short >}} will happily send traffic to a hung container, or
-leave a slow-starting one out of rotation forever.
+A correctly sized Pod that never tells the platform whether it is working is still a
+gamble. Without probes, {{< param product_short >}} will send traffic to a hung container, or
+leave a slow-starting one out of rotation.
 
 **Probes** are how a Pod answers two different questions the platform keeps asking.
 
@@ -20,12 +19,12 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/pr
 
 ![A readinessProbe on GET / gates whether Service endpoints send traffic to the Pod; a livenessProbe on GET /healthz tells the kubelet whether to kill and restart the container](probe-flow.svg)
 
-- **Readiness — "can you take traffic right now?"** Fail it and the Pod is pulled out of the
-  Service's **endpoints**. No traffic reaches it, and the container is left alone. Pass again
-  and traffic resumes. Nothing restarts.
-- **Liveness — "are you still alive in there?"** Fail it repeatedly and the **kubelet** kills
-  the container and starts a fresh one in the same Pod. This is for a container that is
-  running but permanently stuck, which readiness alone can never fix.
+- **Readiness asks "can you take traffic right now?"** Fail it and the Pod is pulled out of
+  the Service's **endpoints**. No traffic reaches it, and the container is left alone. Pass
+  again and traffic resumes. Nothing restarts.
+- **Liveness asks "are you still alive in there?"** Fail it repeatedly and the **kubelet**
+  kills the container and starts a fresh one in the same Pod. That is for a container which
+  is running but permanently stuck, which readiness alone cannot fix.
 
 {{< note >}}
 **📌 Note:** there is a third kind, a [startup probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-startup-probes),
@@ -35,7 +34,7 @@ so a slow start is not mistaken for a hang.
 
 ## Read the probes you already applied
 
-`deployment-probes.yaml` — the file from the last page — carries both: readiness on `/`, and
+`deployment-probes.yaml`, the file from the last page, carries both: readiness on `/`, and
 liveness on the app's dedicated `/healthz`.
 
 ```terminal:execute
@@ -55,8 +54,8 @@ delay: 2
 
 ## Ready means "in the endpoints"
 
-A Pod that passes readiness is added to its Service's endpoint list — the addresses traffic
-is actually sent to:
+A Pod that passes readiness is added to its Service's endpoint list, which is the set of
+addresses traffic is actually sent to:
 
 ```terminal:execute
 command: oc get endpoints hello-dcs
@@ -117,11 +116,10 @@ retries: .INF
 delay: 3
 ```
 
-One address short. The broken Pod is **quarantined** while the others keep serving without
-interruption.
+One address short. The broken Pod is held out of rotation while the others keep serving.
 
-That is the whole point of readiness: an unhealthy replica is taken out of rotation, not
-paraded in front of users.
+That is what readiness is for: an unhealthy replica stops receiving traffic without anything
+being restarted.
 
 ## Restore it
 
@@ -139,7 +137,6 @@ delay: 2
 
 All four addresses are back.
 
-The liveness probe never came into play here: the container was always running and
-answering, just not on the path readiness was pointed at. Liveness only acts when the
-container itself stops answering **anything** — and it recovers by restarting, not by routing
-around.
+The liveness probe never came into play. The container was running and answering the whole
+time, just not on the path readiness was pointed at. Liveness only acts when the container
+stops answering **anything**, and it recovers by restarting rather than by routing around.

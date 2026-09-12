@@ -2,8 +2,8 @@
 title: Ask for a Project
 ---
 
-A Harbor project is not something you click into existence. On {{< param product_short >}} you
-declare it as a Kubernetes object and the platform builds it.
+A Harbor project is not something you click into existence. On {{< param product_short >}}
+you declare it as a Kubernetes object, and the platform builds it.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -73,9 +73,8 @@ into it. Here the cluster's own registry stands in for the destination.
 
 ## When you no longer need it
 
-Delete the object and the provider deletes the project, with the images in it. That is the part
-people find uncomfortable about declarative infrastructure, and it is also the point: the
-manifest is the truth, and Harbor follows it.
+Delete the object and the provider deletes the project, with the images in it. The manifest
+is the source of truth, and Harbor is kept to match it.
 
 A scratch project like this one is for experiments. Your namespace's real project is created
 with the namespace, and you will find it already there.

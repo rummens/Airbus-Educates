@@ -21,7 +21,7 @@ and the disk is deliberately **kept**.
 - **Track:** Build & Run
 - **Audience:** Intermediate
 - **Duration:** ~25 min
-- **Format:** Hands-on, guided — split terminal + editor, in your own OpenShift session namespace
+- **Format:** Hands-on and guided, with a split terminal and editor in your own OpenShift session namespace
 - **Prerequisites:** Core **Store Data** (you have mounted a PVC once) and **Services & Cluster Networking** (a StatefulSet needs a headless Service).
 
 ## By the end of this lab you'll be able to

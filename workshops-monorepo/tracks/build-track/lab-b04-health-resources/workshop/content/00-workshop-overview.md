@@ -4,11 +4,11 @@ title: "Health & Resources"
 
 An app running as **one replica**, with no probes and no resource numbers, is a demo.
 
-It has no redundancy, it cannot tell the platform whether it is actually working, and it
-quietly draws whatever default share of the namespace budget it is given.
+It has no redundancy, it cannot tell the platform whether it is working, and it draws
+whatever default share of the namespace budget it is given.
 
-This lab fixes all three on **{{< param product_name >}}**, in the order the problems
-actually bite: scale it, hit the budget, right-size it, then make it prove its own health.
+This lab fixes all three on **{{< param product_name >}}**, in the order the problems bite:
+scale it, hit the budget, size it properly, then make it prove its own health.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the
@@ -28,12 +28,12 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- The Core labs **Deploy Your First App** and **Configure & Troubleshoot Your App** — you
-  know `oc scale`, the Deployment → ReplicaSet → Pod chain, and how to read
-  `oc describe` / `oc get events` when something goes wrong.
+- The Core labs **Deploy Your First App** and **Configure & Troubleshoot Your App**, so you
+  know `oc scale`, the Deployment → ReplicaSet → Pod chain, and how to read `oc describe` and
+  `oc get events` when something goes wrong.
 
-This lab does not re-teach that mechanics. It puts it under a **real budget**, which is
-where those numbers start to matter.
+This lab does not re-teach those mechanics. It puts them under a **real budget**, which is
+where the numbers start to matter.
 
 {{< note >}}
 **📌 Note:** nothing is carried over from another lab. You deploy the app here, in your own
@@ -45,8 +45,8 @@ namespace.
 A browser-based session with a split **terminal** and an **editor**, pointed at your own
 namespace. All commands run with `oc`.
 
-Your namespace carries a **`medium`** resource budget — deliberately sized so you can hit
-it on purpose before you learn to fit inside it.
+Your namespace carries a **`medium`** resource budget, sized so that you can reach it on
+purpose before you fit inside it.
 
 ## Time and Difficulty
 
