@@ -21,12 +21,12 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/wh
 3. **`oc logs`** reads that file, through the API.
 4. A **collector** also reads it, and ships it to the platform's log store.
 
-Two consequences follow, and they explain nearly every surprise people have with logs:
+Two consequences follow, and they explain most log surprises:
 
 - **`oc logs` is reading a file on a node.** That file is rotated when it gets big, and it
   disappears with the Pod.
-- **Nothing is parsing your lines** on the way. Whatever structure your logs have is the
-  structure you gave them.
+- **Nothing parses your lines** on the way. Whatever structure your logs have is the structure
+  you gave them.
 
 {{< note >}}
 **💡 Tip:** do not write logs to a file inside the container. Nothing collects it, it fills
@@ -57,5 +57,5 @@ command: |-
   echo "sent 20 requests"
 ```
 
-If that could not reach the app yet, it does not matter — the app logs its own startup either
-way, which is enough for the next page.
+If that could not reach the app yet, it does not matter. The app logs its own startup
+either way, which is enough for the next page.

@@ -28,7 +28,7 @@ An operator is a **controller** watching for objects of a kind it understands, m
 <!-- id: crds -->
 ## CRDs and CRs
 
-A **CustomResourceDefinition** teaches the cluster a new **kind**. A **Custom Resource** is one object of that kind — your instance.
+A **CustomResourceDefinition** teaches the cluster a new **kind**. A **Custom Resource** is one object of that kind, which is your instance.
 
 ```
 oc get crds | grep postgresql

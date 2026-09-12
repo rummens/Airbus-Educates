@@ -2,12 +2,12 @@
 title: "Operators on DCS"
 ---
 
-Welcome to this workshop, part of **{{< param product_name >}}**. Every earlier lab had
-you own a resource end to end — you wrote the Deployment, you own its lifecycle. This lab
-introduces a different shape: an **Operator**, installed once by the platform, that watches
-a **Custom Resource** you create and manages a whole application on your behalf. It's the
-Developer track's capstone, and your on-ramp to {{< param product_short >}}'s dedicated
-Operators track.
+Every earlier lab had you own a resource end to end: you wrote the Deployment, and you own
+its lifecycle.
+
+This lab is a different shape. An **Operator** is installed once by the platform, watches a
+**Custom Resource** you create, and manages a whole application from it. That is how every
+platform service on **{{< param product_name >}}** is offered.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the
@@ -15,7 +15,7 @@ Operators track.
 for the terminal, editor and clickable actions.
 {{< /note >}}
 
-## What You'll Learn
+## What You will Learn
 
 By the end of this workshop you will be able to:
 
@@ -30,16 +30,15 @@ By the end of this workshop you will be able to:
 This workshop assumes familiarity with:
 
 - Deployments, labels and selectors, and the declarative apply/inspect loop (Core track).
-- Basic [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) and how a ServiceAccount's permissions scope what runs in your namespace (**RBAC, Tenancy & Namespaces**, the **RBAC, Tenancy & Namespaces** lab) — an operator-managed instance runs with permissions in *your* namespace.
-- Comfortable reading YAML and `oc get`/`oc describe` output; no prior exposure to Operators or CRDs is assumed.
+- Basic [RBAC](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) and how a ServiceAccount's permissions scope what runs in your namespace (**RBAC & Tenancy**), because an operator-managed instance runs with permissions in *your* namespace.
+- Reading YAML and `oc get` / `oc describe` output. No prior exposure to Operators or CRDs is assumed.
 
 ## Your Environment
 
-A browser-based session with a split **terminal**, an **editor**, and a **console** view,
-all scoped to your own OpenShift namespace — the same namespace model as every earlier
-lab, no cluster-admin required. The CloudNativePG operator this lab uses is already
-installed cluster-wide by the platform; you only create and inspect an *instance* of it.
-Commands run with `oc`.
+A browser-based session with a split **terminal** and an **editor**, scoped to your own
+namespace. No cluster-admin is required. The CloudNativePG operator this lab uses is already
+installed cluster-wide by the platform, and you create and inspect an *instance* of it. All
+commands run with `oc`.
 
 ## Time and Difficulty
 

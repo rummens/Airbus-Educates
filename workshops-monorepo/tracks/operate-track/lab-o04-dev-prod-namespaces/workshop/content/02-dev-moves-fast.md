@@ -17,7 +17,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/de
 file: ~/exercises/hello-dcs-unsized.yaml
 ```
 
-No `resources` block at all. No requests, no limits — the app will take the namespace
+No `resources` block at all: no requests and no limits, so the app takes the namespace
 LimitRange defaults.
 
 ```terminal:execute
@@ -32,8 +32,7 @@ retries: .INF
 delay: 3
 ```
 
-Accepted without comment. That is DEV doing its job: you are iterating, and the platform is
-staying out of your way.
+Accepted without comment. You are iterating, and the platform stays out of the way.
 
 ## Put a Service in front of it
 
@@ -82,11 +81,10 @@ failure. The rejection is the point.
 
 ## Why DEV cannot publish
 
-A Route puts your app on the platform's **external** edge — a real hostname, reachable by real
-people, fronted by the controlled load balancer the **Services & Cluster Networking** lab
-described.
+A Route puts your app on the platform's **external** edge: a real hostname, reachable by real
+people, behind the controlled load balancer from **Services & Cluster Networking**.
 
-That is a production act. Giving it to a namespace whose whole purpose is unfinished work
-would mean half-built things quietly becoming reachable.
+Allowing that in a namespace whose purpose is unfinished work would mean half-built things
+becoming reachable without anyone deciding so.
 
-So: iterate in DEV, publish from PROD. Next page.
+Iterate in DEV, publish from PROD.

@@ -16,7 +16,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/in
 {{< note >}}
 **📌 Two different terminals, do not mix them up.** Every other page in this course
 used the **Educates terminal** (the one in this dashboard). From here on, "the
-terminal" means the **workspace terminal** — a separate shell running *inside*
+terminal" means the **workspace terminal**, a separate shell running *inside*
 the Dev Spaces workspace Pod, with its own working directory (the cloned
 `hello-dcs` repo). Commands typed there never touch this session's terminal, and
 vice versa.
@@ -26,10 +26,10 @@ vice versa.
 
 Inside the workspace, three things happen in sequence:
 
-![Edit, run, and reach the change — all inside the workspace](edit-run-reach.svg)
+![Edit, run, and reach the change, all inside the workspace](edit-run-reach.svg)
 
 1. **Edit.** Open `server.py` in the workspace's own editor and change the
-   `GREETING` default — the same string **Deploy Your First App** taught you to change with
+   `GREETING` default, the same string **Deploy Your First App** taught you to change with
    `oc set env`, except here you are editing the *source*, not an environment
    variable on a running Deployment.
 2. **Run.** Trigger the `run-hello-dcs` command from page 02's devfile — one
@@ -37,7 +37,7 @@ Inside the workspace, three things happen in sequence:
    starts on port 8080, **inside the workspace container**, using the exact
    `commandLine` the devfile declared.
 3. **Reach it.** Dev Spaces exposes the devfile's `endpoints` entry (`targetPort:
-   8080`) as a workspace preview URL — click it, and your edited greeting is
+   8080`) as a workspace preview URL, click it, and your edited greeting is
    staring back at you, served from a process running inside your namespace.
 
 ## Three ways to get a code change running
@@ -58,11 +58,11 @@ page draws the boundary explicitly.
 ## Check your understanding
 
 Why does editing `GREETING` in the workspace show up immediately when you run the
-app — with no image build step, unlike **Build Your Image on DCS**?
+app, with no image build step, unlike **Build Your Image on DCS**?
 
 {{< note >}}
 **❓ Answer:** Because the workspace runs the source directly (`python3 server.py`)
-from the cloned project on disk — there is no image to build. **Build Your Image on DCS**'s BuildConfig
+from the cloned project on disk, there is no image to build. **Build Your Image on DCS**'s BuildConfig
 exists precisely because a *deployed* Pod runs from a built image, not live
 source; Dev Spaces trades that production-shaped path for the fastest possible
 feedback loop while you are actively writing code.

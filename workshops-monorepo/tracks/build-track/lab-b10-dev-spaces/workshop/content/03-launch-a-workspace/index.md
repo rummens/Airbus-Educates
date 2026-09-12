@@ -35,14 +35,14 @@ type in this course:
 command: oc get checluster -A
 ```
 
-`-A` means **all namespaces** — the first time this course has needed it. Dev
+`-A` means **all namespaces**, the first time this course has needed it. Dev
 Spaces is a cluster-wide platform service, not something scoped to your own
 namespace, so a plain (namespace-scoped) `oc get` would not find it even if it
 exists.
 
 You will see one of two things: a `CheCluster` object (Dev Spaces is live on this
 cluster), or an error that the resource type does not exist (it is not provisioned
-here yet). Both are a valid, honest answer to "is Dev Spaces here?" — the check
+here yet). Both are a valid, honest answer to "is Dev Spaces here?", the check
 below passes either way, because *knowing how to check* is the point, not a
 specific cluster's provisioning state. If a `CheCluster` exists, you can also
 find it visually in the **Console** tab's search, the same way you'd look up any
@@ -52,21 +52,21 @@ other resource type.
 ## From devfile to running workspace
 
 Creating a workspace from `devfile.yaml` is a single action in the Dev Spaces
-dashboard — point it at the devfile (by URL, or by pasting its contents) and click
+dashboard, point it at the devfile (by URL, or by pasting its contents) and click
 **Create Workspace**. Four things happen, in order:
 
 ![The four stages from devfile to a running workspace](workspace-launch-flow.svg)
 
 1. **You submit the devfile.** Dev Spaces reads its `components`, `projects`, and
-   `commands` — exactly what you highlighted on the previous page.
+   `commands`, exactly what you highlighted on the previous page.
 2. **The Che Operator provisions the workspace.** It creates a Pod in your
    namespace running the `dev` container from `${DCS_REGISTRY}/devspaces/udi:latest`,
    and mounts a shared volume for the source.
 3. **The project is cloned.** The `hello-dcs` source from `projects.git.remotes.origin`
-   lands on that shared volume — the same source you will edit on the next page.
+   lands on that shared volume, the same source you will edit on the next page.
 4. **The workspace reaches `Running`**, and the browser IDE opens: a full editor,
    an integrated terminal *inside the workspace container*, and the `run-hello-dcs`
-   command available as a one-click action — all backed by the Pod from step 2.
+   command available as a one-click action, all backed by the Pod from step 2.
 
 {{< note >}}
 **📌 A live workspace's Pod is a completely ordinary Pod** — on a cluster where Dev
@@ -89,4 +89,4 @@ until the project is cloned onto its shared volume.
 {{< /note >}}
 
 With a workspace conceptually running, the next page is where the payoff is: making
-a change and running it — inside the cluster, not on your laptop.
+a change and running it, inside the cluster, not on your laptop.

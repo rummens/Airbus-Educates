@@ -5,15 +5,14 @@
 You practise reading logs with intent: by workload rather than Pod name, across every replica,
 bounded by time, and live.
 
-Then the flag that pays for the whole lab — `--previous`, which reaches the output of a
-container that has **already crashed and been replaced**. That is where a crash explains
-itself.
+Then `--previous`, which reaches the output of a container that has **already crashed and
+been replaced**. That is where a crash explains itself.
 
 Then the limit: you delete the workload and watch its logs become unreachable. `oc logs` can
 only speak for containers that still exist.
 
-The last page is the fix — the collector, the log store, LogQL, retention, and the rule about
-secrets that matters far more once every line is centrally kept.
+The last page covers what fills that gap: the collector, the log store, LogQL, retention, and
+the rule about secrets, which matters more once every line is centrally kept.
 
 > **💡 Tip:** reaching for `--previous` first is the difference between a two-minute diagnosis
 > and twenty minutes of guessing.

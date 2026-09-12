@@ -2,8 +2,8 @@
 title: Reading Logs With Intent
 ---
 
-`oc logs <pod>` prints everything a container has said since it started. On a busy app that is
-useless. The flags are the lab.
+`oc logs <pod>` prints everything a container has said since it started, which on a busy app
+is unreadable. The flags are what make it useful.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -28,12 +28,12 @@ retries: .INF
 delay: 3
 ```
 
-- **`deploy/hello-dcs`** — `oc` picks a Pod from the Deployment for you.
-- **`--tail=20`** — the last 20 lines instead of everything.
+- **`deploy/hello-dcs`** lets `oc` pick a Pod from the Deployment for you.
+- **`--tail=20`** returns the last 20 lines instead of everything.
 
 {{< warning >}}
 **⚠️ Watch out:** `deploy/…` reads **one** Pod, not all of them. With two replicas you are
-seeing half the story — which is exactly why the label selector below exists.
+seeing half the story, which is what the label selector below fixes.
 {{< /warning >}}
 
 ## Read every replica
@@ -50,8 +50,8 @@ retries: .INF
 delay: 3
 ```
 
-- **`-l app=hello-dcs`** — every Pod matching the label.
-- **`--prefix`** — puts the Pod name in front of each line, which is the only way to tell two
+- **`-l app=hello-dcs`** reads every Pod matching the label.
+- **`--prefix`** puts the Pod name in front of each line, which is the only way to tell two
   replicas apart.
 
 ## Bound it by time
@@ -68,8 +68,8 @@ retries: .INF
 delay: 3
 ```
 
-`--since=5m` is the flag you reach for during an incident: *what was it saying five minutes
-ago*, rather than everything since Tuesday.
+`--since=5m` is the flag for an incident: what was it saying five minutes ago, rather than
+everything since Tuesday.
 
 ## Follow it live
 
@@ -89,5 +89,5 @@ command: |-
   echo "done"
 ```
 
-New lines appear in the lower pane as the requests arrive. `-f` is the log equivalent of
-`tail -f`, and it stops when the Pod does.
+New lines appear in the lower pane as the requests arrive. `-f` behaves like `tail -f`, and
+it stops when the Pod does.

@@ -2,8 +2,7 @@
 title: Summary
 ---
 
-You can now read logs deliberately rather than hopefully — and you know exactly where that
-ability stops.
+You can read logs deliberately now, and you know where that stops.
 
 Open the closing slide (📊 **Slides** tab):
 

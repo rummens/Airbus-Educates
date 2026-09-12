@@ -2,11 +2,10 @@
 title: Start From "Can I?"
 ---
 
-Before opening up the RBAC objects, start from the question they answer.
+Start from the question the RBAC objects answer.
 [`oc auth can-i`](https://kubernetes.io/docs/reference/access-authn-authz/authorization/#checking-api-access)
-asks the cluster, in real time, whether *you* (or anyone else, as you'll see later) are
-allowed to perform an action — without you having to read a single Role or RoleBinding
-first.
+asks the cluster whether you, or anyone else, may perform an action, without reading a single
+Role or RoleBinding first.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -29,10 +28,10 @@ title: Verify your permission list is returned
 timeout: 10
 ```
 
-You'll see a table: a `Verbs` column (`get`, `list`, `create`, `delete`, …) against
-`Resources` and `APIGroups` columns. This is the full, concrete set of things you're allowed
-to do in your namespace right now — normally granted by a RoleBinding to a broad role like
-`admin` or `edit`, which you'll go and find on the next page.
+You get a table: a `Verbs` column (`get`, `list`, `create`, `delete`, …) against `Resources`
+and `APIGroups`. That is the full set of things you may do in your namespace right now,
+normally granted by a RoleBinding to a broad role such as `admin` or `edit`, which you find on
+the next page.
 
 ## Ask about one specific action
 
@@ -48,20 +47,19 @@ title: Verify you can create Deployments in your own namespace
 timeout: 10
 ```
 
-You should get back exactly `yes`. Your namespace access includes creating workloads — that
-matches what you've been doing in every lab so far.
+You get back `yes`. Your namespace access includes creating workloads, which matches what
+you have been doing in every lab so far.
 
 ## Ask about someone else's namespace
 
-Now point the same question at a namespace that isn't yours:
+Now point the same question at a namespace that is not yours:
 
 ```terminal:execute
 command: oc auth can-i get pods -n kube-system
 ```
 
-Here, `-n <namespace>` (short for `--namespace`) targets a **different** namespace than the
-one you're currently in — everywhere else in this lab, commands default to your own
-namespace, so this is the one deliberate exception.
+`-n <namespace>` (short for `--namespace`) targets a **different** namespace than the one
+you are in. Everywhere else in this lab, commands default to your own namespace.
 
 ```examiner:execute-test
 name: verify-can-i-get-pods-kube-system-no
@@ -69,9 +67,8 @@ title: Verify access to another namespace is denied
 timeout: 10
 ```
 
-You should get back `no`. This is namespace isolation in action: your tenant's access
-doesn't extend into `kube-system` or any other namespace that isn't yours — regardless of
-how much you can do inside your own.
+You get back `no`. Your tenant's access does not extend into `kube-system` or any other
+namespace that is not yours, however much you can do inside your own.
 
-Two identical-looking questions, two different answers. Something behind the scenes decides
-this per namespace, per resource, per verb. Next page: what that something actually is.
+Two identical-looking questions, two different answers, decided per namespace, per resource
+and per verb. The next page is what decides them.

@@ -17,7 +17,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/pr
 command: envsubst < hello-dcs-unsized.yaml | oc apply -f - -n $PROD_NS || true
 ```
 
-**Refused** — and read the message before doing anything about it:
+**Refused.** Read the message before doing anything about it:
 
 ```
 PROD requires every container to declare CPU and memory requests and limits.
@@ -33,16 +33,17 @@ retries: .INF
 delay: 3
 ```
 
-Three things worth noticing in that message:
+Three things in that message:
 
-- it names the **rule** (`prod-requires-resources`), so you can go and read it;
+- it names the **rule** (`prod-requires-resources`);
 - it names the **path** that failed, down to the container index;
-- it happened at **`oc apply`** — nothing was created, nothing started and failed later.
+- it happened at **`oc apply`**, so nothing was created and nothing started and failed
+  later.
 
 {{< note >}}
-**📌 Why "autogen".** The rule is written against `Pod`, and the policy engine automatically
-derives the equivalent rule for the Deployment that would create the Pod. That is why you are
-refused now, rather than watching a healthy-looking Deployment produce no Pods.
+**📌 Why "autogen".** The rule is written against `Pod`, and the policy engine derives the
+equivalent rule for the Deployment that would create the Pod. That is why the refusal comes
+now, rather than as a healthy-looking Deployment that produces no Pods.
 {{< /note >}}
 
 ## Fix the manifest, not the namespace
@@ -66,8 +67,8 @@ retries: .INF
 delay: 3
 ```
 
-Admitted. The policy was never asking for much — only that you say what the workload needs
-before the platform commits to running it.
+Admitted. The policy asks only that you say what the workload needs before the platform
+commits to running it.
 
 ## Publish it, from here
 
@@ -98,5 +99,5 @@ retries: .INF
 delay: 3
 ```
 
-Same YAML. Same cluster. Different namespace type, different answer — and both answers came
-from one policy reading one label.
+Same YAML, same cluster, different namespace type, different answer. Both answers came from
+one policy reading one label.

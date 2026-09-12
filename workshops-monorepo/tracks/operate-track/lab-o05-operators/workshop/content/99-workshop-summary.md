@@ -3,7 +3,7 @@ title: Summary
 ---
 
 You went from "an Operator adds a resource type" to a running, reconciled PostgreSQL
-instance — and, more importantly, learned exactly where {{< param product_short >}}'s
+instance, and, more importantly, learned exactly where {{< param product_short >}}'s
 responsibility for it ends and yours begins.
 
 Open the slide for this page (📊 **Slides** tab):
@@ -25,7 +25,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
   `Cluster in healthy state`, reconciled by the Operator without you touching a single
   Pod.
 - **Stated the {{< param product_short >}} ownership model**: platform owns the
-  Operator; you own the instance — its sizing, config, data, backups, and incidents.
+  Operator; you own the instance, its sizing, config, data, backups, and incidents.
 
 ## Check Your Understanding
 
@@ -33,7 +33,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
 
 {{< note >}}
 **❓ Answer:** It continuously compares the actual state of the cluster to the desired
-state declared in a Custom Resource, and acts to close any gap — not just once at
+state declared in a Custom Resource, and acts to close any gap, not just once at
 creation, but for as long as the Operator runs.
 {{< /note >}}
 
@@ -51,9 +51,9 @@ Operator is installed once and defines the CRD; you create as many CRs as you ne
 
 {{< note >}}
 **❓ Answer:** You do. The platform owns installing and upgrading the CloudNativePG
-Operator and its CRDs — that part was already done before this lab started. Everything
-about the instance itself — sizing, configuration, data, backups, upgrading it when you
-choose to, and responding when something goes wrong — is yours. This is the core
+Operator and its CRDs, that part was already done before this lab started. Everything
+about the instance itself, sizing, configuration, data, backups, upgrading it when you
+choose to, and responding when something goes wrong, is yours. This is the core
 {{< param product_short >}} distinction: Operators, not managed-aaS.
 {{< /note >}}
 
@@ -64,5 +64,5 @@ concrete example. {{< param product_short >}}'s dedicated **Operators / Platform
 Services** track goes deep on each service the platform actually offers this way —
 **GitLab**, **Argo CD**, and **CloudNativePG** again, this time as a real, day-2-operated
 tenant database rather than a teaching example. If your team is about to adopt any of
-those services, that track is where the depth lives — this workshop was the on-ramp to
+those services, that track is where the depth lives, this workshop was the on-ramp to
 it, not a substitute for it.

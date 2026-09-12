@@ -1,11 +1,12 @@
 ---
-title: "RBAC, Tenancy & Namespaces"
+title: "RBAC & Tenancy"
 ---
 
-Welcome to this workshop, part of **{{< param product_name >}}**. In the Core lab **Terms — Namespaces & Tenancy** you learned
-the *words* — Tenant, Namespace, and that "project" is not a separate layer. Here you open
-up the *mechanism* behind them: the RBAC objects that actually decide who can do what, in
-which namespace, and why.
+The Core lab **Terms. Namespaces & Tenancy** gave you the words: Tenant, Namespace, and the
+fact that "project" is not a separate layer.
+
+This lab opens the mechanism underneath: the RBAC objects that decide who can do what, in
+which namespace.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the
@@ -13,7 +14,7 @@ which namespace, and why.
 for the terminal, editor and clickable actions.
 {{< /note >}}
 
-## What You'll Learn
+## What You will Learn
 
 By the end of this workshop you will be able to:
 
@@ -25,20 +26,18 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-This workshop assumes you have done the Core lab **Terms — Namespaces & Tenancy**, so you
-already know the *terms* Namespace and Tenant and that access is scoped to your tenant's
-namespaces. It also assumes basic comfort with
+This lab assumes the Core lab **Terms. Namespaces & Tenancy**, so you know the terms
+Namespace and Tenant and that access is scoped to your tenant's namespaces. It also assumes
+basic comfort with
 [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
 and the idea of a [namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/).
-No prior RBAC knowledge is required — that's what this lab teaches.
+No prior RBAC knowledge is required.
 
 ## Your Environment
 
-This session provides a browser-based environment with a **terminal**, an **editor**
-for viewing and editing the Role/RoleBinding manifests, and the **web console** for viewing
-roles, bindings and quota visually. You have OpenShift access scoped to your own session
-namespace — every object you create here (ServiceAccount, Role, RoleBinding) lives inside
-it. Commands are run with `oc`.
+A browser-based session with a **terminal** and an **editor** for the Role and RoleBinding
+manifests. Your access is scoped to your own session namespace, and every object you create
+here (ServiceAccount, Role, RoleBinding) lives inside it. All commands run with `oc`.
 
 ## Time and Difficulty
 

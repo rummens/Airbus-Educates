@@ -2,7 +2,7 @@
 title: Promotion
 ---
 
-You now have the same app running in both namespaces. In real work they would not have got
+You now have the same app running in both namespaces. In real work it would not have got
 there the same way.
 
 Open the slide for this page (📊 **Slides** tab):
@@ -31,18 +31,17 @@ delay: 3
 ```
 
 DEV took the namespace defaults. PROD carries the numbers you declared. **Two different
-running states from two different manifests** — which is exactly the thing promotion is meant
-to prevent.
+running states from two different manifests**, which is what promotion exists to prevent.
 
 ## What promotion is
 
 Promotion is moving a **known, tested artefact** from DEV to PROD, unchanged. Two parts, and
 both matter:
 
-1. **The same image.** Not "rebuilt from the same branch" — the *same image*, identified by
-   its tag or digest. On {{< param product_short >}} it arrives in the PROD project either
-   from the **green catalog** of cleared images, or **mirrored from the DEV project** — a
-   request, not a self-service push.
+1. **The same image**, identified by its tag or digest, rather than one rebuilt from the same
+   branch. On {{< param product_short >}} it arrives in the PROD project either from the
+   **green catalog** of cleared images or **mirrored from the DEV project**, which is a
+   request rather than a self-service push.
 2. **The same manifest**, with only environment-specific values differing (replica count,
    config, hostnames). Sized, because PROD will not admit it otherwise.
 
@@ -50,29 +49,30 @@ both matter:
 
 **Editing PROD in place.**
 
-Two reasons, and the second is the one that hurts:
+Two reasons:
 
 - a change nobody made in DEV has never been tested anywhere;
-- the next promotion **overwrites it**, silently, and the thing that was keeping PROD working
-  disappears.
+- the next promotion **overwrites it**, and whatever was keeping PROD working disappears
+  without a trace.
 
 {{< warning >}}
-**⚠️ Watch out:** "just this one hotfix directly in PROD" is how environments drift apart. The
-fix belongs in DEV, gets tested there, and is promoted — even when that feels slower during an
+**⚠️ Watch out:** "just this one hotfix directly in PROD" is how environments drift apart.
+The fix belongs in DEV, is tested there, and is promoted, even when that is slower during an
 incident.
 {{< /warning >}}
 
 ## Where the policy fits
 
-PROD's refusal earlier was not an obstacle to route around. It was the platform checking that
-what you are promoting is **promotable**:
+PROD's refusal earlier was the platform checking that what you are promoting is
+**promotable**:
 
 - sized, so it can be scheduled and paid for;
 - explicit, so the next person can read what it needs;
 - and only then publishable, through a Route on the controlled edge.
 
-The same posture is why the registry has a cleared catalog and a CVE threshold for PROD pulls:
-by the time something reaches a PROD namespace, several independent things have each said yes.
+The same posture is why the registry has a cleared catalog and a CVE threshold for PROD
+pulls. By the time something reaches a PROD namespace, several independent checks have passed
+it.
 
 ## Clean up the DEV attempt
 

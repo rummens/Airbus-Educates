@@ -2,15 +2,15 @@
 
 **"Why can't I see the other team's Pods?" has an exact answer, and you can read it.**
 
-Core gave you the words — **Tenant**, **Namespace**, and the fact that "project" is not a
-separate layer. This lab opens the mechanism underneath: the RBAC objects that decide who may
+Core gave you the words: **Tenant**, **Namespace**, and the fact that "project" is not a
+separate layer. This lab opens the mechanism underneath, the RBAC objects that decide who may
 do what, and where.
 
 You start from `oc auth can-i`, then go behind the answer to the **Role**, **RoleBinding** and
 **rule** that produced it.
 
-Then you build that chain yourself: create a ServiceAccount, prove it can do **nothing**,
-grant it a read-only Role, and prove exactly what changed — with `--as`, before and after.
+Then you build that chain yourself: create a ServiceAccount, check that it can do
+**nothing**, grant it a read-only Role, and check again with `--as`, before and after.
 
 Ends on quotas: what your namespace was given, and why an increase is a request rather than a
 setting you can edit.
@@ -24,7 +24,7 @@ setting you can edit.
 - **Format:** Hands-on and guided, with a split terminal and editor in your own OpenShift session namespace
 - **Prerequisites:** the Core lab **Terms — Namespaces & Tenancy**.
 
-## By the end of this lab you'll be able to
+## By the end of this lab you will be able to
 
 - Explain the **Tenant → Namespaces** model, and why there is no separate "project" layer.
 - Tell **Role** from **ClusterRole**, and **RoleBinding** from **ClusterRoleBinding**.
@@ -32,7 +32,7 @@ setting you can edit.
 - Create a Role and RoleBinding, and prove least privilege with `oc auth can-i --as`.
 - Read your namespace's quota, and say what happens when you need more.
 
-## What you'll do
+## What you will do
 
 1. **Ask** what you may do, and what you may not.
 2. **Read** the objects that produced those answers.

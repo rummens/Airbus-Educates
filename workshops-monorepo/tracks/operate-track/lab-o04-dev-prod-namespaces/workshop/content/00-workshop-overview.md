@@ -29,8 +29,8 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- The Core lab **Terms — Namespaces & Tenancy** — the vocabulary.
-- **Health & Resources** — requests and limits, which PROD is about to insist on.
+- The Core lab **Terms — Namespaces & Tenancy**, for the vocabulary.
+- **Health & Resources**, for requests and limits, which PROD is about to insist on.
 - Helpful: **RBAC & Tenancy**, the previous lab in this track.
 
 {{< note >}}
@@ -44,7 +44,7 @@ A browser-based session with a split **terminal** and an **editor**. All command
 `oc`, and each one names the namespace it targets with `-n`.
 
 The policy enforcing the PROD posture is a real admission policy on this cluster, scoped to
-your two namespaces. The rejections you get are genuine — nothing is simulated.
+your two namespaces. The rejections you get are genuine.
 
 ## Time and Difficulty
 

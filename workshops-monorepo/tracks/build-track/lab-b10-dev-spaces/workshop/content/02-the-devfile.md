@@ -34,17 +34,17 @@ text: |2
         image: ${DCS_REGISTRY}/devspaces/udi:latest
 ```
 
-This is a **Universal Developer Image (UDI)** — a general-purpose toolchain
+This is a **Universal Developer Image (UDI)**, a general-purpose toolchain
 container (compilers, `git`, common language runtimes) that Red Hat ships for Dev
 Spaces. On DCS it is mirrored into Harbor like every other image: notice the
 component's `image` is `${DCS_REGISTRY}/devspaces/udi:latest`, never a public
-registry — the exact same `${DCS_REGISTRY}` placeholder every prior lab's
+registry, the exact same `${DCS_REGISTRY}` placeholder every prior lab's
 manifests have used, resolved from Harbor at workspace start, air-gapped end to
 end.
 
 **What do I develop?** — `projects`. This is the git source Dev Spaces clones into
 the workspace when it starts, so your editor opens with the actual `hello-dcs`
-code already checked out — not a blank container.
+code already checked out, not a blank container.
 
 **How do I run it?** — `commands`. Highlight the run command:
 
@@ -59,15 +59,15 @@ text: |2
         commandLine: python3 server.py
 ```
 
-`group.kind: run` marks this as the workspace's default "run" action — it shows up
+`group.kind: run` marks this as the workspace's default "run" action, it shows up
 as a one-click command in the Dev Spaces IDE, so you never have to remember the
 exact invocation. It is the same `python3 server.py` entrypoint the `hello-dcs`
-container image runs in production — you are not running a different app, you are
+container image runs in production, you are not running a different app, you are
 running the same app's source, live.
 
 ## See the placeholder resolve
 
-The raw file has `${DCS_REGISTRY}` literally in it — that is deliberate, so the
+The raw file has `${DCS_REGISTRY}` literally in it, that is deliberate, so the
 devfile never hardcodes a registry:
 
 ```terminal:execute
@@ -102,7 +102,7 @@ command: envsubst < ~/exercises/devfile.yaml | grep 'image:'
 
 The before/after tells the whole story: the file you will hand to Dev Spaces never
 names a specific registry, but at workspace-creation time it resolves to your
-platform's real Harbor path — no rebuild, no edit, on any DCS cluster.
+platform's real Harbor path, no rebuild, no edit, on any DCS cluster.
 
 ```examiner:execute-test
 name: verify-devfile

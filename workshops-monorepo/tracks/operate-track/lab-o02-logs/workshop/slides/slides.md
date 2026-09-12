@@ -28,7 +28,7 @@ A container has no log file to configure. It writes to stdout, and the platform 
 <!-- id: reading -->
 ## Reading with intent
 
-`oc logs <pod>` prints everything since startup. On a busy app that is useless — the flags are the skill.
+`oc logs <pod>` prints everything since startup, which on a busy app is unreadable. The flags are what make it useful.
 
 ```
 oc logs deploy/hello-dcs --tail=20

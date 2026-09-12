@@ -38,7 +38,7 @@ for how your tenant gets access.
 
 ## What a workspace actually is
 
-A **workspace** is a set of containers running in your namespace — one of them is
+A **workspace** is a set of containers running in your namespace, one of them is
 your dev environment (a full toolchain image), with your project's source code
 cloned into a shared volume so every container in the workspace can see it. You
 reach it entirely through the browser: no SSH key, no VPN, no local `git clone`. When you

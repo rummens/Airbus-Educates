@@ -2,8 +2,8 @@
 title: The Logs of a Crash
 ---
 
-The single most useful log flag exists because of one situation: the container that can tell
-you what went wrong is **already gone**, replaced by a fresh one that knows nothing.
+One flag exists for a single situation: the container that can tell you what went wrong is
+**already gone**, replaced by a fresh one that knows nothing.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -18,8 +18,8 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/cr
 file: ~/exercises/crashing.yaml
 ```
 
-It logs a startup line, prints a fatal error to **stderr**, and exits non-zero. A Deployment
-does what Deployments do: it starts it again.
+It logs a startup line, prints a fatal error to **stderr**, and exits non-zero. The
+Deployment starts it again.
 
 ```terminal:execute
 command: envsubst < crashing.yaml | oc apply -f - && sleep 20 && oc get pods -l app=flaky
@@ -41,8 +41,8 @@ delay: 5
 command: oc logs deploy/flaky --tail=10 || true
 ```
 
-Depending on the moment you caught it, you get the new container's few lines — or an error,
-because between restarts there is no running container to read.
+Depending on when you catch it, you get the new container's few lines, or an error, because
+between restarts there is no running container to read.
 
 ## Read the one that died
 
@@ -66,14 +66,13 @@ There it is:
 FATAL: cannot reach the database at db.internal:5432
 ```
 
-**`--previous`** reads the log of the **last terminated** container in that Pod. That is where
-a crash explains itself, and reaching for it first is the difference between a two-minute
-diagnosis and twenty minutes of guessing.
+**`--previous`** reads the log of the **last terminated** container in that Pod. That is
+where a crash explains itself, and it is worth reaching for first.
 
 {{< note >}}
-**💡 Tip:** stderr and stdout both land in the same stream — `oc logs` shows them together.
-Writing errors to stderr is still worth doing: the aggregated store keeps the distinction, and
-so do most log parsers.
+**💡 Tip:** stderr and stdout land in the same stream, so `oc logs` shows them together.
+Writing errors to stderr is still worth doing, because the aggregated store keeps the
+distinction and so do most log parsers.
 {{< /note >}}
 
 ## Clean up the noise
@@ -108,8 +107,7 @@ delay: 3
 
 Nothing. The Pod is gone, the node's file went with it, and `oc logs` has nowhere to look.
 
-That is the limit of this whole page: **`oc logs` can only tell you about containers that
-still exist.** Everything that crashed last night, on a node that has since been drained, is
-beyond it.
+**`oc logs` can only tell you about containers that still exist.** Anything that crashed
+last night on a node that has since been drained is out of reach.
 
-Which is the entire reason the next page exists.
+That is what the next page is about.

@@ -2,8 +2,8 @@
 title: Create a Role and Prove Least Privilege
 ---
 
-Reading someone else's RBAC objects is one thing; now build the chain yourself, end to end,
-for a subject you create — and prove exactly what it can and can't do.
+Now build the chain yourself, end to end, for a subject you create, and check exactly what
+it can and cannot do.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -14,9 +14,9 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/le
 
 ## Create a subject to test with
 
-You'll bind permissions to a [**ServiceAccount**](https://kubernetes.io/docs/concepts/security/service-accounts/) —
-a non-human identity, normally used by a workload rather than a person — so the permissions
-you prove belong to this ServiceAccount alone, not mixed in with your own broader access.
+You bind permissions to a [**ServiceAccount**](https://kubernetes.io/docs/concepts/security/service-accounts/),
+which is a non-human identity normally used by a workload rather than a person. That keeps
+the permissions you are testing separate from your own broader access.
 
 ```editor:open-file
 file: ~/exercises/serviceaccount-viewer.yaml
@@ -36,11 +36,11 @@ timeout: 10
 
 ## Check its access before granting anything
 
-`viewer-bot` exists, but no Role or RoleBinding names it yet, so it should have no access at
-all. Prove that with `--as`, which lets you ask `can-i` **on behalf of another subject**
-instead of yourself — a central tool for testing RBAC without having to actually log in as
-that subject. The value is the same `system:serviceaccount:<namespace>:<name>` format you
-just read in a RoleBinding's `Subjects` section:
+`viewer-bot` exists, but no Role or RoleBinding names it yet, so it should have no access.
+Check that with `--as`, which asks `can-i` **on behalf of another subject**. That is how you
+test RBAC without logging in as that subject. The value uses the same
+`system:serviceaccount:<namespace>:<name>` format you read in a RoleBinding's `Subjects`
+section:
 
 ```terminal:execute
 command: oc auth can-i get pods --as=system:serviceaccount:$SESSION_NAMESPACE:viewer-bot
@@ -52,18 +52,18 @@ title: Verify viewer-bot has no access yet (before)
 timeout: 10
 ```
 
-You should get back `no` — the **before** state. No rule grants `viewer-bot` anything yet.
+You get back `no`. That is the **before** state: no rule grants `viewer-bot` anything.
 
 ## Author the Role
 
-Open the Role you'll apply:
+Open the Role you will apply:
 
 ```editor:open-file
 file: ~/exercises/role-viewer.yaml
 ```
 
-Its one rule grants `get`, `list` and `watch` — read-only verbs — on `pods` and
-`configmaps`. Nothing else: no `create`, no `delete`, no other resource types. Apply it:
+Its one rule grants the read-only verbs `get`, `list` and `watch` on `pods` and
+`configmaps`, and nothing else. Apply it:
 
 ```terminal:execute
 command: oc apply -f role-viewer.yaml
@@ -75,8 +75,8 @@ title: Verify the role-viewer Role exists with the expected rule
 timeout: 10
 ```
 
-A Role alone grants nothing to anyone — it's a shelf of permissions with no one assigned to
-it yet. The RoleBinding is what connects it to `viewer-bot`.
+A Role on its own grants nothing to anyone. The RoleBinding is what connects it to
+`viewer-bot`.
 
 ## Bind the Role to the ServiceAccount
 
@@ -85,7 +85,7 @@ file: ~/exercises/rolebinding-viewer.yaml
 ```
 
 Its `subjects` entry names `viewer-bot` with a `namespace` placeholder,
-`${SESSION_NAMESPACE}` — filled in with your real namespace at apply time by
+`${SESSION_NAMESPACE}`, filled in with your real namespace at apply time by
 [`envsubst`](https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html),
 the same substitution pattern used for `${DCS_REGISTRY}` elsewhere in these labs:
 
@@ -115,13 +115,12 @@ retries: .INF
 delay: 2
 ```
 
-Now it returns `yes`. Same question, same subject — the only thing that changed between
-**before** and **after** is the Role + RoleBinding you just created. That's the whole
-mechanism, made visible.
+Now it returns `yes`. Same question, same subject, and the only change between **before**
+and **after** is the Role and RoleBinding you created.
 
 ## Prove least privilege
 
-The rule you wrote granted read-only verbs. Prove it doesn't grant anything more by asking
+The rule you wrote granted read-only verbs. Prove it does not grant anything more by asking
 for a verb you never included:
 
 ```terminal:execute
@@ -134,10 +133,8 @@ title: Verify viewer-bot cannot delete pods (least privilege)
 timeout: 10
 ```
 
-`no` — `viewer-bot` can read pods, and only pods and configmaps, and only read them. This is
-**least privilege** in practice: the RoleBinding grants exactly the rule you wrote, nothing
-implied and nothing extra.
+`no`. `viewer-bot` can read pods and configmaps, and only read them. The RoleBinding grants
+exactly the rule you wrote, with nothing implied and nothing extra.
 
-You've now walked the whole chain in both directions: read someone else's (last page), and
-authored, applied and proved your own (this page). Last stop: the budget your namespace
-operates inside.
+You have now read an existing chain and built your own. The last page is the budget your
+namespace works inside.

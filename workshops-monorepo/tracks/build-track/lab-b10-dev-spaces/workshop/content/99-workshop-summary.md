@@ -20,16 +20,16 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
   removes laptop tool drift and the need for outbound cluster/Harbor access.
 - **Read** a `devfile.yaml` and identified its three jobs: `components` (the
   Harbor-mirrored dev image), `projects` (the cloned source), and `commands`
-  (the `run` action) — and saw `${DCS_REGISTRY}` resolve the same way it does in
+  (the `run` action), and saw `${DCS_REGISTRY}` resolve the same way it does in
   every other lab.
 - **Walked through** launching a workspace from that devfile: submit → provision
-  → clone → running IDE — the same Pod-level reconciliation every other lab's
+  → clone → running IDE, the same Pod-level reconciliation every other lab's
   Deployment has already shown you, triggered by the Che Operator instead of by
   `oc apply`.
 - **Traced** the edit → run → reach loop a workspace gives you, and why it skips
   the image-build step that **Build Your Image on DCS**'s BuildConfig deliberately has.
 - **Placed** Dev Spaces, the Educates editor, BuildConfig (**Build Your Image on DCS**), and `oc apply`
-  (**Deploy Your First App**) on one timeline: write it, build it, run it — four tools, one job
+  (**Deploy Your First App**) on one timeline: write it, build it, run it, four tools, one job
   each, never substitutes for one another.
 
 ## Check Your Understanding
@@ -57,7 +57,7 @@ is `${DCS_REGISTRY}/devspaces/udi:latest`, never a hardcoded or public registry.
 
 {{< note >}}
 **❓ Answer:** A workspace runs the cloned source directly (`python3 server.py`)
-from disk — there is no image in the loop. BuildConfig exists for the opposite
+from disk, there is no image in the loop. BuildConfig exists for the opposite
 case: turning *finished* source into a deployable image once you are done
 iterating.
 {{< /note >}}
@@ -82,23 +82,20 @@ the same ownership split as every other DCS-provided platform service.
 
 ## Next Steps
 
-**Build Your Image on DCS** is this
-lab's twin — it connects the same git repository as a **build source** instead
-of an IDE, so your finished code becomes a Harbor image. From here, **Harbor
-& Image Scanning** (`lab-b04-harbor-scanning`) picks up where your built image
-lands: how it is scanned, and what a vulnerability gate means for what you can
-deploy. Further out, Module F's **GitLab** lab extends this exact workflow —
-cloning straight from your tenant's own GitLab into a Dev Spaces workspace,
-instead of the provided sample repo used here.
+**Build Your Image on DCS** is this lab's twin. It uses the same source as a **build source**
+rather than as an IDE, so your finished code becomes an image in the registry. **Harbor:
+Projects, Push & Scan** picks up where that image lands: the project it goes to, how it is
+scanned, and what the CVE gate means for what may run in PROD.
+
+With the Build & Run track finished, **Operate & Observe** is what to do with the result:
+metrics, logs, RBAC and tenancy, DEV against PROD, and the operators behind the platform's
+own services.
 
 {{< note >}}
-**📌 A provisioning note, for the record.** This workshop's devfile clones from
-`${WORKSPACE_SOURCE_REPO}` — a small, in-platform git repository reachable
-without external egress. The concrete air-gapped hosting for that repo (a
-mirror into the tenant's GitLab vs. a small in-cluster git service) is the same
-open provisioning question tracked for **Build Your Image on DCS**'s `${BUILD_SOURCE_REPO}`; both
-resolve to the same answer once that is settled. Likewise, whether the **Dev
-Spaces** dashboard tab shows a live instance depends on whether your cluster has
-Dev Spaces and a Harbor-mirrored UDI provisioned yet — the content here is
-written for the real thing either way.
+**📌 A provisioning note, for the record.** This lab's devfile clones from
+`${WORKSPACE_SOURCE_REPO}`, an in-platform git repository reachable without external egress.
+Where that repository lives on a given cluster, a mirror into the tenant's GitLab or a small
+in-cluster git service, is a platform decision rather than a lab one. Whether the **Dev
+Spaces** tab shows a live instance likewise depends on whether your cluster has Dev Spaces and
+a Harbor-mirrored UDI provisioned; the content here is written for the real thing either way.
 {{< /note >}}

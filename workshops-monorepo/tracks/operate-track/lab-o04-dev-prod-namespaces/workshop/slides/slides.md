@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # DEV vs PROD Namespaces
 
-Not a naming convention — a **policy posture**. Same cluster, same Kubernetes, same registry, two different answers to the same YAML.
+Not a naming convention but a **policy posture**. Same cluster, same Kubernetes, same registry, two different answers to the same YAML.
 
 **In this lab:** the label and the policy · DEV moves fast · PROD makes you prove it · promotion.
 
@@ -82,6 +82,6 @@ Two running states from two different manifests is exactly what promotion preven
 
 You can read the platform's answer, and the rule behind it, for any namespace you are given.
 
-**Next lab — Operators on DCS:** the pattern behind the platform services you use, CRD versus CR, and the ownership split — the platform owns the operator, you own the instance.
+**Next lab, Operators on DCS:** the pattern behind the platform services you use, CRD versus CR, and the ownership split. The platform owns the operator, you own the instance.
 
 Digital Container Service · DCS Academy

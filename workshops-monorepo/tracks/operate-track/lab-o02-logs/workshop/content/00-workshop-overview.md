@@ -7,8 +7,8 @@ Metrics tell you **that** something changed. Logs tell you **what happened**.
 Both matter, and they are read at different moments: a graph tells you the error rate rose at
 14:05, and the logs tell you it was a database timeout.
 
-This lab is about reading logs **well** on **{{< param product_name >}}** — and about the
-moment `oc logs` runs out, which is exactly the moment aggregation earns its keep.
+This lab is about reading logs **well** on **{{< param product_name >}}**, and about the
+point where `oc logs` stops being able to help, which is where aggregation starts.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the
@@ -28,7 +28,8 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-- The Core lab **Configure & Troubleshoot Your App** — you have read a Pod's logs once.
+- The Core lab **Configure & Troubleshoot Your App**, so you have read a Pod's logs
+  once.
 - Helpful: **Metrics & Monitoring**, the previous lab, for the other half of observability.
 
 {{< note >}}

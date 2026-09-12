@@ -6,11 +6,11 @@ DEV and PROD on DCS are not separated by a naming convention. They differ in **p
 posture**: PROD enforces rules DEV does not, and only PROD may publish a **Route**.
 
 This session gives you one of each. You apply the same unsized Deployment to both and watch
-PROD refuse it — at `oc apply`, with the failing field named. Then the same Route to both, and
+PROD refuse it at `oc apply`, with the failing field named. Then the same Route to both, and
 watch DEV refuse that one.
 
-Neither refusal is a bug, and neither is simulated: you read the real admission policy that
-produced them.
+Neither refusal is simulated. Both come from the cluster's real admission path, and each one
+names the rule behind it.
 
 Ends on **promotion** — why the answer is a fresh apply to PROD rather than an edit in place,
 and where the image has to come from.
