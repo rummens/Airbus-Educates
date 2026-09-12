@@ -4,6 +4,10 @@ Copy-paste-into-chat log of learner-visible fixes and improvements. Newest day f
 one line per change, no internals. Platform/portal changes are live once ArgoCD has
 synced `main`; workshop content is live on the next session start.
 
+## 2026-09-12
+
+- **Five optional console companions are live**, each sitting right after the lab it follows: Builds, Health & resources and Autoscaling in Build & Run, Metrics and Logs in Operate & Observe. They are guided tours of the OpenShift console for topics you have already done in the terminal — every step names the `oc` command it stands in for, and says what the console is genuinely better at.
+
 ## 2026-09-11
 
 - **Two new tracks are live: Build & Run (10 labs) and Operate & Observe (5 labs).** Build & Run follows one app from a Docker mental model to an image you built, a registry that governs it, and a workload that is sized, autoscaled, reachable, stateful and survivable. Operate & Observe covers metrics, logs, RBAC and tenancy, DEV versus PROD namespaces, and operators. Every lab was run end to end against a real cluster before publishing.
