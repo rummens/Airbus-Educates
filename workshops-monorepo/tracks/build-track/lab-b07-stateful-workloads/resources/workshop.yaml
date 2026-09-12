@@ -14,21 +14,24 @@ metadata:
     academy.dcs/details: |
       **A Deployment's replicas are interchangeable. Some workloads are not.**
 
-      A database replica, a queue broker, anything with its own data on disk: it needs the
-      **same name** and the **same volume** back after a restart.
+      A database replica or a queue broker keeps its own data on disk, and needs the same name
+      and the same volume back after a restart.
 
-      That is a **StatefulSet**: ordered names, a **PersistentVolumeClaim per replica**, a
-      per-Pod DNS record, and a rollout that goes one Pod at a time.
+      That is what a **StatefulSet** provides: ordered names, a **PersistentVolumeClaim per
+      replica**, a per-Pod DNS record, and a rollout that moves one Pod at a time.
 
-      You build one, write a different marker into each replica's own volume, delete a Pod
-      and watch the same identity and the same data come back — then scale down and find
-      the volume deliberately left behind.
+      You build one, write a different marker into each replica's volume, delete a Pod and watch
+      the same identity and the same data come back. Then you scale down and find the volume
+      still there.
 
-      > **⚠️ Watch out:** scaling a StatefulSet down does **not** delete its volumes. That
-      > is a feature, and it is also how you quietly fill a storage quota.
+      > **⚠️ Watch out:** scaling a StatefulSet down does not delete its volumes. That is
+      > deliberate, and it is also how a storage quota fills up quietly.
 spec:
   title: "Stateful Workloads"
-  description: Build a StatefulSet with a volume per replica — stable names, per-Pod DNS, ordered rollout — then prove identity and data survive a Pod deletion, and see what scaling down leaves behind.
+  description: >-
+    Build a StatefulSet with a volume per replica: stable names, per-Pod DNS and an ordered
+    rollout. Then delete a Pod to prove identity and data survive, and scale down to see what is
+    left behind.
   duration: 25m
   difficulty: intermediate
   labels:

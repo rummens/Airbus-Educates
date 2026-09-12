@@ -11,25 +11,29 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: shield-check
     academy.dcs/details: |
-      **The platform will move your Pods. The question is whether that costs you an outage.**
+      **The platform will move your Pods. Whether that costs you an outage is up to you.**
 
-      Node maintenance, upgrades and rebalancing are routine, and none of them ask your
-      permission. What you get instead is a way to state your terms.
+      Node maintenance, upgrades and rebalancing are routine, and none of them ask permission.
+      What you get is a way to state your terms.
 
-      You set a **PodDisruptionBudget** and watch its own status say how many Pods the
-      platform may take right now — then scale down and watch that number drop to zero.
+      You set a **PodDisruptionBudget** and read its status, which says how many Pods the
+      platform may take right now. Scaling down takes that number to zero, and the lab shows what
+      that then blocks.
 
-      Then the half most apps get wrong: **shutdown**. You time a Pod's deletion and find
-      out what a container that ignores `SIGTERM` actually costs.
+      Then **shutdown**, which most applications get wrong. You time a Pod's deletion and measure
+      what a container that ignores `SIGTERM` costs.
 
-      Last, **spreading** replicas across nodes, and the trade-off between a spread you
-      prefer and one you require.
+      Last, **spreading** replicas across nodes, and the difference between a spread you prefer
+      and one you require.
 
-      > **⚠️ Watch out:** a budget that leaves the platform no room at all does not make
-      > you safer — it blocks the maintenance that keeps the cluster patched.
+      > **⚠️ Watch out:** a budget that leaves the platform no room blocks the maintenance that
+      > keeps the cluster patched. Leave it room.
 spec:
   title: "Resilience & Scheduling"
-  description: State your terms for planned disruption with a PodDisruptionBudget, learn what a container that ignores SIGTERM costs at shutdown, and spread replicas so one node's failure is not your outage.
+  description: >-
+    State your terms for planned disruption with a PodDisruptionBudget, measure what a container
+    that ignores SIGTERM costs at shutdown, and spread replicas so one node's failure is not an
+    outage.
   duration: 25m
   difficulty: intermediate
   labels:

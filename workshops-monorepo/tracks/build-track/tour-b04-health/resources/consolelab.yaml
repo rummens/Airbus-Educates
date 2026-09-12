@@ -1,6 +1,12 @@
 # Hidden lab: it needs a running Deployment with probes and resources to read, so it is
 # launched from the academy portal, which provisions the namespace and passes it in the
 # URL. Only <<namespace>> is templated; object names come from the paired workshop.yaml.
+#
+# Every href target below was read off a live OpenShift 4.22 console, because the engine
+# resolves an href target with `a[href="<value>"]` and the console mixes two URL forms:
+# sidebar links and tab links use the GVK form (/k8s/ns/x/core~v1~ResourceQuota), table
+# rows use the legacy plural (/k8s/ns/x/resourcequotas/<name>). Using the wrong form
+# leaves the step with nothing to highlight.
 apiVersion: academy.dcs/v1alpha1
 kind: ConsoleLab
 metadata:
@@ -9,14 +15,15 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
-  title: Read health and budget on screen
+  title: Read health and usage on screen
   description: >-
-    Find the probes and resource numbers on a running Deployment, read a Pod's conditions,
-    and open the project's quota and limit ranges.
+    Find the probes and resource numbers on a running Deployment, see why a Pod can be
+    Running and still not Ready, and read your namespace's quota and LimitRange.
   completionText: >-
-    Done. You read the probes and resource block you would otherwise write in YAML, a Pod's
-    own conditions, and the budget your project was given — oc describe deployment, oc
-    describe pod and oc describe quota, on four screens.
+    You have seen where the console keeps health and usage: the Deployment's YAML for
+    probes and resources, a Pod's Conditions for readiness, the ResourceQuota for what
+    your namespace has used of what it was given, and the LimitRange for the defaults a
+    container gets when its manifest sets none.
   visibility: hidden
   mode: assisted
   context:
@@ -34,72 +41,196 @@ spec:
           pods: '/k8s/ns/<<namespace>>/deployments/lab-app/pods'
           yaml: '/k8s/ns/<<namespace>>/deployments/lab-app/yaml'
   steps:
+    # --- the menu itself ----------------------------------------------------------
     - id: open-workloads
-      title: Open Workloads
+      title: Open the Workloads menu
       description: >-
-        Workloads is the group for everything that runs your application. You come here to
-        answer "is it healthy", which is the question oc get pods answers from a terminal.
+        The left sidebar groups the console by what a resource does, not by API group.
+        Workloads holds everything that runs a container: Deployments, Pods, StatefulSets,
+        Jobs and CronJobs, plus HorizontalPodAutoscalers and PodDisruptionBudgets. Open it.
       target: { type: quickStartId, value: qs-nav-workloads }
       complete:
         operation: { type: activateTarget }
         verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
-    - id: open-deployment
-      title: Open the lab deployment
+    - id: open-deployments
+      title: Open Deployments
       description: >-
-        The replica ring shows ready against desired. A Pod that fails its readiness probe
-        is counted here as not ready, which is the fastest signal that something is wrong
-        without anything having crashed.
+        Every entry in this menu is one resource type in your namespace. Deployments is
+        the list you get from oc get deployments.
+      target: { type: consoleElement, id: navigationLink, value: Deployments }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/apps~v1~Deployment' }
+    - id: read-deployment-list
+      title: Read the list
+      description: >-
+        One row per Deployment. The Status column reads "2 of 2 pods": pods that passed
+        their readiness probe, out of pods the Deployment wants. Those two numbers
+        disagreeing is the first sign of trouble, and you see it here before anything has
+        crashed.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    # --- probes and resources on the object ---------------------------------------
+    - id: open-deployment
+      title: Open lab-app
+      description: >-
+        Click the name to open the object. This is oc describe deployment lab-app, laid
+        out as a page.
       target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app' }
-    - id: read-template-yaml
-      title: Find the probes and the resources
+    - id: read-deployment-details
+      title: Read the details block
       description: >-
-        Open the YAML tab and look inside the Pod template for readinessProbe,
-        livenessProbe and resources. These are the fields you wrote by hand in the terminal
-        lab; here they are read off the live object, which is also how you check what is
-        actually deployed rather than what you think is.
+        The ring counts pods that are ready. Beside it are the update strategy and the
+        selector that decides which pods belong to this Deployment. None of this says
+        anything yet about probes or resource numbers, which is the point of the next step.
+      target: { type: consoleElement, id: detailsSection, value: Deployment details }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-yaml
+      title: Open the YAML tab
+      description: >-
+        Probes and resource numbers live in the Pod template, and the console does not put
+        them on the details page. The YAML tab shows the live object, the same text as
+        oc get deployment lab-app -o yaml.
       target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/yaml' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/yaml' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/yaml' }
+    - id: read-probes-and-resources
+      title: Find the probes and resources
+      description: >-
+        Scroll to spec.template.spec.containers. readinessProbe decides whether this pod
+        gets traffic. livenessProbe decides whether the kubelet restarts it. resources
+        holds requests, what the scheduler reserves for the pod, and limits, the ceiling
+        it may not exceed. These four blocks are what you wrote by hand in the terminal
+        lab; reading them back here is how you check what is actually deployed.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-pods-tab
       title: List the pods it owns
       description: >-
-        A replica count is a number; the pods behind it are on this tab, already filtered
-        by the Deployment's own selector.
+        The Pods tab is already filtered by this Deployment's selector, so you do not have
+        to match labels by hand. Ready and Restarts are the two columns to read.
       target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/pods' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/pods' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/pods' }
-    - id: read-pod-conditions
-      title: Read a Pod's conditions
+    # --- Running is not Ready -----------------------------------------------------
+    - id: open-pods
+      title: Open Pods
       description: >-
-        Open one Pod. Its status section lists conditions — Initialized, Ready,
-        ContainersReady — and its restart count. A Pod that is Running but not Ready is
-        failing readiness, and that distinction is the one people miss from a terminal.
-      target: { type: consoleElement, id: detailsSection, value: Pod details }
+        Back to the menu, this time for every pod in the namespace. Your namespace has one
+        more pod than this Deployment owns, and it is the interesting one.
+      target: { type: consoleElement, id: navigationLink, value: Pods }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~Pod' }
+    - id: open-unready-pod
+      title: Open lab-probe
+      description: >-
+        lab-probe is Running, and its Ready column says 0/1. It was given a readiness probe
+        pointed at a path that does not exist, so it never passes. Open it.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/pods/lab-probe' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/lab-probe' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/lab-probe' }
+    - id: read-pod-conditions
+      title: Read the Conditions
+      description: >-
+        Scroll to Conditions. Initialized is True, ContainersReady and Ready are False.
+        That is the difference the Status column hides: the container is up, the process is
+        running, and the pod is still not serving traffic. A Service sends nothing to a pod
+        whose Ready is False, which is exactly what a readiness probe is for.
+      target: { type: consoleElement, id: detailsSection, value: Conditions }
       complete:
         operation: { type: none }
         verify: { type: acknowledge }
+    # --- what the namespace was given ---------------------------------------------
+    - id: open-administration
+      title: Open the Administration menu
+      description: >-
+        Administration is the second half of the sidebar. Most of it is cluster-wide and
+        read-only for you, but two entries are about your own namespace: ResourceQuotas and
+        LimitRanges. Open it.
+      target: { type: quickStartId, value: qs-nav-administration }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
     - id: open-quotas
-      title: Open the project's quota
+      title: Open ResourceQuotas
       description: >-
-        Under Administration, ResourceQuotas shows Used against Hard for every resource
-        the namespace is limited on. This is oc describe quota, as a table that keeps
-        itself up to date.
-      target: { type: href, value: '/k8s/ns/<<namespace>>/resourcequotas' }
+        A ResourceQuota is the budget for a whole namespace. On DCS your namespace has
+        exactly one, set when the namespace was created, and you cannot change it yourself.
+      target: { type: consoleElement, id: navigationLink, value: ResourceQuotas }
       complete:
-        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/resourcequotas' }
-        verify: { type: route, path: '/k8s/ns/<<namespace>>/resourcequotas' }
-    - id: read-limitrange
-      title: Find the LimitRange
+        operation: { type: activateTarget }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~ResourceQuota' }
+    - id: read-quota-list
+      title: Read the list
       description: >-
-        LimitRanges, in the same group, is where a container that declares no resources
-        gets its defaults. That is why an unsized workload still counts against your
-        budget — and why four defaulted Pods can fill it.
-      target: { type: href, value: '/k8s/ns/<<namespace>>/limitranges' }
+        This training namespace lists more than one, because the Academy's own tooling adds
+        a couple of its own. A DCS namespace has one. The one to read here is
+        compute-resources, which is the CPU and memory budget.
+      target: { type: consoleElement, id: pageContent }
       complete:
-        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/limitranges' }
-        verify: { type: route, path: '/k8s/ns/<<namespace>>/limitranges' }
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-quota
+      title: Open compute-resources
+      description: >-
+        Click it. This page is oc describe quota, and it is the answer to "how much of my
+        namespace have I used".
+      target: { type: href, value: '/k8s/ns/<<namespace>>/resourcequotas/compute-resources' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/resourcequotas/compute-resources' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/resourcequotas/compute-resources' }
+    - id: read-quota-usage
+      title: Read Used against Max
+      description: >-
+        The table at the bottom has a row per resource the namespace is limited on, with
+        Used and Max side by side, and the donuts above it say the same thing as a
+        percentage. Used counts what your pods asked for, not what they are burning: a pod
+        that requests 500m and idles at 5m still spends 500m of this budget. When Used
+        reaches Max the next pod is rejected at creation, and the message names the quota.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-limitranges
+      title: Open LimitRanges
+      description: >-
+        Same menu, one entry down. A LimitRange is per-container rather than per-namespace,
+        and on DCS your namespace has exactly one of those too.
+      target: { type: consoleElement, id: navigationLink, value: LimitRanges }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~LimitRange' }
+    - id: open-limitrange
+      title: Open resource-limits
+      description: >-
+        Open the object itself. This is oc describe limitrange.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/limitranges/resource-limits' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/limitranges/resource-limits' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/limitranges/resource-limits' }
+    - id: read-limits
+      title: Read the Limits table
+      description: >-
+        Read the Container row. Default request and Default limit are what a container gets
+        when its manifest asks for nothing, which is why an unsized workload still spends
+        quota, and why four defaulted pods can fill a namespace that would have held twenty
+        sized ones. Min and Max are the range a manifest may ask for: below Min or above
+        Max the object is rejected. Between the two tables you have the whole budget story,
+        one namespace ceiling and one per-container default.
+      target: { type: consoleElement, id: detailsSection, value: Limits }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }

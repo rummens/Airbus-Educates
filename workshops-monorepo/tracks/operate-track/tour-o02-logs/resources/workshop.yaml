@@ -15,53 +15,54 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/display-name: "Logs in the console"
-    academy.dcs/duration: "6 min"
+    academy.dcs/duration: "8 min"
     academy.dcs/difficulty: intermediate
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
-      Follow a Pod's log in the console, pause it, switch containers, and see where an aggregated view would sit.
+      Follow a Pod's log in the console, pause it, find the container selector, and read the
+      events that explain what the log does not.
     academy.dcs/details: |
       ### What this lab is
 
-      A **console lab**, and an optional companion to **Logs**. It opens the OpenShift web
-      console and highlights each step on the real page.
+      An optional console companion to **Logs**. It opens the OpenShift web console and highlights
+      each step on the real page. You type nothing.
 
-      A Pod that logs steadily is created before the lab starts, so the log view has
-      something moving in it.
+      A Pod that logs steadily is created before the lab starts, so the log view has something
+      moving in it.
 
       ### What you should already know
 
-      The concepts, not the clicks. **Logs** is where the log path, `--previous` and
-      aggregation are explained.
+      The concepts, not the clicks. The log path, `--previous` and aggregation are explained in
+      **Logs**.
 
       ### What you will do
 
-      > **💡 Tip:** you type nothing. Each screen names the `oc` command it stands in for.
+      - Open the **Workloads** menu and the Pod list, where `oc get pods` would list them
+      - Read the Pod's details first: status and restart count, the context a log needs
+      - Open the **Logs** tab, the console's `oc logs -f`
+      - Pause the stream, search it, and read one line properly
+      - Find the container selector, which is what `-c` does from a terminal
+      - Open the **Events** tab, which is what the platform did to the Pod rather than what the app wrote
 
-      - Open a Pod's Logs tab, the console's `oc logs -f`
-      - Follow the stream, pause it, and read a specific moment
-      - Switch container when a Pod runs more than one, which `-c` does from a terminal
-      - See where an aggregated log view would sit, and what it adds over this page
+      > **💡 Tip:** each step names the `oc` command the screen stands in for.
 
       ### When the console wins
 
-      Following a log while clicking between Pods is genuinely faster here, and the Logs
-      tab sits next to the events that explain a restart.
+      The log sits one tab away from the events that explain a restart, and clicking between Pods
+      is faster than retyping a command.
 
       ### Cleaning up
 
       Press **Finish** in the guidance box when you are done.
-
-      > **⚠️ Watch out:** leaving the tab open only leaves the project running until it
-      > expires.
     academy.dcs/console-lab: tour-o02-logs
     academy.dcs/orphaned: "0s"
     academy.dcs/expires: 60m
 spec:
   title: "Logs in the console"
   description: >-
-    The console side of Logs: a Pod's Logs tab, following and pausing a live stream, and what an aggregated log store would add.
-  duration: 6m
+    The console side of Logs: a Pod's status and restart count, its live log with pause and
+    search, the container selector, and the events that explain what the log cannot.
+  duration: 8m
   difficulty: intermediate
   labels:
     - name: module

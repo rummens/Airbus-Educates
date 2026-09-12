@@ -15,59 +15,54 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/display-name: "Builds in the console"
-    academy.dcs/duration: "8 min"
+    academy.dcs/duration: "10 min"
     academy.dcs/difficulty: intermediate
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
-      Find a BuildConfig, its builds, the log of one run and the ImageStream tag it
-      produced — the console side of the Build Your Image lab.
+      Find a BuildConfig, start a build from the Actions menu, read its log, and see the
+      ImageStream tag it produced.
     academy.dcs/details: |
       ### What this lab is
 
-      A **console lab**, and an optional companion to **Build Your Image on DCS**. Instead
-      of instruction pages it opens the OpenShift web console and highlights each step on
-      the real page.
+      An optional console companion to **Build Your Image on DCS**. It opens the OpenShift web
+      console and highlights each step on the real page. You type nothing.
 
-      A BuildConfig and a finished build are created before it starts, so every screen has
-      something real on it.
+      A BuildConfig is created before the lab starts, so there is a real recipe to run.
 
       ### What you should already know
 
-      The concepts, not the clicks. **Build Your Image on DCS** is where BuildConfig, Build
-      and ImageStream are explained; nothing new is introduced here.
+      The concepts, not the clicks. BuildConfig, Build and ImageStream are explained in **Build
+      Your Image on DCS**. Nothing new is introduced here.
 
       ### What you will do
 
-      > **💡 Tip:** you type nothing. Each screen names the `oc` command it stands in for.
+      - Open the **Builds** menu and see the three object types it holds
+      - Read the BuildConfig list, one row per recipe rather than per run
+      - Read a BuildConfig's source, strategy and output target
+      - Start a build from the **Actions** menu, which is `oc start-build`
+      - Open the run it created and read its log, which is `oc logs build/...`
+      - Open the ImageStream, and read the tag that resolves to a digest
 
-      - Find BuildConfigs where `oc get bc` would list them
-      - Open one and read the strategy, source type and output target
-      - Open a build and read its log, the console's `oc logs build/...`
-      - See the ImageStream the output landed in, and the tag that resolves to a digest
-      - Find the Start build action — the console's `oc start-build`
+      > **💡 Tip:** each step names the `oc` command the screen stands in for.
 
       ### When the console wins
 
-      For a failed build, the log and the object that produced it are one click apart, and
-      the history of every run is a list rather than a command. For anything repeatable,
-      the CLI still wins.
+      For a failed build the log and the object that produced it are one click apart, and the
+      history of every run is a list rather than a command.
 
       ### Cleaning up
 
-      Press **Finish** in the guidance box when you are done — that records completion and
-      shuts the project down.
-
-      > **⚠️ Watch out:** leaving the tab open only leaves the project running until it
-      > expires.
+      Press **Finish** in the guidance box when you are done. That records completion and shuts
+      the project down.
     academy.dcs/console-lab: tour-b02-builds
     academy.dcs/orphaned: "0s"
     academy.dcs/expires: 60m
 spec:
   title: "Builds in the console"
   description: >-
-    The console side of Build Your Image on DCS: a BuildConfig, the builds it has produced,
-    the log of one run, and the ImageStream tag holding the result.
-  duration: 8m
+    The console side of Build Your Image: the Builds menu, a BuildConfig's strategy and output,
+    a build started from the Actions menu, its log, and the ImageStream tag it produced.
+  duration: 10m
   difficulty: intermediate
   labels:
     - name: module

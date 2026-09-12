@@ -18,6 +18,49 @@ Apply it to **every** learner-facing surface of a lab:
 | `workshop/slides/slides.md` | Bold key terms; slides are already lists |
 | ConsoleLab `description` / `completionText` step text | **No** — plain text only (see below) |
 
+## 0. Voice — write like a colleague, not like a brochure
+
+Reviewers flagged the first Build & Run draft as "sounding AI generated". The depth was right;
+the sentence habits were not. These are the habits, and what to do instead.
+
+**Say the thing, then stop.** The commonest fault is a closing flourish bolted onto a correct
+sentence.
+
+- ✅ `An idle app sits at the minimum.`
+- ❌ `An idle app sits at the minimum, which is the correct answer rather than a broken one.`
+- ❌ `A failed build stays in the list, which is what makes it useful at three in the morning.`
+
+**No em-dash asides.** One per page at most, and never two in a sentence. A comma, a full stop,
+or brackets will do. Long dashes make every sentence sound like the same voice.
+
+- ✅ `Current utilisation is a percentage of the CPU request, not of a core.`
+- ❌ `Current utilisation is a percentage of the CPU REQUEST — not of a core — which is why …`
+
+**No aphorisms, no antithesis as a rhetorical device.** "X is not Y. It is Z." is fine once in a
+lab when it is literally the teaching point; it is not a paragraph opener.
+
+- ❌ `The registry is not a string in your manifest. It is where the platform decides what may run.`
+- ✅ `On DCS the registry decides what may run: an image the registry will not serve cannot start.`
+
+**Do not announce the structure of your own explanation.** Number the ideas if they need
+numbering; do not tell the reader how surprising they are.
+
+- ❌ `Three ideas, and the third one explains most of what people find surprising.`
+- ✅ `Three rules govern what you may push and pull.`
+
+**Drop the triads.** Three parallel phrases in a row is a rhythm, not information. Two is
+usually enough, and a list is better than either.
+
+**Write the reader's action plainly.** No "meet the four lines the platform rejects", no "watch
+the platform keep it alive". Say what they do and what they will see.
+
+**Keep the analogies, keep the why.** This section is about sentence habits, not about depth:
+[content-depth-reference.md](content-depth-reference.md) still governs what must be explained.
+A VM-world analogy, an expected output, a reason a field exists — all stay.
+
+**Applies to:** instruction pages, README prospectus, `academy.dcs/details`, `spec.description`,
+slides, ConsoleLab step text, and examiner messages.
+
 ## 1. Bold the key terms
 
 **Bold the domain nouns and verbs a learner needs to carry forward.** The page's vocabulary

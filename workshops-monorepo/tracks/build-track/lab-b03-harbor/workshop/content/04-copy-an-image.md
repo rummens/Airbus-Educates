@@ -14,8 +14,9 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/co
 
 ## Copy into your own namespace
 
-The cluster's registry stands in for your DEV Harbor project here. Your session token is the
-credential:
+On {{< param product_short >}} the destination would be the project you asked for on the last
+page. There is no Harbor behind this cluster, so the cluster's own registry stands in for it,
+and your session token is the credential:
 
 ```terminal:execute
 command: |-

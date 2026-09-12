@@ -12,22 +12,24 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: edit
     academy.dcs/details: |
-      **Optional — the fourth thing you can do with a git repository on this platform.**
+      **Optional. The fourth thing this platform can do with a git repository.**
 
-      The track so far used git as a *build source*. **OpenShift Dev Spaces** uses it as an
-      **in-cluster IDE**: a workspace defined by a **devfile**, running on the cluster, with
-      the same registry and the same security posture as everything else you deploy.
+      The track so far used git as a **build source**. **OpenShift Dev Spaces** uses it as an
+      in-cluster IDE: a workspace defined by a **devfile**, running on the cluster, with the same
+      registry and the same security posture as anything else you deploy.
 
-      You read a real devfile field by field — the image the workspace develops in, the
-      endpoints it exposes, the commands it can run — and place Dev Spaces against the
-      three other ways this track has worked with code.
+      You read a real devfile field by field, the image the workspace develops in, the endpoints
+      it exposes and the commands it can run, and place Dev Spaces against the three other ways
+      this track has worked with code.
 
-      > **📌 Mostly a reading lab here.** Dev Spaces is operator-provided, and this training
-      > cluster does not run it. The devfile and the model are the transferable parts, and
-      > the lab is honest about which steps need an instance.
+      > **📌 This is mostly a reading lab.** Dev Spaces is operator-provided and this training
+      > cluster does not run it. The devfile and the model transfer; the lab says which steps
+      > need a real instance.
 spec:
   title: "Dev Spaces"
-  description: Git as an in-cluster IDE — what a devfile declares, how a workspace differs from a build, and where Dev Spaces fits next to the editor, BuildConfigs and your laptop.
+  description: >-
+    Git as an in-cluster IDE: what a devfile declares, how a workspace differs from a build, and
+    where Dev Spaces sits next to the editor, BuildConfigs and your laptop.
   duration: 18m
   difficulty: intermediate
   labels:

@@ -10,12 +10,12 @@ metadata:
 spec:
   title: See your metrics drawn
   description: >-
-    Run a query in the console's metrics view, read it as a graph over time, and find the
-    same numbers per workload without writing PromQL.
+    Run a PromQL query in the console, see what the platform is actually scraping, read the
+    ServiceMonitor that asked for it, and find the per-workload graphs that need no query.
   completionText: >-
-    Done. You ran the query you previously issued with curl, read it over a time range
-    rather than as one instant, and found the per-workload view that answers most questions
-    without a query at all.
+    You have queried the same store your curl reached, found your own endpoint in the
+    platform's scrape targets, read the ServiceMonitor that put it there, and seen the
+    per-workload graphs that answer most questions without any PromQL.
   visibility: hidden
   mode: assisted
   context:
@@ -38,61 +38,121 @@ spec:
         consolePath: '/k8s/ns/<<namespace>>/deployments/lab-app'
   steps:
     - id: open-observe
-      title: Open Observe
+      title: Open the Observe menu
       description: >-
-        Observe is where the platform's monitoring surfaces. You come here when a number
-        matters over time rather than right now — which is most of the time during an
-        incident.
-      target: { type: quickStartId, value: qs-nav-observe }
+        Observe is the platform's monitoring. Alerting is what is firing now. Metrics is a
+        PromQL box. Dashboards are prebuilt graphs. Targets is the list of endpoints the
+        platform scrapes, including yours. Open it.
+      target: { type: quickStartId, value: qs-nav-monitoring }
       complete:
         operation: { type: activateTarget }
         verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
     - id: open-metrics
       title: Open Metrics
       description: >-
-        This is a PromQL box and a graph. It queries the same store your curl against the
-        tenant endpoint reached, and it is scoped to the project you are in — you cannot
-        read another tenant's series here either.
+        This queries the same store your curl against the tenant endpoint reached, and it is
+        scoped to your project. You cannot read another tenant's series here either.
       target: { type: consoleElement, id: navigationLink, value: Metrics }
       complete:
-        operation: { type: navigate, path: '/monitoring/query-browser' }
+        operation: { type: activateTarget }
         verify: { type: route, path: '/monitoring/query-browser' }
     - id: run-a-query
       title: Run a query
       description: >-
-        Type hello_dcs_up and run it. One series per Pod comes back, carrying the labels
-        the platform added — namespace, pod, service — on top of the ones the app set.
-      target: { type: consoleElement, id: detailsSection, value: Metrics }
+        Type hello_dcs_up into the expression box at the top and press Enter. One series per
+        Pod comes back, carrying the labels the platform added, namespace, pod and service,
+        on top of the ones your app set.
+      # The empty query browser has no table and no data-test on its CodeMirror editor, so
+      # the highlight goes on the "No query entered" panel directly below the box. Once a
+      # query runs, that panel is replaced by the result table the next step points at.
+      target: { type: consoleElement, id: detailsSection, value: No query entered }
       complete:
-        operation: { type: none }
+        # Continue fills the query in for a learner who would rather not type it.
+        operation: { type: navigate, path: '/monitoring/query-browser?query0=hello_dcs_up' }
         verify: { type: acknowledge }
     - id: read-the-graph
       title: Read it over time
       description: >-
-        Change the query to sum by (pod) (rate(hello_dcs_requests_total[5m])) and pick a
-        time range. A graph answers "is this getting worse" in a way a single instant value
-        never does, which is the reason to come here rather than to a terminal.
-      target: { type: consoleElement, id: detailsSection, value: Metrics }
+        Now try sum by (pod) (rate(hello_dcs_requests_total[5m])) and pick a time range from
+        the dropdown. A graph answers "is this getting worse", which a single instant value
+        cannot. That is the reason to come here instead of curl.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-targets
+      title: Open Targets
+      description: >-
+        Back to the Observe menu. Targets lists every endpoint the platform is scraping, with
+        the state of the last scrape.
+      target: { type: consoleElement, id: navigationLink, value: Targets }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: route, path: '/monitoring/targets' }
+    - id: read-targets
+      title: Find your own endpoint
+      description: >-
+        Filter by your namespace. Your Pod's /metrics endpoint is in this list, with Up as
+        its status and the time of the last scrape. If an app is exposing metrics and nothing
+        appears in a query, this page says whether the platform is even reaching it, which is
+        usually the faster answer.
+      target: { type: consoleElement, id: pageContent }
       complete:
         operation: { type: none }
         verify: { type: acknowledge }
     - id: open-servicemonitor
-      title: See what asked for the scrape
+      title: Open the ServiceMonitor that asked for it
       description: >-
-        None of that would exist without the ServiceMonitor in your own namespace. Its
-        selector names the Service, and its endpoint names the port BY NAME — the two
-        fields that fail silently when they are wrong.
+        The Monitor column links to the object that put your endpoint in this list. That
+        object is in your namespace and you wrote it.
       target: { type: href, value: '/k8s/ns/<<namespace>>/monitoring.coreos.com~v1~ServiceMonitor/lab-app' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/monitoring.coreos.com~v1~ServiceMonitor/lab-app' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/monitoring.coreos.com~v1~ServiceMonitor/lab-app' }
-    - id: per-workload-metrics
-      title: The view that needs no query
+    - id: read-servicemonitor
+      title: Read its two fields
       description: >-
-        The Developer perspective's Observe page shows CPU, memory and — when your app
-        exposes them — its own custom metrics, per workload, with no PromQL at all. Start
-        here; drop to the query box when this cannot answer the question.
-      target: { type: consoleElement, id: detailsSection, value: Observe }
+        The selector names the Service, and the endpoint names the port by name, not by
+        number. Both fail silently when they are wrong: no error, no series, and a Targets
+        page with nothing of yours on it.
+      target: { type: consoleElement, id: detailsSection, value: ServiceMonitor details }
       complete:
         operation: { type: none }
         verify: { type: acknowledge }
+    - id: open-workloads
+      title: Open the Workloads menu
+      description: >-
+        The last stop needs no PromQL at all, and it lives with the workload.
+      target: { type: quickStartId, value: qs-nav-workloads }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-deployments
+      title: Open Deployments
+      description: >-
+        Same list as oc get deployments.
+      target: { type: consoleElement, id: navigationLink, value: Deployments }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/apps~v1~Deployment' }
+    - id: open-deployment
+      title: Open lab-app
+      description: >-
+        The workload whose Pods you have been querying.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app' }
+    - id: open-metrics-tab
+      title: Open its Metrics tab
+      description: >-
+        Every workload has one. You get CPU, memory, filesystem and network for this object,
+        over time, with no query to write, because the console writes the PromQL and scopes
+        it for you. Start here when someone says an app is slow, and go to the query box only
+        when this cannot answer the question.
+      # The charts on this tab carry no heading and no table, so there is nothing inside the
+      # page for the engine to ring. The tab link is the honest target.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/metrics' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/metrics' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/metrics' }

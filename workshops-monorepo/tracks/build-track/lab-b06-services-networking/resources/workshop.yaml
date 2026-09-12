@@ -13,21 +13,23 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: network
     academy.dcs/details: |
-      **"Just expose it" hides five different answers.**
+      **"Just expose it" has five different answers on Kubernetes.**
 
-      A **Service** is not one thing. This lab walks the types a tenant can actually use
-      on DCS — **ClusterIP**, **headless**, **ExternalName** — and the two you will be
-      refused, **NodePort** and **LoadBalancer**, with the reason why.
+      A **Service** is not one thing. This lab covers the types a tenant can use on DCS,
+      **ClusterIP**, **headless** and **ExternalName**, and the two you will be refused,
+      **NodePort** and **LoadBalancer**, with the reason for each refusal.
 
-      You resolve cluster DNS by hand to see what each type puts in DNS, watch endpoints
-      follow Pod readiness, and finish on why the platform hands you a **Route** for
-      anything that must be reachable from outside.
+      You resolve cluster DNS by hand to see what each type puts there, watch endpoints follow
+      Pod readiness, and finish on the **Route**, which is what the platform gives you for
+      anything that has to be reachable from outside.
 
-      > **💡 Tip:** the headless Service you meet here is the same one a StatefulSet needs
-      > in the next lab.
+      > **💡 Tip:** the headless Service here is the same one a StatefulSet needs in the next
+      > lab.
 spec:
   title: "Services & Cluster Networking"
-  description: Take "expose it" apart — ClusterIP, headless and ExternalName Services, what each one puts in cluster DNS, why NodePort and LoadBalancer are refused on DCS, and where a Route fits.
+  description: >-
+    Take "expose it" apart: ClusterIP, headless and ExternalName Services, what each puts in
+    cluster DNS, why NodePort and LoadBalancer are refused on DCS, and where a Route fits.
   duration: 20m
   difficulty: intermediate
   labels:

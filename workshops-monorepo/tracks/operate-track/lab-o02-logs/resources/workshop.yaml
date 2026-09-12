@@ -13,19 +13,21 @@ metadata:
     academy.dcs/details: |
       **Metrics tell you that something changed. Logs tell you what happened.**
 
-      You practise reading logs properly — following them live, going back in time,
-      reaching the output of a container that has already **crashed**, and picking one
-      container out of a Pod that runs several.
+      You practise reading logs properly: following them live, going back in time, reaching the
+      output of a container that has already **crashed**, and picking one container out of a Pod
+      that runs several.
 
-      Then the limit: delete the Pod and the logs go with it. That is the gap aggregation
-      fills, and the last page covers how it works on DCS — the
-      collector, the log store, LogQL and the same tenancy boundary your metrics have.
+      Then the limit. Delete the Pod and the logs go with it, because the file was on the node.
+      The last page covers what fills that gap on DCS: the collector, the log store, LogQL, and
+      the same tenancy boundary your metrics have.
 
-      > **💡 Tip:** `--previous` is the flag that pays for this lab. The logs explaining a
-      > crash belong to the container that crashed, not the one that replaced it.
+      > **💡 Tip:** `--previous` is the flag that pays for this lab. The logs that explain a crash
+      > belong to the container that crashed, not to the one that replaced it.
 spec:
   title: "Logs"
-  description: Read logs properly — follow, filter, go back to a crashed container, pick one container out of many — then meet the limit that makes aggregation necessary.
+  description: >-
+    Read logs properly: follow them live, go back to a container that has already crashed, pick
+    one container out of several, then meet the limit that makes aggregation necessary.
   duration: 20m
   difficulty: intermediate
   labels:

@@ -1,0 +1,32 @@
+#!/bin/bash
+# The project request is valid whether or not this cluster can fulfil it: with the Harbor
+# provider installed the object must exist and be Ready; without it, the manifest must
+# still name this session's project, which is what the learner edited and read.
+set -uo pipefail
+CRD=projects.project.harbor.crossplane.io
+WANT="${SESSION_NAMESPACE}-scratch"
+
+if oc get crd "$CRD" >/dev/null 2>&1; then
+  for _ in $(seq 1 36); do          # ~180s, the provider calls a remote API
+    oc get project.project.harbor.crossplane.io "$WANT" \
+       -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null | grep -q True && {
+      echo "✅ Harbor project '$WANT' exists and the provider reports it Ready."
+      exit 0
+    }
+    sleep 5
+  done
+  echo "❌ The Project object is not Ready. Run 'oc describe project.project.harbor.crossplane.io $WANT' and read the conditions — a failure there is Harbor's answer, not the cluster's." >&2
+  exit 1
+fi
+
+GOT=$(envsubst < ~/exercises/harbor-project.yaml | yq -r '.spec.forProvider.name' 2>/dev/null)
+if [ "$GOT" != "$WANT" ]; then
+  echo "❌ The manifest asks for project '$GOT', expected '$WANT'. Re-run 'bash ~/exercises/request-project.sh' after restoring ~/exercises/harbor-project.yaml." >&2
+  exit 1
+fi
+SCAN=$(envsubst < ~/exercises/harbor-project.yaml | yq -r '.spec.forProvider.vulnerabilityScanning' 2>/dev/null)
+if [ "$SCAN" != "true" ]; then
+  echo "❌ The manifest has vulnerabilityScanning set to '$SCAN'. Without scanning on push, the CVE rules have nothing to act on." >&2
+  exit 1
+fi
+echo "✅ The request is valid: project '$WANT', private, scanned on push. This cluster has no Harbor provider, so there is nothing to create."

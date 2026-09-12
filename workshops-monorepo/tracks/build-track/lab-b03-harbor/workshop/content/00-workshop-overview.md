@@ -21,6 +21,7 @@ By the end of this workshop you will be able to:
 - Inspect an image **without pulling it**, and say why its digest matters more than its tag.
 - Copy an image between registries with [`skopeo`](https://github.com/containers/skopeo) — no Docker daemon.
 - Name the {{< param product_short >}} **catalogs**, and what each is for.
+- Request a Harbor **project** as a Kubernetes object, through Crossplane's Harbor provider.
 - State the **DEV/PROD project rules**, including the CVE threshold PROD pulls under.
 - Read a vulnerability report and decide whether an image would pass the gate.
 - Describe the only two ways an image reaches a PROD project.
@@ -47,7 +48,7 @@ scanner running live is missing, and the lab says so where it matters.
 
 ## Time and Difficulty
 
-- **Estimated time:** 30 minutes
+- **Estimated time:** 35 minutes
 - **Difficulty:** Intermediate
 
 ## Further Reading

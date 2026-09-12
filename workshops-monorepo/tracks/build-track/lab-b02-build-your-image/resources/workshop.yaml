@@ -13,22 +13,23 @@ metadata:
     academy.dcs/details: |
       **There is no Docker daemon on this platform, and you do not need one.**
 
-      A **BuildConfig** builds your image *inside the cluster*: it takes your files and a
-      Containerfile, runs the build in a Pod, and pushes the result to a registry — with
-      no privileged tooling anywhere near your laptop.
+      A **BuildConfig** builds your image inside the cluster. It takes your files and a
+      Containerfile, runs the build in a Pod, and pushes the result to a registry. No privileged
+      tooling runs on your laptop.
 
-      You create one, feed it the files from your session, watch the build log stream,
-      and then deploy the image **you** made — referenced by an **ImageStream** tag
-      rather than a registry URL.
+      You create one, feed it the files from your session, follow the build log, and deploy the
+      image you made. The Deployment refers to an **ImageStream** tag rather than a registry URL.
 
-      Then a change and a second build, so you can see what a new image actually costs,
-      and what triggers a rebuild on a real project.
+      Then you change the source and build again, so you can see what a second image costs and
+      what triggers a rebuild on a real project.
 
-      > **💡 Tip:** builds are a workload like any other. They queue, they have logs, they
-      > can fail, and they draw on your namespace budget.
+      > **💡 Tip:** a build is a workload like any other. It queues, it has logs, it can fail, and
+      > it spends your namespace budget while it runs.
 spec:
   title: "Build Your Image on DCS"
-  description: Build a container image inside the cluster with a BuildConfig — no Docker daemon — then deploy what you built by its ImageStream tag and rebuild it after a change.
+  description: >-
+    Build a container image inside the cluster with a BuildConfig, deploy it by its ImageStream
+    tag, then change the source and build again.
   duration: 25m
   difficulty: intermediate
   labels:

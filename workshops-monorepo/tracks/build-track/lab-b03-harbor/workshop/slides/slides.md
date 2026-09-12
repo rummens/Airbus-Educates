@@ -43,6 +43,28 @@ skopeo inspect --config docker://$DCS_REGISTRY/samples/hello-dcs:1.0
 
 ---
 
+<!-- id: project -->
+## Ask for a project
+
+A Harbor project is a Kubernetes object. Crossplane's Harbor provider reconciles it.
+
+```
+apiVersion: project.harbor.crossplane.io/v1alpha1
+kind: Project
+spec:
+  forProvider:
+    name: my-namespace-scratch
+    public: false
+    vulnerabilityScanning: true
+    deploymentSecurity: ""     # DEV: serve anything. PROD: "critical"
+```
+
+- **`vulnerabilityScanning`** — scan on push, which is what produces the report.
+- **`deploymentSecurity`** — the severity Harbor refuses to serve. `critical` is the CVE < 9 rule.
+- Delete the object, the provider deletes the project.
+
+---
+
 <!-- id: copy -->
 ## Copy it somewhere else
 

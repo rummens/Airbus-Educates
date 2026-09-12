@@ -15,54 +15,56 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/display-name: "Metrics in the console"
-    academy.dcs/duration: "8 min"
+    academy.dcs/duration: "10 min"
     academy.dcs/difficulty: intermediate
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
-      Run a PromQL query in the console, read it as a graph over time, and find your workload's own metrics without writing a query.
+      Run a PromQL query in the console, find your own endpoint in the platform's scrape targets,
+      and read the per-workload graphs that need no query.
     academy.dcs/details: |
       ### What this lab is
 
-      A **console lab**, and an optional companion to **Metrics & Monitoring**. It opens
-      the OpenShift web console and highlights each step on the real page.
+      An optional console companion to **Metrics & Monitoring**. It opens the OpenShift web
+      console and highlights each step on the real page.
 
-      An app exposing `/metrics` and a ServiceMonitor asking for it are created before the
-      lab starts, so there is a real target and real series to look at.
+      An app exposing `/metrics` and a ServiceMonitor asking for it are created before the lab
+      starts, so there is a real target and real series to look at.
 
       ### What you should already know
 
-      The concepts, not the clicks. **Metrics & Monitoring** is where the pipeline, the
-      ServiceMonitor and PromQL are explained.
+      The concepts, not the clicks. The pipeline, the ServiceMonitor and PromQL are explained in
+      **Metrics & Monitoring**.
 
       ### What you will do
 
-      > **💡 Tip:** you type no `oc` commands, but you will type one PromQL query — the
-      > same one you ran from the terminal.
+      - Open the **Observe** menu and see what each of its four entries is for
+      - Run a query where `curl` against the tenant endpoint stood in
+      - Read the result over a time range instead of as one instant value
+      - Open **Targets** and find your own Pod's `/metrics` endpoint, with the state of the last scrape
+      - Follow the link to the ServiceMonitor that put it there, and read its two fields
+      - Open a workload's own **Metrics** tab, which needs no PromQL at all
 
-      - Open the metrics view and run a query, where `curl` against the query endpoint stood in
-      - Read a graph over a time range instead of one instant value
-      - Find your workload's own metrics in the Developer perspective, without writing PromQL
-      - See the ServiceMonitor object that asked for the scrape
+      > **💡 Tip:** you type no `oc` commands, but you do type one PromQL query, the same one you
+      > ran from the terminal.
 
       ### When the console wins
 
-      A graph over fifteen minutes answers "is this getting worse" in a way a single number
-      never does, and it is the fastest way to show somebody else what you are seeing.
+      Targets answers "is the platform even reaching my app" in one page, which from a terminal
+      takes several commands and an assumption.
 
       ### Cleaning up
 
       Press **Finish** in the guidance box when you are done.
-
-      > **⚠️ Watch out:** leaving the tab open only leaves the project running until it
-      > expires.
     academy.dcs/console-lab: tour-o01-metrics
     academy.dcs/orphaned: "0s"
     academy.dcs/expires: 60m
 spec:
   title: "Metrics in the console"
   description: >-
-    The console side of Metrics & Monitoring: the query view, a graph over a time range, and the Developer perspective's per-workload metrics.
-  duration: 8m
+    The console side of Metrics & Monitoring: the Observe menu, a PromQL query and its graph,
+    the platform's scrape targets, the ServiceMonitor behind yours, and a workload's own metrics
+    tab.
+  duration: 10m
   difficulty: intermediate
   labels:
     - name: module

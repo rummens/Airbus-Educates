@@ -12,24 +12,26 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: trending-up
     academy.dcs/details: |
-      **Setting the replica count by hand only works while you are watching.**
+      **Setting the replica count by hand only works while somebody is watching.**
 
-      A **HorizontalPodAutoscaler** moves that number for you: it reads your Pods' CPU
-      use, compares it with the `requests` you set, and adds or removes replicas to hold
-      a target utilisation.
+      A **HorizontalPodAutoscaler** sets that number for you. It reads your Pods' CPU use,
+      compares it with the `requests` you set, and adds or removes replicas to hold a target
+      utilisation.
 
-      You create one, watch it read live metrics, put the app under load from your own
-      terminal and see it scale out — then look at why it scales *in* so much more
-      slowly, and what happens when the namespace budget, not the load, is the ceiling.
+      You create one, watch it read live metrics, put the app under load from your own terminal
+      and see it scale out. Then why it scales back in far more slowly, and what happens when the
+      namespace budget rather than the load is the ceiling.
 
-      Closes with **VPA**, the other autoscaler: the one that tunes `requests` instead of
-      replica count.
+      The last page covers **VPA**, which tunes `requests` instead of the replica count.
 
-      > **⚠️ Watch out:** an HPA on CPU cannot work at all without CPU `requests`. That is
-      > the first thing this lab checks.
+      > **⚠️ Watch out:** an HPA on CPU cannot work without CPU `requests`. That is the first
+      > thing this lab checks.
 spec:
   title: "Autoscaling"
-  description: Let a HorizontalPodAutoscaler own the replica count — read live CPU metrics against your requests, drive the app under load and watch it scale out, then understand scale-in, the quota ceiling and where VPA fits.
+  description: >-
+    Let a HorizontalPodAutoscaler own the replica count: read live CPU against your requests,
+    drive the app under load, watch it scale out, then look at scale-in, the quota ceiling and
+    VPA.
   duration: 20m
   difficulty: intermediate
   labels:

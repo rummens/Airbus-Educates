@@ -1,0 +1,41 @@
+# A Harbor project, declared as a Kubernetes object.
+#
+# DCS runs a Crossplane provider for Harbor. You do not call the Harbor API and you do not
+# click in its UI: you apply this manifest, and the provider reconciles Harbor until a
+# project with these settings exists. Delete the object and the provider deletes the
+# project.
+#
+# ${SESSION_NAMESPACE} is your session's namespace, substituted by envsubst when you apply
+# the file. On DCS the name follows your namespace the same way.
+apiVersion: project.harbor.crossplane.io/v1alpha1
+kind: Project
+metadata:
+  name: ${SESSION_NAMESPACE}-scratch
+spec:
+  forProvider:
+    # The project name as it appears in Harbor, and as the first path element of every
+    # image pushed into it: harbor.dcs/<name>/<repository>:<tag>
+    name: ${SESSION_NAMESPACE}-scratch
+
+    # Private. A public Harbor project is readable without credentials, which is not what
+    # a tenant's own project is for.
+    public: false
+
+    # Scan every image on push. This is what produces the report you read two pages from
+    # now, and without it the CVE rules further down have nothing to act on.
+    vulnerabilityScanning: true
+
+    # The severity at which Harbor REFUSES to serve an image. Empty means "serve anything",
+    # which is the DEV setting: a DEV project takes any push and hands back any pull.
+    #
+    # A PROD project sets this to "critical", which is the CVE < 9 rule in one field:
+    # anything scored 9.0 or above is Critical, and Harbor will not serve it.
+    deploymentSecurity: ""
+
+    # 1 GiB, in bytes. Small on purpose: a scratch project for one lab.
+    storageQuota: 1073741824
+
+  # Which Harbor the provider should talk to, and with which credentials. The platform
+  # owns this object; you only reference it.
+  providerConfigRef:
+    name: harbor

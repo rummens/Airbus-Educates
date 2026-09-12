@@ -14,20 +14,24 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: boxes
     academy.dcs/details: |
-      **You know Docker. This lab translates that knowledge, it does not replace it.**
+      **You already know Docker. This lab translates that knowledge rather than replacing it.**
 
-      You start from a real `docker-compose.yml` for the `hello-dcs` sample and migrate it
-      onto DCS one object at a time: the container becomes a **Deployment**, `ports:`
-      becomes a **Service**, `environment:` becomes a **ConfigMap**.
+      You start from a real `docker-compose.yml` for the `hello-dcs` sample and move it onto DCS
+      one object at a time. The container becomes a **Deployment**, `ports:` becomes a
+      **Service**, `environment:` becomes a **ConfigMap**.
 
-      Then you look at what is left over — four compose lines the platform refuses — and
-      learn which control rejects each one.
+      Four compose lines have no equivalent here. You apply them anyway, read the refusal, and
+      find out which control rejected each one. Most of them are the **Security Context
+      Constraint** your namespace runs under, and the lab goes through what that is.
 
-      > **💡 Tip:** this is the on-ramp to the Build & Run track. Take it before the build
-      > labs if compose is still your mental model.
+      > **💡 Tip:** this is the on-ramp to Build & Run. Take it first if compose is still your
+      > mental model.
 spec:
   title: "From Docker to Kubernetes"
-  description: Migrate a docker-compose file onto DCS object by object — container to Deployment, ports to Service, environment to ConfigMap — then meet the four lines the platform rejects.
+  description: >-
+    Migrate a docker-compose file onto DCS object by object: the container becomes a Deployment,
+    ports become a Service, environment becomes a ConfigMap. Then read what the platform
+    refuses, and why.
   duration: 25m
   difficulty: intermediate
   labels:

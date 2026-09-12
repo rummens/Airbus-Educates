@@ -13,23 +13,25 @@ metadata:
     academy.dcs/details: |
       **"Why can't I see the other team's Pods?" has an exact answer, and you can read it.**
 
-      Core gave you the words — **Tenant**, **Namespace**, and the fact that "project" is
-      not a separate layer. This lab opens the mechanism: the RBAC objects that decide who
-      may do what, where.
+      Core gave you the words: **Tenant**, **Namespace**, and the fact that "project" is not a
+      separate layer. This lab opens the mechanism underneath, the RBAC objects that decide who
+      may do what, and where.
 
-      You start from `oc auth can-i`, then go behind the answer to the **Role**,
-      **RoleBinding** and **rule** that produced it. Then you build the chain yourself for
-      a ServiceAccount you create, and prove least privilege with `--as` — before and
-      after.
+      You start from `oc auth can-i`, then go behind the answer to the **Role**, **RoleBinding**
+      and **rule** that produced it. Then you build that chain yourself for a ServiceAccount you
+      create, and check the result with `--as` before and after.
 
-      Ends on quotas: what your namespace was given, and why an increase is a request
+      The last page covers quotas: what your namespace was given, and why an increase is a request
       rather than a setting.
 
-      > **💡 Tip:** `oc auth can-i --as` is the single most useful RBAC command there is.
-      > You can test any subject's access without ever logging in as them.
+      > **💡 Tip:** `oc auth can-i --as` is the most useful RBAC command there is. You can test any
+      > subject's access without logging in as them.
 spec:
   title: "RBAC & Tenancy"
-  description: Open up the mechanism behind Tenant and Namespace — read the Role, RoleBinding and rules behind an access decision, build the chain yourself for a ServiceAccount, and prove least privilege with oc auth can-i --as.
+  description: >-
+    Open the mechanism behind Tenant and Namespace: read the Role, RoleBinding and rule behind
+    an access decision, build the chain yourself for a ServiceAccount, and prove least privilege
+    with oc auth can-i --as.
   duration: 25m
   difficulty: intermediate
   labels:

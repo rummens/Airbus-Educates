@@ -16,22 +16,23 @@ metadata:
     academy.dcs/details: |
       **Two namespaces, the same manifest, two different answers.**
 
-      DEV and PROD namespaces on DCS are not separated by a naming convention. They
-      differ in **policy posture**: PROD enforces rules that DEV does not, and only PROD
-      may publish a **Route**.
+      DEV and PROD namespaces on DCS are not separated by a naming convention. They differ in
+      policy: PROD enforces rules that DEV does not, and only PROD may publish a **Route**.
 
-      This session gives you one of each. You apply the same unsized Deployment to both
-      and watch PROD refuse it, then the same Route to both and watch DEV refuse that.
-      Neither refusal is a bug — you read the policy that produced it.
+      This session gives you one of each. You apply the same unsized Deployment to both and watch
+      PROD refuse it, then the same Route to both and watch DEV refuse that. Then you read the
+      policy that produced each refusal.
 
-      Ends on **promotion**: why the answer is a new apply to PROD rather than an edit in
+      The last page covers **promotion**: why it is a fresh apply to PROD rather than an edit in
       place, and where the image has to come from.
 
-      > **💡 Tip:** the error messages here are the lesson. Read them before you fix
-      > anything.
+      > **💡 Tip:** the error messages are the lesson here. Read them before you fix anything.
 spec:
   title: "DEV vs PROD Namespaces"
-  description: The same manifest, applied to a DEV and a PROD namespace, with two different answers — what PROD enforces that DEV does not, why only PROD may publish a Route, and how work is promoted between them.
+  description: >-
+    The same manifest applied to a DEV and a PROD namespace, with two different answers: what
+    PROD enforces that DEV does not, why only PROD may publish a Route, and how work is promoted
+    between them.
   duration: 25m
   difficulty: intermediate
   labels:

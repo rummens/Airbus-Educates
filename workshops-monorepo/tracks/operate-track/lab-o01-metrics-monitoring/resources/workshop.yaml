@@ -11,22 +11,23 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: activity
     academy.dcs/details: |
-      **The platform already measures your Pods. It cannot measure what your app is doing
-      unless the app says so.**
+      **The platform already measures your Pods. It cannot measure what your app is doing unless
+      the app tells it.**
 
-      You expose metrics from the app, ask to be scraped with a **ServiceMonitor**, and
-      then query your own series back — from the terminal, with PromQL, against the
-      platform's tenant query endpoint.
+      You expose metrics from the app, ask to be scraped with a **ServiceMonitor**, and then query
+      your own series back from the terminal, with PromQL, against the platform's tenant query
+      endpoint.
 
-      The last part is the one worth remembering: ask about **your** namespace and you get
-      an answer; ask about somebody else's and you get **Forbidden**. Tenancy is enforced
-      in the metrics path, not just in the API.
+      Tenancy is enforced on that endpoint as well as on the API. Ask about your own namespace and
+      you get an answer. Ask about somebody else's and you get **Forbidden**.
 
       > **💡 Tip:** you never configure Prometheus here. You create one object in your own
       > namespace and the platform's monitoring finds it.
 spec:
   title: "Metrics & Monitoring"
-  description: Expose your app's own metrics, ask to be scraped with a ServiceMonitor, and query the series back with PromQL through the platform's tenant-scoped endpoint.
+  description: >-
+    Expose your app's own metrics, ask to be scraped with a ServiceMonitor, and query the series
+    back with PromQL through the platform's tenant-scoped endpoint.
   duration: 25m
   difficulty: intermediate
   labels:

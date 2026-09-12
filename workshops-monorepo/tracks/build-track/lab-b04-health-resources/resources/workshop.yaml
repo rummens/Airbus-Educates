@@ -14,19 +14,21 @@ metadata:
     academy.dcs/details: |
       **One replica with no probes and no resource numbers is a demo, not a service.**
 
-      You scale the sample app to four replicas and read what that actually costs against
-      your namespace budget. Then you apply a deliberately oversized manifest, watch the
-      **quota reject it**, and fix it by right-sizing `requests` and `limits`.
+      You scale the sample app to four replicas and read what that costs against your namespace
+      budget. Then you apply a deliberately oversized manifest, watch the **quota** reject it, and
+      fix it by sizing `requests` and `limits`.
 
-      With the app fitting its budget, you add **liveness** and **readiness** probes, break
-      readiness on purpose to see one replica quarantined while the others keep serving,
-      and finally delete a Pod by hand to watch the platform put it back.
+      With the app inside its budget you add **liveness** and **readiness** probes. Breaking
+      readiness on purpose takes one replica out of the Service while the others keep serving.
+      Deleting a Pod by hand shows the platform putting it back.
 
-      > **💡 Tip:** your session namespace carries a real quota, sized so you can hit it on
-      > purpose. Hitting it is the lesson, not an accident.
+      > **💡 Tip:** your session namespace carries a real quota, sized so that you can reach it.
+      > Reaching it is one of the exercises.
 spec:
   title: "Health & Resources"
-  description: Scale the sample app, hit your namespace quota on purpose, right-size its requests and limits, then give it liveness and readiness probes and watch the platform keep it alive.
+  description: >-
+    Scale the sample app, hit your namespace quota on purpose, size its requests and limits,
+    then add liveness and readiness probes and break one to see what each does.
   duration: 25m
   difficulty: intermediate
   labels:

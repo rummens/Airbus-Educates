@@ -3,6 +3,10 @@
 #   /academy/lessons/tour-b02-builds/start?ns=<namespace>
 # Only <<namespace>> is templated; the object names are owned by the paired
 # workshop.yaml in this folder and are written out literally.
+#
+# Every href below is the form the console actually renders, read off a live 4.22:
+# sidebar and tab links use the GVK form, table rows use the legacy plural. The engine
+# matches an href target with a[href="<value>"], so the wrong form highlights nothing.
 apiVersion: academy.dcs/v1alpha1
 kind: ConsoleLab
 metadata:
@@ -14,12 +18,12 @@ metadata:
 spec:
   title: Follow a build through the console
   description: >-
-    Find a BuildConfig, read its strategy and output, start a build, watch its log and
-    see the ImageStream tag it produced.
+    Find a BuildConfig, read its strategy and output, start a build, watch its log, and
+    see the ImageStream tag the result landed under.
   completionText: >-
-    Done. You found the recipe, ran it, watched the log stream and saw the tag the result
-    landed under — everything oc get bc, oc start-build, oc logs build and oc get
-    imagestream give you, on four screens.
+    You have run a build from the console and followed it to its output: the recipe, the
+    run it created, the log it streamed, and the tag that now resolves to a digest. That is
+    oc get bc, oc start-build, oc logs build and oc get imagestream, on six screens.
   visibility: hidden
   mode: assisted
   context:
@@ -46,11 +50,11 @@ spec:
         consolePath: '/k8s/ns/<<namespace>>/imagestreams/lab-built'
   steps:
     - id: open-builds-nav
-      title: Open Builds
+      title: Open the Builds menu
       description: >-
-        Builds is where the objects that turn source into images live. You come here to
-        answer "did the last build work, and what did it produce?" — the question oc get
-        builds answers from the terminal.
+        The Builds menu holds the three object types that turn source into a runnable
+        image. BuildConfigs are the recipes. Builds are the runs. ImageStreams are where
+        the results are tracked. Open it.
       target: { type: quickStartId, value: qs-nav-builds }
       complete:
         operation: { type: activateTarget }
@@ -58,18 +62,26 @@ spec:
     - id: open-buildconfigs
       title: Open BuildConfigs
       description: >-
-        Each row is a recipe, not a run. This is what oc get bc lists, and the number of
-        builds beside it is how often that recipe has been used.
+        Start with the recipes. This is oc get bc.
       target: { type: consoleElement, id: navigationLink, value: BuildConfigs }
       complete:
-        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/build.openshift.io~v1~BuildConfig' }
+        operation: { type: activateTarget }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/build.openshift.io~v1~BuildConfig' }
-    - id: open-buildconfig
-      title: Open the lab BuildConfig
+    - id: read-buildconfig-list
+      title: Read the list
       description: >-
-        The details page carries the three decisions that make a build: where the source
-        comes from, which strategy builds it, and which image stream tag the result is
-        pushed to. Those are the fields you read in the manifest during the terminal lab.
+        One row per recipe, not per run. The Last run column tells you when it was last
+        used and how that run ended, so a recipe nobody has run since it was changed is
+        visible here.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: open-buildconfig
+      title: Open lab-built
+      description: >-
+        Click the name. This is the object you wrote in the terminal lab, rendered as a
+        page.
       target: { type: href, value: '/k8s/ns/<<namespace>>/buildconfigs/lab-built' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/buildconfigs/lab-built' }
@@ -77,48 +89,98 @@ spec:
     - id: read-strategy
       title: Read the strategy and the output
       description: >-
-        Strategy says how the image is made, and the output target says where it goes.
-        Change either one and you have a different recipe — which is why this object is
-        versioned in git rather than edited here.
+        Three fields decide what this recipe does. The source says where the input comes
+        from. The strategy says how the image is built, Docker here, meaning a
+        Containerfile. The output names the ImageStream tag the finished image is pushed
+        to. Change any of them and it is a different recipe, which is why the object belongs
+        in git rather than being edited on this page.
       target: { type: consoleElement, id: detailsSection, value: BuildConfig details }
       complete:
         operation: { type: none }
         verify: { type: acknowledge }
-    - id: start-build
-      title: Start a build
+    - id: open-actions
+      title: Open the Actions menu
       description: >-
-        The Actions menu holds Start build. That is oc start-build, and it creates a new
-        Build object rather than changing this one — every run is its own record.
-      target: { type: consoleElement, id: actionsMenu, value: Actions }
+        Every details page in the console has an Actions menu in the top right, and what is
+        in it depends on the object type. For a BuildConfig the first entry is the one you
+        want.
+      target: { type: consoleElement, id: actionsMenu }
       complete:
         operation: { type: activateTarget }
         verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: start-build
+      title: Start build
+      description: >-
+        This is oc start-build. It does not change the BuildConfig: it creates a new Build
+        object, and that object is the record of one run. The page does not navigate
+        anywhere, so press Next once you have clicked it.
+      # No verification the engine can watch: 4.22 stays on the BuildConfig page after
+      # Start build. The next step proves the build exists by opening it by name.
+      target: { type: consoleElement, id: menuItem, value: Start build }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: acknowledge }
     - id: open-builds-tab
       title: Open the Builds tab
       description: >-
-        Every run of this recipe is listed here with its status and when it ran. A failed
-        build stays in this list, which is what makes it useful at three in the morning.
+        Every run of this recipe is listed here with its status and when it started. A
+        failed run stays in the list, which is what makes this page worth knowing.
       target: { type: href, value: '/k8s/ns/<<namespace>>/buildconfigs/lab-built/builds' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/buildconfigs/lab-built/builds' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/buildconfigs/lab-built/builds' }
-    - id: read-build-log
-      title: Read a build's log
+    - id: open-build
+      title: Open lab-built-1
       description: >-
-        Open a build and its Logs tab. The log streams as it runs, and it contains the
-        three phases the terminal lab described: the source arriving, each Containerfile
-        step, and the push of the finished image. This is oc logs build/<name>.
-      target: { type: consoleElement, id: detailsSection, value: Build details }
+        Runs are numbered from one, in order. Open the run you just started.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/builds/lab-built-1' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/builds/lab-built-1' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/builds/lab-built-1' }
+    - id: open-build-logs
+      title: Open its Logs tab
+      description: >-
+        This is oc logs build/lab-built-1, and it streams while the build runs.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/builds/lab-built-1/logs' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/builds/lab-built-1/logs' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/builds/lab-built-1/logs' }
+    - id: read-build-log
+      title: Read the log
+      description: >-
+        The log has the three phases from the terminal lab. The input arrives. Each
+        Containerfile instruction runs, and is echoed as it goes. The finished image is
+        pushed to the output tag. A build that fails, fails in one of those three, and the
+        line before the failure says which.
+      target: { type: consoleElement, id: pageContent }
       complete:
         operation: { type: none }
         verify: { type: acknowledge }
-    - id: open-imagestream
-      title: See where the image landed
+    - id: open-imagestreams
+      title: Open ImageStreams
       description: >-
-        Image Streams, under Builds, holds the result. The tag on this one resolves to a
-        digest — the tag is a label that can move, the digest is the image itself. This is
-        what a Deployment refers to instead of a registry URL.
+        Back to the Builds menu for the last of its three entries. An ImageStream is the
+        cluster's own record of an image: names and tags in here, bytes in the registry.
+      target: { type: consoleElement, id: navigationLink, value: ImageStreams }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/image.openshift.io~v1~ImageStream' }
+    - id: open-imagestream
+      title: Open lab-built
+      description: >-
+        The stream your build pushed to.
       target: { type: href, value: '/k8s/ns/<<namespace>>/imagestreams/lab-built' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/imagestreams/lab-built' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/imagestreams/lab-built' }
+    - id: read-tags
+      title: Read the Tags section
+      description: >-
+        The tag resolves to a digest. Tags move when a new build pushes the same tag; the
+        digest is the image itself and never changes. A Deployment that refers to this
+        ImageStream tag therefore picks up the new image on the next rollout, without
+        anyone editing a registry URL.
+      target: { type: consoleElement, id: detailsSection, value: Tags }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }

@@ -27,37 +27,54 @@ spec:
         label: Lab logger pod
         name: lab-logger
         namespace: '<<namespace>>'
-        listPath: '/k8s/ns/<<namespace>>/pods'
+        listPath: '/k8s/ns/<<namespace>>/core~v1~Pod'
         consolePath: '/k8s/ns/<<namespace>>/pods/lab-logger'
         tabs:
           logs: '/k8s/ns/<<namespace>>/pods/lab-logger/logs'
           events: '/k8s/ns/<<namespace>>/pods/lab-logger/events'
   steps:
     - id: open-workloads
-      title: Open Workloads
+      title: Open the Workloads menu
       description: >-
-        Logs belong to a container, so you reach them through the Pod that runs it —
-        the same path oc logs takes, with the Pod named for you.
+        Logs belong to a container, and a container belongs to a Pod, so you reach them
+        through the Pod. That is the path oc logs takes too, with the Pod named for you.
       target: { type: quickStartId, value: qs-nav-workloads }
       complete:
         operation: { type: activateTarget }
         verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }
+    - id: open-pods
+      title: Open Pods
+      description: >-
+        The list oc get pods prints. Ready, Status and Restarts are the three columns worth
+        reading before you open anything.
+      target: { type: consoleElement, id: navigationLink, value: Pods }
+      complete:
+        operation: { type: activateTarget }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~Pod' }
     - id: open-pod
-      title: Open the logger pod
+      title: Open lab-logger
       description: >-
         This Pod writes a line every few seconds, and a warning to stderr every ninth one.
-        Its details page is where a restart count and its conditions live — the context you
-        usually want next to a log.
       target: { type: href, value: '/k8s/ns/<<namespace>>/pods/lab-logger' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/lab-logger' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/lab-logger' }
+    - id: read-pod-details
+      title: Read the details first
+      description: >-
+        Restart count and status live here. Read them before the log: a log that stops
+        mid-sentence and a restart count of 3 are the same story, and the count is the half
+        that tells you the container died rather than went quiet.
+      target: { type: consoleElement, id: detailsSection, value: Pod details }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-logs-tab
       title: Open the Logs tab
       description: >-
-        This is oc logs -f, streaming. Both stdout and stderr arrive in the same view, in
-        order, which is why writing errors to stderr costs you nothing here and helps a
-        parser later.
+        This is oc logs -f, streaming. stdout and stderr arrive in the same view, in order,
+        which is why writing errors to stderr costs you nothing here and helps a parser
+        later.
       target: { type: href, value: '/k8s/ns/<<namespace>>/pods/lab-logger/logs' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/lab-logger/logs' }
@@ -65,29 +82,41 @@ spec:
     - id: pause-the-stream
       title: Pause it and read one line
       description: >-
-        The stream keeps scrolling, which is useless when you are trying to read. Pause it,
-        find a WARN line, and notice you can select and copy text here — the part of a
-        terminal people miss when a log is racing past.
-      target: { type: consoleElement, id: detailsSection, value: Logs }
+        A stream that keeps scrolling is useless when you are trying to read. Pause it with
+        the control above the log, find a WARN line, and note that you can select and copy
+        the text. There is also a search box, which is grep without the pipe.
+      target: { type: consoleElement, id: pageContent }
       complete:
         operation: { type: none }
         verify: { type: acknowledge }
     - id: container-selector
       title: Find the container selector
       description: >-
-        A Pod with more than one container gets a dropdown here. That is the -c flag, and
-        forgetting it is why a sidecar's logs sometimes seem to be missing.
-      target: { type: consoleElement, id: detailsSection, value: Logs }
+        A Pod with more than one container gets a dropdown above the log. That is the -c
+        flag, and forgetting it is why a sidecar's logs sometimes look missing. This Pod has
+        one container, so the dropdown shows only its name.
+      target: { type: consoleElement, id: pageContent }
       complete:
         operation: { type: none }
         verify: { type: acknowledge }
+    - id: open-events
+      title: Open the Events tab
+      description: >-
+        Events are not logs. The log is what your process wrote; events are what the
+        platform did to the Pod, including the pulls, the probe failures and the kills. When
+        a log ends without explanation, the reason is usually on this tab.
+      target: { type: href, value: '/k8s/ns/<<namespace>>/pods/lab-logger/events' }
+      complete:
+        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/lab-logger/events' }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/lab-logger/events' }
     - id: where-aggregation-fits
       title: Where this page stops
       description: >-
-        Delete this Pod and everything on this screen is gone with it — the node's file went
-        too. That is the gap an aggregated store fills, and on a cluster with one, Observe
-        has a Logs entry that searches across workloads and outlives them.
-      target: { type: quickStartId, value: qs-nav-observe }
+        Delete this Pod and everything you have just read goes with it, because the file it
+        came from lived on the node. That is the gap an aggregated log store fills, and on a
+        cluster that has one, the Observe menu grows a Logs entry that searches across
+        workloads and outlives them.
+      target: { type: quickStartId, value: qs-nav-monitoring }
       complete:
         operation: { type: activateTarget }
         verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }

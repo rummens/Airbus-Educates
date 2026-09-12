@@ -11,25 +11,29 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: database
     academy.dcs/details: |
-      **The registry is not a URL in your manifest. It is the thing that decides what may
-      run.**
+      **On DCS the registry decides what may run. An image it will not serve cannot start.**
 
-      You inspect an image without pulling it, copy one between registries with `skopeo`
-      (no Docker daemon involved), and read a real vulnerability report field by field.
+      You inspect an image without pulling it, request a **Harbor project** as a Kubernetes
+      object through Crossplane's Harbor provider, copy an image between registries with
+      `skopeo`, and read a vulnerability report field by field.
 
-      Then the rules that matter on DCS: the catalogs, the Harbor project your namespace
-      may get, and the asymmetry that shapes everything — **DEV takes pushes, PROD takes
-      none and pulls only below the CVE threshold**.
+      Three rules govern the rest: which **catalogs** images may come from, the Harbor project
+      your namespace may be given, and the asymmetry between the two namespace types. **A DEV
+      project takes any push. A PROD project takes none, and serves only images below CVE
+      severity 9.**
 
-      Ends on the only two ways an image reaches PROD: promotion by mirror, or the green
-      catalog of already-cleared images.
+      The last page covers the two ways an image reaches PROD: a mirror from DEV, or the green
+      catalog of images already cleared.
 
-      > **⚠️ Watch out:** no `docker` and no `podman` anywhere in this lab. `skopeo` talks
-      > to registries directly, which is why it is the tool you get.
+      > **⚠️ Watch out:** there is no `docker` and no `podman` in this lab, or on DCS. `skopeo`
+      > talks to registries over their API, which is why it is the tool you are given.
 spec:
   title: "Harbor: Projects, Push & Scan"
-  description: Inspect and copy images with skopeo, read a vulnerability report, and learn the DCS registry rules — catalogs, per-namespace projects, DEV pushes, the PROD CVE gate and how promotion actually works.
-  duration: 30m
+  description: >-
+    Inspect and copy images with skopeo, request a Harbor project through Crossplane, read a
+    vulnerability report, and learn the DCS registry rules: catalogs, DEV pushes, the PROD CVE
+    gate and how promotion works.
+  duration: 35m
   difficulty: intermediate
   labels:
     - name: module

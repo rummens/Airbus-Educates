@@ -15,54 +15,54 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/display-name: "Autoscaling in the console"
-    academy.dcs/duration: "7 min"
+    academy.dcs/duration: "8 min"
     academy.dcs/difficulty: intermediate
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
-      Read an HPA's current utilisation against its target, its replica bounds, and the Deployment it owns.
+      Read an autoscaler's bounds, its current utilisation, and the conditions that say why it is
+      or is not acting.
     academy.dcs/details: |
       ### What this lab is
 
-      A **console lab**, and an optional companion to **Autoscaling**. It opens the
-      OpenShift web console and highlights each step on the real page.
+      An optional console companion to **Autoscaling**. It opens the OpenShift web console and
+      highlights each step on the real page. You type nothing.
 
-      A Deployment with CPU requests and a HorizontalPodAutoscaler are created before it
+      A Deployment with CPU requests and a HorizontalPodAutoscaler are created before the lab
       starts, so the numbers on screen are real.
 
       ### What you should already know
 
-      The concepts, not the clicks. **Autoscaling** is where the HPA loop, requests as the
-      denominator, and the scale-in window are explained.
+      The concepts, not the clicks. The HPA loop, requests as the denominator and the scale-in
+      window are explained in **Autoscaling**.
 
       ### What you will do
 
-      > **💡 Tip:** you type nothing. Each screen names the `oc` command it stands in for.
+      - Find HorizontalPodAutoscalers in the **Workloads** menu, where `oc get hpa` would list them
+      - Read the min and max bounds, and the replica count it currently wants
+      - Read the **Metrics** section: current utilisation as a percentage of the CPU request
+      - Read the **Conditions**, which say whether it can read the metric and whether it may act
+      - Open the Deployment it controls, whose replica count is no longer yours to set
+      - Find **Add HorizontalPodAutoscaler** on that Deployment's Actions menu
 
-      - Find HorizontalPodAutoscalers where `oc get hpa` would list them
-      - Read current utilisation against the target — the TARGETS column, drawn
-      - Read the min and max replica bounds, and what the HPA currently wants
-      - See the Deployment the HPA owns, and that its replica count is no longer yours to set
-      - Find the Add HorizontalPodAutoscaler action on a Deployment's Actions menu
+      > **💡 Tip:** each step names the `oc` command the screen stands in for.
 
       ### When the console wins
 
-      Utilisation against target is a number in the CLI and a graph here, which makes a
-      scaling decision much easier to explain to somebody else.
+      The conditions are three readable sentences here and a `jsonpath` query from a terminal,
+      and they are what answers "why is it not scaling".
 
       ### Cleaning up
 
       Press **Finish** in the guidance box when you are done.
-
-      > **⚠️ Watch out:** leaving the tab open only leaves the project running until it
-      > expires.
     academy.dcs/console-lab: tour-b05-autoscaling
     academy.dcs/orphaned: "0s"
     academy.dcs/expires: 60m
 spec:
   title: "Autoscaling in the console"
   description: >-
-    The console side of Autoscaling: an HPA's utilisation against target, its bounds, and the Deployment whose replica count it now owns.
-  duration: 7m
+    The console side of Autoscaling: an HPA's bounds, its utilisation against the CPU request,
+    the conditions that explain its decision, and the Deployment whose replica count it owns.
+  duration: 8m
   difficulty: intermediate
   labels:
     - name: module

@@ -15,54 +15,55 @@ metadata:
     argocd.argoproj.io/sync-wave: "5"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/display-name: "Health & resources in the console"
-    academy.dcs/duration: "8 min"
+    academy.dcs/duration: "12 min"
     academy.dcs/difficulty: intermediate
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
-      Read probes, resource numbers, Pod conditions and the project's quota on screen — the console side of Health & Resources.
+      Where the console keeps probes, resource numbers, Pod conditions and your namespace's quota and LimitRange.
     academy.dcs/details: |
       ### What this lab is
 
-      A **console lab**, and an optional companion to **Health & Resources**. It opens the
-      OpenShift web console and highlights each step on the real page.
+      An optional console companion to **Health & Resources**. It opens the OpenShift web
+      console and highlights each step on the real page. You type nothing.
 
-      An app is running before it starts, with probes and resource numbers already set, so
-      every screen shows live values.
+      An app is already running when the lab starts, with probes and resource numbers set,
+      so every screen shows live values.
 
       ### What you should already know
 
-      The concepts, not the clicks. **Health & Resources** is where probes, requests,
-      limits and the namespace budget are explained.
+      The concepts, not the clicks. Probes, requests, limits and the namespace budget are
+      explained in **Health & Resources**.
 
       ### What you will do
 
-      > **💡 Tip:** you type nothing. Each screen names the `oc` command it stands in for.
+      - Open the **Workloads** menu and see what it groups together
+      - Read the Deployment list, where ready pods are counted against wanted pods
+      - Find `readinessProbe`, `livenessProbe` and `resources` in the live YAML
+      - Open a Pod that is Running but never Ready, and read its **Conditions**
+      - Open the **Administration** menu, and your namespace's **ResourceQuota**
+      - Read **Used** against **Max**, and what counts towards Used
+      - Open the **LimitRange** and read the defaults an unsized container gets
 
-      - Read a Deployment's replica ring, where `oc get deployment` reports ready versus desired
-      - Find the probes and the resource block on the Pod template — what you wrote in YAML
-      - Open a Pod and read its conditions and restart count, the console's `oc describe pod`
-      - Open the project's ResourceQuota and read Used against Hard
-      - Find the LimitRange that supplies defaults when a manifest sets none
+      > **💡 Tip:** each step names the `oc` command the screen stands in for.
 
-      ### When the console wins
+      ### One quota, one LimitRange
 
-      Quota and limits are a table here rather than three commands, and a Pod's conditions
-      sit next to its events. For anything repeatable the CLI still wins.
+      A DCS namespace is created with exactly one ResourceQuota and exactly one LimitRange,
+      and you cannot change either yourself. This training namespace lists a few extra
+      quotas that the Academy's own tooling adds; the lab says which one to read.
 
       ### Cleaning up
 
-      Press **Finish** in the guidance box when you are done.
-
-      > **⚠️ Watch out:** leaving the tab open only leaves the project running until it
-      > expires.
+      Press **Finish** in the guidance box when you are done. The namespace expires on its
+      own.
     academy.dcs/console-lab: tour-b04-health
     academy.dcs/orphaned: "0s"
     academy.dcs/expires: 60m
 spec:
   title: "Health & resources in the console"
   description: >-
-    The console side of Health & Resources: probes and resource numbers on the Pod template, a Pod's conditions and restarts, and the project's quota and limit ranges.
-  duration: 8m
+    Where the console keeps probes and resource numbers, why a Pod can be Running and not Ready, and how to read your namespace's ResourceQuota and LimitRange.
+  duration: 12m
   difficulty: intermediate
   labels:
     - name: module
@@ -121,3 +122,31 @@ spec:
                   resources:
                     requests: { cpu: 50m, memory: 64Mi }
                     limits: { cpu: 100m, memory: 128Mi }
+      # A Pod that is Running and never Ready: its readiness probe points at a path the
+      # app does not serve. The tour opens it to show Conditions, which is the one place
+      # the console distinguishes "the container is up" from "the pod is serving".
+      # A BARE Pod, not a Deployment, because a console step can only target an anchor
+      # whose href it knows in advance — a Deployment's pods carry a generated suffix.
+      - apiVersion: v1
+        kind: Pod
+        metadata:
+          name: lab-probe
+          namespace: $(session_namespace)
+          labels:
+            app: lab-probe
+            training.educates.dev/session.name: $(session_name)
+        spec:
+          containers:
+            - name: app
+              image: "{{ .Values.workshopImages.sample }}"
+              ports:
+                - containerPort: 8080
+              readinessProbe:
+                # Port 9090 is closed: the app listens on 8080 only. The probe is
+                # refused a connection every time, so the pod never becomes Ready.
+                httpGet: { path: /healthz, port: 9090 }
+                initialDelaySeconds: 3
+                periodSeconds: 5
+              resources:
+                requests: { cpu: 50m, memory: 64Mi }
+                limits: { cpu: 100m, memory: 128Mi }

@@ -27,7 +27,7 @@ spec:
         label: Lab autoscaler
         name: lab-app
         namespace: '<<namespace>>'
-        listPath: '/k8s/ns/<<namespace>>/horizontalpodautoscalers'
+        listPath: '/k8s/ns/<<namespace>>/autoscaling~v2~HorizontalPodAutoscaler'
         consolePath: '/k8s/ns/<<namespace>>/horizontalpodautoscalers/lab-app'
       labDeployment:
         apiVersion: apps/v1
@@ -49,12 +49,22 @@ spec:
     - id: open-hpa-list
       title: Open HorizontalPodAutoscalers
       description: >-
-        The list carries what oc get hpa prints: the workload each one targets, current
-        utilisation against target, and the replica bounds it may move within.
-      target: { type: href, value: '/k8s/ns/<<namespace>>/horizontalpodautoscalers' }
+        The entry is near the bottom of the Workloads menu, under the workload types
+        themselves.
+      target: { type: consoleElement, id: navigationLink, value: HorizontalPodAutoscalers }
       complete:
-        operation: { type: navigate, path: '/k8s/ns/<<namespace>>/horizontalpodautoscalers' }
-        verify: { type: route, path: '/k8s/ns/<<namespace>>/horizontalpodautoscalers' }
+        operation: { type: activateTarget }
+        verify: { type: route, path: '/k8s/ns/<<namespace>>/autoscaling~v2~HorizontalPodAutoscaler' }
+    - id: read-hpa-list
+      title: Read the list
+      description: >-
+        This is what oc get hpa prints: the workload each autoscaler targets, and the
+        replica bounds it may move within. The workload name in the row is a link of its
+        own, which is a useful reminder that an HPA is always about something else.
+      target: { type: consoleElement, id: pageContent }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-hpa
       title: Open the lab autoscaler
       description: >-
@@ -75,6 +85,28 @@ spec:
       complete:
         operation: { type: none }
         verify: { type: acknowledge }
+    - id: read-hpa-metrics
+      title: Read the Metrics section
+      description: >-
+        Current utilisation is a percentage of the CPU request, not of a core. A container
+        that requests 100m and uses 50m reads as 50%. With no request there is nothing to
+        take a percentage of, the value stays unknown, and the autoscaler never acts. That
+        is the most common reason an HPA appears to do nothing.
+      target: { type: consoleElement, id: detailsSection, value: Metrics }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
+    - id: read-hpa-conditions
+      title: Read the Conditions
+      description: >-
+        ScalingActive says whether it can read the metric at all. AbleToScale says whether
+        it is allowed to act. ScalingLimited says it wanted to go further and hit min or
+        max. Between them they answer "why is it not scaling", which is the question the
+        replica count alone never answers.
+      target: { type: consoleElement, id: detailsSection, value: Conditions }
+      complete:
+        operation: { type: none }
+        verify: { type: acknowledge }
     - id: open-deployment
       title: See what it controls
       description: >-
@@ -91,7 +123,7 @@ spec:
         The Actions menu has Add HorizontalPodAutoscaler — the console's version of oc
         autoscale. The form asks for exactly the three things the manifest declares: the
         target metric, and the minimum and maximum replicas.
-      target: { type: consoleElement, id: actionsMenu, value: Actions }
+      target: { type: consoleElement, id: actionsMenu }
       complete:
         operation: { type: activateTarget }
         verify: { type: targetAttribute, attribute: aria-expanded, value: 'true' }

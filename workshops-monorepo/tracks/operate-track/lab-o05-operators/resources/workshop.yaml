@@ -13,23 +13,24 @@ metadata:
     academy.dcs/details: |
       **Every platform service you are offered arrives the same way: as an operator.**
 
-      An operator is a controller that watches for objects of a kind it understands and
-      makes reality match them — the same reconcile loop a Deployment uses, applied to
-      something bigger than a Pod.
+      An operator is a controller that watches for objects of a kind it understands and makes
+      reality match them. It is the reconcile loop a Deployment already uses, applied to something
+      larger than a Pod.
 
-      You read the **CustomResourceDefinition** that added a new kind to this cluster,
-      create a **Custom Resource** of that kind — a PostgreSQL cluster in a few lines —
-      and watch the operator build everything underneath it.
+      You read the **CustomResourceDefinition** that added a new kind to this cluster, create a
+      **Custom Resource** of that kind, a PostgreSQL cluster in a few lines, and watch the
+      operator build everything underneath it.
 
-      Then the part that matters on DCS: the **ownership split**. The platform owns the
-      operator; you own the instance it manages, including its data, its config and its
-      day-2.
+      Then the **ownership split**, which is what matters on DCS. The platform owns the operator.
+      You own the instance it manages, including its data, its configuration and its day-2 work.
 
-      > **💡 Tip:** the manifest you write here has no image, no StatefulSet and no
-      > volumes in it. Counting what you did *not* have to write is the point.
+      > **💡 Tip:** the manifest you write has no image, no StatefulSet and no volumes in it. What
+      > you did not have to write is the point.
 spec:
   title: "Operators on DCS"
-  description: The pattern behind every platform service — a controller reconciling your Custom Resource. Read a CRD, create an instance, watch the operator build it, and learn who owns what.
+  description: >-
+    The pattern behind every platform service: a controller reconciling your Custom Resource.
+    Read a CRD, create an instance, watch the operator build it, and learn who owns which half.
   duration: 25m
   difficulty: advanced
   labels:
