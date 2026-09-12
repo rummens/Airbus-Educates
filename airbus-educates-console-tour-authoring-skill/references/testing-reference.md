@@ -131,3 +131,21 @@ CONSOLE_URL=https://console-openshift-console.apps-crc.testing CONSOLE_PASSWORD=
 
 Do this for every new lab. The manual walkthrough above stays the quicker check while writing
 the steps; the spec is what keeps them working after a console upgrade.
+
+## Walking a lab to prove every step highlights
+
+A step whose target never resolves does not fail loudly: assisted mode waits and the learner
+presses Continue. The only way to know is to walk the lab and watch the spotlight.
+
+1. Apply the ConsoleLab under a scratch name (`zz-<lab>`), so ArgoCD's selfHeal does not
+   revert it mid-run and prune does not delete it.
+2. Create a namespace holding exactly the objects the paired Workshop's `session.objects`
+   provisions, substituting `$(session_namespace)` and the chart's image values.
+3. From the console-plugin repo's `tests/e2e`, run a Playwright spec that launches
+   `/academy/lessons/<lab>/start?ns=<ns>` and, for each step, records whether
+   `.academy-guidance__spotlight` is visible before clicking the panel's **Continue**/**Next**.
+
+Read the result as a table of `HL-OK` / `NO-HL` per step. Anything `NO-HL` is a bug in the
+lab, not in the learner. Two known false negatives: a `menuItem` step, because the harness
+clicks the panel and that closes the menu a learner would have left open, and any step whose
+target only exists after the learner has typed something.

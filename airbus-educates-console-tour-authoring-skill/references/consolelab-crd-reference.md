@@ -78,9 +78,33 @@ Continue and by timed mode), **this proves it happened** (`verify`, watched cont
 
 | `type` | Resolves | Use for |
 |---|---|---|
-| `quickStartId` | element with `data-quickstart-id="<value>"` | navigation sections: `qs-nav-home`, `qs-nav-workloads`, `qs-nav-networking`, `qs-nav-storage` |
-| `href` | anchor whose URL matches `value` (GVK and legacy plural forms both match) | a link to a specific object or tab |
+| `quickStartId` | element with `data-quickstart-id="<value>"` | navigation sections, listed below |
+| `href` | anchor whose `href` attribute is **exactly** `value` | a link to a specific object or tab |
 | `consoleElement` | a named control via the version adapter | `namespaceSelector`, `namespaceFilter`, `namespaceOption` / `menuItem` (exact entry text of an open menu in `value`), `navigationLink` (exact sidebar link name), `resourceSearch`, `actionsMenu` (the Actions toggle on any details page), `revealSecretValues` (Reveal values on a Secret), `detailsSection` (the block a heading introduces — heading *and* content — by its heading text in `value`: `Data`, `Deployment strategy`, `Environment Variables`), `pageContent` (what a tab put on screen — table, event stream or YAML editor — for bodies with no heading) |
+
+### The two URL forms, and why an href target silently fails
+
+The engine resolves an `href` target with `document.querySelector('a[href="<value>"]')`. Route
+*verification* is tolerant of the console's alternative URLs; **target resolution is not**. The
+console renders two forms, and using the wrong one highlights nothing, with no error:
+
+| Where the link is | Form | Example |
+|---|---|---|
+| sidebar link, details-page tab | GVK | `/k8s/ns/<ns>/core~v1~ResourceQuota`, `/k8s/ns/<ns>/deployments/lab-app/yaml` |
+| table row in a list | legacy plural | `/k8s/ns/<ns>/resourcequotas/compute-resources`, `/k8s/ns/<ns>/pods/lab-logger` |
+
+So: **navigate to a list with `consoleElement: navigationLink`** (exact sidebar text) and
+verify with the GVK `route`; **open an object with `href`** in the legacy plural form.
+
+Verified navigation section ids on OpenShift 4.22 (there is no `qs-nav-observe`):
+
+`qs-nav-home` · `qs-nav-ecosystem` · `qs-nav-workloads` · `qs-nav-networking` ·
+`qs-nav-storage` · `qs-nav-builds` · `qs-nav-monitoring` (labelled **Observe**) ·
+`qs-nav-compute` · `qs-nav-usermanagement` · `qs-nav-administration`
+
+Pages with nothing to ring: the metrics query browser with no query entered has no table and
+no addressable heading except `No query entered`, and a workload's **Metrics** tab has neither
+a heading nor a table, so the tab link itself is the honest target there.
 
 ### Controls worth knowing
 
