@@ -37,7 +37,7 @@ file: ~/exercises/deployment.yaml
 It references the registry path for your namespace's `hello-built:latest`.
 
 ```terminal:execute
-command: envsubst < deployment.yaml | oc apply -f - && oc rollout status deploy/hello-built --timeout=180s
+command: envsubst < ~/exercises/deployment.yaml | oc apply -f - && oc rollout status deploy/hello-built --timeout=180s
 ```
 
 ```examiner:execute-test

@@ -2,9 +2,9 @@
 title: Put It Under Load
 ---
 
-Now make the app work for its living. You do not need a load-testing tool — a handful of
-parallel request loops from your own terminal is enough to move a 100m CPU request past its
-50% target.
+Now make the app work for its living. The workshop image ships a small load tool, `ab`
+(ApacheBench) — one process, many requests in flight, connections reused. That is enough to
+push a 100m CPU request past its 50% target.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -25,38 +25,34 @@ session: 2
 
 ## Drive the load
 
-In the **upper** pane, start eight parallel request loops against the Service for two
-minutes:
+In the **upper** pane, run a two-minute burst of traffic with `ab`:
 
 ```terminal:execute
-command: |-
-  url="http://hello-dcs.$(oc project -q).svc:8080"
-  end=$(( $(date +%s) + 120 ))
-  for i in $(seq 1 8); do
-    ( while [ "$(date +%s)" -lt "$end" ]; do curl -s -o /dev/null "$url"; done ) &
-  done
-  wait
-  echo "load finished"
+command: ab -t 120 -c 16 "http://hello-dcs.$(oc project -q).svc:8080/"
+session: 1
 ```
 
 What that does:
 
-- **`url=…` first** — the address is resolved **once**, before the loops start. Leaving
-  `$(oc project -q)` inside the loop would start an `oc` process per request, and the load
-  would be your terminal working hard rather than the app.
-- **`for i in $(seq 1 8)`** — eight independent loops, so requests overlap instead of
-  queuing behind one another.
-- **`( … ) &`** — each loop runs in the background.
-- **`wait`** — hold the terminal until they have all finished, so the command's end really is
-  the end of the load.
+- **`ab`** — sends plain HTTP GET requests in a steady stream and prints a summary when it
+  stops.
+- **`-t 120`** — run for two minutes, then stop by itself. Nothing is left running.
+- **`-c 16`** — sixteen requests in flight at once, over reused connections.
+- **the URL** — the Service address in this namespace; `ab` resolves the name once, at
+  start.
+
+Why a load tool instead of eight `curl` loops: every `curl` is a new process and a fresh
+DNS lookup, and that per-request overhead can keep your terminal container busier than the
+app it is attacking. One `ab` process with reused connections puts the work where it
+belongs — on the app.
+
+While `ab` runs, its progress lines show the request rate. In the lower pane you should
+see TARGETS climb well past `50%`, then the Pod count rise — 2, then 3, then more.
 
 {{< note >}}
 **⏳ This takes a moment:** the HPA samples metrics every 15 seconds and scales out at most
 once per interval. Expect the first extra Pod after roughly half a minute of load.
 {{< /note >}}
-
-In the lower pane you should see TARGETS climb well past `50%`, then the Pod count rise —
-2, then 3, then more.
 
 ```examiner:execute-test
 name: verify-hpa-scaled-up

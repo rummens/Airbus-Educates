@@ -24,10 +24,9 @@ In the console, signed in as yourself:
   them, its **custom** metrics, without writing any PromQL.
 
 {{< note >}}
-**📌 Why this page has no clickable action.** The OpenShift web console cannot be embedded in a
-workshop session — it refuses to be framed, and it would be signed in as the session's
-identity rather than yours. The console labs in the Console track open it in its own tab
-instead, which is how a console tour has to work.
+**📌 See it live:** the **Metrics in the console** console lab opens the OpenShift web console
+in its own tab and walks you through **Observe** step by step — the same data this page
+describes, but on the real page. Run it from the catalog once you have finished this one.
 {{< /note >}}
 
 ## What to do with a graph

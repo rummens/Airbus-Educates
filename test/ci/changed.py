@@ -26,8 +26,10 @@ PYTHON_GLOBS = (re.compile(r"^images/dcs-academy-portal/"),
                 re.compile(r"^test/workshops/.*\.py$"),
                 re.compile(r"^test/ci/"))
 WORKSHOP_RE = re.compile(r"^tracks/[^/]+/(lab-[^/]+)/")
-# a change to the shared harness or plans affects every workshop's tests
-HARNESS_RE = re.compile(r"^test/workshops/(.*\.py|smoke-plans/.*)$")
+PLAN_RE = re.compile(r"^test/workshops/smoke-plans/(lab-[^/]+)\.json$")
+# a change to the shared test CODE affects every workshop's tests; a plan file
+# change only affects the smoke of the workshop it belongs to (one plan per lab)
+HARNESS_RE = re.compile(r"^test/workshops/.*\.py$")
 
 
 def _run(*a):
@@ -63,11 +65,15 @@ def main():
     harness = any(HARNESS_RE.search(f) for f in files)
 
     if harness:
-        # shared test code/plans changed → re-test every workshop that has a plan
+        # shared test code changed → re-test every workshop that has a plan
         plans = (REPO / "test" / "workshops" / "smoke-plans")
         workshops = sorted(p.stem for p in plans.glob("*.json")) if plans.is_dir() else []
     else:
-        workshops = sorted({m.group(1) for f in files if (m := WORKSHOP_RE.search(f))})
+        # labs touched in tracks/ plus the labs whose plan files changed
+        workshops = sorted(
+            {m.group(1) for f in files if (m := WORKSHOP_RE.search(f))}
+            | {m.group(1) for f in files if (m := PLAN_RE.search(f))}
+        )
 
     sys.stderr.write(f"# base ref: {ref}; {len(files)} files changed\n")
     print(f"PYTHON={1 if python else 0}")

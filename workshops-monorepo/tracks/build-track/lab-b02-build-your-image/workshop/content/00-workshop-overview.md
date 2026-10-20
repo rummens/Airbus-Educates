@@ -9,7 +9,7 @@ in this session. Building a container image the usual way needs privileged acces
 which is precisely what a shared platform will not give you.
 
 So the platform builds it **for** you, inside the cluster, from a
-[**BuildConfig**](https://docs.openshift.com/container-platform/latest/cicd/builds/understanding-buildconfigs.html).
+[**BuildConfig**]({{< param dcs_docs_base_url >}}/services/namespace_aas/concepts/buildconfig-and-imagestreams/).
 
 {{< note >}}
 **💡 First time in one of these labs?** See the
@@ -53,5 +53,5 @@ not.
 
 ## Further Reading
 
-- [Understanding BuildConfigs](https://docs.openshift.com/container-platform/latest/cicd/builds/understanding-buildconfigs.html) — the object, its strategies and its triggers.
-- [Managing image streams](https://docs.openshift.com/container-platform/latest/openshift_images/image-streams-manage.html) — what an ImageStream tracks, and why you reference it rather than a URL.
+- [Understanding BuildConfigs]({{< param dcs_docs_base_url >}}/services/namespace_aas/concepts/buildconfig-and-imagestreams/) — the object, its strategies and its triggers.
+- [Managing image streams]({{< param dcs_docs_base_url >}}/services/namespace_aas/concepts/buildconfig-and-imagestreams/) — what an ImageStream tracks, and why you reference it rather than a URL.

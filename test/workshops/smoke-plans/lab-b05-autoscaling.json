@@ -1,6 +1,6 @@
 {
   "workshop": "lab-b05-autoscaling",
-  "_note": "All eight checks need nothing more than the cluster's Metrics API (per-Pod CPU), which requires cluster monitoring to be running \u2014 enabled on the CRC test cluster on 2026-09-11 (two CVO overrides removed) plus user-workload monitoring. Without it every HPA utilisation figure reads <unknown> and the HPA never leaves minReplicas, so the four metrics-dependent checks fail loudly rather than being skipped. imagePullPolicy=Always forces a re-pull of the mutable samples/hello-dcs:1.0 tag.",
+  "_note": "All eight checks need nothing more than the cluster's Metrics API (per-Pod CPU), which requires cluster monitoring to be running \u2014 enabled on the CRC test cluster on 2026-09-11 (two CVO overrides removed) plus user-workload monitoring. Without it every HPA utilisation figure reads <unknown> and the HPA never leaves minReplicas, so the four metrics-dependent checks fail loudly rather than being skipped. imagePullPolicy=Always forces a re-pull of the mutable samples/hello-dcs:1.0 tag. The two scale-out checks carry timeout: 300 \u2014 they wait internally (~2 min) and on a loaded cluster the per-oc-call latency pushes them past the 180s default, which killed them before their diagnostic could print (runs 3-5). The load is ab (ApacheBench, in the session image) detached for 900s: measured in a live session, 8-12 parallel curl loops drove the app to only 2-13% of its 100m request under cluster churn (fork + DNS per request, inside the 500m session container), so the HPA correctly never scaled; one ab -c 16 process reached 57-71% and the HPA scaled 1->3 in under a minute (verified end-to-end on Dev 2026-10-01).",
   "steps": [
     {
       "run": "envsubst < deployment.yaml | oc apply -f - && oc apply -f service.yaml && oc patch deployment/hello-dcs --type=json -p '[{\"op\":\"add\",\"path\":\"/spec/template/spec/containers/0/imagePullPolicy\",\"value\":\"Always\"}]' && oc rollout status deploy/hello-dcs --timeout=180s"
@@ -21,16 +21,18 @@
       "check": "verify-hpa-has-metrics"
     },
     {
-      "run": "url=\"http://hello-dcs.$(oc project -q).svc:8080\"; end=$(( $(date +%s) + 120 )); for i in $(seq 1 8); do ( while [ \"$(date +%s)\" -lt \"$end\" ]; do curl -s -o /dev/null \"$url\"; done ) & done; wait; echo load finished"
+      "run": "( ab -t 900 -c 16 \"http://hello-dcs.$(oc project -q).svc:8080/\" >/dev/null 2>&1 & ); echo \"ab load running detached for 900s\""
     },
     {
-      "check": "verify-hpa-scaled-up"
+      "check": "verify-hpa-scaled-up",
+      "timeout": 300
     },
     {
       "run": "oc describe hpa hello-dcs | tail -20"
     },
     {
-      "check": "verify-hpa-scale-event"
+      "check": "verify-hpa-scale-event",
+      "timeout": 300
     },
     {
       "check": "verify-hpa-still-reading"

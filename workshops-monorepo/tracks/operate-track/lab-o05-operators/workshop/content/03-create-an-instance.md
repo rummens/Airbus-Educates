@@ -136,7 +136,7 @@ session: 2
 Back in the upper pane, look at everything that now exists in that namespace:
 
 ```terminal:execute
-command: oc get cluster,pods,pvc,svc,secret -n $DB_NS
+command: oc get clusters.postgresql.cnpg.io,pods,pvc,svc,secret -n $DB_NS
 ```
 
 ```examiner:execute-test

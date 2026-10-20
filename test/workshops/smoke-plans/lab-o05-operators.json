@@ -21,7 +21,7 @@
       "check": "verify-cr-created"
     },
     {
-      "run": "oc get cluster,pods,pvc,svc,secret -n $DB_NS"
+      "run": "oc get clusters.postgresql.cnpg.io,pods,pvc,svc,secret -n $DB_NS"
     },
     {
       "check": "verify-cr-healthy"

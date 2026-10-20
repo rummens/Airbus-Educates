@@ -5,9 +5,12 @@
 set -uo pipefail
 min=$(oc get hpa hello-dcs -o jsonpath='{.spec.minReplicas}' 2>/dev/null)
 min="${min:-1}"
+seen=""
 for _ in $(seq 1 24); do          # ~120s
   desired=$(oc get hpa hello-dcs -o jsonpath='{.status.desiredReplicas}' 2>/dev/null)
   spec=$(oc get deployment hello-dcs -o jsonpath='{.spec.replicas}' 2>/dev/null)
+  cur=$(oc get hpa hello-dcs -o jsonpath='{.status.currentMetrics[0].resource.current.averageUtilization}' 2>/dev/null)
+  seen="$seen ${cur:-?}%"
   if [ "${desired:-0}" -gt "$min" ] 2>/dev/null || [ "${spec:-0}" -gt "$min" ] 2>/dev/null; then
     echo "✅ The HPA scaled out: it wants ${desired} replicas (minimum is ${min}), and the Deployment is set to ${spec}."
     exit 0
@@ -15,5 +18,5 @@ for _ in $(seq 1 24); do          # ~120s
   sleep 5
 done
 cur=$(oc get hpa hello-dcs -o jsonpath='{.status.currentMetrics[0].resource.current.averageUtilization}' 2>/dev/null)
-echo "❌ The HPA is still at the minimum of ${min} replicas after 2 minutes (current CPU: ${cur:-<unknown>}% of request). If the utilisation is <unknown>, no metrics are reaching it. If it is simply below 50%, the load is not driving the app hard enough — re-run the load step and leave it running." >&2
+echo "❌ The HPA is still at the minimum of ${min} replicas after 2 minutes (current CPU: ${cur:-<unknown>}% of request). Utilisation observed while waiting:${seen} If the utilisation is <unknown>, no metrics are reaching it. If it is simply below 50%, the load is not driving the app hard enough — re-run the load step and leave it running." >&2
 exit 1

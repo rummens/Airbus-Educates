@@ -152,18 +152,45 @@ def run_plan(ctx, ns, pod, steps, tests_dir, workdir, timeout):
             argstr = " ".join(f"'{a}'" for a in step.get("args", []))
             cmd = f'{tests_dir}/{step["check"]} {argstr}'
             label = f"check: {step['check']} {' '.join(step.get('args', []))}".rstrip()
-        # Heartbeat BEFORE running — some steps (rollout status, polling checks with
-        # retries: .INF) take a while; this line tells the user which one is in flight.
-        print(f"  [{i:>2}/{total}] {DIM}… {_short(label)}{RST}", flush=True)
-        t0 = time.time()
-        r = pod_exec(ctx, ns, pod, cmd, timeout)
-        dt = time.time() - t0
         # `expect_fail` steps invert the verdict: they only pass on the real DCS platform
         # (e.g. Kyverno-enforced PROD deploys) and are EXPECTED to fail here. Encoding it
         # keeps the run green while still catching a regression (an unexpected PASS).
         want_fail = bool(step.get("expect_fail"))
-        raw_ok = r.returncode == 0
-        ok = (not raw_ok) if want_fail else raw_ok
+        # The real Educates examiner honours `retries`/`delay` on its execute-test blocks;
+        # the smoke runner calls the grader directly, so honour them here instead. A check
+        # step may carry `retries: N` and `delay: S` to tolerate transient platform
+        # conditions (route/router propagation, RBAC propagation) without masking a real
+        # regression — the check still fails if every attempt fails.
+        attempts = 1 + max(0, int(step.get("retries", 0)))
+        delay = max(0, float(step.get("delay", 0)))
+        # Heartbeat BEFORE running — some steps (rollout status, polling checks with
+        # retries: .INF) take a while; this line tells the user which one is in flight.
+        print(f"  [{i:>2}/{total}] {DIM}… {_short(label)}{RST}", flush=True)
+        t0 = time.time()
+        r = None
+        # A step may carry its own `timeout` (s): polling checks that wait internally
+        # (e.g. an HPA sampling every 15s) need a budget above the 180s default, or the
+        # harness kills them before their own diagnostic can be printed.
+        step_timeout = max(1, int(step.get("timeout", timeout)))
+        for attempt in range(attempts):
+            if attempt:
+                time.sleep(delay)
+            r = pod_exec(ctx, ns, pod, cmd, step_timeout)
+            raw_ok = r.returncode == 0
+            # `expect_fail` steps in the inverse sense: they pass (are "OK" for the plan)
+            # only when the grader FAILS, and that failure must be stable. If an expected
+            # failure ever "passes" (raw_ok True), that is a regression to surface.
+            if want_fail:
+                ok = not raw_ok
+                if ok and attempt + 1 < attempts:
+                    continue                # keep confirming the failure is stable/not a flake
+                if raw_ok:
+                    ok = False              # XPASS: expected failure regressed into a pass
+                break
+            ok = raw_ok
+            if ok:
+                break
+        dt = time.time() - t0
         passed, failed = (passed + 1, failed) if ok else (passed, failed + 1)
         tag = "XFAIL" if (want_fail and ok) else ("XPASS" if want_fail else ("PASS" if ok else "FAIL"))
         colour = GREEN if ok else RED
