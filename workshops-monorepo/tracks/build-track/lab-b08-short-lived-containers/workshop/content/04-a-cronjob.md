@@ -22,7 +22,7 @@ The schedule is `0 3 * * *`, 03:00 daily, so it will **not** fire while you are 
 trigger it by hand instead, which is also how you would test a new CronJob before trusting it
 overnight.
 
-Three fields decide how it behaves when reality gets messy:
+Three fields control overlapping runs, history and pausing:
 
 - **`concurrencyPolicy: Forbid`** skips the next run if the previous one is still going. The
   alternatives are `Allow`, the default, which permits two runs at once, and `Replace`.
@@ -96,8 +96,8 @@ it will not fire. Set it back to `false` to resume.
 
 {{< warning >}}
 **⚠️ Watch out:** a suspended CronJob does **not** catch up on missed runs when you resume
-it. A schedule is not a queue: if the work has to happen eventually, something else has to
-track that.
+it. Missed runs are not stored anywhere, so if the work has to happen eventually, track it
+some other way.
 {{< /warning >}}
 
 Next, the containers that share a Pod with your app.

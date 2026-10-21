@@ -64,8 +64,8 @@ command: oc get pods -l app=hello-dcs
 
 Still four Pods, `4/4` READY, but one name differs from the list you noted.
 
-**You did not create that Pod.** The one you deleted is gone for good; nothing brought it
-back. The Deployment's **ReplicaSet** continuously compares the actual replica count against
+**You did not create the new Pod.** The deleted Pod stays deleted.
+The Deployment's **ReplicaSet** continuously compares the actual replica count against
 `spec.replicas`, and the moment actual dropped to 3 it created a new Pod from the same
 template.
 
@@ -76,10 +76,10 @@ something changed the **actual** state and the platform rolled forward to match 
 Either direction, the ReplicaSet's only job is to make actual equal desired.
 {{< /note >}}
 
-## Why this matters
+## The same mechanism in production
 
 Nothing here was special-cased for a lab. The same mechanism recovers from a node failure,
 an evicted Pod, or a container that crashes on its own.
 
-A Deployment that fits its budget and reports its own health is one the platform can keep
-running without you.
+If a Deployment fits its budget and has probes, the platform can keep it running without
+manual action.

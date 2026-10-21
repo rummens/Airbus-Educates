@@ -1,10 +1,10 @@
 # Storage
 
-**Give your app memory that outlives its Pod — request a volume, write to it, restart, and watch the data survive.**
+**Give your app storage that survives a Pod restart: request a volume, write to it, restart the Pod, and check the data is still there.**
 
-Everything your app has written so far vanished the moment a Pod restarted.
+So far, anything your app wrote was lost when its Pod restarted.
 
-This lab fixes that. You request a **PersistentVolumeClaim** from a DCS storage class, mount
+In this lab you request a **PersistentVolumeClaim** from a DCS storage class, mount
 it into the app, write a marker, delete the Pod, and read the marker back — proof that the
 volume persists independently of the container.
 

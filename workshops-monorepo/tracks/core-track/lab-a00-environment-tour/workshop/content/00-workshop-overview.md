@@ -40,10 +40,10 @@ None. A DCS login is all you need — every tool is already running in your brow
 This session is a browser-based environment with an embedded **terminal**, a **code
 editor** and a **Console** tab, all on one screen.
 
-Nothing to install, no login to do.
+You don't need to install anything or log in.
 
 All commands run with [`oc`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#cli-getting-started),
-the OpenShift command line. You already have your own {{< param product_short >}} project,
+the OpenShift command line. You already have your own {{< param product_short >}} namespace,
 scoped to you alone.
 
 ## Time and Difficulty

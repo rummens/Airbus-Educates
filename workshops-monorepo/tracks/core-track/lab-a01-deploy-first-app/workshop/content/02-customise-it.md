@@ -60,7 +60,7 @@ command: oc set env deploy/hello-dcs --list
 ```
 
 Before, no `GREETING`; after, `GREETING=Hello from the DCS Academy`. That one line is now
-part of your Deployment's desired state. Next, let's actually reach the app and see the
+part of your Deployment's desired state. Next, reach the app and see the
 greeting.
 
 ```examiner:execute-test

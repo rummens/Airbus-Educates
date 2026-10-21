@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Configure & Troubleshoot Your App
 
-Move configuration out of the command line and into dedicated objects — then break the app on purpose and learn to diagnose and fix it.
+Move configuration out of the command line and into a ConfigMap and a Secret, then break the app on purpose and diagnose and fix it.
 
 **In this lab:** ConfigMap · Secret · roll out a config change · break it · read the cluster's signals · recover.
 
@@ -52,7 +52,7 @@ Create the Secret **before** the workload that references it.
 Editing a ConfigMap does **not** restart running Pods — a Pod reads its config only once, at start. The change is staged, but nothing serving it has picked it up.
 
 - Trigger a rollout so new Pods start and read the new value.
-- Same image, same template except the config it reads — the rollout makes the staged change live.
+- The image does not change. The new Pods read the updated ConfigMap when they start.
 
 ```
 oc rollout restart deploy/hello-dcs
@@ -87,7 +87,7 @@ Three commands, in order — each narrows the problem. Read what the platform re
 - **Logs** — and *no* logs is itself a clue: the container never started, so the failure is config, not code.
 
 ```
-oc describe pod -l app=hello-dcs | tail -n 30
+oc describe pod $(oc get pod -l app=hello-dcs --sort-by=.metadata.creationTimestamp -o name | tail -1) | tail -n 30
 oc get events --sort-by=.lastTimestamp | tail -n 15
 oc logs -l app=hello-dcs --tail=20
 ```
@@ -107,4 +107,4 @@ oc rollout status deploy/hello-dcs --timeout=90s
 ```
 
 - The Pod is Ready again and serving its configuration.
-- The loop to remember: **observe → diagnose → fix → verify.**
+- The loop to remember: **observe → hypothesise → fix → verify.**

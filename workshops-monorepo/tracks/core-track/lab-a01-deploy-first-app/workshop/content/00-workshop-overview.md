@@ -42,8 +42,8 @@ By the end of this workshop you will be able to:
 **💡 New to the command line or containers?** This track goes best if you're comfortable
 with **basic Linux/terminal use** (running a command, reading its output, editing a file)
 and know **a little about containers** (what an image is versus a running container). You
-don't need to be an expert, and nothing here is blocking — but if it's all new, a short
-primer first makes everything click faster:
+don't need to be an expert, and you can start without these. If it is all new, watch a
+short primer first:
 
 - [Container Intro — high-level, non-technical](https://drive.google.com/file/d/1HU2t-a4gNn9e_S_rzduL1Y4H59KWP7O-/view?t=2820.945): what containers are and why they matter.
 - [Container 101 — technical](https://drive.google.com/file/d/1RINpBVe2g6js4K5vtW0QbijzTB1P_RVI/view?usp=sharing): images, containers, and the basics.

@@ -30,7 +30,7 @@ Self-service, because these live *within* the rights and quota you already have.
 - **Modify or delete** a tenant or namespace, and **user management**.
 - **Quota increase** — more CPU/memory/storage than your namespace budget (a *Modify
   namespace* request).
-- **Image mirroring** — pulling an external image into Harbor (the **Storage** lab's air-gap).
+- **Image mirroring** — pulling an external image into Harbor (see the air-gap in **What is DCS?**).
 - **New repos / catalogs** in Harbor, and an **S3 bucket** (the **Storage** lab: not a PVC).
 - **Networking whitelist** and **security exceptions**.
 

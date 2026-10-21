@@ -12,7 +12,7 @@ name: Slides
 url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/promotion
 ```
 
-## Compare what is actually running
+## Compare what is running
 
 ```terminal:execute
 command: |-
@@ -35,21 +35,19 @@ running states from two different manifests**, which is what promotion exists to
 
 ## What promotion is
 
-Promotion is moving a **known, tested artefact** from DEV to PROD, unchanged. Two parts, and
-both matter:
+Promotion is moving a **known, tested artefact** from DEV to PROD, unchanged. It has two
+parts:
 
 1. **The same image**, identified by its tag or digest, rather than one rebuilt from the same
-   branch. On {{< param product_short >}} it arrives in the PROD project either from the
-   **green catalog** of cleared images or **mirrored from the DEV project**, which is a
+   branch. On {{< param product_short >}} it reaches PROD either from the
+   **green catalog** of cleared images or **mirrored from DEV**, which is a
    request rather than a self-service push.
 2. **The same manifest**, with only environment-specific values differing (replica count,
    config, hostnames). Sized, because PROD will not admit it otherwise.
 
 ## What promotion is not
 
-**Editing PROD in place.**
-
-Two reasons:
+Promotion is not **editing PROD in place**, for two reasons:
 
 - a change nobody made in DEV has never been tested anywhere;
 - the next promotion **overwrites it**, and whatever was keeping PROD working disappears
@@ -88,4 +86,4 @@ retries: .INF
 delay: 3
 ```
 
-PROD keeps running — which, after a promotion, is the whole idea.
+The PROD Deployment keeps running, as it would after a real promotion.

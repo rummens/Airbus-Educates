@@ -13,8 +13,8 @@ nothing later depends on finishing this one first.
 
 {{< note >}}
 **💡 Prefer it visual?** Open the **Slides** tab for a low-text overview of everything on these
-pages. Each concept page also has a *📊 See this on a slide* link that jumps the Slides
-tab straight to the matching slide.
+pages. Each concept page also has an *Open the slide for this page* box that jumps the
+Slides tab straight to the matching slide.
 {{< /note >}}
 
 {{< note >}}
@@ -36,15 +36,15 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-None. Curiosity about [containers](https://kubernetes.io/docs/concepts/containers/) is
-enough — we introduce everything you need.
+None. This lab introduces every term it uses, including
+[containers](https://kubernetes.io/docs/concepts/containers/).
 
 {{< note >}}
 **💡 New to the command line or containers?** This track goes best if you're comfortable
 with **basic Linux/terminal use** (running a command, reading its output, editing a file)
 and know **a little about containers** (what an image is versus a running container). You
-don't need to be an expert, and nothing here is blocking — but if it's all new, a short
-primer first makes everything click faster:
+don't need to be an expert, and you can start without these. If it is all new, watch a
+short primer first:
 
 - [Container Intro — high-level, non-technical](https://drive.google.com/file/d/1HU2t-a4gNn9e_S_rzduL1Y4H59KWP7O-/view?t=2820.945): what containers are and why they matter.
 - [Container 101 — technical](https://drive.google.com/file/d/1RINpBVe2g6js4K5vtW0QbijzTB1P_RVI/view?usp=sharing): images, containers, and the basics.
@@ -57,7 +57,7 @@ A dedicated **Theory track** covering this ground in depth is planned for the fu
 
 This session is a browser-based environment with an embedded **terminal** and a **code
 editor**. You already have access to your own
-{{< param product_short >}} project, scoped just to you. All commands are run with
+{{< param product_short >}} namespace, scoped to you. All commands are run with
 `oc` in the terminal — no installation or login required.
 
 ## Time and Difficulty

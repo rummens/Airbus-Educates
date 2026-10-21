@@ -2,8 +2,8 @@
 title: Summary
 ---
 
-You went from the words Core gave you to the mechanism that enforces them, and built your
-own Role and RoleBinding on top of it.
+You read the RBAC objects behind Tenant and Namespace, and built your own Role and
+RoleBinding.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -37,7 +37,7 @@ namespaces (the built-in `view` role works this way). See the
 [Kubernetes RBAC reference](https://kubernetes.io/docs/reference/access-authn-authz/rbac/).
 {{< /note >}}
 
-2. What does a **RoleBinding** actually connect?
+2. What does a **RoleBinding** connect?
 
 {{< note >}}
 **❓ Answer:** A subject (User, Group, or ServiceAccount) to a Role or ClusterRole, inside one
@@ -56,7 +56,7 @@ subject for it.
 ## Next Steps
 
 You have now covered *what* a namespace lets you do (RBAC) and *how much* (quota). The other
-half of "what your namespace can do" is its **lifecycle posture**. DEV vs PROD, and the
-different controls each enforces. That is **DEV vs PROD Namespaces & Policies**. The Role and
+half of "what your namespace can do" is its **lifecycle posture**: DEV or PROD, and the
+controls each one enforces. That is the next lab, **DEV vs PROD Namespaces**. The Role and
 RoleBinding skills from this lab are also the prerequisite for **Operators on DCS**, where
 what a ServiceAccount is (and is not) allowed to do matters directly.

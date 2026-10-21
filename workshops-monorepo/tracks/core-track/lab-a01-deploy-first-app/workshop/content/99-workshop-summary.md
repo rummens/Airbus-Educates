@@ -49,7 +49,7 @@ Deployment's `selector.matchLabels` finds the Pods carrying the matching
 
 You set config ad-hoc with `oc set env`. That is fine for one value.
 
-Real apps have many settings, some of them secret — and things go wrong.
+Real apps have many settings, some of them secret, and things go wrong.
 
 **Configure & Troubleshoot Your App** gives you **ConfigMaps** and **Secrets**, then breaks
 something on purpose so you learn to diagnose and fix it.

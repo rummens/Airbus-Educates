@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Logs
 
-Metrics tell you *that* something changed. Logs tell you *what happened*.
+Reading Pod logs with `oc`, and where that stops being enough.
 
 **In this lab:** where logs live · reading them with intent · the logs of a crash · where `oc logs` stops · the aggregated store.
 
@@ -12,7 +12,7 @@ Digital Container Service · DCS Academy
 ---
 
 <!-- id: where -->
-## Where logs actually live
+## Where logs live
 
 A container has no log file to configure. It writes to stdout, and the platform takes it from there.
 
@@ -46,7 +46,7 @@ oc logs -f deploy/hello-dcs
 <!-- id: crash -->
 ## The logs of a crash
 
-The container that can explain the failure has already been replaced by one that knows nothing.
+The container that failed has already been replaced, and the new one's log does not show the error.
 
 ```
 oc get pods -l app=flaky          # RESTARTS climbing
@@ -55,7 +55,7 @@ oc logs <pod> --previous --tail=20
 
 - **`--previous`** reads the **last terminated** container in that Pod.
 - That is where the fatal line is: *cannot reach the database at db.internal:5432*.
-- Reaching for it first is a two-minute diagnosis instead of twenty minutes of guessing.
+- Run it first on any crash-looping Pod.
 - Between restarts there may be no running container to read at all.
 
 ---
@@ -63,7 +63,7 @@ oc logs <pod> --previous --tail=20
 <!-- id: aggregation -->
 ## When the Pod is gone
 
-Delete the workload and `oc logs` has nothing to read. Incidents outlive Pods, and nodes.
+Delete the workload and `oc logs` has nothing to read. The central store keeps lines after the Pod and node are gone.
 
 ```
 {namespace="my-team-dev", app="hello-dcs"} |= "FATAL"
@@ -74,14 +74,14 @@ sum by (pod) (rate({namespace="my-team-dev"} |= "FATAL" [5m]))
 - **LogQL**: select by labels first, then filter lines — `|=`, `!=`, `|~`.
 - The same `rate()` and `sum by` as metrics, over log lines.
 - Authorized per namespace, exactly like metrics.
-- **Never log a secret.** Central store, full retention, everyone entitled to the namespace.
+- **Never log a secret.** The central store keeps it for the full retention period, readable by everyone entitled to the namespace.
 
 ---
 
 <!-- id: next -->
 ## What's next
 
-You can read logs deliberately, recover a crashed container's last words, and you know exactly where that ability ends.
+You can read logs by workload and time window, recover a crashed container's output, and you know where `oc logs` stops.
 
 Metrics and logs both stop at your namespace boundary. **RBAC & Tenancy** is where that boundary is drawn, and **DEV vs PROD Namespaces** is what the platform enforces on top of it.
 

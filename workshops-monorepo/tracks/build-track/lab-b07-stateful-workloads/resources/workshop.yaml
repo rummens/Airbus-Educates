@@ -12,7 +12,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: database
     academy.dcs/details: |
-      **A Deployment's replicas are interchangeable. Some workloads are not.**
+      **Some workloads need each replica to keep its own name and data.**
 
       A database replica or a queue broker keeps its own data on disk, and needs the same name
       and the same volume back after a restart.
@@ -25,7 +25,8 @@ metadata:
       still there.
 
       > **⚠️ Watch out:** scaling a StatefulSet down does not delete its volumes. That is
-      > deliberate, and it is also how a storage quota fills up quietly.
+      > deliberate, and the kept volumes count against your storage quota until someone deletes
+      > them.
 spec:
   title: "Stateful Workloads"
   description: >-

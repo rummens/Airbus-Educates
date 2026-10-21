@@ -1,10 +1,9 @@
 ---
-title: Identity, Not Interchangeability
+title: Why a StatefulSet
 ---
 
-The difference is not that stateful apps need storage. A Deployment can mount a volume.
-
-The difference is whether one replica is distinguishable from another.
+A Deployment can mount a volume too, so storage alone is not the reason to use a StatefulSet.
+You need one when each replica must be distinguishable from the others.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -22,8 +21,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/id
 - One volume, **shared** by every replica, if you mount one at all.
 - Replacements created in **any order**, several at once.
 
-That is what a stateless app wants, and the opposite of what a replica that owns data
-needs.
+That suits a stateless app. A replica that owns data needs the opposite.
 
 ## What a StatefulSet adds
 
@@ -42,7 +40,8 @@ Three guarantees:
 For a database cluster, "start replica 0 first" is how the first member initialises before
 the others try to join it.
 
-Ordering lets an app assume something about its peers. A Deployment makes no such promise.
+With ordering, an app can rely on its peers starting in a known order. A Deployment does not
+guarantee any order.
 
 {{< warning >}}
 **⚠️ Watch out:** a StatefulSet is not a database. It gives an app the identity and storage
@@ -50,4 +49,4 @@ guarantees a database needs; replication, failover and backups remain the app's 
 **operator's**. That is the Operators lab.
 {{< /warning >}}
 
-Next, build one.
+On the next page you build a headless Service and a StatefulSet.

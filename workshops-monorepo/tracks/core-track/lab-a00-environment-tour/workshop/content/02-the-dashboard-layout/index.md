@@ -2,8 +2,8 @@
 title: The Dashboard Layout
 ---
 
-Look at your screen. It is split into two halves, and every lab in the academy uses the
-same layout — learn it once and every other lab works the same way.
+Look at your screen. It is split into two halves, and every lab in the academy uses this
+layout.
 
 Open the slide for this page (📊 **Slides** tab):
 

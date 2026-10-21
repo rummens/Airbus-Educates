@@ -2,8 +2,8 @@
 title: Identity and Data
 ---
 
-Two Pods with ordinal names prove nothing on their own. Address one **specific** replica,
-and give each one data of its own.
+Ordinal names alone do not show that each replica is separate. On this page you address one
+**specific** replica and give each one its own data.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -32,8 +32,7 @@ retries: .INF
 delay: 3
 ```
 
-That is what the per-Pod name is for: a client can say "connect to replica 0" and mean
-it.
+The per-Pod name lets a client connect to replica 0 specifically.
 
 {{< note >}}
 **💡 Tip:** the Service name on its own (`hello-dcs.<namespace>.svc`) still resolves to
@@ -83,6 +82,6 @@ delay: 3
 ```
 
 If those two Pods shared one volume, the second write would have overwritten the first and
-both would read the same thing. They do not share.
+both would read the same thing. Each replica has its own volume.
 
 Next, delete one and see what comes back.

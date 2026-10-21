@@ -19,7 +19,7 @@ metadata:
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
       Read replicas, rollout history and events for a running Deployment in the
-      OpenShift web console, guided step by step.
+      OpenShift web console.
     # A console lab has no workshop content, so there is no README for the portal to
     # fetch: this annotation is the course page's prospectus. Markdown, rendered.
     academy.dcs/details: |
@@ -34,9 +34,9 @@ metadata:
 
       ### What you should already know
 
-      This lab assumes the concepts, not the clicks. You should have finished
-      **Deploy Your First App**, where you created a Deployment and watched a rollout
-      with `oc rollout status`. No new Kubernetes concepts are introduced here.
+      You should have finished **Deploy Your First App**, where you created a Deployment and
+      followed its rollout with `oc rollout status`. This lab shows the replicas, ReplicaSets
+      and events behind that output, and introduces no new Kubernetes concepts.
 
       ### What you will do
 
@@ -54,9 +54,9 @@ metadata:
 
       ### When to reach for the console
 
-      The console wins when you want the rollout state and the objects underneath it on one
-      screen, updating on their own. The CLI still wins for anything you need to repeat,
-      script, or review — which is why the terminal labs come first.
+      During a rollout the console shows the replica count, the owned pods and the events as
+      tabs of one page, and they update on their own. A change you want to repeat or have
+      reviewed still belongs in the manifest you keep in git.
 
       ### Cleaning up
 
@@ -78,10 +78,9 @@ metadata:
 spec:
   title: "Deployments & rollouts (console)"
   description: >-
-    You created a Deployment and watched it roll out from the terminal in Deploy Your
-    First App. This lab walks the same object through the OpenShift web console —
-    replicas, owned pods, revision history, events and live YAML — so you can recognise
-    each command's equivalent on screen.
+    Replicas, owned pods, revision history, events and live YAML of a running Deployment,
+    read in the OpenShift web console. Each screen is matched to the oc command you used for
+    it in Deploy Your First App.
   duration: 5m
   difficulty: beginner
   labels:

@@ -92,4 +92,4 @@ matters.
 That is the [**ResourceQuota**](https://kubernetes.io/docs/concepts/policy/resource-quotas/)
 working as intended: admission control refusing a request the namespace cannot back.
 
-The fix is a better-sized Pod, not a bigger namespace.
+The fix is to size the Pods correctly. Asking for a bigger namespace is not the answer.

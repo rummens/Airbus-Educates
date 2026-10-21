@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Your Workshop Environment
 
-A short tour of the environment every DCS Academy lab runs in, so the tools never get in the way of the learning.
+A short tour of the environment every DCS Academy lab runs in.
 
 **In this lab:** the quick actions · the dashboard layout · the split terminal · the Console (Kubernetes Dashboard) · the editor · the feedback form.
 
@@ -28,11 +28,11 @@ Everything a box does happens on the **right-hand side**, and only one tab is vi
 <!-- id: dashboard-layout -->
 ## The Dashboard Layout
 
-Every lab uses the same two-part screen: instructions on the left, a work area of tabs on the right. Learn it once and every lab looks the same.
+Every lab uses the same two-part screen: instructions on the left, a work area of tabs on the right.
 
 - **Left — Instructions.** The lab content you read and click through.
 - **Right — Work area.** Tabs: **Terminal · Console · Editor · Slides · Feedback**; one visible at a time.
-- **Verify** boxes are examiner tests: they inspect the cluster and turn green only when a step really worked.
+- **Verify** boxes are examiner tests: they inspect the cluster and turn green only when the step's result is on the cluster.
 - A red check means fix the step before moving on; the checks are safe to re-run.
 
 ![DCS Academy workshop dashboard](dashboard-layout.svg)
@@ -52,7 +52,7 @@ The Terminal tab is a shell in your DCS session, split into two panes so a lab c
 oc whoami
 ```
 
-Expected: your username. `oc status` (lower pane) shows your project is empty for now.
+Expected: your username. `oc status` (lower pane) shows your namespace is empty for now.
 
 ---
 
@@ -87,8 +87,8 @@ Expected: the Editor tab switches into view showing `README.md`.
 ---
 
 <!-- id: close -->
-## You're ready
+## Next
 
-You now know the quick actions, the dashboard, the two terminal panes, the Console tab, the editor, and the feedback form — everything the real labs use.
+You have used the quick actions, the dashboard, the two terminal panes, the Console tab, the editor and the feedback form. Every later lab uses them.
 
 **Next:** *What is DCS?* — the first concept lab, before you deploy your first app.

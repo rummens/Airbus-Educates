@@ -2,8 +2,8 @@
 title: Create a Role and Prove Least Privilege
 ---
 
-Now build the chain yourself, end to end, for a subject you create, and check exactly what
-it can and cannot do.
+Now build the chain yourself, end to end, for a subject you create, and check what it
+can and cannot do.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -133,8 +133,7 @@ title: Verify viewer-bot cannot delete pods (least privilege)
 timeout: 10
 ```
 
-`no`. `viewer-bot` can read pods and configmaps, and only read them. The RoleBinding grants
-exactly the rule you wrote, with nothing implied and nothing extra.
+You get back `no`. `viewer-bot` can only read pods and configmaps: the RoleBinding grants the
+rule you wrote, and nothing more.
 
-You have now read an existing chain and built your own. The last page is the budget your
-namespace works inside.
+The last page covers the quota your namespace works within.

@@ -11,7 +11,7 @@ name: Slides
 url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/restart
 ```
 
-## Note what you are about to lose
+## Record the Pod's identity
 
 ```terminal:execute
 command: oc get pod hello-dcs-0 -o custom-columns=NAME:.metadata.name,UID:.metadata.uid,IP:.status.podIP,NODE:.spec.nodeName
@@ -46,7 +46,7 @@ delay: 3
 A Deployment would have created `hello-dcs-<newhash>-<newsuffix>`. Here the replacement is
 `hello-dcs-0` again, with the same ordinal and the same DNS record.
 
-## And the data?
+## Check the data
 
 ```terminal:execute
 command: oc exec hello-dcs-0 -- cat /opt/app-root/src/data/owner.txt
@@ -63,13 +63,13 @@ delay: 3
 `written by hello-dcs-0`, which is the marker from the last page, on a Pod that did not
 exist when it was written.
 
-Nothing restored it. The claim `data-hello-dcs-0` was never deleted, and the new
+No restore step ran. The claim `data-hello-dcs-0` was never deleted, and the new
 `hello-dcs-0` got the same claim back, because the claim belongs to the **ordinal** rather
 than to the Pod.
 
 {{< note >}}
-**📌 Note:** `oc get pvc` looks exactly the same as before. That is the point — the Pod churned,
-the storage did not.
+**📌 Note:** `oc get pvc` shows the same claims as before. The Pod was replaced, but the data
+on the volume is still there.
 {{< /note >}}
 
 ## What this buys an app
@@ -77,6 +77,6 @@ the storage did not.
 A database replica can keep its data directory, its identity in the cluster, and its place in
 the replication topology across a restart, a node drain or an upgrade.
 
-Those are the guarantees you would otherwise have to fake with careful naming and hope.
+Without a StatefulSet you would have to build these guarantees yourself.
 
 Next: what happens when you scale down.

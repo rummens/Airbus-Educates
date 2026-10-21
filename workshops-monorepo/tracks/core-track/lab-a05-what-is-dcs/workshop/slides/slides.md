@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # What is DCS?
 
-The one-glance version of this lab. Every point here is explained in full on the matching page to the left — the slides are the map, the pages are the territory.
+The one-glance version of this lab. Each point is explained in full on the matching page to the left.
 
 **In this lab:** what DCS is · the two clusters · containers vs images · why Kubernetes · your session tools.
 
@@ -30,7 +30,7 @@ Digital Container Service · DCS Academy
 
 As a tenant you meet two clusters. They are **essentially identical** — same platform, same capabilities, same way of working. Sandbox is not a weaker PROD.
 
-- **One** real difference: **when new features arrive** and **how much maintenance notice** you get.
+- They differ in **one** way: **when new features arrive** and **how much maintenance notice** you get.
 - Rollout pipeline: **DEV/QA → Sandbox → PROD**. A feature hits Sandbox in month 1, PROD in month 2.
 - **Sandbox** — newest features first; shorter maintenance notice, slightly lower SLA.
 - **PROD** — features a month later, already proven; longer notice, higher SLA.
@@ -71,9 +71,9 @@ Plain `docker run` is fire-and-forget: nothing records what *should* run, so not
 <!-- id: session -->
 ## Your session
 
-On the right is a **terminal** already connected to DCS and pointed at your own project, plus an **editor** for viewing files. Every command uses `oc`, the OpenShift CLI — click the command blocks, you never type by hand.
+On the right is a **terminal** already connected to DCS and pointed at your own namespace, plus an **editor** for viewing files. Every command uses `oc`, the OpenShift CLI. Click the command blocks; you never type by hand.
 
-Confirm who you are, that the cluster is reachable, and which project you are in:
+Confirm who you are, that the cluster is reachable, and which namespace you are in:
 
 ```
 oc whoami
@@ -89,6 +89,6 @@ The terminal is **split** — an upper pane (`execute-1`) and a lower pane (`exe
 <!-- id: deploy -->
 # Ready to deploy
 
-That's the map: an air-gapped OpenShift platform, two matching clusters, apps packaged as images and run as containers, orchestrated by Kubernetes — all driven with `oc`.
+In short: an air-gapped OpenShift platform with two matching clusters, where apps are packaged as images and run as containers by Kubernetes, all driven with `oc`.
 
 Head to **Deploy Your First App** to put it into practice: your own app running on DCS in minutes.

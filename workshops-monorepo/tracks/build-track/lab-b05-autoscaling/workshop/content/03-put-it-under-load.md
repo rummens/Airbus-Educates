@@ -2,8 +2,8 @@
 title: Put It Under Load
 ---
 
-Now make the app work for its living. The workshop image ships a small load tool, `ab`
-(ApacheBench) — one process, many requests in flight, connections reused. That is enough to
+Next, put the app under load. The workshop image includes `ab` (ApacheBench), a load tool
+that sends many requests at once from one process over reused connections. That is enough to
 push a 100m CPU request past its 50% target.
 
 Open the slide for this page (📊 **Slides** tab):
@@ -43,11 +43,11 @@ What that does:
 
 Why a load tool instead of eight `curl` loops: every `curl` is a new process and a fresh
 DNS lookup, and that per-request overhead can keep your terminal container busier than the
-app it is attacking. One `ab` process with reused connections puts the work where it
-belongs — on the app.
+app it is testing. One `ab` process with reused connections keeps the load on the app, not
+on your terminal.
 
 While `ab` runs, its progress lines show the request rate. In the lower pane you should
-see TARGETS climb well past `50%`, then the Pod count rise — 2, then 3, then more.
+see TARGETS climb well past `50%`, then the Pod count rise: 2, then 3, then more.
 
 {{< note >}}
 **⏳ This takes a moment:** the HPA samples metrics every 15 seconds and scales out at most

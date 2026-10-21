@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Harbor: Projects, Push & Scan
 
-On DCS the registry decides what may run. An image it will not serve cannot start.
+How the DCS registry decides which images may run.
 
 **In this lab:** catalogs and projects · asking for a project · inspect without pulling · copy between registries · read a scan · how an image reaches PROD.
 
@@ -38,7 +38,7 @@ skopeo inspect --config docker://$DCS_REGISTRY/samples/hello-dcs:1.0
 
 - **Digest** — the real identity. Content-addressed: same digest, same bytes.
 - **RepoTags** — tags move; digests do not.
-- **Layers** — shared base, shared layers, faster rebuilds.
+- **Layers** — images that share a base share layers, so rebuilds are faster.
 - **--config** — `User`, `Env`, `Cmd`. Check `User` before you meet the restricted SCC.
 
 ---
@@ -77,9 +77,9 @@ skopeo copy --dest-tls-verify=false \
   docker://image-registry.openshift-image-registry.svc:5000/$SESSION_NAMESPACE/mirrored:1.0
 ```
 
-- Read there, write here. Layer digests preserved; nothing rebuilt, nothing unpacked.
-- Credentials: the **token** only — the username is ignored, and `$(oc whoami)` breaks it (colons) — a Harbor **robot account** on DCS, scoped to one project.
-- A promotion is this, plus a process, plus a destination that refuses every other route.
+- Copies layers as they are, so digests stay the same.
+- Credentials: only the **token** is checked. Use `unused` as the username, not `$(oc whoami)`. On DCS, use a Harbor **robot account** scoped to one project.
+- A promotion is this copy, requested through ITSM, into a project that accepts no other route.
 
 ---
 
@@ -95,8 +95,8 @@ jq -r '.vulnerabilities[] | select(.severity=="Critical")
   scan-report-flagged.json
 ```
 
-- Critical is 9.0+, so a flagged image is refused by PROD and lives happily in DEV.
-- **`fixable`** is the number to read first: most findings are a newer base away.
+- Critical is 9.0+, so a flagged image is refused by PROD but allowed in DEV.
+- **`fixable`** is the number to read first: most findings are fixed by rebuilding on a newer base.
 - No fix available → remove it, replace it, or take the exception route.
 - The verdict attaches to a **digest** — re-pushing a tag does not inherit it.
 
@@ -105,12 +105,12 @@ jq -r '.vulnerabilities[] | select(.severity=="Critical")
 <!-- id: promotion -->
 ## Getting into PROD
 
-Exactly two routes, and naming both is the point.
+There are two routes into PROD.
 
-- **The green catalog** — already cleared. Boring, and usually right. A cleared base also helps your own builds pass.
+- **The green catalog** — already cleared. A cleared base also helps your own builds pass.
 - **Promotion** — a mirror from DEV, requested through **ITSM**, with the digest preserved and the gate enforced.
-- **Robot accounts** for automation: scoped to one project, revocable, and they outlive you.
-- "No pushes" is a stronger guarantee than "pushes that are checked" — there is no accidental path in.
+- **Robot accounts** for automation: scoped to one project, revocable, and not tied to any person's account.
+- No push access means no unreviewed image can reach PROD, even by accident.
 
 ---
 

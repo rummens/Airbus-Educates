@@ -96,4 +96,4 @@ delay: 2
 ```
 
 The app now answers with **`Configured by a ConfigMap`**, and the same values are also
-readable as files in `/etc/hello-dcs` — env and file, from one ConfigMap.
+readable as files in `/etc/hello-dcs`. Both come from the one ConfigMap.

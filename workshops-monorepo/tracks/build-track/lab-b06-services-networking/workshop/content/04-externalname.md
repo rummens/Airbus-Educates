@@ -75,10 +75,10 @@ delay: 2
   PROD.
 
 {{< warning >}}
-**⚠️ Watch out:** an alias is not access. {{< param product_short >}} is air-gapped and
-egress is **deny-by-default**, so a name that resolves does not mean the destination is
-reachable. An external destination has to be allowed through the **managed egress proxy**
-first, and that is a request rather than a manifest.
+**⚠️ Watch out:** {{< param product_short >}} is air-gapped and egress is
+**deny-by-default**, so a name that resolves does not mean the destination is reachable. An
+external destination has to be allowed through the **managed egress proxy** first. You
+request that from the platform team; a manifest cannot do it.
 {{< /warning >}}
 
 Next, the two types that look like the obvious way out.

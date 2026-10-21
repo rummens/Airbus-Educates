@@ -2,9 +2,9 @@
 title: Diagnose It
 ---
 
-Three commands tell you almost everything about a misbehaving workload. Use them in order —
-each one narrows the problem. The general rule: read what the platform is reporting before
-you change anything.
+Three commands show most of what you need to know about a failing workload. Use them in
+order; each one narrows the problem. Read what the platform reports before you change
+anything.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -63,7 +63,7 @@ You get **no log lines** — instead the server answers with something like:
 Error from server (BadRequest): container "hello-dcs" in pod "hello-dcs-…" is waiting to start: CreateContainerConfigError
 ```
 
-That is not a broken command — it is the clue.
+The command worked. This error message is the clue.
 
 There are no logs *because the container never started*, and the message names the reason:
 the container's **config** could not be built.
@@ -78,4 +78,5 @@ container's logs. Here there is nothing to read.
 ## The diagnosis
 
 The manifest's `envFrom` points at `hello-dcs-conf`, but the real ConfigMap is
-`hello-dcs-config`. One character off. Next page: fix it and confirm recovery.
+`hello-dcs-config`: the name is missing its last two letters. The next page fixes it and
+confirms recovery.

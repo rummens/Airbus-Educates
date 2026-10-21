@@ -49,10 +49,10 @@ command: oc get jobs && oc get pods -l job-name=db-migrate
 Two things to notice:
 
 - the Job reports **`COMPLETIONS 1/1`**;
-- its Pod is still listed, with status **`Completed`** — not running, not restarted, kept so
-  you can read it.
+- its Pod is still listed, with status **`Completed`**. The Job keeps it so you can read its
+  logs.
 
-That Pod is the record of the work. A Deployment would have replaced it.
+The Pod stays as a record of the run; a Deployment would have replaced it.
 
 ## Read the output
 

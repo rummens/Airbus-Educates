@@ -2,13 +2,11 @@
 title: "Resilience & Scheduling"
 ---
 
-The platform **will** move your Pods.
+The platform moves your Pods as routine work: nodes are drained for maintenance, clusters are
+upgraded, workloads are rebalanced.
 
-Nodes are drained for maintenance, clusters are upgraded, workloads are rebalanced. None of
-it asks your permission, and all of it is routine.
-
-What you get is a way to state your **terms**, and a shutdown path that decides whether being
-moved costs you an outage.
+You can limit how many Pods it takes at once, and the way your app shuts down decides whether
+being moved costs you an outage.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the
@@ -23,7 +21,7 @@ By the end of this workshop you will be able to:
 - Tell **voluntary** disruption from **involuntary**, and say what protects against each.
 - Write a [**PodDisruptionBudget**](https://kubernetes.io/docs/concepts/workloads/pods/disruptions/) and read from its own status how many Pods the platform may take right now.
 - Explain why a budget that allows **nothing** is a problem rather than extra safety.
-- Explain what happens at shutdown — `SIGTERM`, `terminationGracePeriodSeconds`, `preStop` — and what a container that ignores `SIGTERM` costs.
+- Explain what happens at shutdown (`SIGTERM`, `terminationGracePeriodSeconds`, `preStop`) and what a container that ignores `SIGTERM` costs.
 - Spread replicas with [**topology spread constraints**](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/), and choose between a spread you *prefer* and one you *require*.
 
 ## Prerequisites
@@ -43,8 +41,8 @@ A browser-based session with a split **terminal** and an **editor**, pointed at 
 namespace. All commands run with `oc`.
 
 You will **not** drain a node, because that is the platform's action rather than a
-tenant's. You do the tenant half: declare what the platform must respect, and check that it
-has understood.
+tenant's. You do the tenant half: declare what the platform must respect, and read the budget's
+status to confirm it is in effect.
 
 ## Time and Difficulty
 

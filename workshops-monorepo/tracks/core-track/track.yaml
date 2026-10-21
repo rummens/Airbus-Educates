@@ -4,6 +4,6 @@
 # defaults (order 100, icon "layers").
 id: core             # track id — must equal the workshops' academy.dcs/track label
 title: "Core — DCS Foundations"
-description: "Get oriented on DCS: containers, images, namespaces, and working with oc."
+description: "The foundations: deploying, configuring, exposing and storing an app on DCS, and how tenants and namespaces are requested."
 order: 10            # track sort order in the portal (low = first)
 icon: code           # FA-style icon name the portal vendors

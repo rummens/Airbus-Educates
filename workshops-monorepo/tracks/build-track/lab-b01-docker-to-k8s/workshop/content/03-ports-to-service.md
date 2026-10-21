@@ -72,8 +72,8 @@ retries: .INF
 delay: 2
 ```
 
-`HTTP 200`, from a name that outlives the Pods behind it. That is the compose `ports:`
-line, translated.
+`HTTP 200` means the Service answered. Its name stays the same when the Pods behind it are
+replaced. This is what the compose `ports:` line becomes.
 
 Nothing is exposed outside the cluster yet. That is a Route, which the Core **Expose Your
 App** lab covers, and which the **Services & Cluster Networking** lab later in this track

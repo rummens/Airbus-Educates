@@ -35,16 +35,14 @@ mirror between projects requested through ITSM, or you take an already-cleared i
 ## 3. The builder itself is platform-provided
 
 There is no daemon on your laptop and none on the cluster. The build runs in a Pod with a
-builder image the platform supplies and keeps patched. You choose what goes *in* your image;
-the platform owns what *does* the building.
+builder image the platform supplies and keeps patched. You choose the contents of your image.
+The platform supplies and patches the builder.
 
 {{< note >}}
-**📌 Note:** this is the same ownership split as the Operators lab. The platform owns the
-machinery, you own what it produces.
+**📌 Note:** this is the same ownership split as the Operators lab.
 {{< /note >}}
 
 ## What does not change
 
-Everything you just did. The BuildConfig, the Build, the log, the ImageStream tag and the
-rebuild are the same objects and the same commands. Only the endpoints differ, and those are
-values in a manifest.
+Everything else stays the same: the BuildConfig, the Build, the log, the ImageStream tag and
+the rebuild. Only the registry endpoints differ, and those are values in a manifest.

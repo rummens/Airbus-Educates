@@ -3,9 +3,9 @@
 <!-- id: intro -->
 # Services & Cluster Networking
 
-"Just expose it" hides at least five different answers. This lab walks them, resolving each one through cluster DNS by hand.
+Kubernetes has five Service types. This lab resolves each one through cluster DNS by hand.
 
-**In this lab:** the types · ClusterIP and DNS · headless · ExternalName · the two that look right and are not.
+**In this lab:** the types · ClusterIP and DNS · headless · ExternalName · the two that do not work here.
 
 Digital Container Service · DCS Academy
 
@@ -20,7 +20,7 @@ Every Service has a selector and ports. The `type` decides what the platform bui
 - **Headless** — `clusterIP: None`: one DNS record per ready Pod.
 - **ExternalName** — a CNAME to something elsewhere.
 - **NodePort** — a port on every node. Shared, and unreachable from outside here.
-- **LoadBalancer** — needs a provider. On-prem, nobody answers.
+- **LoadBalancer** — needs a provider, and an on-prem cluster has none.
 
 ![The five Service types side by side, with Route as the supported way out on DCS](service-types.svg)
 
@@ -46,7 +46,7 @@ getent hosts hello-dcs.$(oc project -q).svc.cluster.local
 <!-- id: headless -->
 ## Headless
 
-Sometimes one address is exactly wrong: a client that must reach **replica 2**, or peers that discover each other.
+Some clients need one address per Pod: a client that must reach **replica 2**, or peers that discover each other.
 
 ```
 oc apply -f service-headless.yaml
@@ -79,7 +79,7 @@ getent hosts api-alias.$(oc project -q).svc.cluster.local
 <!-- id: refused -->
 ## The two that look right
 
-Both are created without complaint. Neither gets you what you came for.
+The API accepts both, but neither makes the app reachable from outside.
 
 ```
 oc get svc hello-dcs-nodeport   # 8080:30113/TCP
@@ -88,15 +88,15 @@ oc get svc hello-dcs-lb         # EXTERNAL-IP <pending>
 
 - **NodePort** — a port on shared nodes, outside your tenant boundary, and no route in: the platform's monitored external load balancer is the only edge.
 - **LoadBalancer** — a request to infrastructure that has no provider to fulfil it. Stays `<pending>` forever, reporting healthy.
-- **Route** is the supported way out — and it needs a PROD-type namespace.
+- **Route** is the supported way out. It needs a PROD-type namespace.
 
 ---
 
 <!-- id: next -->
 ## What's next
 
-You have a name per Pod that survives a restart, and you know which door the platform lets traffic in through.
+You have a name per Pod that survives a restart, and you know that outside traffic enters only through a Route.
 
-**Next lab — Stateful Workloads:** a StatefulSet with its own headless Service, a PersistentVolumeClaim **per replica**, and an ordered rollout — for when replicas are not interchangeable.
+**Next lab, Stateful Workloads:** a StatefulSet with its own headless Service, a PersistentVolumeClaim **per replica**, and an ordered rollout, for workloads whose replicas are not interchangeable.
 
 Digital Container Service · DCS Academy

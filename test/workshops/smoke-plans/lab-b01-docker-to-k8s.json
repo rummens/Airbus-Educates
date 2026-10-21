@@ -45,7 +45,7 @@
       "check": "verify-scc-restricted"
     },
     {
-      "run": "cat <<'YAML' | oc apply -f - 2>&1 | tail -4 || true\napiVersion: v1\nkind: Pod\nmetadata:\n  name: rootme\nspec:\n  containers:\n  - name: c\n    image: ${DCS_REGISTRY}/samples/hello-dcs:1.0\n    securityContext:\n      runAsUser: 0\nYAML"
+      "run": "cat <<YAML | oc apply -f - 2>&1 | tail -4 || true\napiVersion: v1\nkind: Pod\nmetadata:\n  name: rootme\nspec:\n  containers:\n  - name: c\n    image: ${DCS_REGISTRY}/samples/hello-dcs:1.0\n    securityContext:\n      runAsUser: 0\nYAML"
     },
     {
       "check": "verify-root-rejected"

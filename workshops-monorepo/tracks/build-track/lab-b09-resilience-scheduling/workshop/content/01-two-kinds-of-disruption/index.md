@@ -15,9 +15,9 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/di
 
 ## Involuntary: nobody chose this
 
-A node fails. A kernel panics. A container exceeds its memory limit and is `OOMKilled`.
+A node fails, a kernel panics, or a container exceeds its memory limit and is `OOMKilled`.
 
-Nothing negotiates with these. Your defences are the ones from earlier labs:
+You cannot delay these. Your defences are the ones from earlier labs:
 
 - **more than one replica**, so losing one is not losing the service;
 - **probes**, so a broken replica leaves the Service's endpoints;
@@ -33,8 +33,8 @@ These are planned, and a planned action can wait. That is what a
 
 {{< note >}}
 **📌 On {{< param product_short >}} you never run the drain.** Node maintenance is the
-platform's job, and your PDB is how you constrain it without being in the room. That is why it
-has to exist before the maintenance window rather than during it.
+platform's job, and your PDB sets the limit its drains must respect, without you taking part.
+That is why it has to exist before the maintenance window rather than during it.
 {{< /note >}}
 
 ## Both paths end in shutdown
@@ -43,13 +43,12 @@ Whichever reason ends a Pod, the ending itself is the same sequence: the Pod lea
 Service's endpoints, `preStop` runs, `SIGTERM` arrives, and after the grace period `SIGKILL`
 follows.
 
-An app that handles that sequence well can be moved without anyone noticing. An app that
-ignores it drops requests every time the platform touches it, and you measure what that costs
-two pages from now.
+An app that handles this sequence can be moved without dropping requests, but one that
+ignores it drops requests each time a Pod is moved. You measure that cost two pages from now.
 
 ## What this lab does
 
 1. Declare a budget, and read back **how many Pods the platform may take right now**.
-2. Squeeze it until the answer is **zero**, and see why that is not "safer".
+2. Squeeze it until the answer is **zero**, and see why that blocks maintenance.
 3. Time a shutdown and find out what `SIGTERM` handling is worth.
 4. Ask for replicas to be **spread**, and choose how hard an ask it is.

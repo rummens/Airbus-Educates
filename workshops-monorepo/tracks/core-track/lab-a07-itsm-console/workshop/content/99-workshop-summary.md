@@ -52,14 +52,17 @@ have. Only *raising* that quota is a request.
 
 {{< note >}}
 **❓ Answer:** Because {{< param product_short >}} onboarding is **automated** and the fields
-feed that automation directly — the missing piece is the self-service frontend, not the
-provisioning.
+feed that automation directly. Provisioning is already automated; only the self-service
+frontend is still missing.
 {{< /note >}}
 
 ## Next Steps
 
-That completes the Core track. Two tracks continue from here:
+That completes the Core track. Three tracks continue from here:
 
 - the **Console track** — the same work, done in the OpenShift web console;
-- the **Developer track** — the mechanisms behind it: **RBAC, Tenancy & Namespaces** (access
-  in full) and **DEV vs PROD Namespaces & Policies** (how DEV and PROD differ by policy).
+- the **Build & Run** track — build your image, get it into Harbor, and make the app
+  healthy, scalable and resilient;
+- the **Operate & Observe** track — metrics, logs and the mechanisms behind your
+  namespaces: **RBAC & Tenancy** (access in full) and **DEV vs PROD Namespaces** (how DEV
+  and PROD differ by policy).

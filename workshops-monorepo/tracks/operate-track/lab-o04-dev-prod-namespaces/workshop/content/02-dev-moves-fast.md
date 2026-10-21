@@ -2,7 +2,7 @@
 title: DEV Moves Fast
 ---
 
-Start in the DEV namespace, with the manifest people actually write first.
+Start in the DEV namespace, with the manifest people usually write first.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -32,7 +32,8 @@ retries: .INF
 delay: 3
 ```
 
-Accepted without comment. You are iterating, and the platform stays out of the way.
+DEV accepts it with no warning. DEV namespaces do not enforce these rules, so you can iterate
+freely.
 
 ## Put a Service in front of it
 
@@ -76,7 +77,7 @@ delay: 3
 
 {{< note >}}
 **📌 Note:** the `|| true` on that command is only so the page continues past an expected
-failure. The rejection is the point.
+failure. The rejection message is what you came to read.
 {{< /note >}}
 
 ## Why DEV cannot publish
@@ -85,6 +86,5 @@ A Route puts your app on the platform's **external** edge: a real hostname, reac
 people, behind the controlled load balancer from **Services & Cluster Networking**.
 
 Allowing that in a namespace whose purpose is unfinished work would mean half-built things
-becoming reachable without anyone deciding so.
-
-Iterate in DEV, publish from PROD.
+becoming reachable without anyone deciding so. So you iterate in DEV
+and publish from PROD.

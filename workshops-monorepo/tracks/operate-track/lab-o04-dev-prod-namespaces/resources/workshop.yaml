@@ -14,10 +14,9 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: shield
     academy.dcs/details: |
-      **Two namespaces, the same manifest, two different answers.**
+      **One manifest applied to a DEV and a PROD namespace, with different results.**
 
-      DEV and PROD namespaces on DCS are not separated by a naming convention. They differ in
-      policy: PROD enforces rules that DEV does not, and only PROD may publish a **Route**.
+      DEV and PROD namespaces on DCS differ in policy: PROD enforces rules that DEV does not, and only PROD may publish a **Route**.
 
       This session gives you one of each. You apply the same unsized Deployment to both and watch
       PROD refuse it, then the same Route to both and watch DEV refuse that. Then you read the
@@ -26,11 +25,12 @@ metadata:
       The last page covers **promotion**: why it is a fresh apply to PROD rather than an edit in
       place, and where the image has to come from.
 
-      > **💡 Tip:** the error messages are the lesson here. Read them before you fix anything.
+      > **💡 Tip:** read each error message before you fix anything. It names the rule and the
+      > field.
 spec:
   title: "DEV vs PROD Namespaces"
   description: >-
-    The same manifest applied to a DEV and a PROD namespace, with two different answers: what
+    The same manifest applied to a DEV and a PROD namespace, with different results: what
     PROD enforces that DEV does not, why only PROD may publish a Route, and how work is promoted
     between them.
   duration: 25m

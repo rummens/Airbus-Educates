@@ -2,8 +2,8 @@
 title: Your Session
 ---
 
-Time to get hands-on. On the right you have a **terminal** already connected to
-{{< param product_short >}} and pointed at your own project. Every command in this
+On the right you have a **terminal** already connected to
+{{< param product_short >}} and pointed at your own namespace. Every command in this
 academy is run with [`oc`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#cli-getting-started),
 the OpenShift command line tool. Click the command blocks below to run them — you never
 have to type them by hand.
@@ -47,10 +47,10 @@ title: Verify the cluster API is reachable
 timeout: 10
 ```
 
-## Which Project Am I In?
+## Which Namespace Am I In?
 
-On {{< param product_short >}}, your work lives in a **project** (an OpenShift project
-wrapping a Kubernetes namespace). Yours is already selected. Show its name:
+On {{< param product_short >}}, your work lives in a **namespace**. OpenShift calls it a
+**project**, which is why the command is `oc project`. Yours is already selected. Show its name:
 
 ```terminal:execute
 command: oc project -q | tee ~/exercises/project.txt
@@ -58,18 +58,18 @@ command: oc project -q | tee ~/exercises/project.txt
 
 ```examiner:execute-test
 name: verify-project
-title: Verify your project is selected
+title: Verify your namespace is selected
 timeout: 10
 ```
 
 {{< note >}}
-**📌 Note:** your project name is also available in the terminal as `$SESSION_NAMESPACE`. Because it
+**📌 Note:** your namespace name is also available in the terminal as `$SESSION_NAMESPACE`. Because it
 is already your default, most `oc` commands need no `-n` flag.
 {{< /note >}}
 
-## What's In My Project?
+## What's In My Namespace?
 
-`oc status` gives a quick overview of what is running in your project. Each lab runs in
+`oc status` gives a quick overview of what is running in your namespace. Each lab runs in
 its own fresh session namespace, so this one starts clean:
 
 ```terminal:execute
@@ -78,7 +78,7 @@ command: oc status | tee ~/exercises/status.txt
 
 ```examiner:execute-test
 name: verify-status
-title: Verify oc status runs against your project
+title: Verify oc status runs against your namespace
 timeout: 10
 ```
 

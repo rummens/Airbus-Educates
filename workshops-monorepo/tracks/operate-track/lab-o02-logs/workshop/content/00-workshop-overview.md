@@ -20,7 +20,7 @@ for the terminal, editor and clickable actions.
 
 By the end of this workshop you will be able to:
 
-- Explain where a container's logs actually live, and who rotates them.
+- Explain where a container's logs live, and who rotates them.
 - Read logs with intent: [`oc logs`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#oc-logs) with `-f`, `--tail`, `--since`, `-c` and label selectors.
 - Recover the output of a container that has already **crashed and restarted**.
 - Say exactly when `oc logs` can no longer help you.

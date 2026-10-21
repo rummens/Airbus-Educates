@@ -2,9 +2,9 @@
 title: Liveness and Readiness
 ---
 
-A correctly sized Pod that never tells the platform whether it is working is still a
-gamble. Without probes, {{< param product_short >}} will send traffic to a hung container, or
-leave a slow-starting one out of rotation.
+Without probes, {{< param product_short >}} cannot tell whether a container works, even
+when it is correctly sized: it sends traffic to a hung container, or keeps a slow-starting one out of
+rotation.
 
 **Probes** are how a Pod answers two different questions the platform keeps asking.
 
@@ -55,7 +55,7 @@ delay: 2
 ## Ready means "in the endpoints"
 
 A Pod that passes readiness is added to its Service's endpoint list, which is the set of
-addresses traffic is actually sent to:
+addresses the Service sends traffic to:
 
 ```terminal:execute
 command: oc get endpoints hello-dcs
@@ -89,8 +89,8 @@ command: oc set probe deployment/hello-dcs --readiness --get-url=http://:8080/th
 ```
 
 That is a template change, so one replacement Pod rolls out at a time. The new Pod starts,
-fails its readiness check every few seconds, and never becomes Ready — so it never joins the
-endpoints.
+fails its readiness check every few seconds, and never becomes Ready, so it is never added to
+the endpoints.
 
 In the lower pane, one Pod's READY column sits at `0/1` while the others stay `1/1`.
 
@@ -116,10 +116,8 @@ retries: .INF
 delay: 3
 ```
 
-One address short. The broken Pod is held out of rotation while the others keep serving.
-
-That is what readiness is for: an unhealthy replica stops receiving traffic without anything
-being restarted.
+The list now has one address fewer. The Pod that fails readiness gets no traffic, the
+others keep serving, and nothing is restarted.
 
 ## Restore it
 

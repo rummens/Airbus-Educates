@@ -69,7 +69,7 @@ spec:
         operation: { type: navigate, path: /k8s/cluster/projects }
         verify: { type: route, path: /k8s/cluster/projects }
     - id: read-projects
-      title: Your projects, and only yours
+      title: Read your project list
       description: >-
         This is oc get projects: the projects your account may see, which on DCS is a
         deliberately short list. A project is a Kubernetes namespace with OpenShift's access

@@ -14,12 +14,12 @@ metadata:
 spec:
   title: Follow the traffic chain in the console
   description: >-
-    Walk from Route to Service to pods on screen, and see where a broken chain shows
-    itself first.
+    Walk from Route to Service to pods on screen, and see which screen shows a broken
+    chain first.
   completionText: >-
     Done. You followed a request backwards from the Route to the Service to the pods the
-    selector matched, and saw where the platform's own NetworkPolicies sit — everything
-    oc get route, oc get service and oc get endpoints tell you, on four screens.
+    selector matched, and saw where the platform's own NetworkPolicies sit. Those four
+    screens show what oc get route, oc get service and oc get endpoints print.
   visibility: hidden
   mode: assisted
   context:
@@ -64,19 +64,19 @@ spec:
     - id: open-service
       title: Open the lab service
       description: >-
-        The list is oc get service with its ports and cluster IP. What decides whether the
-        Service works is one click deeper.
+        The list is oc get service with its ports and cluster IP. Open the lab service to see
+        its selector, which decides whether the Service works.
       target: { type: href, value: '/k8s/ns/<<namespace>>/services/lab-app' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/services/lab-app' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/services/lab-app' }
     - id: read-service-routing
-      title: The selector is the wiring
+      title: Read the selector
       description: >-
         Service routing shows the pod selector and the port mapping: which labels a pod must
         carry to receive this Service's traffic, and which container port each service port
-        forwards to. Nothing here validates that any pod matches — a Service with a selector
-        that matches nothing looks perfectly healthy on this screen.
+        forwards to. Nothing here checks that any pod matches: a Service whose selector
+        matches nothing looks healthy on this screen.
       target: { type: consoleElement, id: detailsSection, value: Service routing }
       complete:
         operation: { type: none }
@@ -84,7 +84,7 @@ spec:
     - id: open-service-pods
       title: See what the selector matched
       description: >-
-        So check it. The Pods tab lists what this Service currently resolves to.
+        Open the Pods tab to see which pods this Service currently resolves to.
       target: { type: href, value: '/k8s/ns/<<namespace>>/services/lab-app/pods' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/services/lab-app/pods' }
@@ -92,10 +92,10 @@ spec:
     - id: read-service-pods
       title: This list is the endpoints
       description: >-
-        These are the pods the selector matched, which is what oc get endpoints prints. An
-        empty list is the single most useful fact in this lab: the Service answers nothing,
-        and the cause is almost always a selector that no longer matches the labels the pods
-        carry. Check this before you suspect the Route or the network.
+        These are the pods the selector matched, which is what oc get endpoints prints. If
+        this list is empty, the Service answers nothing, and the cause is almost always a
+        selector that no longer matches the labels the pods carry. Check this before you
+        suspect the Route or the network.
       target: { type: consoleElement, id: pageContent }
       complete:
         operation: { type: none }
@@ -103,8 +103,8 @@ spec:
     - id: open-routes
       title: Open Routes
       description: >-
-        The Service is reachable inside the cluster. Publishing it to a user outside is a
-        different object.
+        Open Routes: a Route is the separate object that publishes the Service outside the
+        cluster.
       target: { type: consoleElement, id: navigationLink, value: Routes }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/route.openshift.io~v1~Route' }
@@ -132,8 +132,9 @@ spec:
     - id: open-networkpolicies
       title: Look at the NetworkPolicies
       description: >-
-        Service and Route can both be correct and a connection still fail. One more object
-        decides that, and it is not owned by you.
+        A connection can still fail when the Service and Route are both correct. Open
+        NetworkPolicies to see the rules that decide which traffic reaches the pods; the
+        platform team owns them.
       target: { type: consoleElement, id: navigationLink, value: NetworkPolicies }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/networking.k8s.io~v1~NetworkPolicy' }

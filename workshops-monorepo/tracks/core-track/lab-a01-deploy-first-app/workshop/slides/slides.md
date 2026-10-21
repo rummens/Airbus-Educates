@@ -71,7 +71,7 @@ curl -s localhost:8080
 ```
 
 - The new Pod replaces the old one; the earlier tunnel (to the old Pod) closes, so you reopen it.
-- The response now shows the new greeting — served by a brand-new Pod, same image, no rebuild.
+- The response now shows the new greeting, served by a new Pod from the same image without a rebuild.
 
 ---
 

@@ -19,7 +19,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/po
 environments, and each national organisation has its **own myITSM portal**. There is no
 one central form.
 
-That has one consequence you must get right before you type anything:
+Before you fill in anything, note this rule:
 
 {{< warning >}}
 **⚠️ A Tenant has to be requested for each location separately, in that location's own
@@ -46,7 +46,7 @@ same national domain your colleagues use. If two locations look plausible, ask i
 not possible.
 {{< /note >}}
 
-## The shape of the whole journey
+## The request flow
 
 ![Pick your national myITSM portal, request a tenant, then request namespaces; DCS provisions them automatically](request-flow.svg)
 
@@ -62,13 +62,12 @@ Then {{< param product_short >}} takes over: the onboarding itself is **automate
 DCS side** — no human hand-provisions your namespace.
 
 {{< note >}}
-**📌 Then why does the form offer so many options?** Because the automation is already there
-but the **self-service frontend is not** — ITSM is currently the input form for that
+**📌 Why the form has so many options.** The automation already exists, but the
+**self-service frontend does not** yet. ITSM is currently the input form for that
 pipeline, so every option the platform supports shows up as a field.
 
-**Don't let that put you off.** Most of it is optional or has a default. Leave what you
-don't recognise alone, ask in **"Further details"** at the end of the form, and things go
-quickly.
+Most fields are optional or have a default. Leave any field you don't recognise at its
+default and ask about it in **"Further details"** at the end of the form.
 {{< /note >}}
 
 ## Every request starts the same way

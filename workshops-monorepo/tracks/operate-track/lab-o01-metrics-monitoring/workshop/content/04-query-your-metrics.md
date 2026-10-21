@@ -98,7 +98,6 @@ retries: .INF
 delay: 5
 ```
 
-**Forbidden.** The endpoint authorizes every query against the namespace you named, using
-the same permissions that decide whether you may read Pods there.
-
-**Tenancy is enforced in the metrics path as well as in the API.**
+You get **Forbidden** (HTTP 403). The endpoint authorizes every query against the namespace you named, using
+the same permissions that decide whether you may read Pods there, so metrics queries follow
+the same tenancy rules as the API.

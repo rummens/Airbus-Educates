@@ -1,8 +1,9 @@
 ---
-title: Expose It for Real
+title: Expose It Outside the Cluster
 ---
 
-Now you give the app a real external URL with a Route. One thing to know first.
+Now you give the app a real external URL with a Route. First, note the namespace rule
+below.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -14,7 +15,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ro
 {{< note >}}
 **⚠️ A Route requires a PROD-type namespace.** DCS only admits Routes in namespaces marked
 PROD; a DEV namespace cannot expose anything. Your session namespace is PROD-type for this
-lab, so this works. *Why* PROD enforces this, and how, is a Developer-track topic (**DEV vs PROD Namespaces & Policies**).
+lab, so this works. *Why* PROD enforces this, and how, is covered in the **DEV vs PROD Namespaces** lab (Operate & Observe track).
 {{< /note >}}
 
 ## Create the Route
@@ -63,7 +64,8 @@ The command has two lines and two new flags:
 
 - **line 1** — stores the Route host in a shell variable named `HOST`.
 - **line 2** — calls it with `curl`.
-- **`-k`** — tells `curl` to accept the DCS TLS certificate without complaint.
+- **`-k`** — skips TLS certificate checks. This URL is plain `http://`, so it has no
+  effect here.
 - **`%{http_code} from "$HOST"`** — prints the status code and the host it reached.
 
 ```terminal:execute
@@ -80,5 +82,5 @@ retries: .INF
 delay: 2
 ```
 
-`HTTP 200`. Because the app runs in **UI mode**, that page also prints its own Route URL,
+You should see `HTTP 200`. Because the app runs in **UI mode**, that page also prints its own Route URL,
 the live DCS DNS name, so you can see the real address it is serving on.

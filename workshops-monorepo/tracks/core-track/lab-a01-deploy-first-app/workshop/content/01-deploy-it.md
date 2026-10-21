@@ -2,7 +2,7 @@
 title: Deploy It
 ---
 
-One command gets your app running.
+You start the app with one command.
 
 A [**Deployment**](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 is how you tell {{< param product_short >}}: *keep one copy of this image running for me*.
@@ -43,7 +43,7 @@ delay: 2
 
 ## See it running
 
-Don't take the green check's word for it — look at what's actually running:
+Check what is running:
 
 ```terminal:execute
 command: oc get deployment,pods -l app=hello-dcs
@@ -54,8 +54,6 @@ Two things confirm it is working:
 - the **Deployment** reports `1/1` READY;
 - one **Pod** is in `Running`.
 
-That is your app, live on {{< param product_short >}}.
-
 ```examiner:execute-test
 name: verify-ready
 title: Verify hello-dcs is running (1 ready replica)
@@ -64,5 +62,5 @@ retries: .INF
 delay: 2
 ```
 
-That's your app running on {{< param product_short >}} — from an image, to a scheduled,
-self-healing workload, with a single command. Next, make it yours.
+One command turned the image into a scheduled, self-healing workload on
+{{< param product_short >}}. Next, customise it.

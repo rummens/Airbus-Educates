@@ -4,7 +4,7 @@ title: Right-Sizing
 
 The oversized manifest failed because it asked for more per Pod than the budget had left.
 
-The fix is a Pod that states what it **actually needs**, instead of taking the LimitRange
+The fix is a Pod that states what it **needs**, instead of taking the LimitRange
 defaults or guessing high to be safe.
 
 Open the slide for this page (📊 **Slides** tab):
@@ -25,8 +25,8 @@ block, and they do different jobs:
 - **`limits`** is the **ceiling**. Cross it on memory and the container is killed
   (`OOMKilled`); cross it on CPU and the container is throttled instead.
 
-Setting both to what the app genuinely uses is what lets four replicas of a small app sit
-inside a budget instead of filling it exactly.
+If you set both to what the app uses, four replicas of a small app fit inside the budget
+with room to spare.
 
 ## Apply the right-sized version
 
@@ -77,5 +77,5 @@ the rollout, the retiring Pods are still counted and `Used` still shows the old 
 `oc describe quota` again if you catch it mid-way.
 {{< /note >}}
 
-Same four replicas, same app, a quarter of the budget, and headroom for whatever you deploy
-next.
+The same four replicas now use a quarter of the budget, which leaves room for other
+workloads.

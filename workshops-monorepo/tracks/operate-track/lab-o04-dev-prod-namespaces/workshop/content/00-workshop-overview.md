@@ -2,14 +2,14 @@
 title: "DEV vs PROD Namespaces"
 ---
 
-On **{{< param product_name >}}** a DEV namespace and a PROD namespace are not separated by a
-naming convention. They differ in **policy posture**.
+On **{{< param product_name >}}** a DEV namespace and a PROD namespace differ in **policy
+posture**.
 
 PROD enforces rules DEV does not, and only PROD may publish a
 [**Route**](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/ingress_and_load_balancing/routes).
 
-This session gives you **one of each**. You will apply the same manifests to both and read the
-two different answers.
+This session gives you **one of each**. You will apply the same manifests to both and compare the
+results.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the
@@ -21,7 +21,7 @@ for the terminal, editor and clickable actions.
 
 By the end of this workshop you will be able to:
 
-- Say what actually distinguishes a DEV namespace from a PROD one on {{< param product_short >}}.
+- Say what distinguishes a DEV namespace from a PROD one on {{< param product_short >}}.
 - Predict which manifests a PROD namespace will refuse, and why.
 - Read an **admission** rejection and identify the policy and rule that produced it.
 - Explain why only a PROD-type namespace may publish a Route.

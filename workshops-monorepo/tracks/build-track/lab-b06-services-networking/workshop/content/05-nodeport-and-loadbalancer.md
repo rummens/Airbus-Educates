@@ -33,7 +33,7 @@ retries: .INF
 delay: 2
 ```
 
-So why is it the wrong tool here?
+It is the wrong tool on {{< param product_short >}} for two reasons:
 
 - **It is not yours.** The port is on shared cluster nodes, outside your tenant boundary, and
   it collides with every other tenant who wants that number.
@@ -58,7 +58,7 @@ NAME           TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)
 hello-dcs-lb   LoadBalancer   10.217.4.90    <pending>     8080:30732/TCP
 ```
 
-**`<pending>`, and it stays that way.** A LoadBalancer Service is a request to the
+**`EXTERNAL-IP` stays `<pending>`.** A LoadBalancer Service is a request to the
 infrastructure for an address, and it needs a provider to fulfil it. On an on-prem cluster
 without one, nothing answers.
 
@@ -72,8 +72,8 @@ delay: 5
 
 {{< warning >}}
 **⚠️ Watch out:** the Service is not in an error state. It reports as healthy and does
-nothing, which is harder to spot. A `<pending>` external IP is a design mistake rather than a
-fault to debug.
+nothing, which makes it harder to spot. A `<pending>` external IP here means the wrong Service
+type was chosen; there is no fault to debug.
 {{< /warning >}}
 
 ## What you use instead

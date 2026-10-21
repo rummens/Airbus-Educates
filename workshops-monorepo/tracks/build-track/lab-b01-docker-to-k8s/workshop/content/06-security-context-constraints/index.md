@@ -19,11 +19,11 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/sc
 
 ## Ask for root, and read the refusal
 
-The fastest way to understand an SCC is to be refused by one:
+Try to create a Pod that runs as root, and read the refusal:
 
 ```terminal:execute
 command: |-
-  cat <<'YAML' | oc apply -f - 2>&1 | tail -4 || true
+  cat <<YAML | oc apply -f - 2>&1 | tail -4 || true
   apiVersion: v1
   kind: Pod
   metadata:
@@ -72,7 +72,7 @@ You cannot read the SCCs themselves. They are cluster-scoped and platform-owned:
 command: oc get scc 2>&1 | tail -2 || true
 ```
 
-But you can ask whether you may **use** a particular one, which is the question that matters:
+You can ask whether you may **use** a particular one:
 
 ```terminal:execute
 command: |-
@@ -92,7 +92,7 @@ delay: 3
 `restricted-v2` **yes**; `anyuid` and `privileged` **no**. You get the constraint every
 tenant gets, and the permissive ones belong to the platform.
 
-## What your running container actually got
+## What your running container got
 
 ```terminal:execute
 command: oc exec deploy/hello-dcs -- id
@@ -111,8 +111,8 @@ Two things in that output decide whether an image works here at all:
 - **`uid=1001`**, not 0. On {{< param product_short >}} the platform may also assign an
   **arbitrary** UID from the namespace's range instead of the image's own, and your process
   must not care which one it gets.
-- **`gid=0(root)`**, the **root group**, always. This is the one people miss: an OpenShift
-  container runs as an unpredictable user but a predictable *group*.
+- **`gid=0(root)`**, the **root group**, always. This one is easy to miss: on OpenShift
+  the UID can change, but the group is always 0.
 
 ## What that means for images you build
 
@@ -128,7 +128,7 @@ Four rules, and they follow directly from the two lines above:
 
 {{< note >}}
 **💡 Tip:** an image built to these rules runs unchanged on a laptop, on plain Kubernetes and
-here. An image that assumes root runs in exactly one of those places.
+here. An image that assumes root runs on a laptop and on plain Kubernetes, but is refused on {{< param product_short >}}.
 {{< /note >}}
 
 ## Clean up

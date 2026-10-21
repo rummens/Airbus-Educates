@@ -45,7 +45,7 @@ A Service is in-cluster only. To let outside traffic in, DCS uses a chain of par
 ---
 
 <!-- id: route -->
-## Expose It for Real
+## Expose It Outside the Cluster
 
 A **Route** gives the app a real external URL. With no explicit `host`, OpenShift assigns one that includes your namespace, on the DCS `*.apps` domain.
 
@@ -71,7 +71,7 @@ The Route is the real external address. For convenience while you work, you can 
 
 - The **session proxy** tab is an HTTPS, auth-gated endpoint for use inside your session.
 - The **Route** is the real, external URL anyone can reach from outside.
-- Same app, two separate entry points.
+- Both reach the same app.
 
 ```
 dashboard:create-dashboard
@@ -106,7 +106,7 @@ oc exec deploy/hello-dcs -- \
 
 You gave the app a stable in-cluster address, a real external Route, an in-session tab, and saw how network policy and egress are restricted by default.
 
-- The app is reachable, but still forgets everything when a Pod restarts — no storage.
+- The app is reachable, but it has no storage: its data is lost when a Pod restarts.
 - **Storage** gives it a persistent volume so its data survives restarts.
 
 Digital Container Service · DCS Academy

@@ -2,8 +2,8 @@
 title: Summary
 ---
 
-Your app now says what it is doing, the platform collects it, and you can ask for it back —
-but only about your own namespace.
+Your app now publishes metrics, the platform collects them, and you can query them for your
+own namespace only.
 
 Open the closing slide (📊 **Slides** tab):
 
@@ -16,8 +16,8 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
 
 1. **Separated** the metrics the platform gives you from the ones only your app can produce.
 2. **Read** the exposition format your app serves on `/metrics`, and made its counter move.
-3. **Created** a ServiceMonitor — and checked its selector actually matches, because nothing
-   would have told you otherwise.
+3. **Created** a ServiceMonitor and checked that its selector matches, because nothing would
+   have told you otherwise.
 4. **Queried** your own series through the platform's tenant endpoint, then asked a real
    question with `rate()` and `sum by`.
 5. **Were refused** when asking about another namespace.
@@ -53,12 +53,12 @@ metrics boundary is the RBAC boundary, not a separate system.
 4. Who configures Prometheus in this story?
 
 {{< note >}}
-**❓ Answer:** **nobody you know**. The platform runs user-workload monitoring; you put a
-ServiceMonitor in your own namespace and it gets picked up. That split is why you cannot break
-anyone else's collection, and why you cannot fix it either.
+**❓ Answer:** **the platform team, not you**. The platform runs user-workload monitoring; you
+put a ServiceMonitor in your own namespace and it gets picked up. Because of that split, you
+cannot break anyone else's collection, and you cannot fix the platform side yourself.
 {{< /note >}}
 
 ## Next Steps
 
-Metrics tell you *that* something changed. **Logs** tell you what happened — the next lab in
-this track, where the same tenancy boundary applies to a very different kind of data.
+The next lab, **Logs**, shows what your app wrote when a metric changed. The same tenancy
+boundary applies to logs.

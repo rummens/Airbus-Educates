@@ -1,6 +1,6 @@
 # Requesting a Tenant & Namespace via ITSM
 
-**Every namespace you have used so far was simply there. This lab shows where it comes from — and what the request form actually asks you.**
+**So far your namespaces were created for you. This lab shows how to request one, and what each field on the request form means.**
 
 DCS is multi-national, so there is no single ITSM portal. Each location (DIV, DE, ES, …) has
 its own **myITSM**.
@@ -15,13 +15,13 @@ This lab walks the whole path:
 - the **New namespace for existing tenant** request;
 - the **self-service vs request** line.
 
-Deliberately a **quick-start**, not a reference. The namespace page steers to the *basic*
-option and leaves expert mode — operators, capacity tiers, the ten quota fields — as a
-pointer to the docs.
+This lab is a **quick-start**, not a full reference. The namespace page recommends the
+*basic* option and points to the docs for expert mode (operators, capacity tiers, the ten
+quota fields).
 
 > **📌 Note:** the form has many options because DCS onboarding is **automated**. ITSM is
-> currently the input form for that pipeline; the missing piece is the self-service
-> frontend, not the provisioning.
+> currently the input form for that pipeline. Provisioning is already automated; only the
+> self-service frontend is still missing.
 
 - **Track:** Core / Fundamentals
 - **Audience:** Beginner — you've done the **Terms — Namespaces & Tenancy** lab

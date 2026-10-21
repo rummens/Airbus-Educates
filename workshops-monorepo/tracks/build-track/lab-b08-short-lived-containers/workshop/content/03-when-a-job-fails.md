@@ -3,9 +3,7 @@ title: When a Job Fails
 ---
 
 A Deployment whose container keeps exiting restarts it forever, which shows up as
-`CrashLoopBackOff` and never resolves.
-
-A Job reaches a **verdict** instead.
+`CrashLoopBackOff` and never resolves. A Job stops after its retries and reports **`Failed`**.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -51,7 +49,7 @@ attempts survive for you to inspect and the first failure is not overwritten by 
 command: oc describe job db-migrate-broken | tail -20
 ```
 
-At the bottom, the `BackoffLimitExceeded` event: the Job is telling you it stopped, and why.
+At the bottom, the `BackoffLimitExceeded` event records that the Job stopped, and why.
 
 ```examiner:execute-test
 name: verify-failed-pods-kept
@@ -61,15 +59,15 @@ retries: .INF
 delay: 3
 ```
 
-## Why this matters
+## Read the failure reason
 
 ```terminal:execute
 command: oc logs job/db-migrate-broken | tail -5
 ```
 
-`cannot reach the database`, from the attempt that produced it.
+The log shows `cannot reach the database`, from the attempt that produced it.
 
-A Job that gives up beats one that retries forever:
+A Job that stops is better than one that retries forever:
 
 - somebody gets a clear failure instead of a Pod quietly restarting all night;
 - the logs of every attempt are still there;

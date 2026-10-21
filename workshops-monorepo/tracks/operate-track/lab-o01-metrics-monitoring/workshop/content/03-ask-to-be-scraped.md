@@ -2,8 +2,8 @@
 title: Ask to Be Scraped
 ---
 
-You do not configure the platform's Prometheus. You put an object in **your own namespace**
-that says what to collect, and the platform finds it.
+You put an object in **your own namespace** that says what to collect, and the platform's
+monitoring picks it up.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -18,13 +18,13 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/se
 file: ~/exercises/servicemonitor.yaml
 ```
 
-Three fields carry it, and two of them are where the mistakes are:
+Three fields matter, and two of them cause most mistakes:
 
 - **`selector.matchLabels`** picks which **Service** to scrape. It matches the *Service's*
   labels, not the Pods'.
 - **`endpoints.port`** names the Service's port **by name**. A numeric port does not work, and
   an unnamed Service port cannot be scraped at all.
-- **`interval`** sets how often. Every sample costs storage that somebody pays for.
+- **`interval`** sets how often. Every sample costs storage.
 
 ```terminal:execute
 command: oc apply -f servicemonitor.yaml
@@ -66,9 +66,8 @@ If the labels on the left do not appear on a Service on the right, nothing will 
 scraped, and nothing will tell you so.
 
 {{< warning >}}
-**⚠️ Watch out:** a ServiceMonitor never reports an error for selecting nothing. No error, no
-data, no clue. Checking the selector by hand, as you just did, is the whole debugging
-technique.
+**⚠️ Watch out:** a ServiceMonitor never reports an error for selecting nothing; it collects no
+data. Checking the selector by hand, as you just did, is how you debug it.
 {{< /warning >}}
 
 ## Wait for the first scrape

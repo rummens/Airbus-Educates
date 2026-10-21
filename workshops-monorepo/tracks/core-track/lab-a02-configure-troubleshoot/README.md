@@ -1,14 +1,14 @@
 # Configure & Troubleshoot Your App
 
-**Grow up from ad-hoc env vars to real configuration — then break the app on purpose and learn to fix it.**
+**Move from ad-hoc env vars to ConfigMaps and Secrets, then break the app on purpose and fix it.**
 
 In the **Deploy Your First App** lab you set one value with `oc set env`. Real apps have
-many settings and secrets — and they go wrong.
+many settings, some of them secret, and they break.
 
 This lab moves configuration into a **ConfigMap** and a **Secret**, wires them into the app
 as environment variables and a mounted file, and rolls out a change.
 
-Then it hands you a **broken** version and walks the debugging loop every operator lives by:
+Then it hands you a **broken** version and walks you through the debugging loop:
 **observe → hypothesise → fix → verify**, using logs, events and `describe`.
 
 - **Track:** Core / Fundamentals
@@ -29,5 +29,5 @@ Then it hands you a **broken** version and walks the debugging loop every operat
 1. **Apply** a ConfigMap and a Secret, and wire them into a declarative Deployment.
 2. **Roll out** a config change.
 3. **Apply** a version with one seeded fault.
-4. **Diagnose** the root cause from the cluster's own signals.
+4. **Diagnose** the root cause from events, logs and `describe`.
 5. **Fix** the single offending line and confirm the app recovers.

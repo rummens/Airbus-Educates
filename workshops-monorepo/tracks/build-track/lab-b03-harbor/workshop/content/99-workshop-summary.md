@@ -2,7 +2,8 @@
 title: Summary
 ---
 
-You have worked the registry as an object rather than as a string in a manifest.
+You inspected, copied and requested registry objects, and read the rules that decide what
+PROD will run.
 
 Open the closing slide (📊 **Slides** tab):
 
@@ -38,7 +39,7 @@ provably the same bytes.
 {{< note >}}
 **❓ Answer:** DEV takes it, with no CVE limitation. It cannot be promoted, because a PROD
 project pulls only below the threshold. The fix is to rebuild on a newer base, checking
-`fixable` first, or to take the exception route if there is genuinely no fix.
+`fixable` first, or to take the exception route if no fix exists.
 {{< /note >}}
 
 3. Name the two ways an image can end up in a PROD project.
@@ -59,6 +60,6 @@ anything else you do.
 
 ## Next Steps
 
-That is the artefact's whole journey — built, stored, scanned, promoted. The rest of the
+You followed an image from build to storage, scan and promotion. The rest of the
 **Build & Run** track is about the workload it becomes: sizing it, scaling it, exposing it,
 giving it state, and keeping it alive through the platform's maintenance.

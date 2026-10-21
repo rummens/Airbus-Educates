@@ -32,8 +32,7 @@ metadata:
 
       ### What you should already know
 
-      The concepts, not the clicks. The pipeline, the ServiceMonitor and PromQL are explained in
-      **Metrics & Monitoring**.
+      The pipeline, the ServiceMonitor and PromQL are explained in **Metrics & Monitoring**.
 
       ### What you will do
 
@@ -49,8 +48,8 @@ metadata:
 
       ### When the console wins
 
-      Targets answers "is the platform even reaching my app" in one page, which from a terminal
-      takes several commands and an assumption.
+      Targets shows on one page whether the platform is reaching your app, which takes several
+      commands from a terminal.
 
       ### Cleaning up
 
@@ -61,9 +60,8 @@ metadata:
 spec:
   title: "Metrics in the console"
   description: >-
-    The console side of Metrics & Monitoring: the Observe menu, a PromQL query and its graph,
-    the platform's scrape targets, the ServiceMonitor behind yours, and a workload's own metrics
-    tab.
+    The Observe menu, a PromQL query and its graph, the platform's scrape targets, the
+    ServiceMonitor behind yours, and a workload's own Metrics tab, in the OpenShift web console.
   duration: 10m
   difficulty: intermediate
   labels:

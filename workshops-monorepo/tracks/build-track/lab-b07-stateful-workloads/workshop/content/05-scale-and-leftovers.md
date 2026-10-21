@@ -90,9 +90,9 @@ retries: .INF
 delay: 3
 ```
 
-Look for `requests.storage` and `persistentvolumeclaims`. Every claim from every scale-up —
-including the one whose Pod is gone — is counted there.
+Look for `requests.storage` and `persistentvolumeclaims`. Every claim from every scale-up is
+counted there, including the one whose Pod is gone.
 
 Deleting a StatefulSet behaves the same way: `oc delete statefulset hello-dcs` removes the
-Pods and leaves every claim. Cleaning up a stateful workload for real is **two** deletions,
-and the second one is the one you have to mean.
+Pods and leaves every claim. To remove a stateful workload completely you delete
+**twice**: the StatefulSet, then its claims. Deleting the claims destroys the data.

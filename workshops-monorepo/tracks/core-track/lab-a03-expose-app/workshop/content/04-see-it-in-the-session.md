@@ -32,7 +32,7 @@ name: App
 {{< note >}}
 **📌 Two ways to reach the same app.** The **session proxy** (this tab) is an HTTPS,
 auth-gated endpoint for use inside your session. The **Route** from the last page is the
-real, external URL anyone can reach from outside. Same app, two separate entry points.
+real, external URL anyone can reach from outside. Both reach the same app.
 {{< /note >}}
 
 When you're ready to run more commands, switch back to the terminal (the next steps type

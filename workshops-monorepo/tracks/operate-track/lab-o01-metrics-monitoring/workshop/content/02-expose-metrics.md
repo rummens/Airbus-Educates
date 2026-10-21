@@ -2,7 +2,7 @@
 title: What the App Says
 ---
 
-Before anything can scrape your app, the app has to have something to say.
+Before anything can scrape your app, the app has to expose metrics.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -29,7 +29,7 @@ delay: 3
 
 ## Read the format
 
-That output is the whole contract: plain text, with three kinds of line.
+The format is plain text, with three kinds of line.
 
 ```
 # HELP hello_dcs_requests_total Requests served, by path.
@@ -53,7 +53,7 @@ convention.
 
 ## Generate some traffic
 
-An idle app has boring metrics. Give it something to count:
+Send 60 requests so the counter has something to count:
 
 ```terminal:execute
 command: |-

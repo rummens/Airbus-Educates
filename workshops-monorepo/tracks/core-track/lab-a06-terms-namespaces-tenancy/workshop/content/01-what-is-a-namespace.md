@@ -20,8 +20,8 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/na
 On {{< param product_short >}} the namespace is also the **unit of consumption**: you
 request namespaces and ship applications into them.
 
-That is what "Namespace as a Service" means — the **namespace**, not a server, is the thing
-you are given.
+"Namespace as a Service" means that {{< param product_short >}} gives you namespaces, not
+servers.
 
 Learn more in the
 [{{< param product_short >}} tenancy & access overview]({{< param dcs_docs_base_url >}}/services/tenants).
@@ -29,9 +29,9 @@ Learn more in the
 {{< note >}}
 **💡 Think of an office building.** The **Tenant** is your organisation renting space in it:
 named on the contract, billed monthly, accountable for what happens inside. A **Namespace**
-is one room your organisation was given — your furniture, your mess, and nothing from the
-room next door leaks in. **RBAC** decides who holds a key to which room. And the **PROD**
-rooms are the ones with the alarm system switched on: same building, stricter house rules.
+is one room your organisation was given; what is in it stays separate from the rooms next
+door. **RBAC** decides who holds a key to which room. The **PROD** rooms have the alarm
+system switched on and follow stricter rules.
 The platform team runs the building; you decide what happens in your rooms.
 {{< /note >}}
 
@@ -39,7 +39,7 @@ The platform team runs the building; you decide what happens in your rooms.
 
 Your **active namespace** is the one your `oc` context points at right now — the default
 for every command that does not name a different one. Show it with `oc project`, which
-prints the active namespace and nothing else:
+prints the active namespace and the cluster server it is on:
 
 ```terminal:execute
 command: oc project | tee ~/exercises/project.txt
@@ -73,6 +73,6 @@ title: Verify you can list workloads in your namespace
 timeout: 10
 ```
 
-In this fresh session your namespace is empty — that's fine. The point is that
-*whatever* you deploy is scoped to this one namespace. Next, you'll prove that scoping is
-real by running the same app in two *other* namespaces side by side.
+In this fresh session your namespace is empty. Whatever you deploy is scoped to this
+namespace. Next, you test that by running the same app in two *other* namespaces side by
+side.

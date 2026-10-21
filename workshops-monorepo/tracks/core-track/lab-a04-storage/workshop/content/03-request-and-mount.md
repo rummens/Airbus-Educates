@@ -28,7 +28,7 @@ command: oc apply -f pvc-file.yaml
 ```
 
 The claim is created. Many storage classes only **bind** the volume once a workload
-actually uses it (a "wait for first consumer" policy), so let's give it a consumer next.
+uses it (a "wait for first consumer" policy), so let's give it a consumer next.
 
 ## Mount it into the app
 
@@ -105,4 +105,4 @@ retries: .INF
 delay: 2
 ```
 
-The marker is on the volume now. The real test is what happens when the Pod goes away.
+The marker is on the volume now. Next, replace the Pod and check the marker is still there.

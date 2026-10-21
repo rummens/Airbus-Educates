@@ -3,7 +3,7 @@ title: Containers and Images
 ---
 
 Everything you run on {{< param product_short >}} runs in a **container** — including the
-apps you've already deployed earlier in this track. Here's what that actually means, and
+apps you've already deployed earlier in this track. This page explains what that means and
 how it differs from the virtual machines you may already know.
 
 Open the slide for this page (📊 **Slides** tab):
@@ -21,7 +21,7 @@ self-contained but heavy — minutes to boot, gigabytes of disk.
 A [container](https://kubernetes.io/docs/concepts/containers/) carries only your application
 and the few libraries it needs, and **shares** the host's operating system kernel.
 
-The result: containers start in **seconds**, are much smaller, and run the same way on any
+So containers start in **seconds**, are much smaller, and run the same way on any
 machine.
 
 {{< note >}}
@@ -56,4 +56,4 @@ That is all you need for now. The registry gets a workshop of its own later in t
 
 ## Next
 
-Next: if a container just runs on one machine, why do we need Kubernetes at all?
+Next: what Kubernetes adds on top of running a container on one machine.

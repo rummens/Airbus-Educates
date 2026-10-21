@@ -2,15 +2,15 @@
 title: Change It and Watch the Rollout
 ---
 
-This is the core {{< param product_short >}} behaviour, made concrete.
+This page shows how {{< param product_short >}} reacts when you change the desired state.
 
 When you change the **desired state** — here, the greeting — the platform reconciles to it:
 
 1. it **rolls out** a new Pod with the new configuration;
 2. it **retires** the old one.
 
-No downtime, and nothing for you to restart by hand. The next page defines this
-"desired state" idea properly.
+There is no downtime, and you restart nothing by hand. The next page defines "desired
+state" properly.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -42,7 +42,7 @@ delay: 2
 **⚠️ The rollout replaced the Pod.** The tunnel from the last page pointed at the *old*
 Pod, so it is now closed.
 
-That is expected — you simply reopen it.
+This is expected. Reopen it with the command below.
 {{< /note >}}
 
 ## Reopen the tunnel (lower terminal)
@@ -75,8 +75,8 @@ command: curl -s localhost:8080
 
 The response now reads `Updated without a rebuild`.
 
-It is served by a brand-new **Pod**, from the **same image**, with no rebuild — declarative
-desired state at work.
+A new **Pod** serves it, from the **same image**, without a rebuild. You changed the
+desired state, and {{< param product_short >}} replaced the Pod to match it.
 
 ```examiner:execute-test
 name: verify-new-greeting

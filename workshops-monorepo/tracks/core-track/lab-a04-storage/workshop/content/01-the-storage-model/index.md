@@ -21,7 +21,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/st
 - A [**PersistentVolume (PV)**](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistent-volumes) —
   the real volume DCS provisions and **binds** to your claim.
 
-This is **dynamic provisioning**: you never pre-create the disk, you just claim one and DCS
+This is **dynamic provisioning**: you do not pre-create the disk. You claim one, and DCS
 creates and binds a matching PV automatically.
 
 {{< note >}}

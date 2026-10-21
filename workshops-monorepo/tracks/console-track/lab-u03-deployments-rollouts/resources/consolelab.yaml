@@ -19,9 +19,9 @@ spec:
     Read desired versus available replicas, the pods a Deployment owns, its rollout
     history and its events — the console side of oc get deployment and oc rollout.
   completionText: >-
-    Done. You read a Deployment's rollout state, the pods it owns, its revision history, its
-    events and its YAML, then found the menu that writes to it and the form behind it —
-    everything oc get deployment, oc rollout history, oc describe and oc set give you.
+    You read a Deployment's rollout state, the pods it owns, its revision history, its events
+    and its YAML, then found the Actions menu and the edit form behind it. Those screens
+    cover oc get deployment, oc rollout history, oc describe and oc set.
   visibility: hidden
   mode: assisted
   context:
@@ -86,13 +86,13 @@ spec:
     - id: open-pods-tab
       title: List the pods it owns
       description: >-
-        A replica count is a number. The pods behind it are on the next tab.
+        Open the Pods tab to see the pods behind the replica count.
       target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/pods' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/pods' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/pods' }
     - id: read-pods-tab
-      title: One application, nothing else
+      title: Read the owned pods
       description: >-
         These are the pods matching this Deployment's selector and no others — the filtering
         you would write out as oc get pods -l app=lab-app. Each row carries its own status,
@@ -105,8 +105,7 @@ spec:
     - id: open-replicasets
       title: See the rollout history
       description: >-
-        A Deployment does not replace pods itself. Something sits between the two, and the
-        next tab is where it is kept.
+        Open the ReplicaSets tab to see the objects a Deployment uses to replace its pods.
       target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/replicasets' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/replicasets' }
@@ -125,20 +124,19 @@ spec:
     - id: open-events
       title: Read the events
       description: >-
-        Status fields say what is true now. When a rollout is stuck you need what the cluster
-        tried and failed to do, which is the next tab.
+        Open the Events tab to see what the cluster tried and failed to do, which is what you
+        need when a rollout is stuck.
       target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/events' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/events' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/deployments/lab-app/events' }
     - id: read-events
-      title: What the cluster tried to do
+      title: Read the event stream
       description: >-
-        This stream is the cluster's own account of its attempts — scaling a ReplicaSet up,
-        failing to pull an image, being refused by a quota. It is the tail of
-        oc describe deployment, updating by itself, and it is where a rollout that never
-        finishes explains itself. Events expire after about an hour, so an empty list means
-        quiet, not healthy.
+        The events list what the cluster attempted: scaling a ReplicaSet up, failing to pull
+        an image, being refused by a quota. This is the end of oc describe deployment, updated
+        live, and it is where you find out why a rollout does not finish. Events expire after
+        about an hour, so an empty list means quiet, not healthy.
       target: { type: consoleElement, id: pageContent }
       complete:
         operation: { type: none }
@@ -146,8 +144,8 @@ spec:
     - id: open-yaml
       title: Open the YAML
       description: >-
-        Every tab so far showed one part of the object through a widget. One tab shows all of
-        it as text.
+        Open the YAML tab to see the whole object as text, including the fields the other tabs
+        do not show.
       target: { type: href, value: '/k8s/ns/<<namespace>>/deployments/lab-app/yaml' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/deployments/lab-app/yaml' }
@@ -156,7 +154,7 @@ spec:
       title: The whole object, editable
       description: >-
         This is the complete Deployment, the text oc get deployment -o yaml returns, and the
-        pod template inside it is what a rollout actually replaces. It is an editor: Save
+        pod template inside it is what a rollout replaces. It is an editor: Save
         applies at once, with no review and no record outside the cluster. Read here, and
         make changes that must survive in the manifest you keep in git. Press Hide if the
         guidance box is over the text you want to read.

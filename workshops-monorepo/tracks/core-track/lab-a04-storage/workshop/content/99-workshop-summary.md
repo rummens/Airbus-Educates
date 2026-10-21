@@ -17,7 +17,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/cl
 
 - Learned the **PVC → StorageClass → PV** model and dynamic provisioning.
 - Claimed a **File** PVC and mounted it at `/opt/app-root/src/data`.
-- Wrote a marker, restarted the Pod, and **read it back** — persistence proven.
+- Wrote a marker, restarted the Pod, and **read it back** after the restart.
 - Compared **File (RWX)** vs **Block (RWO)** and saw that **classification** drives the choice.
 - Learned that **S3** comes via an **ITSM ticket**, not a PVC.
 
@@ -90,5 +90,5 @@ has no storage class. File and Block are PVCs; S3 is a request.
 That completes the Core basics: **what DCS is → deploy → configure & fix → expose →
 persist**. Next come the orientation labs — **Terms — Namespaces & Tenancy** and
 **Requesting a Tenant & Namespace via ITSM** — then the **Console track**
-for the same work in the OpenShift web console, and the **Developer track** for the
+for the same work in the OpenShift web console, and the **Build & Run** and **Operate & Observe** tracks for the
 mechanisms behind everything you just did.

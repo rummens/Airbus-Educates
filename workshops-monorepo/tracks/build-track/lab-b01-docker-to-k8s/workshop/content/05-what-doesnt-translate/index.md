@@ -5,8 +5,8 @@ title: What Doesn't Translate
 Three compose lines mapped cleanly onto a Deployment, a Service and a ConfigMap.
 
 Four lines did **not** make it into any manifest you applied, because
-{{< param product_short >}} refuses them. The mapping was the easy half. The constraints are
-the half that changes how you build images.
+{{< param product_short >}} refuses them. These constraints affect how you build images, so they
+matter more than the mapping.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -25,7 +25,7 @@ file: ~/exercises/docker-compose.yml
 
 ## `image: docker.io/rummens/hello-dcs:latest`
 
-Two separate problems live on this one line.
+This line has two separate problems.
 
 **Not from Harbor.** {{< param product_short >}} is **air-gapped**, so `docker.io` is
 unreachable from inside the platform. Every image must already be mirrored into
@@ -35,7 +35,7 @@ not pulled ad hoc.
 
 **The floating tag.** A [tag](https://kubernetes.io/docs/concepts/containers/images/#image-names)
 like `latest` means the same manifest can quietly start a *different* image tomorrow. That
-is impossible to reproduce, and impossible to scan as a known artifact.
+deployment cannot be reproduced, and the image cannot be scanned as a known artifact.
 {{< param product_short >}} wants a pinned version, or better a digest. `hello-dcs:1.0` is
 the pinned version.
 
@@ -55,8 +55,8 @@ manifest: this is a property of the **image** you choose.
 A [privileged container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 gets root-equivalent access to the node: every device, every kernel capability.
 
-The restricted SCC blocks it outright. A workload that genuinely needs one capability gets
-that one capability granted explicitly — never a blanket escape hatch.
+The restricted SCC blocks it outright. If a workload needs one specific capability, that
+capability is granted explicitly. Full privileged mode is not granted.
 
 ## `volumes: - /var/run/docker.sock:/var/run/docker.sock`
 
@@ -71,8 +71,7 @@ platform provisions. The restricted SCC rejects `hostPath` for the same reason i
 
 ## See the constraint for yourself
 
-The SCC is enforced by the cluster, not written down somewhere for you to follow. Ask what
-your own workload was admitted under:
+The cluster enforces the SCC on every Pod. Ask which SCC admitted your own workload:
 
 ```terminal:execute
 command: oc get pod -l app=hello-dcs -o jsonpath='{.items[0].metadata.annotations.openshift\.io/scc}{"\n"}'
@@ -89,5 +88,5 @@ retries: 3
 delay: 2
 ```
 
-Each of those four lines assumes one trusted host that you control. An air-gapped,
-multi-tenant platform does not have one to give you.
+All four lines assume a single host that you control. On an air-gapped, multi-tenant
+platform you do not control the host, so the platform refuses them.

@@ -2,8 +2,7 @@
 title: Network Policies & Egress
 ---
 
-Exposing an app is one part of networking. The other part is which traffic is *allowed* to
-and from the app. On a shared, air-gapped platform the defaults are restrictive on purpose.
+Networking also controls which traffic is *allowed* to and from the app. On a shared, air-gapped platform the defaults are restrictive on purpose.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -57,8 +56,9 @@ internal mirrors), never from the open internet.
 **📌 There is a controlled exception.** Specific external resources *can* be reached through
 a managed egress proxy — but this is **not on by default**. Each destination must be
 **explicitly whitelisted and enabled** (via a request to the platform team), so egress
-stays deny-by-default and every allowed route is deliberate and auditable. "Air-gapped"
-means *no open path out*, not *no path ever*.
+stays deny-by-default and every allowed destination is approved and auditable. On
+{{< param product_short >}}, "air-gapped" means there is no open path to the internet;
+approved destinations can still be reached through the proxy.
 {{< /note >}}
 
 ```examiner:execute-test

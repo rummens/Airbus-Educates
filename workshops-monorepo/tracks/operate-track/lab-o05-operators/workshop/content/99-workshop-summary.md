@@ -2,9 +2,9 @@
 title: Summary
 ---
 
-You went from "an Operator adds a resource type" to a running, reconciled PostgreSQL
-instance, and, more importantly, learned exactly where {{< param product_short >}}'s
-responsibility for it ends and yours begins.
+You created a PostgreSQL instance from a Custom Resource, watched the operator build the
+objects behind it, and learned where {{< param product_short >}}'s responsibility ends and
+yours begins.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -21,20 +21,19 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
   is the instance you created.
 - **Confirmed OLM/OperatorHub installed the Operator** cluster-wide, and that
   {{< param product_short >}}'s OperatorHub is curated and air-gapped.
-- **Created a `Cluster` CR** and watched it go from an empty status to
-  `Cluster in healthy state`, reconciled by the Operator without you touching a single
-  Pod.
+- **Created a `Cluster` CR** and watched the Operator create its volume claim, Services,
+  secrets and Pods without you writing any of them.
 - **Stated the {{< param product_short >}} ownership model**: platform owns the
   Operator; you own the instance, its sizing, config, data, backups, and incidents.
 
 ## Check Your Understanding
 
-1. What does an Operator's reconciliation loop actually do?
+1. What does an Operator's reconciliation loop do?
 
 {{< note >}}
 **❓ Answer:** It continuously compares the actual state of the cluster to the desired
-state declared in a Custom Resource, and acts to close any gap, not just once at
-creation, but for as long as the Operator runs.
+state declared in a Custom Resource, and acts to close any gap, for as long as the
+Operator runs rather than only once at creation.
 {{< /note >}}
 
 2. What's the difference between a CRD and a CR?
@@ -51,18 +50,16 @@ Operator is installed once and defines the CRD; you create as many CRs as you ne
 
 {{< note >}}
 **❓ Answer:** You do. The platform owns installing and upgrading the CloudNativePG
-Operator and its CRDs, that part was already done before this lab started. Everything
-about the instance itself, sizing, configuration, data, backups, upgrading it when you
-choose to, and responding when something goes wrong, is yours. This is the core
-{{< param product_short >}} distinction: Operators, not managed-aaS.
+Operator and its CRDs; that was done before this lab started. Everything about the
+instance itself is yours: sizing, configuration, data, backups, upgrading it when you
+choose to, and responding when something goes wrong. On {{< param product_short >}},
+services are offered as Operators, not as managed services.
 {{< /note >}}
 
 ## Next Steps
 
-This lab kept things at the pattern and ownership level, using CloudNativePG only as a
-concrete example. {{< param product_short >}}'s dedicated **Operators / Platform
-Services** track goes deep on each service the platform actually offers this way —
-**GitLab**, **Argo CD**, and **CloudNativePG** again, this time as a real, day-2-operated
-tenant database rather than a teaching example. If your team is about to adopt any of
-those services, that track is where the depth lives, this workshop was the on-ramp to
-it, not a substitute for it.
+This lab covered the pattern and the ownership model, using CloudNativePG as an example. A
+planned {{< param product_short >}} **Operators / Platform Services** track covers each
+service the platform offers this way (**GitLab**, **Argo CD** and **CloudNativePG**), as a
+tenant-owned instance you operate day to day. If your team is about to adopt one of those
+services, take that track; this workshop is an introduction only.

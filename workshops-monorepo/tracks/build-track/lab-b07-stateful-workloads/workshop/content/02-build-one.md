@@ -58,7 +58,7 @@ Now apply it in the **upper** pane:
 command: envsubst < statefulset.yaml | oc apply -f - && oc rollout status statefulset/hello-dcs --timeout=180s
 ```
 
-In the lower pane, notice what you do **not** see: both Pods starting at once.
+In the lower pane, the two Pods do **not** start together.
 `hello-dcs-0` reaches Ready first, and only then is `hello-dcs-1` created.
 
 ```examiner:execute-test

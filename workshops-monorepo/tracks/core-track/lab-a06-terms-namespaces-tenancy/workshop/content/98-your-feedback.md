@@ -2,8 +2,8 @@
 title: Your Feedback
 ---
 
-Before you finish, please take 15 seconds to rate this workshop. Your feedback
-directly shapes how **{{< param product_name >}}** training improves.
+Before you finish, please take 15 seconds to rate this workshop. We use your feedback to
+improve **{{< param product_name >}}** training.
 
 ## Leave your feedback
 

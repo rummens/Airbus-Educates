@@ -35,8 +35,8 @@ One declaration: do you plan to put **EC or ITAR data** into any namespace of th
 {{< warning >}}
 **⚠️ Watch out:** {{< param product_short >}} **can** host such data. But if you answer yes, you must notify
 your **local Export Control team** — your Export Control officer, or the Export Control
-hub page, is the place to start. They just want to know; this is a notification duty, not
-a rejection.
+hub page, is the place to start. You only have to notify them; answering yes does not get
+your request rejected.
 {{< /warning >}}
 
 ## Further details, then submit
@@ -44,5 +44,4 @@ a rejection.
 The last box is free text. Use it for anything the form doesn't cover: a field you were
 unsure about, a different namespace owner than the members you listed, a special need.
 
-Then submit — and {{< param product_short >}} takes over. Provisioning is **automated**,
-so you are not waiting on someone to build your tenant by hand.
+Then submit. Provisioning is **automated**, so nobody builds your tenant by hand.

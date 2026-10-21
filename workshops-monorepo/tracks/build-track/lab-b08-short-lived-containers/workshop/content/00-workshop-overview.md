@@ -5,8 +5,8 @@ title: "Short-Lived & Helper Containers"
 Everything you have deployed so far was meant to run **forever**. A Deployment's job is to
 notice that a container stopped and start it again.
 
-A lot of real work is not shaped like that. A database migration has to **finish**. A report
-runs **nightly**. A setup step has to complete **before** the app starts. A log shipper runs
+A lot of real work is not shaped like that: a database migration has to **finish**, a report
+runs **nightly**, a setup step has to complete **before** the app starts, and a log shipper runs
 **beside** it.
 
 This lab covers those four shapes on **{{< param product_name >}}**.
@@ -22,10 +22,10 @@ for the terminal, editor and clickable actions.
 By the end of this workshop you will be able to:
 
 - Run work to completion with a [**Job**](https://kubernetes.io/docs/concepts/workloads/controllers/job/), and read its result.
-- Explain `backoffLimit`, `restartPolicy` and `ttlSecondsAfterFinished`, and watch a failing Job **give up** instead of crash-looping.
+- Explain `backoffLimit`, `restartPolicy` and `ttlSecondsAfterFinished`, and watch a failing Job **stop** after its retries instead of crash-looping.
 - Schedule work with a [**CronJob**](https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/), and trigger a run by hand to test it.
 - Use an [**init container**](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) for work that must finish before the app starts.
-- Explain what makes a container a [**sidecar**](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/) — and why it is the same API as an init container.
+- Explain what makes a container a [**sidecar**](https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/), and why it is the same API as an init container.
 
 ## Prerequisites
 

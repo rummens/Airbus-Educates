@@ -43,12 +43,11 @@ on CPU and VPA on memory, or VPA in recommendation mode only.
 
 ## On {{< param product_short >}}
 
-VPA arrives as an **operator** the platform installs, not as something a tenant deploys.
-That is the same split as every other operator-provided capability: the platform owns the
-controller, you own the object that uses it.
+VPA is an **operator** the platform installs. You create VPA objects; the platform runs the
+controller, as with every other operator-provided capability.
 
 More in the
 [{{< param product_short >}} autoscaling docs]({{< param dcs_docs_base_url >}}/concepts/autoscaling).
 
-Whether a VPA is available in your own namespace is a question for your platform contact.
-It is worth asking before you spend an afternoon tuning requests by hand.
+Ask your platform contact whether a VPA is available in your namespace before you tune
+requests by hand.

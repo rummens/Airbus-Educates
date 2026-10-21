@@ -2,7 +2,7 @@
 title: Summary
 ---
 
-You now have the vocabulary — and you've *seen* the thing the words describe.
+You learned the terms and saw namespace isolation in practice.
 
 ## What You Did
 
@@ -41,6 +41,6 @@ levels only: **Tenant → Namespaces**.
 
 ## Next Steps
 
-That's the *landscape*. The **deep model** is the Developer track: **RBAC, Tenancy &
-Namespaces** (the access rules in full) and **DEV vs PROD Namespaces & Policies** (how PROD
+This lab covered the terms. The **Operate & Observe** track covers the full model:
+**RBAC & Tenancy** (the access rules in full) and **DEV vs PROD Namespaces** (how PROD
 is enforced with Kyverno and why only PROD can expose apps with a Route).

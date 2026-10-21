@@ -37,7 +37,7 @@ A container's own filesystem is **ephemeral** — it exists only while the Pod e
 - Deploy the app with no volume attached.
 - Write a file inside the container, then delete the Pod.
 - The Deployment starts a fresh Pod from the clean image.
-- The file is gone — that is the default: no Pod, no data.
+- The file is gone: by default, data written inside a container is lost with its Pod.
 
 ```
 oc create deployment hello-dcs --image="$DCS_REGISTRY/samples/hello-dcs:v1.0.0"
@@ -72,7 +72,7 @@ The PVC becomes `Bound` once the Pod is scheduled.
 <!-- id: persists -->
 ## Prove It Persists
 
-The key test: destroy the Pod, let DCS create a fresh one, and read the marker back. It survives because it lives on the PV, not on the container.
+Destroy the Pod, let DCS create a fresh one, and read the marker back. It survives because it lives on the PV, not on the container.
 
 - `rollout restart` retires the old Pod and starts a new one.
 - The new Pod is built from the clean image again.
@@ -84,7 +84,7 @@ oc rollout restart deploy/hello-dcs
 oc exec deploy/hello-dcs -- cat /opt/app-root/src/data/marker
 ```
 
-Expected: `persisted-marker-42` — that is persistent storage.
+Expected: `persisted-marker-42`, read from a new Pod.
 
 ---
 
@@ -116,4 +116,4 @@ You gave an app storage that survives a Pod restart — the last step of the Cor
 - You claimed a File PVC, mounted it, wrote a marker, and read it back after a restart.
 - You compared **File (RWX)** and **Block (RWO)**, and saw **classification** drive the choice.
 
-Next: the orientation labs (namespaces & tenancy, the ITSM console, the OpenShift web console), then the Developer track for the mechanisms behind everything you just did.
+Next: the orientation labs (namespaces & tenancy, the ITSM console, the OpenShift web console), then the Build & Run and Operate & Observe tracks for the mechanisms behind everything you just did.

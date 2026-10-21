@@ -56,7 +56,8 @@ exactly one namespace, and `-n` is how you pick which.
 - **Leave it off** — the command uses your *current* namespace.
 - **Add `-n app-a`** — it targets `app-a` instead.
 
-Same command, same manifest. Only the `-n` value decides where the app is created.
+The command and the manifest stay the same. Only the `-n` value changes where the app is
+created.
 
 The deploy command combines three parts:
 
@@ -123,8 +124,8 @@ retries: 3
 delay: 2
 ```
 
-On a single cluster you have two Deployments both called `hello`, and neither knows the
-other exists. The namespace is the boundary that makes that safe.
+On a single cluster you have two Deployments called `hello`. They do not clash because
+each is in its own namespace.
 
 ## Actions don't leak
 
@@ -158,5 +159,5 @@ retries: .INF
 delay: 2
 ```
 
-`app-a` is now empty; `app-b` is unchanged. **Names, objects, and actions are all scoped
-to the namespace.** That is the core idea.
+`app-a` is now empty and `app-b` is unchanged. **Names, objects and actions are all
+scoped to the namespace.**

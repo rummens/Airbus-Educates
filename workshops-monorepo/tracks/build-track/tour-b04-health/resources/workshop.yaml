@@ -31,7 +31,7 @@ metadata:
 
       ### What you should already know
 
-      The concepts, not the clicks. Probes, requests, limits and the namespace budget are
+      Probes, requests, limits and the namespace budget are
       explained in **Health & Resources**.
 
       ### What you will do
@@ -44,7 +44,7 @@ metadata:
       - Read **Used** against **Max**, and what counts towards Used
       - Open the **LimitRange** and read the defaults an unsized container gets
 
-      > **💡 Tip:** each step names the `oc` command the screen stands in for.
+      > **💡 Tip:** most steps give the `oc` command that shows the same information.
 
       ### One quota, one LimitRange
 

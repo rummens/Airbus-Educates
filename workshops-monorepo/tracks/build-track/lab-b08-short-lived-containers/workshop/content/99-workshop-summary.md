@@ -14,7 +14,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
 ## What You Did
 
 1. **Ran** a Job to completion and read its output from the Pod it kept.
-2. **Failed** a Job on purpose and watched it reach a verdict after `backoffLimit` retries,
+2. **Failed** a Job on purpose and watched it stop after `backoffLimit` retries,
    with both attempts preserved for inspection.
 3. **Created** a CronJob, **triggered** it by hand with `--from=cronjob/…`, and **suspended**
    it without deleting anything.
@@ -37,14 +37,14 @@ records whether it succeeded.
 
 {{< note >}}
 **❓ Answer:** `backoffLimit` decides how many **retries** (with a doubling delay). When they
-run out the Job is marked `Failed` with a `BackoffLimitExceeded` event, and it stops — unlike
-a crash-looping Deployment, which never reaches a verdict.
+run out the Job is marked `Failed` with a `BackoffLimitExceeded` event, and it stops. A
+crash-looping Deployment keeps restarting instead.
 {{< /note >}}
 
 3. What is the difference between an init container and a native sidecar?
 
 {{< note >}}
-**❓ Answer:** one line — `restartPolicy: Always`. Both are declared under `initContainers`, so
+**❓ Answer:** one field, `restartPolicy: Always`. Both are declared under `initContainers`, so
 both are ordered relative to the app container; without that field the container must
 **finish** before the app starts, with it the container **keeps running** beside the app (and
 is stopped after it).
@@ -54,13 +54,13 @@ is stopped after it).
    resume it?
 
 {{< note >}}
-**❓ Answer:** nothing — they are gone. A schedule is not a queue; resuming only means the
+**❓ Answer:** nothing. The missed runs are skipped; resuming only means the
 **next** scheduled time will fire. Work that must happen eventually needs a queue, or a run
 triggered by hand with `oc create job --from=cronjob/…`.
 {{< /note >}}
 
 ## Next Steps
 
-**Resilience & Scheduling** is the last lab in this track: PodDisruptionBudgets that survive a
-node drain, graceful shutdown when the platform sends `SIGTERM`, and spreading replicas so one
-node's failure is not your outage.
+**Resilience & Scheduling** is the last lab in this track: PodDisruptionBudgets that limit what a
+node drain may evict, graceful shutdown when the platform sends `SIGTERM`, and spreading replicas
+so losing one node does not take the app down.

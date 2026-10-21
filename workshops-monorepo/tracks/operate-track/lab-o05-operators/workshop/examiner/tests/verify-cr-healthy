@@ -1,5 +1,5 @@
 #!/bin/bash
-# What the operator BUILT from four lines of YAML.
+# What the operator BUILT from three lines of spec.
 #
 # Deliberately not "is PostgreSQL serving": the DCS Academy's training namespaces run
 # under Educates' own SCC (educates-restricted, runAsUser: MustRunAsNonRoot), while a
@@ -31,7 +31,7 @@ fi
 
 case "$phase" in
   "Cluster in healthy state")
-    echo "✅ The operator reports '${phase}', having created ${pvcs} volume claim(s), ${svcs} Service(s) and ${secs} secret(s) from four lines of YAML."
+    echo "✅ The operator reports '${phase}', having created ${pvcs} volume claim(s), ${svcs} Service(s) and ${secs} secret(s) from three lines of spec."
     exit 0 ;;
 esac
 echo "✅ The operator is reconciling ('${phase}') and has already created ${pvcs} volume claim(s), ${svcs} Service(s) and ${secs} secret(s) — none of which you wrote."

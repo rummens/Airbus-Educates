@@ -32,8 +32,8 @@ delay: 3
 - **`--tail=20`** returns the last 20 lines instead of everything.
 
 {{< warning >}}
-**⚠️ Watch out:** `deploy/…` reads **one** Pod, not all of them. With two replicas you are
-seeing half the story, which is what the label selector below fixes.
+**⚠️ Watch out:** `deploy/…` reads **one** Pod, not all of them. With two replicas you see
+only one Pod's lines, which the label selector below fixes.
 {{< /warning >}}
 
 ## Read every replica
@@ -68,8 +68,8 @@ retries: .INF
 delay: 3
 ```
 
-`--since=5m` is the flag for an incident: what was it saying five minutes ago, rather than
-everything since Tuesday.
+`--since=5m` limits the output to the last five minutes, which is what you need during an
+incident.
 
 ## Follow it live
 
@@ -80,7 +80,7 @@ command: timeout 30 oc logs -f deploy/hello-dcs --tail=5
 session: 2
 ```
 
-In the **upper** pane, make some noise:
+In the **upper** pane, send ten requests, one per second:
 
 ```terminal:execute
 command: |-

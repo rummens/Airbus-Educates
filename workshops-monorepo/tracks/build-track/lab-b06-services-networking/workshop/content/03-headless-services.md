@@ -67,13 +67,13 @@ retries: .INF
 delay: 2
 ```
 
-## Why this matters later
+## Headless Services and StatefulSets
 
 A headless Service is also how a **StatefulSet** gives each replica a **stable name**:
 `<pod>.<service>.<namespace>.svc.cluster.local`, so `db-0` stays `db-0` across restarts.
 
-That is the next lab. What matters here is that Pod IPs are not stable, while the *names*
-a StatefulSet builds on top of this are.
+The next lab covers StatefulSets. Pod IPs change when a Pod is replaced, but the names a
+StatefulSet builds on top of this Service stay the same.
 
 {{< warning >}}
 **⚠️ Watch out:** a headless Service gives you no load balancing and no failover. The

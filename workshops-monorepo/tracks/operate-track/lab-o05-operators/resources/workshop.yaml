@@ -11,21 +11,21 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: cog
     academy.dcs/details: |
-      **Every platform service you are offered arrives the same way: as an operator.**
+      **Every platform service on DCS is delivered as an operator.**
 
       An operator is a controller that watches for objects of a kind it understands and makes
-      reality match them. It is the reconcile loop a Deployment already uses, applied to something
+      the cluster match them. It is the reconcile loop a Deployment already uses, applied to something
       larger than a Pod.
 
       You read the **CustomResourceDefinition** that added a new kind to this cluster, create a
       **Custom Resource** of that kind, a PostgreSQL cluster in a few lines, and watch the
       operator build everything underneath it.
 
-      Then the **ownership split**, which is what matters on DCS. The platform owns the operator.
+      Then the **ownership split** on DCS. The platform owns the operator.
       You own the instance it manages, including its data, its configuration and its day-2 work.
 
-      > **💡 Tip:** the manifest you write has no image, no StatefulSet and no volumes in it. What
-      > you did not have to write is the point.
+      > **💡 Tip:** the manifest you write has no image, StatefulSet or volumes in it. The
+      > operator creates those for you.
 spec:
   title: "Operators on DCS"
   description: >-
@@ -81,7 +81,7 @@ spec:
     # ("exec container process /controller/manager: Permission denied"). A normal
     # namespace with the platform's standard restricted posture runs it fine — verified
     # on the test cluster. Operator-provisioned workloads belong in a normal namespace,
-    # which is also how a tenant would really use one.
+    # which is also how a tenant would use one.
     #
     # The learner is granted the operator's kinds THERE, plus edit, bound to the session
     # ServiceAccount (which lives in the WORKSHOP namespace — binding the session

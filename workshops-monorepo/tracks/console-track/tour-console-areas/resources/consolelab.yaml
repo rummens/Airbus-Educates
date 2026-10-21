@@ -65,8 +65,8 @@ spec:
     - id: open-networking
       title: Open Networking
       description: >-
-        Running is not the same as reachable. The objects that publish an application are in
-        their own group.
+        Open Networking: the objects that make an application reachable are in their own
+        group.
       target: { type: quickStartId, value: qs-nav-networking }
       complete:
         operation: { type: activateTarget }
@@ -80,7 +80,7 @@ spec:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~Service' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/core~v1~Service' }
     - id: read-services
-      title: Addresses, not pods
+      title: Read the Service list
       description: >-
         What oc get service prints: each row is a name, a cluster IP and the ports it
         answers on. Routes sit in the same group and publish one of these to a URL outside
@@ -109,8 +109,8 @@ spec:
     - id: read-pvcs
       title: Bound or waiting
       description: >-
-        The visual form of oc get pvc: capacity, access mode, storage class, and the status
-        that decides everything else. Bound means a volume exists and a pod can mount it;
+        The visual form of oc get pvc: capacity, access mode, storage class and status.
+        Bound means a volume exists and a pod can mount it;
         Pending means the request has not been satisfied and any pod that wants it will wait
         rather than start.
       target: { type: consoleElement, id: pageContent }
@@ -120,8 +120,8 @@ spec:
     - id: open-configmaps
       title: Open ConfigMaps
       description: >-
-        One group left that matters daily: the configuration a workload reads at startup.
-        ConfigMaps live back under Workloads, next to the objects that consume them.
+        Last, ConfigMaps: the configuration a workload reads at startup. They live back
+        under Workloads, next to the objects that consume them.
       target: { type: consoleElement, id: navigationLink, value: ConfigMaps }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~ConfigMap' }

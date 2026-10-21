@@ -2,11 +2,10 @@
 title: "Harbor: Projects, Push & Scan"
 ---
 
-Every lab so far treated the registry as a string in a manifest. It is more than that: on
-**{{< param product_name >}}** the registry is where the platform decides **what may run at
-all**.
+On **{{< param product_name >}}** the registry also decides **which images may run**: Harbor
+refuses to serve images that break its rules.
 
-This lab opens it up — the tools, the rules, and the arithmetic behind the gate.
+This lab covers the registry tools (`skopeo`), the project rules, and how the CVE gate decides.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the
@@ -43,8 +42,8 @@ A browser-based session with a split **terminal** and an **editor**. All command
 and `skopeo`.
 
 The scan reports you read are **fixtures**: this training cluster has no scanner-backed
-registry attached. The structure, the fields and the gate arithmetic are real — only the
-scanner running live is missing, and the lab says so where it matters.
+registry attached. The report structure, fields and gate rules are real. Only the live
+scanner is missing, and the lab points this out where it matters.
 
 ## Time and Difficulty
 

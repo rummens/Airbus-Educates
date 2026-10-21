@@ -14,8 +14,8 @@ spec:
     Open a Pod's Logs tab, follow the stream, pause it to read one moment, and see where an
     aggregated view would fit.
   completionText: >-
-    Done. You followed a live log, paused it to read a specific line, and saw where the
-    Logs tab stops being enough — which is exactly where an aggregated store begins.
+    You followed a live log, paused it to read a specific line, and saw where the Logs
+    tab stops being enough and an aggregated log store is needed.
   visibility: hidden
   mode: assisted
   context:
@@ -62,9 +62,9 @@ spec:
     - id: read-pod-details
       title: Read the details first
       description: >-
-        Restart count and status live here. Read them before the log: a log that stops
-        mid-sentence and a restart count of 3 are the same story, and the count is the half
-        that tells you the container died rather than went quiet.
+        Restart count and status are shown here. Read them before the log. A log that
+        stops mid-sentence often goes with a restart count of 3, and the restart count tells
+        you the container died rather than went quiet.
       target: { type: consoleElement, id: detailsSection, value: Pod details }
       complete:
         operation: { type: none }
@@ -102,7 +102,7 @@ spec:
     - id: open-events
       title: Open the Events tab
       description: >-
-        Events are not logs. The log is what your process wrote; events are what the
+        Events are different from logs: the log is what your process wrote; events are what the
         platform did to the Pod, including the pulls, the probe failures and the kills. When
         a log ends without explanation, the reason is usually on this tab.
       target: { type: href, value: '/k8s/ns/<<namespace>>/pods/lab-logger/events' }

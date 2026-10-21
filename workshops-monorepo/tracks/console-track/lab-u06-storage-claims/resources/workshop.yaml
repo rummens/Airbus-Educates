@@ -18,8 +18,8 @@ metadata:
     academy.dcs/difficulty: beginner
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
-      Read a PersistentVolumeClaim in the OpenShift web console — status, capacity,
-      class, events — and find the pod that mounts it.
+      Read a PersistentVolumeClaim's status, capacity, class and events in the OpenShift
+      web console, and find the pod that mounts it.
     # A console lab has no workshop content, so there is no README for the portal to
     # fetch: this annotation is the course page's prospectus. Markdown, rendered.
     academy.dcs/details: |
@@ -34,9 +34,9 @@ metadata:
 
       ### What you should already know
 
-      This lab assumes the concepts, not the clicks. You should have finished
-      **Storage**, where you requested a PersistentVolumeClaim, mounted it, and proved the
-      data survived a restart. No new Kubernetes concepts are introduced here.
+      You should have finished **Storage**, where you requested a PersistentVolumeClaim,
+      mounted it, and checked that the data survived a restart. This lab reads that kind of
+      claim and its pod in the console, and introduces no new Kubernetes concepts.
 
       ### What you will do
 
@@ -53,9 +53,9 @@ metadata:
 
       ### When to reach for the console
 
-      The console wins when a pod will not start and you need to see the claim, its class
-      and its events without three commands. The CLI still wins for anything you need to
-      repeat, script, or review — which is why the terminal labs come first.
+      When a pod will not start because of its volume, the console shows the claim, its
+      class and its events without three separate commands. For a check you repeat or
+      script, use `oc get pvc` and `oc describe pvc`.
 
       ### Cleaning up
 
@@ -77,10 +77,9 @@ metadata:
 spec:
   title: "Storage claims (console)"
   description: >-
-    You requested a volume and proved it survived a restart from the terminal in Storage.
-    This lab reads the same claim in the OpenShift web console — status, capacity, access
-    mode, class and events — and ends on the pod that mounts it, so you can diagnose a
-    storage problem from the screen instead of from three commands.
+    Trace a storage claim to the pod that mounts it in the OpenShift web console, reading
+    its status, capacity, access mode, class and events on the way. The console view of the
+    volume you requested from the terminal in Storage.
   duration: 5m
   difficulty: beginner
   labels:

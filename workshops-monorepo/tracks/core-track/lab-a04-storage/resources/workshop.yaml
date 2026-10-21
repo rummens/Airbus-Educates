@@ -12,7 +12,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   title: "Storage"
-  description: Give your app storage that survives a restart — request a PVC from a DCS storage class, mount it, write data, restart, and prove the data persists — and learn when to pick File vs Block and how S3 is requested.
+  description: Request a PVC from a DCS storage class, mount it, write data, restart, and check the data is still there. Also covers when to pick File or Block, and how S3 is requested.
   duration: 20m
   difficulty: beginner
   labels:

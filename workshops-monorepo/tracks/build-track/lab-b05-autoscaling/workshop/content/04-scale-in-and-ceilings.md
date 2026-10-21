@@ -2,7 +2,7 @@
 title: Scale In, and Ceilings
 ---
 
-Scaling out is the easy half. What an HPA does next is where the decisions are.
+This page covers what the HPA does after the load stops, and what limits it.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -59,13 +59,13 @@ delay: 2
 {{< note >}}
 **💡 Tip:** waiting out the full five minutes here is not worth your session time. Setting
 `behavior.scaleDown.stabilizationWindowSeconds` is how you would shorten it for a workload
-that genuinely tolerates it.
+that can handle faster scale-in.
 {{< /note >}}
 
 ## The real ceiling is your budget
 
-`maxReplicas: 6` is the ceiling you chose. The namespace budget is the ceiling you were
-**given**, and it wins.
+`maxReplicas: 6` is the limit you set. The namespace budget is a second limit, set by the
+platform. When the two disagree, the budget applies.
 
 Each replica of this app has a **200m CPU / 128Mi** limit, and a `medium` namespace allows
 **2 CPU / 2Gi** on the limit side:
@@ -89,6 +89,6 @@ retries: 3
 delay: 2
 ```
 
-**Set `maxReplicas` from the budget you have**, not from the load you imagine. An
+**Set `maxReplicas` from the budget you have**, not from the load you expect. An
 autoscaler that cannot get Pods still looks like it is working, which makes it harder to
 diagnose than a fixed replica count.

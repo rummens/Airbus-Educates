@@ -50,9 +50,8 @@ retries: .INF
 delay: 3
 ```
 
-**`no`**, which is the correct answer. Platform policy is owned by the platform: you cannot
-read it, edit it or bypass it. You can observe it, precisely and repeatably, which is what the
-rest of this lab does.
+You get **`no`**, as expected. The platform owns this policy, so you cannot read, edit or
+bypass it. You can only see its decisions, and the rest of this lab does that.
 
 Two rules are in play:
 
@@ -71,9 +70,8 @@ each one names the rule that produced it.
 
 - **DEV** lets you move fast. Deploy something half-finished, iterate, break it.
 - **PROD** requires the workload to be sized before it is admitted, so it can be scheduled and
-  accounted for against a budget somebody pays for.
+  accounted for against a budget.
 
-The same cluster gives you a place to iterate and a place where unfinished work is refused at
-the door.
+On one cluster, DEV is for iterating and PROD refuses unfinished work at admission.
 
 Next, use the DEV namespace as intended.

@@ -2,8 +2,8 @@
 title: The Logs of a Crash
 ---
 
-One flag exists for a single situation: the container that can tell you what went wrong is
-**already gone**, replaced by a fresh one that knows nothing.
+One flag covers this situation: the container that failed has **already been replaced**, and
+the new container's log does not contain the error.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -60,14 +60,14 @@ retries: .INF
 delay: 5
 ```
 
-There it is:
+The output contains the fatal error:
 
 ```
 FATAL: cannot reach the database at db.internal:5432
 ```
 
-**`--previous`** reads the log of the **last terminated** container in that Pod. That is
-where a crash explains itself, and it is worth reaching for first.
+**`--previous`** reads the log of the **last terminated** container in that Pod. That log
+usually holds the error, so run it first on a crash-looping Pod.
 
 {{< note >}}
 **💡 Tip:** stderr and stdout land in the same stream, so `oc logs` shows them together.
@@ -105,9 +105,9 @@ retries: .INF
 delay: 3
 ```
 
-Nothing. The Pod is gone, the node's file went with it, and `oc logs` has nowhere to look.
+The command returns an error instead of logs: the Pod is gone, and its log file on the node
+was deleted with it.
 
-**`oc logs` can only tell you about containers that still exist.** Anything that crashed
-last night on a node that has since been drained is out of reach.
-
-That is what the next page is about.
+`oc logs` only reads containers that still exist. Anything that crashed last night on a
+node that has since been drained is out of reach. The next page covers how the platform
+keeps those lines.

@@ -32,8 +32,7 @@ metadata:
 
       ### What you should already know
 
-      The concepts, not the clicks. The log path, `--previous` and aggregation are explained in
-      **Logs**.
+      The log path, `--previous` and aggregation are explained in **Logs**.
 
       ### What you will do
 
@@ -60,8 +59,8 @@ metadata:
 spec:
   title: "Logs in the console"
   description: >-
-    The console side of Logs: a Pod's status and restart count, its live log with pause and
-    search, the container selector, and the events that explain what the log cannot.
+    A Pod's status and restart count, its live log with pause and search, the container
+    selector, and the events that explain what the log cannot, in the OpenShift web console.
   duration: 8m
   difficulty: intermediate
   labels:

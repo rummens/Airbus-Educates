@@ -17,13 +17,13 @@ A [**Tenant**]({{< param dcs_docs_base_url >}}/services/tenants) is the org-leve
 {{< param product_short >}}. It is who is **accountable**, and it is what gets **billed**
 (recharged).
 
-A Tenant **owns one or more Namespaces**. That is the entire model — two levels, Tenant then
+A Tenant **owns one or more Namespaces**. The model has two levels, Tenant then
 Namespaces:
 
 ![A Tenant owns one or more Namespaces of type DEV or PROD; PROD enforces Kyverno policy, DEV does not](tenancy-model.svg)
 
 {{< warning >}}
-**⚠️ There is no separate "project" layer.** On OpenShift, "project" is simply the word for
+**⚠️ There is no separate "project" layer.** On OpenShift, "project" is the word for
 a namespace — the same thing you've been using — not a third level between Tenant and
 Namespace. If you've seen a "Namespace → Project → Tenant" diagram elsewhere, it's wrong
 for {{< param product_short >}}.
@@ -38,8 +38,8 @@ differently:
   to expose apps.
 - **DEV** — looser, for fast iteration.
 
-That the types *exist* is the point here. *How* the difference is enforced is a
-Developer-track topic (**DEV vs PROD Namespaces & Policies**).
+This lab only shows that the types exist. The **DEV vs PROD Namespaces** lab (Operate &
+Observe track) shows how the difference is enforced.
 
 Look at the labels on your own namespace. The command reads them and formats them one per
 line:
@@ -66,5 +66,5 @@ it is.
 {{< note >}}
 **⚠️ Do not confuse a cluster with a namespace type.** From the **What is DCS?** lab: Sandbox and PROD are
 *clusters* — where the platform runs. DEV and PROD here are *namespace types* — how a
-namespace is governed. Different things that reuse the word "PROD".
+namespace is governed. The two share the word "PROD" but mean different things.
 {{< /note >}}

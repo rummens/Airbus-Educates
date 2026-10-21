@@ -2,9 +2,9 @@
 title: Roll Out a Change
 ---
 
-The point of keeping configuration in a ConfigMap is that you can *change* it without
-touching the image. On this page you edit the greeting, apply the change, and roll the app
-onto the new value — the image never changes.
+Because the configuration is in a ConfigMap, you can *change* it without touching the
+image. On this page you edit the greeting, apply the change, and roll the app onto the new
+value. The image stays the same.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -62,9 +62,8 @@ Now ask the **new** container the same question:
 command: oc exec deploy/hello-dcs -- printenv GREETING
 ```
 
-Output: `Reconfigured without a redeploy` — the **new** value. Same image, same Pod
-template except for the config it reads: the rollout is what turned the staged change into
-a live one.
+Output: `Reconfigured without a redeploy`, the **new** value. The image did not change.
+The rollout started new Pods, and they read the updated ConfigMap when they started.
 
 {{< note >}}
 **💡 Want to watch it happen?** In the **lower** terminal you can run `oc get pods -w` to see the
@@ -79,4 +78,4 @@ retries: .INF
 delay: 2
 ```
 
-The app now answers **`Reconfigured without a redeploy`** — same image, new config, live.
+The app now answers **`Reconfigured without a redeploy`**.

@@ -27,7 +27,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/na
 
 ## Then pick "Basic standard namespace"
 
-The form offers three paths. For getting started, one of them is the answer:
+The form offers three options. To get started, pick the first one:
 
 - ✅ **Basic standard namespace** — pre-configured, standard-sized. You are asked only for
   the **usage** and any **features** below, and nothing else. Need more resources later? A
@@ -37,9 +37,9 @@ The form offers three paths. For getting started, one of them is the answer:
 - **Customized (expert mode)** — you set every quota and technical parameter by hand.
 
 {{< note >}}
-**📌 Basic is not a downgrade.** Same platform, sensible defaults, and the limits are raised
-on request. Choose expert mode when you already know your exact numbers — not to keep your
-options open.
+**📌 Basic runs on the same platform** with sensible defaults, and you can raise its limits
+with a request. Choose expert mode only when you already know the exact quota numbers you
+need.
 {{< /note >}}
 
 ## Usage — DEV or PROD
@@ -66,14 +66,14 @@ Leave them all off if you don't know you need them; they can be added later.
 
 {{< warning >}}
 **⚠️ Watch out:** "Harbor **project**" is Harbor's own word for a registry namespace. It is **not** a layer
-in the {{< param product_short >}} tenancy model — that is still just **Tenant →
+in the {{< param product_short >}} tenancy model — that is still **Tenant →
 Namespaces**, as the **Terms — Namespaces & Tenancy** lab said.
 {{< /warning >}}
 
 ## The whole request, start to finish
 
-Three fields, one usage choice, zero or more features, submit. Everything after that is
-automated.
+Fill in the three fields, choose the usage, tick any features you need, and submit.
+{{< param product_short >}} provisions the namespace automatically.
 
 {{< note >}}
 **📌 Going further later.** Expert mode adds operators, capacity tiers (16 / 32 / 48 CPU) and

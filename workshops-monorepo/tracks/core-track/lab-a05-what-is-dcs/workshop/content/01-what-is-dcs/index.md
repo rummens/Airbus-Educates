@@ -5,7 +5,7 @@ title: What is DCS?
 **{{< param product_name >}}** is Airbus Defence and Space's on-prem, multi-national
 (European) container platform, built on Red Hat OpenShift. It gives teams a governed,
 secure place to run containerised applications without managing the underlying
-infrastructure — and because it runs on-premises and **air-gapped**, everything you
+infrastructure. Because it runs on-premises and **air-gapped**, everything you
 need (images, tools) is provided from within the platform.
 
 Open the slide for this page (📊 **Slides** tab):
@@ -29,11 +29,11 @@ Airbus Commercial adopted OpenShift to modernise how applications are built and 
 Airbus Defence and Space faces the same need at greater scale, and under stricter
 **security** and **sovereignty** requirements.
 
-That is what {{< param product_short >}} delivers: a **Namespace as a Service** platform.
+{{< param product_short >}} meets that need as a **Namespace as a Service** platform.
 Teams request namespaces and ship applications; the platform handles the clusters, security
 and compliance.
 
-The payoff for you as a tenant is three things:
+For you as a tenant, this means:
 
 - **air-gapped and sovereign** — your workloads and data stay inside the platform;
 - **managed** — the platform team runs the clusters, security and compliance;

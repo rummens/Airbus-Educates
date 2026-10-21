@@ -29,15 +29,14 @@ metadata:
       OpenShift web console and walks you through it: the step you are on is highlighted
       on the real page, and the guidance box follows you as you navigate.
 
-      Two projects are created for you before the lab starts, because the lesson only
-      works with two: the same object name in both, belonging to neither.
+      Two projects are created for you before the lab starts. Each holds an object with the
+      same name, and the lab compares them.
 
       ### What you should already know
 
-      This lab assumes the concepts, not the clicks. You should have finished
-      **Terms — Namespaces & Tenancy**, where you deployed the same application into two
-      namespaces and saw them stay independent. No new Kubernetes concepts are introduced
-      here.
+      You should have finished **Terms — Namespaces & Tenancy**, where you deployed the same
+      application into two namespaces and saw them stay independent. This lab shows the same
+      separation in the console and introduces no new Kubernetes concepts.
 
       ### What you will do
 
@@ -49,14 +48,14 @@ metadata:
       - Switch the project selector, the console's equivalent of `oc project`, to a second
         project
       - Find that project's own object carrying the same name
-      - Compare the two pages — same kind, same name, different UID — and see why editing one
+      - Compare the two pages (same kind and name, different UID) and see why editing one
         cannot affect the other
 
       ### When to reach for the console
 
-      The console wins here: the project selector makes scope visible at all times, which
-      is exactly the thing that is invisible in a terminal until you check `oc project`.
-      The CLI still wins for anything you need to repeat, script, or review.
+      The project selector shows the current scope at the top of every page; in a terminal
+      you see it only when you run `oc project`. That makes the console the quicker place to
+      compare objects across two projects.
 
       ### Cleaning up
 
@@ -79,10 +78,9 @@ metadata:
 spec:
   title: "See the namespace boundary (console)"
   description: >-
-    You proved namespace isolation from the terminal in Terms — Namespaces & Tenancy by
-    running the same application in two namespaces. This lab does it in the OpenShift web
-    console: two projects, one resource name, two independent objects — and the project
-    selector that decides which one you are looking at.
+    Compare two ConfigMaps with the same name in two projects in the OpenShift web console,
+    and see how the project selector sets which one you are looking at. Follows on from
+    Terms — Namespaces & Tenancy, where you ran the same application in two namespaces.
   duration: 10m
   difficulty: beginner
   labels:

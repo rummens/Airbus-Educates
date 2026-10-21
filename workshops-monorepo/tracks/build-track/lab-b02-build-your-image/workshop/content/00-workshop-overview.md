@@ -2,7 +2,7 @@
 title: "Build Your Image on DCS"
 ---
 
-Every lab so far ran an image somebody else built. This one builds yours.
+In this lab you build your own image.
 
 There is **no Docker daemon** on **{{< param product_name >}}**, on the cluster or in this
 session. Building an image the usual way needs privileged access to a host, and a shared

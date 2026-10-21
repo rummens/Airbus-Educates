@@ -52,13 +52,13 @@ command: oc status | tee ~/exercises/status.txt
 session: 2
 ```
 
-`oc status` gives a quick overview of what's running in your project. It's empty for
-now — you'll change that in the later labs. The point here is only that the command ran
-in the **lower** pane while the upper one kept its output.
+`oc status` gives a quick overview of what's running in your namespace. It is empty for
+now; later labs deploy apps into it. This step only shows that the command ran in the
+**lower** pane while the upper pane kept its output.
 
 ```examiner:execute-test
 name: verify-status
-title: Verify oc status runs against your project
+title: Verify oc status runs against your namespace
 timeout: 10
 ```
 

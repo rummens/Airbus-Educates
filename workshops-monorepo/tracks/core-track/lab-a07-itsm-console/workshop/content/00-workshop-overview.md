@@ -2,15 +2,15 @@
 title: "Requesting a Tenant & Namespace via ITSM"
 ---
 
-Six labs in, you have deployed, configured, exposed and persisted — always inside a
-namespace that was simply *there*. This lab, part of **{{< param product_name >}}**, shows
-where that namespace comes from: you **request** it through ITSM.
+In the earlier labs you deployed, configured, exposed and stored data for an app, always in
+a namespace that was created for you. This lab, part of **{{< param product_name >}}**,
+shows where that namespace comes from: you **request** it through ITSM.
 
 {{< note >}}
 **💡 The short version, in case you only read this page:** find your national myITSM portal →
 request a **Tenant** (about seven fields) → request a **Namespace** if you need a second
 one (three fields, then pick *basic*). {{< param product_short >}} provisions the rest
-automatically. The pages below just walk those fields one by one.
+automatically. The pages below walk through those fields one by one.
 {{< /note >}}
 
 {{< note >}}

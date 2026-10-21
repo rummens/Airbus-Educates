@@ -24,7 +24,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
 5. **Identified** the four lines {{< param product_short >}} rejects, and the control behind
    each.
 6. **Met the SCC properly**: asked for root, read the refusal, found which constraints are
-   yours to use, and saw the uid and group your container actually runs as.
+   yours to use, and saw the uid and group your container runs as.
 
 ## Check Your Understanding
 

@@ -1,21 +1,18 @@
 # Operators on DCS
 
-**Every platform service you are offered arrives the same way: as an operator.**
-
 An operator is a controller that watches for objects of a kind it understands and makes
-reality match them. It is the reconcile loop a Deployment already uses, applied to something
+the cluster match them. It is the reconcile loop a Deployment already uses, applied to something
 larger than a Pod.
 
 You read the **CustomResourceDefinition** that taught this cluster a new kind, create a
 **Custom Resource** of that kind, a PostgreSQL cluster in a few lines, and watch the operator
 build the StatefulSet, the storage and the Services underneath it.
 
-Then the **ownership split**. The platform owns the operator and its lifecycle. You own the
-instance it manages: its data, its configuration, its backups,
-its day-2.
+Then the **ownership split**: the platform owns the operator and its lifecycle, and you own
+the instance it manages, including its data, configuration, backups and day-2 operations.
 
-> **💡 Tip:** the manifest you write has no image, no StatefulSet and no volumes in it.
-> Counting what you did *not* have to write is the point of the lab.
+> **💡 Tip:** the manifest you write has no image, StatefulSet or volumes in it. The operator
+> creates those for you.
 
 - **Track:** Operate & Observe
 - **Audience:** Advanced

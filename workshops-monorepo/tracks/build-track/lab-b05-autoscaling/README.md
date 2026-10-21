@@ -29,7 +29,7 @@ count, and why you do not point both at the same resource.
 - Create an HPA with `autoscaling/v2` and read its conditions and events.
 - Drive an app under load and watch it scale out.
 - Explain why scale-in is slow, and what a stabilisation window protects.
-- Set `maxReplicas` from the namespace budget instead of from imagination.
+- Set `maxReplicas` from the namespace budget instead of from expected load.
 - Say what VPA does differently.
 
 ## What you'll do

@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Terms — Namespaces & Tenancy
 
-Names the place your apps have been running in — the **Namespace** — then shows isolation for real by running the same app in two namespaces at once.
+Explains the **Namespace** your apps have been running in, then shows isolation by running the same app in two namespaces at once.
 
 **In this lab:** define a Namespace · see isolation directly · reasons to split into namespaces · the Tenant → Namespaces model · DEV vs PROD namespace types.
 
@@ -59,7 +59,7 @@ Four common reasons to run more than one namespace — each one something you sa
 - **Independent quotas and RBAC** — each namespace has its own budget and access rules.
 - **Naming freedom** — two teams can both name an app `hello` without coordinating.
 
-No command on this page — it is a reason to remember, not a step to run.
+No command on this page.
 
 ---
 
@@ -83,8 +83,8 @@ oc get namespace "$(oc project -q)" -o jsonpath='{.metadata.labels}'
 <!-- id: next -->
 ## What's next
 
-You now have the vocabulary and have seen isolation for real.
+You learned the terms and saw namespace isolation in practice.
 
-- The **deep access model** is the Developer-track lab **RBAC, Tenancy & Namespaces**.
-- **DEV vs PROD by policy** — how PROD is enforced with Kyverno — is the Developer-track lab **DEV vs PROD Namespaces & Policies**.
+- The full access model is the **RBAC & Tenancy** lab in the Operate & Observe track.
+- How PROD is enforced with Kyverno is the **DEV vs PROD Namespaces** lab in the same track.
 - Leave feedback in the **Feedback** tab before you finish.

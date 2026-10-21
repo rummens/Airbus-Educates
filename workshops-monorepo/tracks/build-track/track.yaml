@@ -4,7 +4,7 @@
 # defaults (order 100, icon "layers").
 id: build            # track id — must equal the workshops' academy.dcs/track label
 title: "Build & Run — Your App on DCS"
-description: "Build your image on the cluster, get it into Harbor, then make the app healthy, scalable and resilient."
+description: "Build your image on the cluster, get it into Harbor, then configure probes, resource limits, autoscaling, networking and storage for it."
 order: 20            # after the core foundations + console tracks
 icon: package        # FA-style icon name the portal vendors
 

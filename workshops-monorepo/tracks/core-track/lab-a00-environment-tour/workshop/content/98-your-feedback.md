@@ -2,9 +2,9 @@
 title: Your Feedback
 ---
 
-Before you finish, please take 15 seconds to rate this workshop. Your feedback
-directly shapes how **{{< param product_name >}}** training improves — and trying the
-feedback form is the last stop on this environment tour.
+Before you finish, please take 15 seconds to rate this workshop. We use your feedback to
+improve **{{< param product_name >}}** training. Trying the feedback form is also the last
+stop on this environment tour.
 
 ## Leave your feedback
 

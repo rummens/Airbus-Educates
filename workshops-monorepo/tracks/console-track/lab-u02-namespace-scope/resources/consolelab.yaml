@@ -15,7 +15,7 @@ metadata:
 spec:
   title: See the namespace boundary
   description: Compare the same-named ConfigMap in two projects to see what a namespace isolates.
-  completionText: Lesson complete — one resource name, two independent objects.
+  completionText: Lesson complete. You compared two ConfigMaps with the same name in two projects and saw that they are separate objects.
   visibility: hidden
   mode: assisted
   context:
@@ -67,11 +67,10 @@ spec:
     - id: read-first-configmap
       title: Name plus namespace
       description: >-
-        Name and Namespace sit next to each other for a reason: together they are this
-        object's identity. The name kube-root-ca.crt does not collide with the copies in
-        other projects, because the namespace is part of what identifies it — the same rule
-        that lets oc get configmap in two projects return two different objects. Note the
-        UID; you will see a different one shortly.
+        Name and Namespace together identify this object. The name kube-root-ca.crt does not
+        collide with the copies in other projects, because the namespace is part of its
+        identity. The same rule lets oc get configmap in two projects return two different
+        objects. Note the UID; you will see a different one shortly.
       target: { type: consoleElement, id: detailsSection, value: ConfigMap details }
       complete:
         operation: { type: none }
@@ -117,10 +116,10 @@ spec:
     - id: read-second-configmap
       title: Same name, different object
       description: >-
-        Same kind, same name, different Namespace — and a different UID, which is what proves
-        these are two objects rather than one seen twice. Deleting or editing this one has no
-        effect on the copy in <<namespace>>. That is the whole meaning of a namespace
-        boundary, and why quota, RBAC and NetworkPolicy are all set per project.
+        The kind and name match the first ConfigMap, but the Namespace and UID differ, so these
+        are two objects rather than one seen twice. Editing or deleting this one has no effect
+        on the copy in <<namespace>>. This separation is why quota, RBAC and NetworkPolicy are
+        set per project.
       target: { type: consoleElement, id: detailsSection, value: ConfigMap details }
       complete:
         operation: { type: none }

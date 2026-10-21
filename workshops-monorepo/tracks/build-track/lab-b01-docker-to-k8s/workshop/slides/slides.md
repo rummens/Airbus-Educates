@@ -14,12 +14,12 @@ Digital Container Service · DCS Academy
 <!-- id: mental-model -->
 ## The mental model
 
-The objects do the same jobs under different names. What changes is *how you describe them*.
+The objects do the same jobs under different names. The change is that you declare the state you want instead of running commands.
 
 - **Imperative** — `docker run` tells the daemon what to do, once.
 - **Declarative** — a Deployment states the end state, and the platform keeps reconciling to it.
 - That is why a dead Pod comes back with nobody running a command.
-- Four compose concepts, four Kubernetes objects.
+- Each compose concept maps to one Kubernetes object.
 
 ![Docker world mapped onto Kubernetes objects](mental-model.svg)
 
@@ -64,7 +64,7 @@ curl -s -o /dev/null -w 'HTTP %{http_code}\n' \
 <!-- id: configmap -->
 ## Env to ConfigMap
 
-A compose `environment:` block welds config into the file. A **ConfigMap** lifts it out into its own object that any workload in the namespace can reference.
+A compose `environment:` block keeps config inside the compose file. A **ConfigMap** stores it as a separate object that any workload in the namespace can reference.
 
 ```
 oc apply -f configmap.yaml
@@ -80,11 +80,11 @@ oc set env deploy/hello-dcs --from=configmap/hello-dcs-config
 <!-- id: rejected -->
 ## What does not translate
 
-Four compose lines never became a manifest, because DCS refuses them. This is the half that changes how you build images.
+Four compose lines never became a manifest, because DCS refuses them. These rules affect how you build images.
 
 - `image: docker.io/...:latest` — air-gapped platform, Harbor only, and no floating tags.
 - `user: root` — the restricted SCC forbids UID 0 and assigns an arbitrary UID.
-- `privileged: true` — one capability granted explicitly, never a blanket escape hatch.
+- `privileged: true` — blocked. A specific capability can be granted explicitly instead.
 - `volumes: /var/run/docker.sock` — no host paths; storage is a namespace-scoped Volume.
 
 ![Four compose lines and the DCS control that rejects each](rejected-lines.svg)
@@ -102,7 +102,7 @@ oc auth can-i use scc/anyuid          # no  — "not usable by user or serviceac
 ```
 
 - **"Invalid value"** — an SCC you may use, refusing your request. Fix the workload.
-- **"not usable by user or serviceaccount"** — the SCC is not yours. Stop looking.
+- **"not usable by user or serviceaccount"** — the SCC exists but you may not use it. Fix the image or the manifest instead.
 - You run as a **non-root, possibly arbitrary UID**, always in **group 0** — build to that.
 
 ![A Pod is checked against every SCC its identity may use; none admits it and nothing is created](scc-flow.svg)
@@ -112,8 +112,8 @@ oc auth can-i use scc/anyuid          # no  — "not usable by user or serviceac
 <!-- id: next -->
 ## What's next
 
-You migrated an image somebody else built. Three compose lines became a Deployment, a Service and a ConfigMap; four lines met a platform control.
+You migrated an image somebody else built. Three compose lines became a Deployment, a Service and a ConfigMap, and four lines were refused by a platform control.
 
-**Next lab, Build Your Image on DCS:** point a **BuildConfig** at your own files, let the platform build them into an image, and push it to the registry. No Docker daemon anywhere.
+**Next lab, Build Your Image on DCS:** point a **BuildConfig** at your own files, let the platform build them into an image, and push it to the registry, without a Docker daemon.
 
 Digital Container Service · DCS Academy

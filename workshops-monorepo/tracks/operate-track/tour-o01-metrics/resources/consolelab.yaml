@@ -10,7 +10,7 @@ metadata:
 spec:
   title: See your metrics drawn
   description: >-
-    Run a PromQL query in the console, see what the platform is actually scraping, read the
+    Run a PromQL query in the console, see what the platform is scraping, read the
     ServiceMonitor that asked for it, and find the per-workload graphs that need no query.
   completionText: >-
     You have queried the same store your curl reached, found your own endpoint in the
@@ -51,7 +51,7 @@ spec:
       title: Open Metrics
       description: >-
         This queries the same store your curl against the tenant endpoint reached, and it is
-        scoped to your project. You cannot read another tenant's series here either.
+        scoped to your namespace. You cannot read another tenant's series here either.
       target: { type: consoleElement, id: navigationLink, value: Metrics }
       complete:
         operation: { type: activateTarget }
@@ -74,8 +74,8 @@ spec:
       title: Read it over time
       description: >-
         Now try sum by (pod) (rate(hello_dcs_requests_total[5m])) and pick a time range from
-        the dropdown. A graph answers "is this getting worse", which a single instant value
-        cannot. That is the reason to come here instead of curl.
+        the dropdown. A graph shows whether things are getting worse, which a single
+        value from curl cannot.
       target: { type: consoleElement, id: pageContent }
       complete:
         operation: { type: none }
@@ -113,8 +113,8 @@ spec:
       title: Read its two fields
       description: >-
         The selector names the Service, and the endpoint names the port by name, not by
-        number. Both fail silently when they are wrong: no error, no series, and a Targets
-        page with nothing of yours on it.
+        number. Both fail silently when wrong: you get no error and no series, and nothing
+        of yours appears on the Targets page.
       target: { type: consoleElement, id: detailsSection, value: ServiceMonitor details }
       complete:
         operation: { type: none }

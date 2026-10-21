@@ -14,7 +14,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: boxes
     academy.dcs/details: |
-      **You already know Docker. This lab translates that knowledge rather than replacing it.**
+      **For learners who know Docker: this lab maps docker-compose onto DCS objects.**
 
       You start from a real `docker-compose.yml` for the `hello-dcs` sample and move it onto DCS
       one object at a time. The container becomes a **Deployment**, `ports:` becomes a

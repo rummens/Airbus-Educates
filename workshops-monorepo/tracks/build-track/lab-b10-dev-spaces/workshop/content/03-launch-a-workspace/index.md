@@ -19,32 +19,30 @@ url: {{< param dcs_devspaces_url >}}
 
 {{< note >}}
 **📌 Whether this tab shows a live Dev Spaces login screen depends on your cluster.**
-Dev Spaces is installed per-cluster by the platform team (see the previous page) —
-not every DCS environment has it provisioned yet. Either way, the walkthrough below
-is the real flow: it is what happens the moment you click through it.
+Dev Spaces is installed per-cluster by the platform team (see the first page), and
+not every DCS environment has it yet. The walkthrough below describes what happens
+when you create a workspace on a cluster that has it.
 {{< /note >}}
 
 ## Check for Dev Spaces on this cluster
 
 Dev Spaces is installed by the platform team as a `CheCluster` [custom
-resource](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/) —
-you can check for it yourself, the same way you have queried any other resource
+resource](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/). You
+can check for it yourself, the same way you have queried any other resource
 type in this course:
 
 ```terminal:execute
 command: oc get checluster -A
 ```
 
-`-A` means **all namespaces**, the first time this course has needed it. Dev
-Spaces is a cluster-wide platform service, not something scoped to your own
-namespace, so a plain (namespace-scoped) `oc get` would not find it even if it
-exists.
+`-A` means **all namespaces**. Dev Spaces is a cluster-wide platform service, not
+something scoped to your own namespace, so a plain (namespace-scoped) `oc get`
+would not find it even if it exists.
 
 You will see one of two things: a `CheCluster` object (Dev Spaces is live on this
 cluster), or an error that the resource type does not exist (it is not provisioned
-here yet). Both are a valid, honest answer to "is Dev Spaces here?", the check
-below passes either way, because *knowing how to check* is the point, not a
-specific cluster's provisioning state. If a `CheCluster` exists, you can also
+here yet). Either result tells you whether Dev Spaces is installed on this cluster.
+If a `CheCluster` exists, you can also
 find it visually in the **Console** tab's search, the same way you'd look up any
 other resource type.
 
@@ -52,13 +50,13 @@ other resource type.
 ## From devfile to running workspace
 
 Creating a workspace from `devfile.yaml` is a single action in the Dev Spaces
-dashboard, point it at the devfile (by URL, or by pasting its contents) and click
+dashboard: point it at the devfile (by URL, or by pasting its contents) and click
 **Create Workspace**. Four things happen, in order:
 
 ![The four stages from devfile to a running workspace](workspace-launch-flow.svg)
 
 1. **You submit the devfile.** Dev Spaces reads its `components`, `projects`, and
-   `commands`, exactly what you highlighted on the previous page.
+   `commands`, the sections you read on the previous page.
 2. **The Che Operator provisions the workspace.** It creates a Pod in your
    namespace running the `dev` container from `${DCS_REGISTRY}/devspaces/udi:latest`,
    and mounts a shared volume for the source.
@@ -69,12 +67,10 @@ dashboard, point it at the devfile (by URL, or by pasting its contents) and clic
    command available as a one-click action, all backed by the Pod from step 2.
 
 {{< note >}}
-**📌 A live workspace's Pod is a completely ordinary Pod** — on a cluster where Dev
-Spaces is provisioned, you could watch it land with `oc get pods -w` in your own
-namespace from the Educates terminal, the same way you have watched every other Pod
-in this course. Nothing about steps 2–4 is magic; it is the same Deployment-like
-reconciliation you already know, triggered by the Che Operator instead of by you
-running `oc apply`.
+**📌 A workspace runs as an ordinary Pod.** On a cluster where Dev Spaces is
+provisioned, you could watch it start with `oc get pods -w` in your own namespace
+from the Educates terminal. Steps 2–4 are the same reconciliation you know from
+Deployments, triggered by the Che Operator instead of by you running `oc apply`.
 {{< /note >}}
 
 ## Check your understanding
@@ -83,10 +79,9 @@ Before moving on: which of the four steps above is the one where your actual
 *code* becomes visible inside the workspace?
 
 {{< note >}}
-**❓ Answer:** Step 3 — cloning the project. Steps 1 and 2 only set up the *environment*
+**❓ Answer:** Step 3, cloning the project. Steps 1 and 2 only set up the *environment*
 (the devfile and the container); your source does not exist inside the workspace
 until the project is cloned onto its shared volume.
 {{< /note >}}
 
-With a workspace conceptually running, the next page is where the payoff is: making
-a change and running it, inside the cluster, not on your laptop.
+Next, you change the code and run it inside the workspace.

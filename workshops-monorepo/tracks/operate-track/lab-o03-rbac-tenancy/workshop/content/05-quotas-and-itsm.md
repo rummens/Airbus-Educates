@@ -59,11 +59,8 @@ Setting `resources.requests` and `resources.limits` on your own workloads avoids
 
 ## Increasing a quota is an ITSM request
 
-If your namespace's quota is too small for real work, you do not edit the ResourceQuota
+If your namespace's quota is too small for your workloads, you do not edit the ResourceQuota
 object yourself. You raise an
 [**ITSM request**]({{< param dcs_docs_base_url >}}/support/itsm-requests) to the platform
 team. **Service Requests** cover quota increases, along with image mirroring, catalog
 additions, repository creation and security exceptions; **Incidents** cover problems.
-
-RBAC decides what you can do, the quota and LimitRange decide how much of it you can do at
-once, and an ITSM request is how that ceiling is raised.

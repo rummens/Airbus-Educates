@@ -32,7 +32,7 @@ metadata:
 
       ### What you should already know
 
-      The concepts, not the clicks. The HPA loop, requests as the denominator and the scale-in
+      The HPA loop, requests as the denominator and the scale-in
       window are explained in **Autoscaling**.
 
       ### What you will do
@@ -41,12 +41,12 @@ metadata:
       - Read the min and max bounds, and the replica count it currently wants
       - Read the **Metrics** section: current utilisation as a percentage of the CPU request
       - Read the **Conditions**, which say whether it can read the metric and whether it may act
-      - Open the Deployment it controls, whose replica count is no longer yours to set
+      - Open the Deployment it controls, whose replica count the HPA now sets
       - Find **Add HorizontalPodAutoscaler** on that Deployment's Actions menu
 
-      > **💡 Tip:** each step names the `oc` command the screen stands in for.
+      > **💡 Tip:** where a screen has a CLI equivalent, the step names the `oc` command.
 
-      ### When the console wins
+      ### When to use the console
 
       The conditions are three readable sentences here and a `jsonpath` query from a terminal,
       and they are what answers "why is it not scaling".
@@ -60,8 +60,8 @@ metadata:
 spec:
   title: "Autoscaling in the console"
   description: >-
-    The console side of Autoscaling: an HPA's bounds, its utilisation against the CPU request,
-    the conditions that explain its decision, and the Deployment whose replica count it owns.
+    An HPA's bounds, its utilisation against the CPU request, the conditions that explain its
+    decision, and the Deployment whose replica count it sets. Console companion to Autoscaling.
   duration: 8m
   difficulty: intermediate
   labels:

@@ -1,24 +1,22 @@
 # Metrics & Monitoring
 
-**The platform already measures your Pods. It cannot measure what your app is doing unless the
-app says so.**
+**The platform already collects Pod metrics. Application metrics need the app to expose them.**
 
-CPU, memory and restarts come for free, and they answer "is this Pod healthy" — never "are
-requests failing".
+CPU, memory and restarts come for free. They tell you whether a Pod is healthy, not whether
+requests are failing.
 
 You expose metrics from the app, read the exposition format it serves, then ask to be scraped
-with a **ServiceMonitor** — and check its selector really matches, because a ServiceMonitor
-that matches nothing looks exactly like one that works.
+with a **ServiceMonitor**, and check that its selector matches a Service, because a
+ServiceMonitor that matches nothing reports no error.
 
 Then you query your own series back with **PromQL**, from the terminal, through the platform's
 tenant query endpoint.
 
-The last step is the one worth remembering: ask about your namespace and you get an answer;
-ask about somebody else's and you get **Forbidden**. Tenancy is enforced in the metrics path
-too.
+In the last step you query your own namespace and get an answer, then query somebody else's
+and get **Forbidden**. Tenancy applies to metrics too.
 
-> **💡 Tip:** you never configure Prometheus here. You put one object in your own namespace and
-> the platform's monitoring finds it.
+> **💡 Tip:** the platform runs Prometheus for you. You create one ServiceMonitor in your own
+> namespace and the platform's monitoring picks it up.
 
 - **Track:** Operate & Observe
 - **Audience:** Intermediate
@@ -30,7 +28,7 @@ too.
 
 - Explain the path a metric takes from your container to a query, and who owns each hop.
 - Read the Prometheus exposition format your app serves.
-- Create a ServiceMonitor and confirm it is actually selecting something.
+- Create a ServiceMonitor and confirm that it selects a Service.
 - Query your series with `rate()` and `sum by`.
 - Explain why the same query about another namespace is refused.
 

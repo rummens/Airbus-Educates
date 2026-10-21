@@ -2,13 +2,12 @@
 title: "Health & Resources"
 ---
 
-An app running as **one replica**, with no probes and no resource numbers, is a demo.
+An app running as **one replica** with no probes and no resource numbers has no redundancy,
+cannot report whether it works, and takes whatever default share of the namespace budget it
+is given.
 
-It has no redundancy, it cannot tell the platform whether it is working, and it draws
-whatever default share of the namespace budget it is given.
-
-This lab fixes all three on **{{< param product_name >}}**, in the order the problems bite:
-scale it, hit the budget, size it properly, then make it prove its own health.
+This lab fixes all three on **{{< param product_name >}}**, in this order:
+scale it, hit the budget, size it, then add health probes.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the

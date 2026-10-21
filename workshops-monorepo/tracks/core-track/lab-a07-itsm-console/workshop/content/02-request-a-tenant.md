@@ -15,7 +15,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/te
 Recall the **Terms — Namespaces & Tenancy** lab: **Tenant → Namespaces**. The Tenant is the accountable, recharged org unit;
 the namespaces are where your workloads run.
 
-## Seven fields, and you're through
+## The seven fields
 
 | Field | What to put in it |
 |---|---|
@@ -27,13 +27,13 @@ the namespaces are where your workloads run.
 | **New namespace name** | Optional — names the **default namespace** the Tenant is created with. Blank means it inherits the Tenant name. |
 | **Preferred tenant location** | The cluster your tenant lives on. The list differs per ITSM. |
 
-That's the whole first half of the form.
+Those are all the fields in the first half of the form.
 
 ## Two things you can't undo
 
 {{< warning >}}
 **⚠️ Location is permanent.** A Tenant cannot be moved once created — pick the location you
-actually work in.
+work in.
 
 **Names get a suffix.** {{< param product_short >}} appends a random suffix to keep names
 unique platform-wide, so you get `my-tenant-<suffix>` back, not exactly what you typed.
@@ -41,9 +41,9 @@ Use the name from the confirmation everywhere afterwards.
 {{< /warning >}}
 
 {{< note >}}
-**💡 Unsure about a field?** Don't stall. Leave it at its default and write your question in
-**"Further details"** at the end of the form — that box is read.
+**💡 Tip:** if you are unsure about a field, leave it at its default and write your
+question in **"Further details"** at the end of the form. The team reads that box.
 {{< /note >}}
 
-The second half of the form is billing and export control, and for most people it is two
-quick answers. That's the next page.
+The second half of the form, billing and export control, is on the next page. For most
+people it is two quick answers.

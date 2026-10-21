@@ -18,7 +18,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/co
 
 ## Open the Console on your namespace
 
-Click below to switch to the Console tab and point it at your own project:
+Click below to switch to the Console tab and point it at your own namespace:
 
 ```dashboard:reload-dashboard
 name: Console
@@ -30,9 +30,8 @@ It is **empty** right now — you have not deployed anything yet.
 From **Deploy Your First App** onwards you deploy apps and come back here to watch them
 appear.
 
-It may also show a warning or two about resources it is not allowed to list. That is the
-dashboard reaching the edge of your **namespace-scoped** permissions, not a problem with
-your session.
+It may also show a warning or two about resources it is not allowed to list. These
+warnings come from your **namespace-scoped** permissions. Your session is fine.
 
 {{< note >}}
 **📌 Not the OpenShift web console.** The real OpenShift console can't be embedded in a tab

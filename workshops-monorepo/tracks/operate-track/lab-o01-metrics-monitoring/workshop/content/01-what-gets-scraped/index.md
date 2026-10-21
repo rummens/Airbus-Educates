@@ -15,8 +15,8 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/pi
 
 ## Infrastructure metrics: free, and generic
 
-The platform collects CPU, memory, restarts and Pod phase for **every** workload. You did
-nothing to get them, and you can do nothing to change them.
+The platform collects CPU, memory, restarts and Pod phase for **every** workload. You get
+them without doing anything, and you cannot change them.
 
 They answer "is this Pod healthy", and nothing about whether your app is doing its job.
 
@@ -36,7 +36,7 @@ yourself.
 
 {{< note >}}
 **📌 Note:** this only works because the platform runs **user-workload monitoring**. On a
-cluster without it, a ServiceMonitor is a YAML file nobody reads.
+cluster without it, nothing acts on a ServiceMonitor.
 {{< /note >}}
 
 ## Check the app you are about to instrument

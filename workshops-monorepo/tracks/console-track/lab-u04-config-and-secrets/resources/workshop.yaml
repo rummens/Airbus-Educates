@@ -34,10 +34,9 @@ metadata:
 
       ### What you should already know
 
-      This lab assumes the concepts, not the clicks. You should have finished
-      **Configure & Troubleshoot Your App**, where you moved configuration into a
-      ConfigMap and a Secret and rolled the change out. No new Kubernetes concepts are
-      introduced here.
+      You should have finished **Configure & Troubleshoot Your App**, where you moved
+      configuration into a ConfigMap and a Secret and rolled the change out. This lab finds
+      those three objects in the console and introduces no new Kubernetes concepts.
 
       ### What you will do
 
@@ -54,9 +53,10 @@ metadata:
 
       ### When to reach for the console
 
-      The console wins when you want to see configuration and the workload that reads it
-      side by side, without printing YAML. The CLI still wins for anything you need to
-      repeat, script, or review — which is why the terminal labs come first.
+      The console shows configuration and the workload that reads it side by side, without
+      printing YAML, and decodes a Secret in one click. An edit saved here is not recorded
+      anywhere outside the cluster, so configuration changes still belong in the manifest
+      you keep in git.
 
       ### Cleaning up
 
@@ -78,10 +78,9 @@ metadata:
 spec:
   title: "Config & secrets (console)"
   description: >-
-    You moved an application's configuration into a ConfigMap and a Secret from the
-    terminal in Configure & Troubleshoot Your App. This lab finds the same objects in the
-    OpenShift web console, shows what Reveal values really means, and ends on the
-    Deployment tab that wires configuration into a workload.
+    Find the ConfigMap and Secret from Configure & Troubleshoot Your App in the OpenShift
+    web console, see what Reveal values does, and finish on the Deployment tab that wires
+    configuration into a workload.
   duration: 5m
   difficulty: beginner
   labels:

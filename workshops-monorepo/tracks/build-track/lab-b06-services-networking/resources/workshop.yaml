@@ -15,9 +15,9 @@ metadata:
     academy.dcs/details: |
       **"Just expose it" has five different answers on Kubernetes.**
 
-      A **Service** is not one thing. This lab covers the types a tenant can use on DCS,
-      **ClusterIP**, **headless** and **ExternalName**, and the two you will be refused,
-      **NodePort** and **LoadBalancer**, with the reason for each refusal.
+      There are several **Service** types. This lab covers the ones a tenant can use on DCS,
+      **ClusterIP**, **headless** and **ExternalName**, and the two that do not work here,
+      **NodePort** and **LoadBalancer**, with the reason for each.
 
       You resolve cluster DNS by hand to see what each type puts there, watch endpoints follow
       Pod readiness, and finish on the **Route**, which is what the platform gives you for
@@ -28,8 +28,8 @@ metadata:
 spec:
   title: "Services & Cluster Networking"
   description: >-
-    Take "expose it" apart: ClusterIP, headless and ExternalName Services, what each puts in
-    cluster DNS, why NodePort and LoadBalancer are refused on DCS, and where a Route fits.
+    Compare ClusterIP, headless and ExternalName Services and what each puts in cluster DNS,
+    see why NodePort and LoadBalancer do not work on DCS, and where a Route fits.
   duration: 20m
   difficulty: intermediate
   labels:

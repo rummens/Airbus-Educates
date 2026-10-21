@@ -25,8 +25,8 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/co
 
 ## Before: whose value is it?
 
-The Deployment you applied set no configuration at all. Check what the container actually
-sees right now:
+The Deployment you applied set no configuration at all. Check what the container sees right
+now:
 
 ```terminal:execute
 command: oc exec deploy/hello-dcs -- printenv GREETING
@@ -100,5 +100,5 @@ delay: 3
 running Pod keeps the value it started with until something triggers a new rollout.
 {{< /warning >}}
 
-Three compose lines are now three Kubernetes objects. Next, the lines that do not
-translate at all.
+You now have a Deployment, a Service and a ConfigMap. Next: the compose lines that have no
+equivalent.

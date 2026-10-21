@@ -29,7 +29,7 @@ metadata:
     #   academy.dcs/expires, academy.dcs/orphaned
 spec:
   title: What is DCS?
-  description: Get oriented on the Digital Container Service — what it is, how containers and images fit, and how to work in the DCS environment with oc.
+  description: What DCS is, how containers and images relate, and how you work with it through oc.
   duration: 10m
   difficulty: beginner
   # spec.labels are Educates-native (searchable in Educates' own UI). Catalog

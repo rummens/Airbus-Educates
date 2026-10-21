@@ -2,8 +2,8 @@
 title: Summary
 ---
 
-You gave your app real configuration, changed it live, and — when it broke — diagnosed and
-fixed it from the cluster's own signals.
+You moved your app's configuration into a ConfigMap and a Secret, changed it, and
+diagnosed and fixed a broken rollout.
 
 ## What You Did
 

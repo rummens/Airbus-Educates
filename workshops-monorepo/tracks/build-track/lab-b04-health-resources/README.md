@@ -1,8 +1,8 @@
 # Health & Resources
 
-**One replica, no probes, no resource numbers: that is a demo, not a service.**
+**An app with one replica, no probes and no resource numbers is not ready for production.**
 
-You scale the sample app to four replicas and read what it actually costs against your
+You scale the sample app to four replicas and read what it costs against your
 namespace budget.
 
 Then you apply a deliberately oversized manifest and watch the **quota refuse it**, with the

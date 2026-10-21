@@ -86,7 +86,7 @@ Four Pods at that default limit is **exactly** the whole `medium` budget:
 ![Four Pods filling the namespace's medium budget exactly, while their requests use only a quarter of it](quota-budget.svg)
 
 Read your namespace's [**ResourceQuota**]({{< param dcs_docs_base_url >}}/concepts/quotas)
-to see it for real:
+to see the numbers:
 
 ```terminal:execute
 command: oc describe quota

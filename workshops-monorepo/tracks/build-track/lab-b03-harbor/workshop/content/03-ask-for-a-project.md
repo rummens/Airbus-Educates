@@ -2,8 +2,8 @@
 title: Ask for a Project
 ---
 
-A Harbor project is not something you click into existence. On {{< param product_short >}}
-you declare it as a Kubernetes object, and the platform builds it.
+On {{< param product_short >}} you do not create a Harbor project in a UI. You declare it as a
+Kubernetes object, and the platform creates it.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -19,7 +19,7 @@ external system into Kubernetes objects: you apply a manifest, a controller call
 until Harbor matches it, and it keeps checking.
 
 That means your Harbor project is requested the same way as everything else you have created in
-this course. Same `oc apply`, same object, same reconciliation loop.
+this course: you use `oc apply`, and a controller keeps Harbor in sync with the object.
 
 Open the manifest:
 

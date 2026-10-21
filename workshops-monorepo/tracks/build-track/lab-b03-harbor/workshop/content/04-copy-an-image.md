@@ -34,7 +34,7 @@ retries: .INF
 delay: 5
 ```
 
-What that command actually did:
+What that command did:
 
 1. **Read** the manifest and layers from the source registry.
 2. **Wrote** them to the destination registry, under a new name.
@@ -69,13 +69,13 @@ delay: 5
 
 ## This is what a promotion is
 
-A **mirror from a DEV project into a PROD project** is exactly the command you just ran:
-read here, write there, same digest.
+A **mirror from a DEV project into a PROD project** is the same operation you just ran: it
+copies the image without changing its digest.
 
-What makes it a promotion is everything around it:
+A promotion adds three conditions around that copy:
 
 - it is **requested through ITSM** rather than run by you;
 - the destination **refuses direct pushes**, so this is the only route in;
 - the image must be **below the CVE threshold** before the destination will serve it.
 
-Which brings us to the report that decides that.
+Next: the scan report that decides whether an image is below the threshold.

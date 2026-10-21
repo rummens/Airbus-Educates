@@ -92,8 +92,8 @@ Two sections matter. **`Role`** near the top names the Role or ClusterRole it gr
 **`Subjects`** lists who it grants it to, by kind (`User`, `Group` or `ServiceAccount`), name
 and namespace.
 
-That is the whole chain: this subject, this binding, this role, these rules. It is what
-produced every `yes` and `no` on the last page. Next you build the same chain yourself, for a
+Together, subject, binding, role and rules form the chain that produced every `yes` and `no`
+on the last page. Next you build the same chain yourself, for a
 subject you create.
 
 - [Kubernetes RBAC reference](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)

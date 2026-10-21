@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # DEV vs PROD Namespaces
 
-Not a naming convention but a **policy posture**. Same cluster, same Kubernetes, same registry, two different answers to the same YAML.
+DEV and PROD namespaces differ in **policy posture**: the same YAML gets different results in each.
 
 **In this lab:** the label and the policy · DEV moves fast · PROD makes you prove it · promotion.
 
@@ -21,7 +21,7 @@ oc get namespace $DEV_NS $PROD_NS --show-labels
 oc auth can-i list clusterpolicies      # no — platform-owned
 ```
 
-- You meet platform policy through its **decisions**, not by reading it.
+- You cannot read platform policy; you see its **decisions**.
 - `route-requires-prod` — a Route in a DEV-type namespace is denied.
 - `prod-requires-resources` — a container in a PROD-type namespace must declare CPU and memory, requests **and** limits.
 - A representative slice of the real posture, enforced through the cluster's real admission path.
@@ -33,14 +33,14 @@ oc auth can-i list clusterpolicies      # no — platform-owned
 <!-- id: dev -->
 ## DEV moves fast
 
-The manifest people actually write first: no resources block, nothing finished.
+The manifest people usually write first: no resources block.
 
 ```
 envsubst < hello-dcs-unsized.yaml | oc apply -f - -n $DEV_NS   # admitted
 oc apply -f route.yaml -n $DEV_NS                              # refused
 ```
 
-- Accepted without comment — DEV is staying out of your way.
+- Accepted: DEV does not enforce these rules.
 - The Route is refused: *"A Route needs a PROD-type namespace."*
 - A Route publishes on the platform's **external edge**. That is a production act.
 - So: iterate in DEV, publish from PROD.
@@ -58,20 +58,20 @@ envsubst < hello-dcs-sized.yaml   | oc apply -f - -n $PROD_NS  # admitted
 oc apply -f route.yaml -n $PROD_NS                             # admitted, real host
 ```
 
-- Refused at **`oc apply`** — nothing created, nothing to debug later.
+- Refused at **`oc apply`**, so nothing is created.
 - The message names the rule and the failing path, down to the container index.
 - "autogen" in the rule name: the Pod rule is auto-derived for the Deployment.
-- One `resources` block is the whole difference between refused and admitted.
+- Adding one `resources` block turns the refusal into an admission.
 
 ---
 
 <!-- id: promotion -->
 ## Promotion
 
-Two running states from two different manifests is exactly what promotion prevents.
+Promotion prevents two running states from two different manifests.
 
-- **The same image**, by tag or digest — from the **green catalog**, or mirrored from the DEV project by request.
-- **The same manifest**, with only environment values differing. Sized, because PROD insists.
+- **The same image**, by tag or digest — from the **green catalog**, or mirrored from DEV by request.
+- **The same manifest**, with only environment values differing, and sized, because PROD requires it.
 - **Not** an edit in place: untested, and the next promotion silently overwrites it.
 - PROD's refusal was the platform checking that what you are promoting is promotable.
 

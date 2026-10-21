@@ -26,16 +26,15 @@ A mirror from the DEV project into the PROD project, which is the `skopeo copy` 
 earlier, with three differences:
 
 1. **You do not run it.** It is requested through **ITSM** and the platform performs it.
-   Self-service is the direction; a ticket is where it stands today.
+   Today this is an ITSM ticket. Self-service is planned.
 2. **The image must pass the gate**, below the CVE threshold, or the destination will not
    serve it.
 3. **The digest is preserved**, so what was scanned and what runs are provably the same
    bytes.
 
 {{< note >}}
-**📌 Why not just let teams push to PROD?** "No pushes" is a stronger guarantee than "pushes
-that are checked". It means there is no path at all to a production image that skipped the
-review, including by accident.
+**📌 Why PROD has no push access:** if nobody can push, no image can reach production
+without review, not even by accident.
 {{< /note >}}
 
 ## Robot accounts
@@ -60,4 +59,5 @@ You can now follow one artefact end to end:
 5. It is deployed into a **PROD namespace**, which enforces its own policies
    (*DEV vs PROD Namespaces*).
 
-You control step 1. Steps 2 to 4 are the platform's checks on it.
+You run step 1. The platform runs steps 2 to 4 as checks, and the PROD namespace enforces
+step 5.

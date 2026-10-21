@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Metrics & Monitoring
 
-The platform measures your Pods for free. It cannot measure what your app is *doing* unless the app says so.
+The platform measures your Pods for free. Application metrics need the app to expose them.
 
 **In this lab:** the pipeline and who owns it · exposing metrics · asking to be scraped · querying with PromQL · the tenancy boundary.
 
@@ -16,10 +16,10 @@ Digital Container Service · DCS Academy
 
 Two kinds of metric, and confusing them wastes time.
 
-- **Infrastructure** — CPU, memory, restarts, for every Pod. Free, generic, unchangeable.
+- **Infrastructure** — CPU, memory, restarts, for every Pod. Collected for you; you cannot change them.
 - **Application** — requests, failures, queue depth. Only your app can produce them.
 - Four hops: your app exposes → your ServiceMonitor asks → the platform scrapes → a tenant-scoped endpoint serves it back.
-- You own both ends. You never configure Prometheus.
+- You own both ends; the platform runs Prometheus.
 
 ![The platform scrapes infrastructure metrics for every Pod; app metrics reach the same store only when the app exposes them and a ServiceMonitor asks](metrics-pipeline.svg)
 
@@ -28,7 +28,7 @@ Two kinds of metric, and confusing them wastes time.
 <!-- id: expose -->
 ## What the app says
 
-Plain text, three kinds of line, and that is the whole contract.
+Plain text, with three kinds of line.
 
 ```
 # HELP hello_dcs_requests_total Requests served, by path.
@@ -38,7 +38,7 @@ hello_dcs_requests_total{path="/"} 12
 
 - **HELP** — what it means. **TYPE** — counter, gauge, and a couple more.
 - **Labels** in braces make one metric into many series you can filter and sum.
-- A **counter** only goes up, so its raw value is uninteresting — its `rate()` is the point.
+- A **counter** only goes up, so its raw value tells you little; use its `rate()`.
 - Each replica counts its own requests; that is why you scrape all endpoints, not one.
 
 ---
@@ -46,7 +46,7 @@ hello_dcs_requests_total{path="/"} 12
 <!-- id: servicemonitor -->
 ## Ask to be scraped
 
-One object, in your own namespace. The platform finds it.
+One object in your own namespace, picked up by the platform's monitoring.
 
 ```
 oc apply -f servicemonitor.yaml
@@ -56,8 +56,8 @@ oc get svc -l app=hello-dcs
 
 - `selector` matches the **Service's** labels, not the Pods'.
 - `endpoints.port` is the port **by name** — a number does not work, and an unnamed port cannot be scraped.
-- **A selector that matches nothing reports no error.** No error, no data, no clue.
-- Checking the selector and the port name by hand is the debugging technique.
+- **A selector that matches nothing reports no error**, and collects no data.
+- Checking the selector and the port name by hand is how you debug it.
 
 ---
 
@@ -86,18 +86,18 @@ curl -sk -H "Authorization: Bearer $TOKEN" \
 Everything you queried by hand is in the console, drawn instead of printed.
 
 - **Observe → Metrics** — a PromQL box and a time range.
-- **Observe → Targets** — proof that a scrape is actually happening.
+- **Observe → Targets** — shows whether a scrape is happening.
 - **Developer → Observe** — per-workload graphs, including your custom metrics.
 - Three panels worth having: is it serving, is it failing, is it struggling.
-- An **alert** is just a query with a threshold and a duration, written as a `PrometheusRule` in your namespace.
+- An **alert** is a query with a threshold and a duration, written as a `PrometheusRule` in your namespace.
 
 ---
 
 <!-- id: next -->
 ## What's next
 
-Your app now says what it is doing, the platform collects it, and the boundary around it is the same one RBAC draws.
+Your app now publishes metrics, the platform collects them, and RBAC decides who may query them.
 
-**Next — Logs:** metrics tell you *that* something changed; logs tell you *what happened*. Same tenancy boundary, very different data.
+**Next — Logs:** reading what your app wrote when something changed, behind the same tenancy boundary.
 
 Digital Container Service · DCS Academy

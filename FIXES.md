@@ -7,6 +7,8 @@ synced `main`; workshop content is live on the next session start.
 ## 2026-10-21
 
 - **OpenShift documentation links work again.** Red Hat retired the old OpenShift docs site, so every "read more" link to it ended on a "page not found". All of them now open the matching page on Red Hat's current documentation site.
+- **Plainer wording in every lab.** Pages, slides, catalog cards and console-lab steps no longer use slogans, dramatic one-word sentences or lines repeated from lab to lab. Each sentence now just says what happens and what to do. The facts and steps are unchanged.
+- **Small factual slips corrected along the way.** Examples: the autoscaling slide now says the Pod "never used more than 40m"; the SCC page no longer claims a root image runs in only one place; the Dev Spaces devfile check now counts one component instead of three; Operators on DCS no longer calls the database healthy when the page explains it cannot fully start in the training session; old lab names ("Developer track", "DEV vs PROD Namespaces & Policies") and "your project" now use the names you see in the catalog.
 - **Operators on DCS: the Pod watch now shows the database Pods.** The watch in the lower pane looked in the wrong namespace and stayed empty while the Operator was provisioning; it now watches the database namespace.
 
 ## 2026-09-12

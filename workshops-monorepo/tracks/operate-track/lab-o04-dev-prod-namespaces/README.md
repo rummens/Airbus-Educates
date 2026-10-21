@@ -1,9 +1,7 @@
 # DEV vs PROD Namespaces
 
-**Two namespaces, the same manifest, two different answers.**
-
-DEV and PROD on DCS are not separated by a naming convention. They differ in **policy
-posture**: PROD enforces rules DEV does not, and only PROD may publish a **Route**.
+DEV and PROD namespaces on DCS differ in **policy posture**: PROD enforces rules DEV does
+not, and only PROD may publish a **Route**.
 
 This session gives you one of each. You apply the same unsized Deployment to both and watch
 PROD refuse it at `oc apply`, with the failing field named. Then the same Route to both, and
@@ -12,10 +10,10 @@ watch DEV refuse that one.
 Neither refusal is simulated. Both come from the cluster's real admission path, and each one
 names the rule behind it.
 
-Ends on **promotion** — why the answer is a fresh apply to PROD rather than an edit in place,
+The lab ends on **promotion**: why the answer is a fresh apply to PROD rather than an edit in place,
 and where the image has to come from.
 
-> **💡 Tip:** the error messages are the lesson here. Read them before you fix anything.
+> **💡 Tip:** read each error message before you fix anything. It names the rule and the field.
 
 - **Track:** Operate & Observe
 - **Audience:** Intermediate
@@ -25,7 +23,7 @@ and where the image has to come from.
 
 ## By the end of this lab you'll be able to
 
-- Say what actually distinguishes a DEV namespace from a PROD one.
+- Say what distinguishes a DEV namespace from a PROD one.
 - Predict which manifests PROD will refuse, and why.
 - Read an admission rejection and find the rule behind it.
 - Explain why only PROD may publish a Route.

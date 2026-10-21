@@ -2,8 +2,8 @@
 title: Spreading Replicas
 ---
 
-Three replicas on **one** node is one node's failure away from an outage, and one drain
-away from a full restart.
+If all three replicas run on **one** node, a node failure takes the app down and a drain
+restarts every replica.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -12,7 +12,7 @@ name: Slides
 url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/spread
 ```
 
-## Where are they now?
+## Where they run now
 
 ```terminal:execute
 command: oc get pods -l app=hello-dcs -o custom-columns=NAME:.metadata.name,NODE:.spec.nodeName,STATUS:.status.phase
@@ -47,9 +47,9 @@ retries: .INF
 delay: 3
 ```
 
-## Prefer, or require?
+## Prefer or require
 
-The single most important field here is `whenUnsatisfiable`:
+`whenUnsatisfiable` decides what happens when the spread is not possible:
 
 - **`ScheduleAnyway`**, used here, is a **preference**. If the spread cannot be honoured the
   Pod still runs, just not where you hoped.
@@ -87,5 +87,6 @@ hard spread on a busy cluster produces a slow rollout with Pods stuck Pending, a
 is in a scheduler event. Check `oc describe pod` first.
 {{< /warning >}}
 
-With the budget and a clean shutdown, that is the set. The platform can do its maintenance
-without your users seeing it.
+A budget, spread replicas and an app that handles `SIGTERM` let the platform do its
+maintenance without your users noticing. `hello-dcs` ignores `SIGTERM`, so each of its Pods
+still waits out the full grace period and is then killed with `SIGKILL`.

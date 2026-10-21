@@ -2,8 +2,6 @@
 
 **Your own app running on DCS in a few minutes — then a look at the YAML behind it.**
 
-This is the quick win.
-
 You take a ready-made **image** from the DCS registry and turn it into a running
 **Deployment** with a single command. Then you customise it, reach it, change it, and watch
 DCS **roll out** the new version.
@@ -36,5 +34,5 @@ chain behind it.
 4. **Change** the greeting and watch the rollout replace the Pod.
 5. **Save and read** the Deployment YAML.
 
-That last step is the bridge from "do this" commands to the desired-state manifests every
-later lab writes.
+That last step links the commands you ran to the desired-state manifests you write in
+every later lab.

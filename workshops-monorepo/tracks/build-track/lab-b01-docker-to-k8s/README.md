@@ -7,9 +7,9 @@ object at a time.
 
 The container becomes a **Deployment**. The `ports:` line becomes a **Service**. The
 `environment:` block becomes a **ConfigMap**. Each step is applied and checked, so the app
-is genuinely running when you finish.
+is running when you finish.
 
-Then what is left over: four compose lines the platform refuses, and which control rejects
+Last, you look at the four compose lines the platform refuses, and the control that rejects
 each one.
 
 > **💡 Tip:** take this lab first if compose is still your mental model. The rest of the
@@ -36,4 +36,4 @@ each one.
 4. **Translate** the environment variable into a ConfigMap, and watch the rollout serve it.
 5. **Read** the four lines that do not translate, and the refusal each one gets.
 
-The mapping is the easy half. The last step is the one that changes how you build images.
+The last step matters most for your own images: it lists what DCS refuses, and why.

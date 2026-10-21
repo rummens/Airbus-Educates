@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Build Your Image on DCS
 
-Every lab so far ran an image somebody else built. This one builds yours, with no Docker daemon anywhere.
+You build your own image on the cluster, without a Docker daemon.
 
 **In this lab:** the three objects · build from your files · deploy what you built · rebuild · what changes on DCS.
 
@@ -14,7 +14,7 @@ Digital Container Service · DCS Academy
 <!-- id: objects -->
 ## Three objects, one image
 
-Keep them straight and every later error message reads clearly.
+Knowing which object is which makes build errors easier to read.
 
 - **BuildConfig** — the recipe: input, strategy, output. Created once.
 - **Build** — one run of it, as a Pod, with logs and a status. Kept as the record.
@@ -30,12 +30,12 @@ Keep them straight and every later error message reads clearly.
 ## Build it
 
 ```
-oc new-build --binary --strategy=docker --name=hello-built
+oc apply -f buildconfig.yaml
 oc start-build hello-built --from-dir=. --follow
 oc get builds
 ```
 
-- One command creates **both** the BuildConfig and its ImageStream.
+- `buildconfig.yaml` creates **both** the BuildConfig and its ImageStream. `oc new-build --binary --strategy=docker` is the one-line shortcut.
 - The log shows three phases worth recognising: **uploading**, **STEP n/n**, **pushing**.
 - `FROM` pulls from the platform's registry — on an air-gapped cluster nothing else is reachable.
 - A build is a Pod: it queues, it costs budget, and the first one is slow.
@@ -53,7 +53,7 @@ envsubst < deployment.yaml | oc apply -f -
 oc exec deploy/hello-built -- printenv GREETING
 ```
 
-- The tag resolves to an image **digest** — the digest is the identity, the tag is a label that moves.
+- The tag resolves to an image **digest**. The digest identifies the image; the tag can move.
 - `GREETING` came from the **image**, not from `oc set env`.
 - Configuration is attached at deploy time; what is in the image is decided at build time.
 
@@ -72,7 +72,7 @@ oc rollout restart deploy/hello-built
 - Faster the second time: unchanged layers are reused.
 - **A new image restarts nothing.** The Pod keeps what it started with.
 - **Build triggers** start a build on a push; **image triggers** roll out when a tag moves.
-- An automatic promotion is exactly as safe as the build behind it, which is why PROD takes no pushes.
+- An automatic trigger deploys untested builds too, which is why PROD takes no pushes.
 
 ---
 

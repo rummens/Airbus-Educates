@@ -10,7 +10,7 @@ This lab takes a small `docker-compose.yml` for the `hello-dcs` sample and moves
 by piece, into the **Deployment**, **Service** and **ConfigMap** you would use on
 {{< param product_short >}}.
 
-Then the lines that do not come with it, and which control refuses each one.
+Then you look at the lines that cannot be migrated, and the control that refuses each one.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the

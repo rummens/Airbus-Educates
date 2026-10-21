@@ -25,7 +25,7 @@ By the end of this workshop you will be able to:
 - Walk through launching a workspace from a devfile and making a code change run
   **inside the cluster**, not on your laptop.
 - Place Dev Spaces correctly among the Educates editor (this workshop), a
-  BuildConfig (code → image), and `oc apply` (deploy), same git, three different jobs.
+  BuildConfig (code → image), and `oc apply` (deploy), which all use the same git repository for different jobs.
 
 ## Prerequisites
 

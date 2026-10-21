@@ -26,8 +26,8 @@ Look at where the three are declared. Two of them, `setup` and `heartbeat`, are 
 - **`heartbeat`** has **`restartPolicy: Always`**, which makes it a **sidecar**: started
   before the app, and kept running beside it for the life of the Pod.
 
-They share an `emptyDir` called `work` with the app container, which is how a helper hands
-something over: same Pod, same volume.
+They share an `emptyDir` called `work` with the app container, and a helper passes
+files to the app through that shared volume.
 
 ## Apply it and watch the order
 
@@ -71,7 +71,7 @@ delay: 3
 The init container's log ends at `setup done` and stops. The sidecar's keeps producing output,
 because it is still running.
 
-## The proof they shared a Pod
+## Read the shared volume from the app
 
 The init container wrote a file into the shared volume. Read it **from the app container**:
 
@@ -111,6 +111,6 @@ delay: 3
 
 {{< warning >}}
 **⚠️ Watch out:** every container in the Pod takes its own `requests` and `limits` from the
-namespace budget. Three containers in one Pod is three sets of numbers, and a sidecar on fifty
-replicas is fifty more containers to pay for.
+namespace budget. A Pod with three containers needs three sets of requests and limits, and
+a sidecar on fifty replicas adds fifty containers to your quota.
 {{< /warning >}}

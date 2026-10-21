@@ -2,8 +2,7 @@
 title: Quick Actions
 ---
 
-Before anything else, the one thing that makes these labs work: the **boxes** in the
-instructions on the left. They are **buttons**.
+The **boxes** in the instructions on the left are **buttons**.
 
 Click one and it does the work for you — it types a command, opens a file, checks your
 cluster, or opens a slide. You rarely type anything by hand.
@@ -32,7 +31,7 @@ the command, and runs it.
 command: echo "quick actions work" > ~/exercises/quick-actions.txt
 ```
 
-The command writes one line into a file. There is no output — the shell prompt simply
+The command writes one line into a file. There is no output — the shell prompt
 comes back. That is normal for a command that redirects its output into a file.
 
 ## Try a "verify" box
@@ -46,16 +45,16 @@ title: Verify your first quick action ran
 timeout: 10
 ```
 
-**Green** means the step really worked — not "the page scrolled past", but "the cluster
-and your session are in the state this step promised".
+**Green** means the check found the cluster and your session in the state this step
+describes.
 
 If a check is ever **red**, fix the step above before moving on. Checks are safe to click
 again.
 
 {{< note >}}
-**⚠️ Amber means waiting, not broken.** Checks run one at a time. Click a second check while
-the first is still running and it turns amber until its turn comes — then it runs and shows
-its real result. Nothing is wrong; give it a moment.
+**⚠️ Watch out:** amber means the check is queued. Checks run one at a time. Click a second
+check while the first is still running and it turns amber until its turn comes. Then it runs
+and shows its result.
 {{< /note >}}
 
 ## Try an "open a file" box

@@ -4,7 +4,7 @@
   "steps": [
     {"run": "cat ~/exercises/devfile.yaml | head -30"},
     {"check": "verify-devfile"},
-    {"run": "python3 -c \"import re; raw=open('/home/eduk8s/exercises/devfile.yaml').read(); print('schemaVersion:', re.search(r'schemaVersion:\\\\s*(\\\\S+)', raw).group(1)); print('components:', len(re.findall(r'^\\\\s+- name:', raw, re.M))); print('commands:', len(re.findall(r'^\\\\s+- id:', raw, re.M)))\""},
+    {"run": "yq '{\"schemaVersion\": .schemaVersion, \"components\": (.components | length), \"commands\": (.commands | length)}' ~/exercises/devfile.yaml"},
     {"check": "verify-devfile-structure"}
   ]
 }

@@ -21,9 +21,9 @@ spec:
     Find a BuildConfig, read its strategy and output, start a build, watch its log, and
     see the ImageStream tag the result landed under.
   completionText: >-
-    You have run a build from the console and followed it to its output: the recipe, the
-    run it created, the log it streamed, and the tag that now resolves to a digest. That is
-    oc get bc, oc start-build, oc logs build and oc get imagestream, on six screens.
+    You ran a build from the console and followed it to its output: the BuildConfig, the
+    Build it created, its log, and the ImageStream tag the result was pushed to. These are
+    the console versions of oc get bc, oc start-build, oc logs build and oc get imagestream.
   visibility: hidden
   mode: assisted
   context:
@@ -124,7 +124,7 @@ spec:
       title: Open the Builds tab
       description: >-
         Every run of this recipe is listed here with its status and when it started. A
-        failed run stays in the list, which is what makes this page worth knowing.
+        failed run stays in the list, so you can open it later and read its log.
       target: { type: href, value: '/k8s/ns/<<namespace>>/buildconfigs/lab-built/builds' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/buildconfigs/lab-built/builds' }

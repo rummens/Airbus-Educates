@@ -2,8 +2,8 @@ Exercise files for the Short-Lived & Helper Containers workshop.
 
 - `job-migrate.yaml`            — a Job that succeeds: runs to completion, retries up to
   `backoffLimit`, then deletes itself after `ttlSecondsAfterFinished`.
-- `job-failing.yaml`            — the same shape, failing on purpose, to see a Job give up
-  rather than crash-loop forever.
+- `job-failing.yaml`            — the same shape, failing on purpose, to see a Job stop after
+  its retries instead of crash-looping forever.
 - `cronjob-report.yaml`         — a Job factory on a schedule, with `concurrencyPolicy`,
   history limits and `suspend`. Scheduled for 03:00 so it will not fire during the lab.
 - `deployment-with-helpers.yaml` — one Pod with an **init container** (runs first, to

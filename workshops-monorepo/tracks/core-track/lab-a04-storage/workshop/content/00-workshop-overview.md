@@ -2,11 +2,11 @@
 title: "Storage"
 ---
 
-Restart your app and everything it wrote is **gone**. That's by design — a container's
-filesystem is temporary, and the **Configure & Troubleshoot Your App** lab showed you Pods get replaced all the time. For anything
-worth keeping, you need storage that lives *outside* the Pod. This workshop on
-**{{< param product_name >}}** gives your app exactly that, and proves it survives a
-restart.
+When a Pod restarts, everything it wrote to its own filesystem is **lost**. This is by
+design: a container's filesystem is temporary, and the **Configure & Troubleshoot Your App** lab showed you Pods get replaced all the time. For anything
+worth keeping, you need storage that lives *outside* the Pod. In this workshop on
+**{{< param product_name >}}** you give your app that storage and check that the data
+survives a restart.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the

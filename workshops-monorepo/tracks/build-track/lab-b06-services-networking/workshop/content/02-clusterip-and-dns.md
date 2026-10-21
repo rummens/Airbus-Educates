@@ -82,7 +82,7 @@ retries: .INF
 delay: 2
 ```
 
-That is what the type is for. Clients resolve **one** address that never changes, and the
+Clients resolve **one** address that never changes, and the
 platform forwards each connection to one of the ready Pods.
 
 ## Use it

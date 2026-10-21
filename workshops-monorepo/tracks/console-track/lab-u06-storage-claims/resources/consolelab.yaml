@@ -19,8 +19,8 @@ spec:
     pod holds it.
   completionText: >-
     Done. You read a claim's capacity, access mode and class, found out from its events why a
-    claim would stay Pending, and traced it to the path it is mounted at inside the pod —
-    everything oc get pvc and oc describe pvc report.
+    claim would stay Pending, and traced it to the path it is mounted at inside the pod.
+    These are the facts oc get pvc and oc describe pvc report.
   visibility: hidden
   mode: assisted
   context:
@@ -49,8 +49,8 @@ spec:
       title: Open Storage
       description: >-
         Storage holds the claims a project makes for durable disk space. You asked for one
-        from the terminal in Storage; this is where the platform's answer is visible without
-        printing YAML.
+        from the terminal in Storage; this is where you see what the platform provisioned,
+        without printing YAML.
       target: { type: quickStartId, value: qs-nav-storage }
       complete:
         operation: { type: activateTarget }
@@ -58,7 +58,7 @@ spec:
     - id: open-pvcs
       title: Open PersistentVolumeClaims
       description: >-
-        A claim is a request for storage; the volume behind it is the platform's answer.
+        A claim is a request for storage; the platform provides a volume to satisfy it.
         Claims are what a project owns, so that is the list to open.
       target: { type: consoleElement, id: navigationLink, value: PersistentVolumeClaims }
       complete:
@@ -92,7 +92,7 @@ spec:
     - id: open-pvc-events
       title: Check the claim's events
       description: >-
-        A Bound claim needs no explanation. A Pending one gives its reason on the next tab.
+        Open the Events tab, where a Pending claim shows the reason it is not Bound.
       target: { type: href, value: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data/events' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/persistentvolumeclaims/lab-data/events' }
@@ -100,7 +100,7 @@ spec:
     - id: read-pvc-events
       title: Why a claim stays Pending
       description: >-
-        This stream names the fault in the platform's own words: no storage class matched,
+        The events give the reason a claim stays Pending: no storage class matched,
         the class has no provisioner, or the requested size cannot be satisfied. It is the
         first screen to open when a pod will not start and the reason mentions a volume — and
         on DCS the answer is often an ITSM request rather than a change you can make.
@@ -111,8 +111,7 @@ spec:
     - id: open-workloads
       title: Open Workloads
       description: >-
-        A claim on its own stores nothing. The other half of the story is the workload that
-        mounts it, and that lives back under Workloads.
+        Go back to Workloads to find the pod that mounts the claim and writes the data.
       target: { type: quickStartId, value: qs-nav-workloads }
       complete:
         operation: { type: activateTarget }
@@ -120,7 +119,8 @@ spec:
     - id: open-pods
       title: Open Pods
       description: >-
-        The claim named no consumer. The pod does, so go and find it there.
+        The claim does not list the pod that uses it, but the pod lists the claim, so open
+        Pods.
       target: { type: consoleElement, id: navigationLink, value: Pods }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/core~v1~Pod' }

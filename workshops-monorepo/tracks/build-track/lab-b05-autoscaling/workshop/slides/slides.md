@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Autoscaling
 
-Setting the replica count by hand only works while someone is watching. This lab hands that decision to a controller.
+A HorizontalPodAutoscaler sets the replica count as the load changes.
 
 **In this lab:** how an HPA computes a replica count · create one · drive load and scale out · scale-in and the budget ceiling · where VPA fits.
 
@@ -14,7 +14,7 @@ Digital Container Service · DCS Academy
 <!-- id: hpa-loop -->
 ## How an HPA works
 
-A controller running a loop, not a rule that fires once: it reads per-Pod CPU, averages it, compares it with a target, and writes a new replica count.
+A controller that loops: it reads per-Pod CPU, averages it, compares it with a target, and writes a new replica count.
 
 The target is a percentage **of the Pod's CPU request**, which is why an app with no request can never autoscale on CPU.
 
@@ -48,7 +48,7 @@ oc describe hpa hello-dcs
 <!-- id: load -->
 ## Under load
 
-A load tool beats eight curl loops: one process, reused connections — the work lands on the app, not your terminal.
+`ab` uses one process and reused connections, so the load hits the app and not your terminal.
 
 ```
 ab -t 120 -c 16 "http://hello-dcs.$(oc project -q).svc:8080/"
@@ -65,12 +65,12 @@ ab -t 120 -c 16 "http://hello-dcs.$(oc project -q).svc:8080/"
 <!-- id: scale-in -->
 ## Scale in, and ceilings
 
-Scaling out is the easy half. What happens next is where the design lives.
+What happens after the load stops, and what limits the HPA.
 
 - Scale-in waits out a **stabilisation window**, 5 minutes by default, using the highest recommendation in it.
 - Quick to add, slow to remove — because removing a replica you immediately need again is thrashing.
 - Tune with `behavior.scaleDown.stabilizationWindowSeconds`.
-- `maxReplicas` is the ceiling you chose; the **namespace budget** is the ceiling you were given, and it wins.
+- `maxReplicas` is the limit you set. The **namespace budget** is a second limit, set by the platform: Pods past it are refused.
 - 6 x 200m = 1.2 CPU, inside a `medium` 2 CPU budget. At `maxReplicas: 20` the extra Pods are refused and the HPA reports `ScalingLimited`.
 
 ---
@@ -81,7 +81,7 @@ Scaling out is the easy half. What happens next is where the design lives.
 HPA changes **how many** Pods. VPA changes **how big** each one asks to be.
 
 - **HPA** — "one Pod is not enough for this load." More Pods.
-- **VPA** — "this Pod asked for 500m and never used 40m." Smaller request.
+- **VPA** — "this Pod asked for 500m and never used more than 40m." Smaller request.
 - Wrong requests are the most common reason a namespace runs out of budget while idle.
 - Start in **recommendation-only** mode: applying a new request **replaces** the Pod.
 - Never point both at the same resource — they fight over the number utilisation is measured against.
@@ -92,7 +92,7 @@ HPA changes **how many** Pods. VPA changes **how big** each one asks to be.
 <!-- id: next -->
 ## What's next
 
-The replica count is no longer yours to babysit, and you know which ceiling stops it.
+The HPA now sets the replica count, and you know which limit stops it.
 
 **Next lab, Services & Cluster Networking:** the Service types, cluster DNS, headless Services, and why DCS hands you a Route for anything that has to be reachable from outside.
 

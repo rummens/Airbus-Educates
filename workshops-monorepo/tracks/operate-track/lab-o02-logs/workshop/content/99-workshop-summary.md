@@ -28,7 +28,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
 its output is the previous container's, and that is where the error is.
 {{< /note >}}
 
-2. You run `oc logs deploy/my-app` on a Deployment with three replicas. What are you actually
+2. You run `oc logs deploy/my-app` on a Deployment with three replicas. What are you
    reading?
 
 {{< note >}}
@@ -40,7 +40,7 @@ its output is the previous container's, and that is where the error is.
 
 {{< note >}}
 **❓ Answer:** only in the **aggregated store**. The node's file went with the Pod, so `oc logs`
-cannot help — that gap is the entire reason a log store exists.
+cannot help. That gap is the main reason for a central log store.
 {{< /note >}}
 
 4. Why is "never log a secret" a stronger rule on a platform than on a laptop?
@@ -48,7 +48,7 @@ cannot help — that gap is the entire reason a log store exists.
 {{< note >}}
 **❓ Answer:** because the line does not stay in the container. It is copied to a central store,
 kept for the whole retention period, and readable by everyone entitled to that namespace's
-logs. `oc logs` feels private; the aggregate never is.
+logs.
 {{< /note >}}
 
 ## Next Steps

@@ -17,7 +17,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   title: "Expose Your App"
-  description: Give your app a stable in-cluster address with a Service, then expose it for real with a Route on DCS-managed DNS — reachable outside the session — and surface it as a new dashboard tab inside the session too.
+  description: Give your app a stable in-cluster address with a Service, publish it with a Route on DCS-managed DNS so it is reachable outside the session, and open it as a new dashboard tab inside the session.
   duration: 20m
   difficulty: beginner
   labels:

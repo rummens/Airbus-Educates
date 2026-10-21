@@ -1,6 +1,6 @@
 # Harbor: Projects, Push & Scan
 
-**On DCS the registry decides what may run. An image it will not serve cannot start.**
+**On DCS, a Pod can only start if Harbor will serve its image.**
 
 You inspect an image without pulling it, request a **Harbor project** as a Kubernetes object
 through Crossplane's Harbor provider, and copy an image between registries with `skopeo`.

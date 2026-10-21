@@ -5,7 +5,8 @@ title: Fix It and Verify
 You have named the **root cause**: the broken manifest's `envFrom` points at a **ConfigMap**
 called `hello-dcs-conf`, which does not exist.
 
-The real one is `hello-dcs-config`. Time to **fix** and **confirm**.
+The real one is `hello-dcs-config`. On this page you **fix** the manifest and **confirm**
+the app recovers.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -22,7 +23,7 @@ file: ~/exercises/broken-deployment.yaml
 
 Under `containers → envFrom → configMapRef`, the `name:` reads `hello-dcs-conf`.
 
-That one wrong **name** is the whole fault.
+That **name** is the only fault in the file.
 
 ## Restore the correct desired state
 
@@ -51,8 +52,8 @@ retries: .INF
 delay: 2
 ```
 
-The **Pod** is Ready again and serving `Reconfigured without a redeploy` — recovered, *and*
-still reading its configuration.
+The **Pod** is Ready again and serves `Reconfigured without a redeploy`, so it recovered
+and still reads its ConfigMap.
 
 That is the full loop:
 

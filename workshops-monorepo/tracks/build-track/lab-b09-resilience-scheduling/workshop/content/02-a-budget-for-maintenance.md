@@ -58,8 +58,8 @@ Read the columns together:
 - **DESIRED 2** is the floor you asked for.
 - **ALLOWED 1** is **how many Pods the platform may take away right now**.
 
-That last number is what the object is for. A drain of one node can evict one of your Pods,
-then has to wait for a replacement to become ready before touching another.
+`ALLOWED` is the number the platform checks before evicting a Pod. A drain of one node can
+evict one of your Pods, then has to wait for a replacement to become ready before touching another.
 
 ```examiner:execute-test
 name: verify-disruptions-allowed
@@ -93,12 +93,12 @@ delay: 3
 ```
 
 {{< warning >}}
-**⚠️ Watch out:** this is not extra safety. A drain that cannot proceed **waits**, and a node
+**⚠️ Watch out:** a budget of zero blocks maintenance. A drain that cannot proceed **waits**, and a node
 that cannot be drained does not get patched. A budget nobody can satisfy makes your app the
 reason the cluster falls behind on maintenance, and somebody will eventually override it.
 {{< /warning >}}
 
-The fix is not a smaller budget. It is **more replicas than your floor**:
+To fix it, keep the budget and run **more replicas than your floor**:
 
 ```terminal:execute
 command: oc scale deploy/hello-dcs --replicas=3 && oc rollout status deploy/hello-dcs --timeout=120s

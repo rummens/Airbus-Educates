@@ -28,7 +28,7 @@ resource-pool quota, and a Namespace is one resource pool carved out of it. The 
 the accountable unit; the resource pool is where workloads run.
 {{< /note >}}
 
-## What actually enforces isolation
+## What enforces isolation
 
 On a shared cluster, many tenants' namespaces sit side by side. Two mechanisms keep them
 apart:
@@ -43,8 +43,8 @@ access is scoped to your tenant's namespaces, and nothing grants you a rule else
 
 ## See your own project and its labels
 
-Your session namespace is already the active project, you do not need to log in or switch to
-it. Confirm which one you are in:
+Your session namespace is already the active project, so you do not need to log in or switch
+to it. Confirm which one you are in:
 
 ```terminal:execute
 command: oc project
@@ -69,7 +69,7 @@ command: oc get namespace $(oc project -q) -o jsonpath='{.metadata.labels}'
 Here, `oc project -q` prints **just** the current project's name with no extra text (the
 `-q` flag means "quiet", no headers, no decoration, only the value), and `$(...)` runs that
 command first and substitutes its output into the outer command. `-o jsonpath='{...}'`
-extracts one specific field from the full object instead of dumping the whole thing, here,
+extracts one specific field from the full object instead of dumping the whole thing: here,
 the `metadata.labels` map.
 
 ```examiner:execute-test
@@ -82,9 +82,6 @@ You will see a small JSON object of labels, at minimum the built-in
 `kubernetes.io/metadata.name` label, matching your namespace's own name. On a live DCS
 namespace this is also where tenant and lifecycle-type labels live.
 
-Tenancy and namespace types are DCS-specific concepts, see
+Tenancy and namespace types are DCS-specific concepts. See
 [Tenancy & Access]({{< param dcs_docs_base_url >}}/concepts/tenancy-and-access) for the full
 model, including DEV vs PROD lifecycle and how a namespace is provisioned.
-
-You know which namespace is yours. The next page asks what you are allowed to do inside
-it.

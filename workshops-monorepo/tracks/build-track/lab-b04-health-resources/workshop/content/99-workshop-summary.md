@@ -52,7 +52,7 @@ namespace quota count against it. `limits` is the ceiling: exceed it on memory a
 container is `OOMKilled`, exceed it on CPU and it is throttled instead.
 {{< /note >}}
 
-4. You delete a Pod belonging to a Deployment. What actually brings a replacement back?
+4. You delete a Pod belonging to a Deployment. What brings a replacement back?
 
 {{< note >}}
 **❓ Answer:** the Deployment's **ReplicaSet**, reconciling the actual replica count back up
@@ -62,5 +62,5 @@ to `spec.replicas`. Nothing you ran created that Pod.
 ## Next Steps
 
 You set the replica count by hand. **Autoscaling** is the next lab: letting a
-**HorizontalPodAutoscaler** move that number for you as load changes — and why it cannot work
-at all without the `requests` you set here.
+**HorizontalPodAutoscaler** move that number for you as load changes. It needs the `requests` you set
+here to work.

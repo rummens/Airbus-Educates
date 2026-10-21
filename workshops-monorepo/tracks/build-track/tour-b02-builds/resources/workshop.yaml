@@ -31,7 +31,7 @@ metadata:
 
       ### What you should already know
 
-      The concepts, not the clicks. BuildConfig, Build and ImageStream are explained in **Build
+      BuildConfig, Build and ImageStream are explained in **Build
       Your Image on DCS**. Nothing new is introduced here.
 
       ### What you will do
@@ -43,9 +43,9 @@ metadata:
       - Open the run it created and read its log, which is `oc logs build/...`
       - Open the ImageStream, and read the tag that resolves to a digest
 
-      > **💡 Tip:** each step names the `oc` command the screen stands in for.
+      > **💡 Tip:** each step tells you which `oc` command does the same thing.
 
-      ### When the console wins
+      ### When to use the console
 
       For a failed build the log and the object that produced it are one click apart, and the
       history of every run is a list rather than a command.
@@ -60,8 +60,8 @@ metadata:
 spec:
   title: "Builds in the console"
   description: >-
-    The console side of Build Your Image: the Builds menu, a BuildConfig's strategy and output,
-    a build started from the Actions menu, its log, and the ImageStream tag it produced.
+    The Builds menu, a BuildConfig's strategy and output, a build started from the Actions menu,
+    its log, and the ImageStream tag it produced. Console companion to Build Your Image.
   duration: 10m
   difficulty: intermediate
   labels:

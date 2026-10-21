@@ -2,7 +2,7 @@
 title: How an HPA Works
 ---
 
-An HPA is a controller running a loop rather than a rule that fires once.
+An HPA is a controller that checks the metrics again every few seconds.
 
 Every few seconds it asks the same question: given what these Pods are using, how many of
 them should there be?
@@ -48,4 +48,4 @@ the budget.
   it the metric that reflects the real bottleneck.
 - It does **not** exceed `maxReplicas`, and it cannot beat the namespace budget.
 
-Next, create one.
+The next page creates one.

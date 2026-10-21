@@ -2,7 +2,7 @@
 title: PROD Makes You Prove It
 ---
 
-Same manifest, different namespace. Watch what happens.
+Now apply the same manifest to the PROD namespace.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -17,7 +17,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/pr
 command: envsubst < hello-dcs-unsized.yaml | oc apply -f - -n $PROD_NS || true
 ```
 
-**Refused.** Read the message before doing anything about it:
+PROD refuses it. Read the message before you change anything:
 
 ```
 PROD requires every container to declare CPU and memory requests and limits.
@@ -67,8 +67,8 @@ retries: .INF
 delay: 3
 ```
 
-Admitted. The policy asks only that you say what the workload needs before the platform
-commits to running it.
+PROD admits it. The policy only requires the workload to declare its CPU and memory before it
+runs.
 
 ## Publish it, from here
 
@@ -99,5 +99,5 @@ retries: .INF
 delay: 3
 ```
 
-Same YAML, same cluster, different namespace type, different answer. Both answers came from
-one policy reading one label.
+The Route YAML is identical; only the namespace type differs. One policy, reading one label,
+made both decisions.

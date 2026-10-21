@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Resilience & Scheduling
 
-The platform will move your Pods: drains, upgrades, rebalancing. None of it asks permission. This lab is how you state your terms.
+The platform moves your Pods during drains, upgrades and rebalancing. This lab shows how to limit that and shut down cleanly.
 
 **In this lab:** two kinds of disruption · a PodDisruptionBudget · timing a real shutdown · spreading replicas.
 
@@ -14,11 +14,11 @@ Digital Container Service · DCS Academy
 <!-- id: disruption -->
 ## Two kinds of disruption
 
-They need different answers, and only one of them can be negotiated with.
+They need different answers, and only voluntary disruption can be delayed.
 
 - **Involuntary** — a node fails, a container is OOMKilled. Defences: replicas, probes, spreading.
 - **Voluntary** — a drain, an upgrade, a rebalance. Planned, so it can **wait**: that is what a PDB is for.
-- On DCS you never run the drain. Your budget constrains the platform without you being in the room.
+- On DCS you never run the drain. Your budget sets the limit the platform's drains must respect.
 - Both paths end in the same shutdown sequence.
 
 ![Involuntary disruption answered by replicas and spreading; voluntary answered by a PodDisruptionBudget; both ending in the same shutdown sequence](disruption-kinds.svg)
@@ -40,7 +40,7 @@ HEALTHY:.status.currentHealthy,EXPECTED:.status.expectedPods
 - **disruptionsAllowed** — how many Pods the platform may take **right now**.
 - 3 replicas, floor of 2 → **1**: a drain proceeds one Pod at a time.
 - Scale to 2 → **0**: the drain waits, and the node goes unpatched.
-- A budget nobody can satisfy is not safety — it is the reason somebody overrides it.
+- If nobody can satisfy the budget, maintenance stalls until someone overrides it.
 - The fix is **more replicas than the floor**.
 
 ---
@@ -48,7 +48,7 @@ HEALTHY:.status.currentHealthy,EXPECTED:.status.expectedPods
 <!-- id: shutdown -->
 ## Shutting down well
 
-Deletion is a sequence rather than an event, and two of its steps race.
+Deleting a Pod runs a sequence of steps, and two of them race.
 
 ```
 pod=$(oc get pods -l app=hello-dcs -o name | head -1)
@@ -60,14 +60,14 @@ echo $(( end - start ))
 - `preStop` pauses before SIGTERM, covering that race.
 - `terminationGracePeriodSeconds` is the total budget — preStop comes out of it.
 - Ours takes the **full 30s**: hello-dcs ignores SIGTERM, so the kubelet SIGKILLs it.
-- A well-behaved app exits early and nobody notices the maintenance. That is the image's job, not the manifest's.
+- An app that handles SIGTERM exits early. That behaviour comes from the image; the manifest cannot add it.
 
 ---
 
 <!-- id: spread -->
 ## Spreading replicas
 
-Three replicas on one node is one node's failure away from an outage. The scheduler packs by default, because it optimises for cluster use rather than for your availability.
+If all three replicas run on one node, one node failure takes the app down. The scheduler packs by default, because it optimises for cluster use rather than for your availability.
 
 ```
 topologySpreadConstraints:

@@ -5,9 +5,9 @@ title: A Secret
 A [**Secret**](https://kubernetes.io/docs/concepts/configuration/secret/) looks like a
 ConfigMap but is for sensitive values — tokens, passwords, keys. Two differences matter:
 
-- Secret values are **base64-encoded, not encrypted**. Base64 is just an encoding anyone
-  can reverse — so a Secret is *not* safe because of base64. It's safer because access to
-  Secrets is restricted by RBAC and the values are kept out of manifests and logs.
+- Secret values are **base64-encoded, not encrypted**. Base64 is an encoding anyone can
+  reverse. What protects a Secret is RBAC, which restricts who can read it, and keeping its
+  values out of manifests and logs.
 - You **never** print a Secret's value to the terminal or bake it into an image.
 
 Open the slide for this page (📊 **Slides** tab):
@@ -54,7 +54,7 @@ references a Secret (or ConfigMap) that doesn't exist yet won't start.
 ## Confirm injection — without leaking the value
 
 You want to prove the `API_TOKEN` variable is present in the container **without** printing
-what it holds. The trick is to count its characters instead of showing it.
+what it holds. To do that, count its characters instead of printing it.
 
 `printenv API_TOKEN` reads the variable inside the container and would normally print its
 value. Instead of showing that value, the `|` pipe sends it to `wc -c`, which prints only
@@ -67,7 +67,8 @@ command: oc exec deploy/hello-dcs -- printenv API_TOKEN | wc -c
 
 You see a number (around `41` — the token's length plus the line ending). A number greater
 than `1` proves the variable is set and non-empty, while the value itself stays hidden.
-That is the habit: prove the wiring without exposing the secret.
+Use this check whenever you need to confirm a secret is set: it proves the wiring without
+showing the value.
 
 ```examiner:execute-test
 name: verify-secret-injected

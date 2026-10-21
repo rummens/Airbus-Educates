@@ -1,22 +1,23 @@
 # Resilience & Scheduling
 
-**The platform will move your Pods. The question is whether that costs you an outage.**
+**The platform evicts Pods during maintenance. This lab covers how to avoid an outage when it does.**
 
-Node maintenance, upgrades and rebalancing are routine, and none of them ask permission. What
-you get is a way to state your terms.
+Node maintenance, upgrades and rebalancing evict Pods routinely. A PodDisruptionBudget sets
+how many may be evicted at once.
 
 You set a **PodDisruptionBudget** and read from its status how many Pods the platform may
 take right now, then scale down until that number is **zero** and see why a budget nobody can
-satisfy causes problems rather than adding safety.
+satisfy blocks maintenance.
 
-Then **shutdown**, which most applications get wrong. You time a real Pod deletion and measure
+Then **shutdown**. You time a real Pod deletion and measure
 what a container that ignores `SIGTERM` costs.
 
 Last, **spreading** replicas across nodes, and the trade-off between a spread you prefer and
 one you require.
 
 > **⚠️ Watch out:** you will not drain a node, because that is the platform's action. You do the
-> tenant half: declare what it must respect, then check it understood.
+> tenant half: declare what it must respect, then read the budget's status to confirm it is in
+> effect.
 
 - **Track:** Build & Run — the last lab
 - **Audience:** Intermediate

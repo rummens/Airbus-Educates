@@ -12,7 +12,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   title: "Deploy Your First App"
-  description: Get your own app running on DCS fast — create a Deployment from a Harbor image, customise it, reach it, change it and watch it roll out — then peek at the YAML behind it to see how Kubernetes really works.
+  description: Create a Deployment from a Harbor image, customise it, reach it, change it and watch it roll out. Then read the YAML behind it.
   duration: 20m
   difficulty: beginner
   labels:

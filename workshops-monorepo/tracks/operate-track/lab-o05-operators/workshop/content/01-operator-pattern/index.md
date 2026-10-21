@@ -2,7 +2,7 @@
 title: The Operator Pattern
 ---
 
-Everything you have deployed so far, a Deployment, a ConfigMap, a Secret, is a single
+Everything you have deployed so far (a Deployment, a ConfigMap, a Secret) is a single
 built-in resource. A real application is usually several: a database needs storage
 provisioned, a primary elected, replicas configured, backups scheduled, and all of that kept
 correct as Pods restart or fail.
@@ -20,7 +20,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/pa
 ## Controller plus reconciliation
 
 An Operator is a **controller**: a process that runs continuously, watches one kind of
-object, and drives reality toward what that object declares. The loop is called
+object, and changes the cluster to match what that object declares. The loop is called
 **reconciliation**: read the desired state, compare it with the actual state, act to close the
 gap, and repeat. It runs continuously rather than once at creation.
 

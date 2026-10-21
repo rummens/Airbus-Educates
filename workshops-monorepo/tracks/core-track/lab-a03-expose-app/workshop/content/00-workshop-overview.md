@@ -5,7 +5,7 @@ title: "Expose Your App"
 So far your app has only been reachable through a **local tunnel** — a `port-forward` that
 runs only while a single terminal command is open.
 
-That works for a quick test, but not for anything real.
+That is fine for a quick test, but nobody else can use it.
 
 In this workshop on **{{< param product_name >}}** you give the app a proper address:
 

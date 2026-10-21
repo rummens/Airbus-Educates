@@ -8,7 +8,7 @@ OpenShift-based container platform.
 This is the concept lab that opens the track, right after the environment tour. It covers:
 
 - what the **platform** is and where it fits;
-- what **containers** and **images** actually are;
+- what **containers** and **images** are;
 - how you get work done in your session with the `oc` command line.
 
 > **💡 Tip:** it assumes no prior container or Kubernetes knowledge, and it stands alone — so
@@ -35,4 +35,4 @@ This is the concept lab that opens the track, right after the environment tour. 
 2. **Move** between the terminal and the editor.
 3. **Run** a handful of `oc` commands to confirm your identity and access.
 
-Short and low-pressure — the mental model that sits under everything you do on DCS.
+A short lab that gives you the basic model behind everything you do on DCS.

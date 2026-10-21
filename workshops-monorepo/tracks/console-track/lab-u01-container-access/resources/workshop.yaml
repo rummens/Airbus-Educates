@@ -18,8 +18,8 @@ metadata:
     academy.dcs/difficulty: beginner
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
-      Do the pod investigation you already know from the terminal — get pods, logs,
-      rsh — in the OpenShift web console instead, guided step by step.
+      Do the pod investigation you already know from the terminal (get pods, logs,
+      rsh) in the OpenShift web console instead.
     # A console lab has no workshop content, so there is no README for the portal to
     # fetch: this annotation is the course page's prospectus. Markdown, rendered.
     academy.dcs/details: |
@@ -30,14 +30,14 @@ metadata:
       on the real page, and the guidance box follows you as you navigate.
 
       Your own project is created before the lab starts, with a running pod already in
-      it, so everything you click is live — nothing is a screenshot or a simulation.
+      it, so every page you open shows live data.
 
       ### What you should already know
 
-      This lab assumes the concepts, not the clicks. You should have finished
-      **Deploy Your First App** and **Configure & Troubleshoot Your App**, where you met
-      pods, logs and container shells from the command line. Here you only map that
-      knowledge onto the console — no new Kubernetes concepts are introduced.
+      You should have finished **Deploy Your First App** and **Configure & Troubleshoot
+      Your App**, where you listed pods, read their logs and opened a shell in a container
+      from the command line. This lab shows where the console puts each of those, and
+      introduces no new Kubernetes concepts.
 
       ### What you will do
 
@@ -45,20 +45,20 @@ metadata:
       > Each screen names the `oc` command it replaces, so you can map one onto the other
       > afterwards.
 
-      - Read a project's pod list, where `oc get pods` would report it — and watch it refresh
+      - Read a project's pod list, where `oc get pods` would report it, and see it refresh
         without a watch flag
       - Read the containers inside one pod: image, state, restart count, the part of
         `oc describe pod` that matters during an incident
       - Follow its live output on the **Logs** tab, the screen behind `oc logs -f`
-      - Open a shell in the container from the **Terminal** tab, where `oc rsh` puts you — and
-        learn the one rule about repairing anything from in there
+      - Open a shell in the container from the **Terminal** tab, where `oc rsh` puts you, and
+        see why you should not repair anything from in there
 
       ### When to reach for the console
 
-      The console wins for looking around: live status without re-running a command,
-      related objects one click apart, and events beside the object they concern. The CLI
-      still wins for anything you need to repeat, script, or review — which is why the
-      terminal labs come first.
+      When you are looking at one pod during an incident, the console saves commands: its
+      status updates without re-running anything, and its logs and shell are tabs on the
+      same page. A check you repeat, script or hand to a colleague is still better written
+      as `oc` commands.
 
       ### Cleaning up
 

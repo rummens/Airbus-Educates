@@ -70,5 +70,5 @@ timeout: 10
 You get back `no`. Your tenant's access does not extend into `kube-system` or any other
 namespace that is not yours, however much you can do inside your own.
 
-Two identical-looking questions, two different answers, decided per namespace, per resource
-and per verb. The next page is what decides them.
+The two questions look the same but get different answers, because RBAC decides per
+namespace, per resource and per verb. The next page shows the objects that make that decision.

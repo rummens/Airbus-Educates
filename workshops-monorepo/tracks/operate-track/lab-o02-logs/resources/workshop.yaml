@@ -11,18 +11,18 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: file-check
     academy.dcs/details: |
-      **Metrics tell you that something changed. Logs tell you what happened.**
+      **Reading Pod logs with oc, and where they stop being enough.**
 
       You practise reading logs properly: following them live, going back in time, reaching the
       output of a container that has already **crashed**, and picking one container out of a Pod
       that runs several.
 
-      Then the limit. Delete the Pod and the logs go with it, because the file was on the node.
+      Then you hit the limit: delete the Pod and its logs go with it, because the file was on the node.
       The last page covers what fills that gap on DCS: the collector, the log store, LogQL, and
       the same tenancy boundary your metrics have.
 
-      > **💡 Tip:** `--previous` is the flag that pays for this lab. The logs that explain a crash
-      > belong to the container that crashed, not to the one that replaced it.
+      > **💡 Tip:** `--previous` is the most useful flag in this lab. The error behind a crash is in
+      > the log of the container that crashed, not the one that replaced it.
 spec:
   title: "Logs"
   description: >-

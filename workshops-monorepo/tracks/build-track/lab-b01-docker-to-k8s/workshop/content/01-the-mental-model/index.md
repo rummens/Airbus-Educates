@@ -44,15 +44,14 @@ above, then click again.
 
 ## Same ideas, different shape
 
-The biggest shift is not *what* the objects do. It is *how* you describe them.
+The objects do the same jobs as in Docker. What changes is how you describe them.
 
 **Imperative:** `docker run` and `docker compose up` tell the Docker daemon what to do
 right now, in order.
 
-**Declarative:** Kubernetes takes the state you *want* and keeps working to make reality
-match it. A [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) that dies is
-**replaced** without you running anything, because nobody has to: the platform is still
-converging on the state you declared.
+**Declarative:** you give Kubernetes the state you *want*, and it keeps changing the cluster
+until it matches. A [Pod](https://kubernetes.io/docs/concepts/workloads/pods/) that dies is
+**replaced** without you running anything.
 
 {{< note >}}
 **💡 Tip:** if you have used compose's `restart: always`, self-healing is not new to you.

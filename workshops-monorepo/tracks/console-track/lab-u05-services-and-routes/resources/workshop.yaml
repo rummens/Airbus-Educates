@@ -21,7 +21,7 @@ metadata:
     academy.dcs/icon: monitor
     academy.dcs/summary: >-
       Follow a request from Route to Service to pods in the OpenShift web console,
-      and learn where a broken chain shows itself first.
+      and see which screen shows a broken chain first.
     # A console lab has no workshop content, so there is no README for the portal to
     # fetch: this annotation is the course page's prospectus. Markdown, rendered.
     academy.dcs/details: |
@@ -36,10 +36,9 @@ metadata:
 
       ### What you should already know
 
-      This lab assumes the concepts, not the clicks. You should have finished
-      **Expose Your App**, where you gave an application a stable in-cluster address with
-      a Service and published it with a Route. No new Kubernetes concepts are introduced
-      here.
+      You should have finished **Expose Your App**, where you gave an application a stable
+      in-cluster address with a Service and published it with a Route. This lab follows that
+      chain in the console and introduces no new Kubernetes concepts.
 
       ### What you will do
 
@@ -48,7 +47,7 @@ metadata:
       > afterwards.
 
       - Read a Service's selector and port mapping, where `oc get service` reports the address
-      - Check what that selector actually matched on the Service's Pods tab — the screen behind
+      - Check what that selector matched on the Service's Pods tab — the screen behind
         `oc get endpoints`, and the first thing to look at when nothing answers
       - Open the Route that publishes it and read its host, target Service and TLS settings,
         the facts `oc get route` prints
@@ -57,9 +56,9 @@ metadata:
 
       ### When to reach for the console
 
-      The console wins for following a chain: Route, Service and pods are one click apart,
-      so an empty endpoint list is obvious in seconds. The CLI still wins for anything you
-      need to repeat, script, or review — which is why the terminal labs come first.
+      Route, Service and pods are one click apart in the console, so when an application
+      does not answer you can spot an empty endpoint list in seconds. To check the same chain
+      repeatedly or from a script, use `oc get route`, `oc get service` and `oc get endpoints`.
 
       ### Cleaning up
 
@@ -81,10 +80,10 @@ metadata:
 spec:
   title: "Services & routes (console)"
   description: >-
-    You built the traffic chain from the terminal in Expose Your App — a Service for a
-    stable in-cluster address, a Route for a URL outside it. This lab walks the same chain
-    in the OpenShift web console, where a Service with no matching pods is visible at a
-    glance, and ends at the NetworkPolicies that can block traffic the chain allows.
+    Where a Route, its Service and the pods behind it appear in the OpenShift web console. A
+    Service with no matching pods is visible on one tab, and the last step shows the
+    NetworkPolicies that can block traffic the Route and Service allow. Builds on the chain
+    you created in Expose Your App.
   duration: 5m
   difficulty: beginner
   labels:

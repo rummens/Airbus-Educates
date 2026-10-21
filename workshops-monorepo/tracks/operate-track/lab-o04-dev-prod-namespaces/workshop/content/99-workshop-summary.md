@@ -2,7 +2,7 @@
 title: Summary
 ---
 
-One label, one policy, two very different answers to the same YAML.
+One label and one admission policy gave different results for the same YAML.
 
 Open the closing slide (📊 **Slides** tab):
 
@@ -20,7 +20,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
 4. **Applied** the same unsized manifest to PROD and was refused again — at `oc apply`, with
    the failing path named.
 5. **Sized** the workload, got it admitted, and published the identical Route from PROD.
-6. **Compared** the two running states, and named what promotion actually is.
+6. **Compared** the two running states, and named what promotion is.
 
 ## Check Your Understanding
 
@@ -28,16 +28,15 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ne
 
 {{< note >}}
 **❓ Answer:** a **label** — `dcs.airbus/namespace-type` — and the **admission policy** that
-matches on it. Same cluster, same Kubernetes, same registry; the policy is the difference.
+matches on it. Everything else, including the cluster and the registry, is the same.
 {{< /note >}}
 
 2. Your Deployment is refused by PROD with a message about `resources`. Where did the
    rejection happen, and what exists afterwards?
 
 {{< note >}}
-**❓ Answer:** at **admission**, during `oc apply` — so **nothing** was created. That is the
-point of an admission policy: not a Pod that starts and fails later, but a change that never
-lands.
+**❓ Answer:** at **admission**, during `oc apply`, so **nothing** was created. An admission
+policy rejects the change before it is stored, so no Pod starts and fails later.
 {{< /note >}}
 
 3. Why is a Route refused in a DEV namespace?
@@ -51,9 +50,8 @@ make half-built things publicly reachable.
 4. Why is editing PROD directly worse than it looks, even when it works?
 
 {{< note >}}
-**❓ Answer:** the change was never tested in DEV, and the **next promotion overwrites it** —
-silently. The thing that was keeping PROD working disappears, and nobody remembers it was ever
-there.
+**❓ Answer:** the change was never tested in DEV, and the **next promotion silently overwrites
+it**. Whatever the edit was fixing breaks again, with no record of the change.
 {{< /note >}}
 
 ## Next Steps

@@ -30,14 +30,14 @@ metadata:
       on the real page, and the guidance box follows you as you navigate.
 
       Your own project is created before the lab starts, containing one healthy pod and
-      one that is deliberately broken. The fault is real and the cluster's own messages
-      explain it — nothing here is a screenshot.
+      one that is deliberately broken. The fault is real, and the cluster's events record
+      its cause.
 
       ### What you should already know
 
-      This lab assumes the concepts, not the clicks. You should have finished
-      **Configure & Troubleshoot Your App**, where you diagnosed a broken application from
-      logs, events and `oc describe`. No new Kubernetes concepts are introduced here.
+      You should have finished **Configure & Troubleshoot Your App**, where you diagnosed a
+      broken application from logs, events and `oc describe`. This lab runs the same
+      diagnosis in the console and introduces no new Kubernetes concepts.
 
       ### What you will do
 
@@ -50,16 +50,16 @@ metadata:
       - Read the container's own state and reason, the part of `oc describe pod` that separates
         a bad pod from a bad container
       - Find the cause in the pod's events — the screen that ends most investigations
-      - See why a pod in this state has no logs at all, and why that emptiness is itself a
-        finding
+      - See why a pod in this state has no logs at all, and what that tells you about the
+        fault
       - Confirm the cause in the manifest, as `oc get pod -o yaml` would show it, and decide
         where the fix belongs
 
       ### When to reach for the console
 
-      The console wins for triage: status, events, logs and manifest are tabs on one page,
-      so you stop guessing which command to run next. The CLI still wins for anything you
-      need to repeat, script, or review — which is why the terminal labs come first.
+      For triage the console puts status, events, logs and manifest on tabs of one page, so
+      you move between them without choosing the next command. The fix itself still belongs
+      in the manifest you keep in git.
 
       ### Cleaning up
 
@@ -81,10 +81,9 @@ metadata:
 spec:
   title: "Diagnose a broken pod (console)"
   description: >-
-    You diagnosed a broken application from logs, events and describe in Configure &
-    Troubleshoot Your App. This lab gives you a pod that will not start and walks the same
-    investigation through the OpenShift web console — status, events, an empty log, and the
-    manifest that caused it — so you know which tab answers which question.
+    A pod that will not start, worked from status to events to manifest in the OpenShift web
+    console. It repeats the investigation from Configure & Troubleshoot Your App and shows
+    which tab answers which question, including what an empty log means.
   duration: 5m
   difficulty: beginner
   labels:

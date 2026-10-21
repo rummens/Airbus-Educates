@@ -27,8 +27,8 @@ This lab uses [**CloudNativePG**](https://cloudnative-pg.io/docs/), an Operator 
 PostgreSQL. It adds a CRD named `Cluster`, under its own API group so it never collides with
 another `Cluster`-named type, plus supporting CRDs for backups and connection pooling.
 
-Confirm the cluster knows those kinds. **Discovery**, what `oc` itself uses to work out
-which types exist, is readable by any authenticated user, so this works from inside your own
+Confirm the cluster knows those kinds. **Discovery** (what `oc` itself uses to work out
+which types exist) is readable by any authenticated user, so this works from inside your own
 namespace without any cluster-wide permission:
 
 ```terminal:execute

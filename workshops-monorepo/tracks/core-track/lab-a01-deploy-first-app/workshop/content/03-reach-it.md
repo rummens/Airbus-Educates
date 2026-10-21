@@ -6,7 +6,7 @@ Your app is running, but nothing outside the cluster can talk to it yet.
 
 For a quick local test, open a **tunnel** from your terminal straight to the Pod with
 [`oc port-forward`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/nodes/working-with-containers#nodes-containers-port-forwarding).
-No public address required.
+It needs no public address.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -19,8 +19,7 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/re
 **📌 Note:** this is a *local* tunnel — only for you, only while the command runs. It is
 not real exposure.
 
-Giving the app a proper external address (a **Route**) is the whole point of **Expose Your
-App**.
+**Expose Your App** gives the app a proper external address (a **Route**).
 {{< /note >}}
 
 ## Open the tunnel (lower terminal)

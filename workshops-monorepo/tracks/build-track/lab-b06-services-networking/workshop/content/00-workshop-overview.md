@@ -2,14 +2,12 @@
 title: "Services & Cluster Networking"
 ---
 
-"Just expose it" has five different answers on Kubernetes.
-
-The `type` field on a
+Kubernetes has five Service types. The `type` field on a
 [**Service**](https://kubernetes.io/docs/concepts/services-networking/service/) changes what
 gets created, what lands in DNS, and whether anything outside the cluster can reach it.
 
 This lab covers the types a tenant can use on **{{< param product_name >}}**, and the two
-that look right and are not.
+that exist in the API but do not work here.
 
 {{< note >}}
 **💡 First time in one of these labs?** See the

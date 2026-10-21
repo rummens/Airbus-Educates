@@ -1,16 +1,15 @@
 # Services & Cluster Networking
 
-**"Just expose it" has five different answers on Kubernetes.**
+**Kubernetes has five Service types, and each one exposes an app in a different way.**
 
-A Service is not one thing. The `type` field changes what gets built, what lands in DNS, and
-whether anything outside the cluster can reach it.
+The Service `type` field changes what gets built, what lands in DNS, and whether anything
+outside the cluster can reach it.
 
 You work through the types a tenant uses on DCS, **ClusterIP**, **headless** and
 **ExternalName**, resolving each one through cluster DNS by hand to see what comes back.
 
-Then the two that look like the obvious way out. You apply a **NodePort** and a
-**LoadBalancer**, read what each does here, and find out why the platform hands you a
-**Route** instead.
+Then you apply a **NodePort** and a **LoadBalancer**, read what each does here, and see why
+the platform gives you a **Route** instead.
 
 > **💡 Tip:** the headless Service you meet here is the same one a StatefulSet needs in the
 > next lab.
@@ -32,7 +31,7 @@ Then the two that look like the obvious way out. You apply a **NodePort** and a
 ## What you'll do
 
 1. **Deploy** two replicas and front them with a ClusterIP Service.
-2. **Resolve** the name and get one address — the Service's own.
+2. **Resolve** the name and get one address: the Service's own.
 3. **Go headless** and get one address per Pod instead.
 4. **Alias** something outside your namespace, and follow the CNAME.
 5. **Apply** a NodePort and a LoadBalancer, see what happens, and clean them up.

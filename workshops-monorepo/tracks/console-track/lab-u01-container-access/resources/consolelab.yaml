@@ -20,9 +20,9 @@ spec:
     walks the same investigation through the OpenShift web console, so you can recognise
     each command's equivalent on screen and pick whichever tool is faster for the job.
   completionText: >-
-    Done. You read a project's pod list, the containers inside one pod, its live logs and a
-    shell in its container — everything oc get pods, oc describe pod, oc logs and oc rsh give
-    you, without typing a command.
+    Done. You read a project's pod list, the containers in one pod and its live logs, and
+    opened a shell in its container. These are the console screens for oc get pods,
+    oc describe pod, oc logs and oc rsh.
   visibility: hidden
   mode: assisted
   context:
@@ -64,7 +64,7 @@ spec:
       description: >-
         This is what oc get pods returns for your current project, and nothing outside it.
         The Status and Ready columns carry the same facts as the CLI output, but they update
-        on their own — no repeated command and no watch flag. Names, restart counts and node
+        on their own, without a repeated command or a watch flag. Names, restart counts and node
         placement are the columns worth learning to read at a glance.
       target: { type: consoleElement, id: pageContent }
       complete:
@@ -83,7 +83,7 @@ spec:
       title: What is inside the pod
       description: >-
         The Containers section lists each container with the image it was created from, its
-        current state and its restart count — the part of oc describe pod you actually read
+        current state and its restart count — the part of oc describe pod you read
         during an incident. A rising restart count with a Running state means the container
         keeps dying and being recreated, which no single status word tells you.
       target: { type: consoleElement, id: detailsSection, value: Containers }
@@ -93,14 +93,13 @@ spec:
     - id: open-logs
       title: Read the logs
       description: >-
-        Configuration explains what the pod should do. Its output explains what it did. That
-        is the next tab.
+        Open the Logs tab to see what the application has printed while it ran.
       target: { type: href, value: '/k8s/ns/<<namespace>>/pods/<<podName>>/logs' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/<<podName>>/logs' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/<<podName>>/logs' }
     - id: read-logs
-      title: The application's own account
+      title: Follow the live output
       description: >-
         This is oc logs, streaming live and following by itself. Logs are the first place to
         look when a workload misbehaves and the safest: reading them changes nothing about
@@ -113,14 +112,14 @@ spec:
     - id: open-terminal
       title: Open a shell in the container
       description: >-
-        Logs show what the application chose to print. When you need to see the filesystem
-        or the environment it is actually running with, you go inside it.
+        Open the Terminal tab to check the filesystem or the environment the process runs
+        with, which the logs do not show.
       target: { type: href, value: '/k8s/ns/<<namespace>>/pods/<<podName>>/terminal' }
       complete:
         operation: { type: navigate, path: '/k8s/ns/<<namespace>>/pods/<<podName>>/terminal' }
         verify: { type: route, path: '/k8s/ns/<<namespace>>/pods/<<podName>>/terminal' }
     - id: read-terminal
-      title: A shell, with one rule
+      title: Look, do not repair
       description: >-
         You are now inside the running container, exactly as oc rsh puts you there. Use it to
         look — at config files, environment variables, what the process can reach over the

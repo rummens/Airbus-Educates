@@ -26,7 +26,7 @@ delay: 5
 ```
 
 The tag `latest` now resolves to an image **with a digest** in the cluster's registry. The
-digest is the real identity; the tag is a label that can move.
+digest identifies the exact image. The tag can be moved to a different image later.
 
 ## Deploy it
 
@@ -62,8 +62,8 @@ retries: .INF
 delay: 3
 ```
 
-`Built on DCS, by me`, and nobody set that at deploy time. It came from the image, which
-came from your build.
+The output is `Built on DCS, by me`. Nothing set it at deploy time: it is the `ENV` line
+from your Containerfile, baked into the image by your build.
 
-That is the distinction to take away. **Configuration** is attached when you deploy. **What
-is in the image** is decided when you build.
+**Configuration** (such as `oc set env`) is added at deploy time. **Image contents** (such as
+`ENV` in the Containerfile) are fixed at build time.

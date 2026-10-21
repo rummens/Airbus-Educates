@@ -15,7 +15,7 @@ machines, why Kubernetes beats plain Docker, and how to work in your session wit
 - Saw how containers and images relate.
 - Learned why Kubernetes adds scheduling, self-healing, scaling, and declarative
   desired-state over plain Docker.
-- Confirmed your identity, cluster access, and project with `oc`.
+- Confirmed your identity, cluster access, and namespace with `oc`.
 
 ## Check Your Understanding
 
@@ -27,7 +27,7 @@ workloads. All images are provided from within the platform (the Harbor registry
 can't pull from public registries.
 {{< /note >}}
 
-2. What is the **one real difference** between the Sandbox and PROD clusters?
+2. What is the **one difference** between the Sandbox and PROD clusters?
 
 {{< note >}}
 **❓ Answer:** Feature-rollout timing and maintenance notice/SLA. New platform features
@@ -56,5 +56,6 @@ continuously reconciles to it, versus a one-shot `docker run`).
 
 Next is **Deploy Your First App** — it gets an application running on
 {{< param product_short >}} in minutes using the [`oc`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#cli-getting-started)
-skills you just practised. From here the orientation labs (**Terms**, the **ITSM console**,
-the **OpenShift console**) round out the picture.
+skills you just practised. After that come the orientation labs (**Terms — Namespaces & Tenancy** and
+**Requesting a Tenant & Namespace via ITSM**) and the **Console** track for the OpenShift
+web console.

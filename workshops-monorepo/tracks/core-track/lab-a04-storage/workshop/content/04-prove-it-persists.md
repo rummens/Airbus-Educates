@@ -2,8 +2,8 @@
 title: Prove It Persists
 ---
 
-This is the key test. Destroy the Pod, let {{< param product_short >}} create a fresh one,
-and check the marker is still there — it lives on the PV, not on the container.
+Destroy the Pod, let {{< param product_short >}} create a fresh one, and check the marker
+is still there. It lives on the PV, not in the container.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -55,5 +55,5 @@ retries: .INF
 delay: 2
 ```
 
-`persisted-marker-42` — same value, new Pod. The container was replaced; the volume, and
-everything on it, persisted. **That's persistent storage.**
+You should see `persisted-marker-42`. The Pod is new, but the marker is on the PV, so it
+survived the restart.

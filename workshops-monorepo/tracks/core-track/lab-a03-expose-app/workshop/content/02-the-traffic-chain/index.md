@@ -21,9 +21,9 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/tr
   stable in-cluster address that load-balances across your Pods by label (you just created
   this).
 - **[Route](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/ingress_and_load_balancing/routes)** (OpenShift docs) —
-  publishes a Service on a public hostname. A Route is OpenShift's take on the upstream
-  Kubernetes [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/);
-  same idea, OpenShift-native.
+  publishes a Service on a public hostname. A Route does the same job as the upstream
+  Kubernetes [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
+  and is built into OpenShift.
 - **External load balancer + DCS-managed DNS** — {{< param product_short >}} runs the
   load balancer and owns the DNS. If your Route host stays inside the platform's
   **`*.apps`** domain, DCS handles the DNS record, the load balancer, and the TLS

@@ -12,19 +12,19 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: edit
     academy.dcs/details: |
-      **Optional. The fourth thing this platform can do with a git repository.**
+      **Optional: Dev Spaces, the fourth way this track uses a git repository.**
 
       The track so far used git as a **build source**. **OpenShift Dev Spaces** uses it as an
       in-cluster IDE: a workspace defined by a **devfile**, running on the cluster, with the same
       registry and the same security posture as anything else you deploy.
 
-      You read a real devfile field by field, the image the workspace develops in, the endpoints
-      it exposes and the commands it can run, and place Dev Spaces against the three other ways
+      You read a devfile field by field: the image the workspace develops in, the endpoints it
+      exposes and the commands it can run. Then you compare Dev Spaces with the three other ways
       this track has worked with code.
 
       > **📌 This is mostly a reading lab.** Dev Spaces is operator-provided and this training
-      > cluster does not run it. The devfile and the model transfer; the lab says which steps
-      > need a real instance.
+      > cluster does not run it. What you learn about the devfile applies on a real instance, and
+      > the lab says which steps need one.
 spec:
   title: "Dev Spaces"
   description: >-

@@ -12,14 +12,12 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: trending-up
     academy.dcs/details: |
-      **Setting the replica count by hand only works while somebody is watching.**
-
-      A **HorizontalPodAutoscaler** sets that number for you. It reads your Pods' CPU use,
+      A **HorizontalPodAutoscaler** sets the replica count for you. It reads your Pods' CPU use,
       compares it with the `requests` you set, and adds or removes replicas to hold a target
       utilisation.
 
       You create one, watch it read live metrics, put the app under load from your own terminal
-      and see it scale out. Then why it scales back in far more slowly, and what happens when the
+      and see it scale out. Then you see why it scales back in far more slowly, and what happens when the
       namespace budget rather than the load is the ceiling.
 
       The last page covers **VPA**, which tunes `requests` instead of the replica count.

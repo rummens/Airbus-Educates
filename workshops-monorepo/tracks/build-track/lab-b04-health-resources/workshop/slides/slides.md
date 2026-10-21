@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Health & Resources
 
-One replica, no probes, no resource numbers is a demo. This lab turns it into something the platform can keep alive.
+One replica with no probes and no resource numbers is not production-ready. This lab adds replicas, resource numbers and probes.
 
 **In this lab:** scale and read the budget · hit the quota on purpose · right-size requests and limits · readiness vs liveness · self-healing.
 
@@ -43,15 +43,15 @@ oc get events --sort-by=.lastTimestamp
 
 - Nothing crashes: the new Pods are never created.
 - The `FailedCreate` event names what was **requested**, what is **used**, and the **limited** ceiling.
-- Read it left to right and the arithmetic is obvious.
-- The fix is not a bigger namespace. It is a better-sized Pod.
+- Read it left to right: requested + used > limited.
+- Fix: size the Pod correctly, not the namespace.
 
 ---
 
 <!-- id: right-size -->
 ## Right-sizing
 
-State what the app actually needs, instead of taking the defaults or guessing high.
+State what the app needs, instead of taking the defaults or guessing high.
 
 ```
 envsubst < deployment-probes.yaml | oc apply -f -
@@ -59,8 +59,8 @@ oc describe quota
 ```
 
 - `requests: 50m / 64Mi` · `limits: 100m / 128Mi` for this small app.
-- Applying a known-good manifest **over** a stuck rollout is the declarative recovery move.
-- Same four replicas, about a quarter of the budget, real headroom left.
+- Recover a stuck rollout by applying a known-good manifest **over** it.
+- Same four replicas, about a quarter of the budget.
 - Memory over its limit is **OOMKilled**; CPU over its limit is **throttled**.
 
 ---
@@ -73,7 +73,7 @@ Two different questions the platform keeps asking a Pod, with two different cons
 - **Readiness** — can you take traffic? Fail and the Pod leaves the Service **endpoints**. The container is untouched.
 - **Liveness** — are you alive in there? Fail repeatedly and the kubelet **restarts** the container.
 - A **startup** probe holds liveness off while a slow app boots.
-- Break readiness and one replica is quarantined; the others serve on.
+- Break readiness: one replica gets no traffic, the others keep serving.
 
 ![A readinessProbe on GET / gates whether Service endpoints send traffic to the Pod; a livenessProbe on GET /healthz tells the kubelet whether to kill and restart the container](probe-flow.svg)
 
@@ -91,7 +91,7 @@ oc delete pod/<that-one>
 
 - The deleted Pod never returns; a **new** one is created from the same template.
 - The **ReplicaSet** compares actual against `spec.replicas` and closes the gap.
-- Change the *desired* state and it rolls out; change the *actual* state and it rolls forward.
+- It reacts the same way whether you change the desired state or the actual state changes.
 - Same mechanism recovers a node failure, an eviction or a crash.
 
 ---
@@ -99,7 +99,7 @@ oc delete pod/<that-one>
 <!-- id: next -->
 ## What's next
 
-Your app now fits its budget and reports its own health, which is what lets the platform keep it running without you.
+Your app now fits its budget and has probes, so the platform can keep it running.
 
 **Next lab — Autoscaling:** let a **HorizontalPodAutoscaler** move the replica count as load changes, and see why it cannot work at all without the `requests` you set here.
 

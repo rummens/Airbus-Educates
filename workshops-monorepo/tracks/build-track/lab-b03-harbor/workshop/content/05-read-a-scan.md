@@ -2,8 +2,8 @@
 title: Read a Scan
 ---
 
-Harbor scans what it stores. The report is a document you can read, and the gate is
-arithmetic on one field of it.
+Harbor scans what it stores. The report is a JSON document. The PROD gate compares one field
+in it, the severity count, with the threshold.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -36,11 +36,11 @@ retries: .INF
 delay: 3
 ```
 
-The `summary.severityCount` is the whole verdict in four numbers. This one has **no Critical
+`summary.severityCount` gives the number of findings at each of the four severity levels. This one has **no Critical
 and no High** findings: one Medium and two Low.
 
-Note `fixable`: of the three findings, two have a fixed version available. That distinction
-decides what you can actually do about them.
+Note `fixable`: of the three findings, two have a fixed version available. Whether a fix exists
+decides what you can do about each finding.
 
 ## An image that fails the gate
 
@@ -60,7 +60,7 @@ delay: 3
 images whose findings sit **below CVE severity 9**, and Critical means 9.0 and above, so this
 image is refused there. It can sit in a DEV project without any trouble.
 
-## Look at what is actually wrong
+## List the Critical findings
 
 ```terminal:execute
 command: jq -r '.vulnerabilities[] | select(.severity=="Critical") | "\(.id)  \(.package) \(.installedVersion) → \(.FixedVersion // "no fix")"' ~/exercises/scan-report-flagged.json
@@ -74,12 +74,12 @@ retries: .INF
 delay: 3
 ```
 
-Each line is a decision:
+For each finding, decide:
 
 - **A fixed version exists:** rebuild on an updated base, or bump the dependency. That covers
   most findings most of the time, which is why `fixable` is the number to read first.
-- **No fix available:** then it is a conversation. Can the component be removed or replaced,
-  or is this the **security exception** path?
+- **No fix available:** find out whether the component can be removed or replaced, or request
+  a **security exception**.
 
 {{< warning >}}
 **⚠️ Watch out:** a scan result belongs to a **digest**, not to a tag. Re-pushing a different
@@ -87,8 +87,7 @@ image under the same tag does not inherit the old verdict, which is the other re
 tags are refused.
 {{< /warning >}}
 
-## The habit worth forming
+## Check scans early
 
-Read the summary **before** you need it. Otherwise an image that fails the gate is
-discovered at promotion time, which is a late moment to learn that your base image is two
-years old.
+Read the scan summary while you are still in DEV. Otherwise a failing image is only found at
+promotion time, for example because the base image is outdated.

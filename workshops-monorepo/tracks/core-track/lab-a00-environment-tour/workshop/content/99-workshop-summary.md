@@ -2,9 +2,7 @@
 title: Summary
 ---
 
-You've toured the whole {{< param product_name >}} lab environment. You now know your way
-around the dashboard, the two terminal panes, the editor, the Console tab, and the
-feedback form — everything the real labs use.
+You've toured the {{< param product_name >}} lab environment that every later lab uses.
 
 ## What You Did
 
@@ -47,5 +45,5 @@ toured in the **Console track**.
 
 ## Next Steps
 
-You're ready. Continue with **What is DCS?**, the first concept lab, where you'll learn
-what the {{< param product_short >}} platform actually is before you deploy your first app.
+Continue with **What is DCS?**, the first concept lab, which explains what the
+{{< param product_short >}} platform is before you deploy your first app.

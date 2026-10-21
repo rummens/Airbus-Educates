@@ -91,8 +91,9 @@ retries: .INF
 delay: 2
 ```
 
-The note is **gone**. The new Pod started from the clean image — everything the old
-container wrote to its filesystem went with it. That's the default: **no Pod, no data.**
+The note is **gone**. The new Pod started from the clean image, and everything the old
+container wrote to its filesystem was deleted with it. By default, data written inside a
+container is lost when its Pod is replaced.
 
 For anything that must outlive a Pod — a database, uploads, state — you need storage that
 is *not* part of the container. That's what you'll request next.

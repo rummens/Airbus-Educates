@@ -5,7 +5,7 @@ title: The Devfile
 A [devfile](https://devfile.io/docs/2.2.0/what-is-a-devfile) is to a Dev Spaces
 workspace what a Deployment manifest is to a running app: a single YAML document
 that fully describes the desired environment, so anyone (or any automation) can
-recreate the same workspace from it. Open the one for `hello-dcs`:
+recreate the same workspace from it.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -14,16 +14,17 @@ name: Slides
 url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/devfile
 ```
 
+Open the devfile for `hello-dcs`:
+
 ```editor:open-file
 file: ~/exercises/devfile.yaml
 ```
 
-## The three things every devfile answers
+## The three sections
 
-A devfile always answers the same three questions. `hello-dcs`'s does it in three
-sections:
+A devfile has three main sections.
 
-**Where do I develop?** — `components`. Highlight the dev container:
+**`components`** say where you develop. Highlight the dev container:
 
 ```editor:select-matching-text
 file: ~/exercises/devfile.yaml
@@ -36,17 +37,16 @@ text: |2
 
 This is a **Universal Developer Image (UDI)**, a general-purpose toolchain
 container (compilers, `git`, common language runtimes) that Red Hat ships for Dev
-Spaces. On DCS it is mirrored into Harbor like every other image: notice the
-component's `image` is `${DCS_REGISTRY}/devspaces/udi:latest`, never a public
-registry, the exact same `${DCS_REGISTRY}` placeholder every prior lab's
-manifests have used, resolved from Harbor at workspace start, air-gapped end to
-end.
+Spaces. On DCS it is mirrored into Harbor like every other image. The component's
+`image` is `${DCS_REGISTRY}/devspaces/udi:latest`, the same placeholder the other
+labs' manifests use, so no public registry is involved. The placeholder is filled
+in with `envsubst` before the file is used, as in every other lab.
 
-**What do I develop?** — `projects`. This is the git source Dev Spaces clones into
-the workspace when it starts, so your editor opens with the actual `hello-dcs`
-code already checked out, not a blank container.
+**`projects`** say what you develop: the git source Dev Spaces clones into the
+workspace when it starts, so your editor opens with the `hello-dcs` code already
+checked out.
 
-**How do I run it?** — `commands`. Highlight the run command:
+**`commands`** say how to run it. Highlight the run command:
 
 ```editor:select-matching-text
 file: ~/exercises/devfile.yaml
@@ -59,16 +59,16 @@ text: |2
         commandLine: python3 server.py
 ```
 
-`group.kind: run` marks this as the workspace's default "run" action, it shows up
-as a one-click command in the Dev Spaces IDE, so you never have to remember the
-exact invocation. It is the same `python3 server.py` entrypoint the `hello-dcs`
-container image runs in production, you are not running a different app, you are
-running the same app's source, live.
+The command's `group.kind: run`, below the highlighted lines, marks it as the
+workspace's default run action. The Dev Spaces IDE shows it as a one-click command,
+so you do not have to remember the invocation. It runs `python3 server.py`, the same
+entrypoint the `hello-dcs` container image runs in production, against the source in
+the workspace.
 
 ## See the placeholder resolve
 
-The raw file has `${DCS_REGISTRY}` literally in it, that is deliberate, so the
-devfile never hardcodes a registry:
+The raw file contains the literal text `${DCS_REGISTRY}`, so the devfile never
+hardcodes a registry:
 
 ```terminal:execute
 command: grep 'image:' ~/exercises/devfile.yaml
@@ -80,10 +80,11 @@ title: Verify devfile.yaml is present and Harbor-parameterized
 timeout: 5
 ```
 
-And that it is a devfile rather than a file that merely mentions the right words:
+Check that it has the structure of a devfile, with a schema version, components and commands:
 
 ```terminal:execute
-command: python3 -c "import sys,re; raw=open('/home/eduk8s/exercises/devfile.yaml').read(); print('schemaVersion:', re.search(r'schemaVersion:\\s*(\\S+)', raw).group(1)); print('components:', len(re.findall(r'^\\s+- name:', raw, re.M))); print('commands:', len(re.findall(r'^\\s+- id:', raw, re.M)))"
+command: |-
+  yq '{"schemaVersion": .schemaVersion, "components": (.components | length), "commands": (.commands | length)}' ~/exercises/devfile.yaml
 ```
 
 ```examiner:execute-test
@@ -100,9 +101,9 @@ Now resolve it the way the session does, substituting the real registry host:
 command: envsubst < ~/exercises/devfile.yaml | grep 'image:'
 ```
 
-The before/after tells the whole story: the file you will hand to Dev Spaces never
-names a specific registry, but at workspace-creation time it resolves to your
-platform's real Harbor path, no rebuild, no edit, on any DCS cluster.
+The file you hand to Dev Spaces never names a registry. Once `envsubst` fills in the
+placeholder, the image points to your platform's Harbor, so the same devfile works on
+any DCS cluster without editing.
 
 ```examiner:execute-test
 name: verify-devfile
@@ -110,4 +111,4 @@ title: Verify devfile.yaml is present and Harbor-parameterized
 timeout: 5
 ```
 
-With the devfile understood, it is time to use it.
+Next, launch a workspace from it.

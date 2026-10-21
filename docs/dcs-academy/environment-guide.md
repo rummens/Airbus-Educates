@@ -1,7 +1,7 @@
 # DCS Academy — Your Lab Environment
 
-First time in a DCS Academy lab? This page explains everything you see on screen, so you
-can focus on learning rather than figuring out the tools.
+First time in a DCS Academy lab? This page explains what you see on screen and how to
+use each part.
 
 Each lab runs entirely in your **browser** — nothing to install.
 
@@ -69,7 +69,7 @@ terminal. _(screenshot: console showing a deployment)_
 ### Slides
 
 Where a lab includes presentation slides (concept explanations, diagrams) alongside the
-hands-on steps. Not every lab has slides. _(screenshot: slides tab)_
+lab steps. Not every lab has slides. _(screenshot: slides tab)_
 
 ## Tips
 
@@ -77,8 +77,8 @@ hands-on steps. Not every lab has slides. _(screenshot: slides tab)_
   progress on purpose.
 - **Watch which tab is visible.** Running a command switches you to the Terminal; if a
   step told you to look at the Console or a web app, switch back to that tab afterwards.
-- **Take your time.** Sessions have a generous time limit; read the *why*, not just the
-  *what*.
+- **Take your time.** Sessions run longer than the lab needs, so read the explanations
+  as well as running the commands.
 - **Something stuck?** Re-read the last expected output, check the Terminal tab is
   visible, and re-run the action. Diagnose/challenge steps include hints.
 

@@ -1,6 +1,6 @@
 # Stateful Workloads
 
-**A Deployment's replicas are interchangeable. Some workloads are not.**
+**Some workloads need each replica to keep its own name and data.**
 
 A database replica, a queue broker or a cache with its own data on disk needs the same name
 and the same volume back after a restart. That is what a **StatefulSet** provides.
@@ -15,8 +15,8 @@ same data come back.
 Last, scaling. Scale up and a new disk is provisioned; scale down and the disk is
 deliberately **kept**.
 
-> **⚠️ Watch out:** scaling down does not delete volumes. That is deliberate, and it is also how
-> a storage quota fills up quietly.
+> **⚠️ Watch out:** scaling down does not delete volumes. That is deliberate, and the kept
+> volumes count against your storage quota until someone deletes them.
 
 - **Track:** Build & Run
 - **Audience:** Intermediate

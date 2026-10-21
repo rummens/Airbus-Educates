@@ -42,7 +42,7 @@ commands run with `oc`.
 
 ## Time and Difficulty
 
-- **Estimated time:** 28 minutes
+- **Estimated time:** 25 minutes
 - **Difficulty:** Advanced
 
 ## Further Reading

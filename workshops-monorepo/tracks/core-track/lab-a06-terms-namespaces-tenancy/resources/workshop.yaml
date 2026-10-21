@@ -13,7 +13,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   title: "Terms — Namespaces & Tenancy"
-  description: Name the DCS terms you keep hearing — Namespace, Tenant, and the DEV/PROD namespace types — and see namespace isolation for real by deploying the same app into two namespaces at once.
+  description: Name the DCS terms you keep hearing — Namespace, Tenant, and the DEV/PROD namespace types — and test namespace isolation by deploying the same app into two namespaces at once.
   duration: 15m
   difficulty: beginner
   labels:

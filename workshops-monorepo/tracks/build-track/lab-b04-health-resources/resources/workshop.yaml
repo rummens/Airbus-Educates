@@ -12,7 +12,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: gauge
     academy.dcs/details: |
-      **One replica with no probes and no resource numbers is a demo, not a service.**
+      **Size the sample app's requests and limits against your namespace quota, then add probes.**
 
       You scale the sample app to four replicas and read what that costs against your namespace
       budget. Then you apply a deliberately oversized manifest, watch the **quota** reject it, and

@@ -27,8 +27,8 @@ A [**Job**](https://kubernetes.io/docs/concepts/workloads/controllers/job/) runs
 expects it to **end**. Exit 0 and the Job is `Complete`; fail and it retries up to
 `backoffLimit`, then gives up and reports `Failed`.
 
-Giving up is the useful part. A migration that cannot work will not work on the fortieth
-attempt either, and a Job that stops says so.
+Stopping is useful. A migration that cannot work fails on every attempt, and a Job that stops
+reports `Failed` so someone notices.
 
 ## Until it is done, again and again: a CronJob
 
@@ -46,11 +46,11 @@ Both of these live in the **same Pod** as your app and share its network and vol
   proxy, a metrics exporter.
 
 On current Kubernetes a **native sidecar is declared as an init container**, with one extra
-line, `restartPolicy: Always`. That field is the whole difference between "finish first" and
-"run alongside".
+line, `restartPolicy: Always`. Without that field the container must finish first; with it,
+the container runs alongside the app.
 
 {{< note >}}
-**📌 Why declare a sidecar as an init container at all?** Because init containers have
+**📌 Sidecars are declared as init containers for ordering.** Init containers have
 guaranteed ordering. A sidecar declared this way is **started before** the app container and
 **stopped after** it, which is what a log shipper or proxy needs. An ordinary container in the
 `containers:` list gets neither guarantee.

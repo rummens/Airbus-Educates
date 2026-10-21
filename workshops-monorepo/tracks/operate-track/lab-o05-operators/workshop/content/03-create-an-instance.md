@@ -22,52 +22,44 @@ storage.
 file: ~/exercises/sample-cr.yaml
 ```
 
-Three fields matter, and they are all things **you** control, nothing here touches how
-the Operator itself works:
+Two fields matter, and both are things **you** control; neither changes how the Operator
+itself works:
 
 - **`spec.instances`** — how many copies of PostgreSQL you want. `1` is enough to see
   reconciliation happen; a production database would use `3` for automatic failover, a
-  day-2 decision that is entirely yours to make.
-- **`spec.imageName`** — which PostgreSQL image the Operator runs your instances with,
-  resolved from the {{< param product_short >}} Harbor registry, never a public one.
+  day-2 decision that is yours to make.
 - **`spec.storage.size`** — how much disk this instance gets.
-
-Notice what is *not* here: nothing about how the Operator watches this object, how it
-elects a primary, or how it wires up the underlying Pods. That is the Operator's job, not
-yours, you declare the outcome, it handles the mechanism.
 
 ## Apply it
 
-Notice what the manifest does **not** contain: no image, no StatefulSet, no
-PersistentVolumeClaim, no Service, no probes, no failover logic.
-
-You declare **what** you want. The operator decides **how**.
+The manifest has no image, StatefulSet, PersistentVolumeClaim, Service, probes or failover
+logic. You declare what you want, and the operator decides how to build it.
 
 {{< note >}}
 **📌 There is no `imageName` here on purpose.** On {{< param product_short >}} the platform
 configures the operator with the operand image it is allowed to run, from the
-{{< param product_short >}} registry. Which PostgreSQL build runs is not the tenant's
-decision, that is "the platform owns the operator", in one field.
+{{< param product_short >}} registry. Which PostgreSQL build runs is decided by the
+platform, because the platform owns the operator.
 {{< /note >}}
 
 {{< warning >}}
 **⚠️ In this training session the database will not finish starting.** You will see the
-operator create everything, volume claim, Services, secrets, Pods, and then the PostgreSQL
+operator create the volume claim, Services, secrets and Pods, and then the PostgreSQL
 process fail with `Permission denied`.
 
-That is the Academy's own environment, not the operator: a training namespace runs under a
+The cause is the Academy's environment, not the operator: a training namespace runs under a
 stricter security policy than a real tenant namespace, and never assigns the container a UID
-to run as. On {{< param product_short >}} the same four lines produce a running database.
+to run as. On {{< param product_short >}} the same manifest produces a running database.
 
-Everything this lab is about, what you declared, what the operator built from it, and who
-owns which half, is visible regardless.
+You can still see what you declared, what the operator built from it, and who owns which
+part.
 {{< /warning >}}
 
 {{< note >}}
 **📌 Why `-n $DB_NS`.** The database goes in a namespace next to your session's, not in the
 session namespace itself. A training session runs under the workshop's own security policy,
-and the operand the operator starts cannot execute there. It also keeps the operator's objects together in one place, which is where a real tenant
-would put a database anyway.
+and the operand the operator starts cannot execute there. A separate namespace also keeps
+the operator's objects together, which is where a real tenant would put a database anyway.
 {{< /note >}}
 
 ```terminal:execute
@@ -82,7 +74,7 @@ timeout: 10
 
 ## Before: just created, not yet reconciled
 
-Look at it immediately, the object exists, but the Operator has not had time to act on
+Look at it immediately. The object exists, but the Operator has not had time to act on
 it yet:
 
 ```terminal:execute
@@ -95,9 +87,9 @@ title: Verify the CR exists (before reconciliation)
 timeout: 10
 ```
 
-The `STATUS` column is blank or shows an early transitional message, the CR is
-registered, but nothing has been provisioned for it yet. That gap between "exists" and
-"actually running" is exactly what the reconciliation loop from page 01 closes.
+The `STATUS` column is blank or shows an early transitional message. The CR is
+registered, but nothing has been provisioned for it yet. The reconciliation loop from page 01
+closes the gap between "exists" and "running".
 
 ## Watch the Operator provision it
 
@@ -110,11 +102,10 @@ session: 2
 ```
 
 {{< note >}}
-**📌 Note:** Provisioning storage and starting PostgreSQL for the first time takes a minute or two —
-this is not stuck, the Operator is working through its own reconciliation steps
-(allocate storage, start the container, initialise the database, elect a primary). The
-check below polls until it is done, so there is nothing to do but wait and watch the lower
-pane.
+**📌 Note:** Provisioning storage and starting PostgreSQL for the first time takes a minute or two.
+This is not stuck: the Operator is working through its reconciliation steps (allocate
+storage, start the container, initialise the database, elect a primary). The check below
+polls until a Pod is scheduled, so wait and watch the lower pane.
 {{< /note >}}
 
 ```examiner:execute-test
@@ -125,7 +116,7 @@ retries: .INF
 delay: 3
 ```
 
-Once a Pod appears and settles into `Running`, stop the watch, it is served its purpose:
+Once a Pod appears, stop the watch:
 
 ```terminal:interrupt
 session: 2
@@ -141,13 +132,13 @@ command: oc get clusters.postgresql.cnpg.io,pods,pvc,svc,secret -n $DB_NS
 
 ```examiner:execute-test
 name: verify-cr-healthy
-title: Verify the operator created the objects behind your four lines
+title: Verify the operator created the objects behind your three lines of spec
 timeout: 150
 retries: .INF
 delay: 5
 ```
 
-You wrote **four lines of spec**. The operator produced a volume claim, Services, secrets and
+You wrote **three lines of spec**. The operator produced a volume claim, Services, secrets and
 Pods, each one an object you would otherwise have had to write, name, size and wire together
 yourself.
 
@@ -165,10 +156,6 @@ retries: .INF
 delay: 5
 ```
 
-On a real tenant namespace that settles at `Cluster in healthy state`. Here it stops short,
-for the environment reason above, but the loop from page 01 has already played out in full:
-you declared a `Cluster`, the operator noticed, and it went to work making reality match.
-
-Same field, two ways of looking at it, a table column, and a raw value. Either way,
-that is the whole loop from page 01, played out for real: you declared a `Cluster`, the
-Operator noticed, and it kept working until actual state matched desired state.
+On a real tenant namespace the phase settles at `Cluster in healthy state`. Here it stops
+short, for the reason in the warning above, but the loop from page 01 has still run: you
+declared a `Cluster`, and the operator created the objects to match it.

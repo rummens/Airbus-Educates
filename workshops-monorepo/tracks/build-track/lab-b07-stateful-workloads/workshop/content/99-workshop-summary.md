@@ -2,7 +2,8 @@
 title: Summary
 ---
 
-You built a workload whose replicas have names, disks and an order of their own.
+You built a StatefulSet: each replica has a stable name and its own volume, and the replicas
+start in order.
 
 Open the closing slide (📊 **Slides** tab):
 
@@ -38,7 +39,7 @@ addressing `hello-dcs-0.hello-dcs...` keep reaching the same member.
 2. You scale a StatefulSet from 3 to 2. What happened to replica 2's data?
 
 {{< note >}}
-**❓ Answer:** nothing — the claim `data-hello-dcs-2` is still there and still `Bound`. Scale
+**❓ Answer:** nothing. The claim `data-hello-dcs-2` is still there and still `Bound`. Scale
 back to 3 and the new `hello-dcs-2` re-attaches it. It also still counts against your storage
 quota until somebody deletes it deliberately.
 {{< /note >}}
@@ -47,7 +48,7 @@ quota until somebody deletes it deliberately.
 
 {{< note >}}
 **❓ Answer:** each new replica needs its **own volume provisioned** and must become Ready
-before the next ordinal is created. Ordering plus storage, instead of "start them all".
+before the next ordinal is created.
 {{< /note >}}
 
 4. Does using a StatefulSet make an app highly available?
@@ -60,6 +61,6 @@ Replication, leader election, failover and backups are the application's job —
 
 ## Next Steps
 
-Not every container should run forever. **Short-Lived & Helper Containers** covers the other
-shapes: **Jobs** and **CronJobs** that run to completion, **init containers** that must finish
+**Short-Lived & Helper Containers** covers containers that stop, or that run beside the app:
+**Jobs** and **CronJobs** that run to completion, **init containers** that must finish
 before the app starts, and **sidecars** that run beside it.

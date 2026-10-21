@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Requesting a Tenant & Namespace via ITSM
 
-Every namespace you have used so far was simply there. This lab shows where it comes from — and how to get your own quickly.
+So far your namespaces were created for you. This lab shows how to request your own.
 
 **The short version:** find your national myITSM portal, request a **Tenant**, request a **Namespace** if you need a second one. DCS provisions the rest automatically.
 
@@ -46,11 +46,11 @@ Names get a **random suffix** for uniqueness — use the name you get back.
 <!-- id: tenant-extras -->
 ## Request a Tenant — Billing & Export Control
 
-The rest of the tenant form. For most first-time requests, under a minute.
+The rest of the tenant form. Most first-time requests answer it in under a minute.
 
 - **Billing** (WBS project code, CC siglum, facts code, IWO) — only if recharging applies to you, i.e. medium and large requests. Otherwise leave it empty.
 - **Export control / ITAR** — declare whether you plan to put EC or ITAR data in.
-- DCS **can** host such data; if you answer yes, notify your **local Export Control team**. A notification duty, not a rejection.
+- DCS **can** host such data; if you answer yes, notify your **local Export Control team**. Answering yes does not get the request rejected.
 - **Further details** — free text for anything the form doesn't cover, or any field you were unsure about.
 - Then submit. Provisioning is **automated** — nobody builds your tenant by hand.
 
@@ -89,4 +89,4 @@ You can now onboard yourself onto DCS end to end and tell requests from self-ser
 - **Tenant first**, then namespaces; the Tenant brings one default namespace.
 - **Basic** unless you already know your numbers.
 
-The **Console track** does the same work in the OpenShift web console; the **Developer track** covers **RBAC, Tenancy & Namespaces** and **DEV vs PROD Namespaces & Policies**.
+The **Console track** does the same work in the OpenShift web console. The **Build & Run** track covers building and running your own image, and the **Operate & Observe** track covers **RBAC & Tenancy** and **DEV vs PROD Namespaces**.

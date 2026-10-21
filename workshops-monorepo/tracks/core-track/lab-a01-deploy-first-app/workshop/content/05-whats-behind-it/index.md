@@ -7,8 +7,7 @@ You did all of that with **imperative** commands.
 Underneath, {{< param product_short >}} turned every one of them into a single
 **desired-state document**.
 
-This page shows you that document. It is the bridge to every later lab, where you write
-these documents yourself.
+This page shows you that document. In every later lab you write these documents yourself.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -19,12 +18,13 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/be
 
 {{< note >}}
 **📌 Two ways to work: imperative and declarative.** These two words come up throughout the
-course, so it is worth defining them plainly:
+course:
 
 - **Imperative** means you give step-by-step commands — "create this", "set that". Each
   command does one thing, once. `oc create deployment` and `oc set env` are imperative.
 - **Declarative** means you write down the end result you want — the *desired state* — in a
-  file, and the platform makes reality match it and keeps it that way. The YAML you are
+  file, and the platform creates or changes objects until the cluster matches it, and keeps
+  it that way. The YAML you are
   about to see is declarative.
 
 You just worked imperatively. From the **Configure & Troubleshoot Your App** lab on, you work declaratively.
@@ -51,11 +51,12 @@ file: ~/exercises/deployment.yaml
 Three parts are worth finding:
 
 - **`spec.replicas`** — how many copies you want (`1`). This is the number DCS keeps
-  running; the "self-healing" you saw is DCS making reality match it.
+  running: if a Pod disappears, DCS starts a replacement (self-healing).
 - **`spec.selector.matchLabels`** — how the Deployment *finds* the Pods it owns
   (`app: hello-dcs`).
 - **`spec.template.metadata.labels`** — the labels *stamped on* each Pod it creates. The
-  selector and the template labels match — that's the glue.
+  selector and the template labels match, which is how the Deployment knows which Pods
+  are its own.
 
 ## The ownership chain
 

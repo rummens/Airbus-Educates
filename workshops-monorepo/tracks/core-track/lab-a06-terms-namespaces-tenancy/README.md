@@ -1,6 +1,6 @@
 # Terms — Namespaces & Tenancy
 
-**The words you keep hearing — Namespace, Tenant, DEV/PROD — and namespace isolation shown for real, not just described.**
+**The words you keep hearing (Namespace, Tenant, DEV/PROD), and a namespace-isolation demo you run yourself.**
 
 You have been deploying into a **namespace** since your first lab, without a name for it.
 
@@ -8,8 +8,7 @@ This lab names it, then makes **isolation** concrete: you deploy the *same* app 
 namespaces at once, and watch identical names coexist while actions stay contained.
 
 Then it places the namespace in the DCS **Tenant → Namespaces** model and names the
-**DEV**/**PROD** namespace types — the vocabulary the Developer track builds its deep model
-on.
+**DEV**/**PROD** namespace types. The **Operate & Observe** track builds on these terms.
 
 - **Track:** Core / Fundamentals
 - **Audience:** Beginner — comfortable deploying with `oc`
@@ -30,5 +29,3 @@ on.
 1. **Deploy** the same `hello` Deployment into two namespaces from one manifest.
 2. **Prove** the names do not clash, and that a change in one does not touch the other.
 3. **Map** namespaces onto tenants and namespace types.
-
-Vocabulary that finally has evidence behind it.

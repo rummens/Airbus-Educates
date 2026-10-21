@@ -1,5 +1,5 @@
 ---
-title: Where Logs Actually Live
+title: Where Logs Live
 ---
 
 A container has no log file to configure. It writes to **stdout** and **stderr**, and the
@@ -30,7 +30,7 @@ Two consequences follow, and they explain most log surprises:
 
 {{< note >}}
 **💡 Tip:** do not write logs to a file inside the container. Nothing collects it, it fills
-the container's disk, and it is gone with the Pod. Standard output is the interface.
+the container's disk, and it is gone with the Pod. Write to standard output instead.
 {{< /note >}}
 
 ## Deploy something that logs
@@ -47,7 +47,7 @@ retries: .INF
 delay: 3
 ```
 
-## Give it something to say
+## Generate some log lines
 
 ```terminal:execute
 command: |-

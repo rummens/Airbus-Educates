@@ -2,9 +2,9 @@
 title: The DCS Ownership Model
 ---
 
-You just declared a PostgreSQL database without provisioning a single Pod, Service or
-Secret by hand. That is not the same as a managed database-as-a-service, and the difference is
-the most important idea in this lab.
+You just declared a PostgreSQL database without creating a Pod, Service or Secret by hand.
+This is not a managed database-as-a-service, and the difference matters when something
+breaks.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -13,11 +13,11 @@ name: Slides
 url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ownership
 ```
 
-## Operators, not aaS
+## Operators, not managed services
 
 {{< param product_short >}} offers platform services, like the CloudNativePG database
 you just used, as [**Operators**]({{< param dcs_docs_base_url >}}/concepts/operators),
-not as managed/aaS. The split is exact:
+not as managed services. The split is:
 
 - **The platform owns the Operator**: installing it, upgrading it, and the CRD versions it
   brings. That was already done when you found the CRDs on page 02.
@@ -61,7 +61,7 @@ command: oc get cluster.postgresql.cnpg.io sample-db -n $DB_NS
 
 ```examiner:execute-test
 name: verify-cr-healthy
-title: Verify sample-db is still healthy
+title: Verify the operator still manages sample-db
 timeout: 10
 ```
 

@@ -2,7 +2,7 @@
 title: What Is OpenShift Dev Spaces
 ---
 
-Every lab so far has run your `oc` commands from the **Educates terminal**, which is a
+In this course you run `oc` commands in the **Educates terminal**, which is a
 shell rather than a development environment. [OpenShift Dev
 Spaces](https://developers.redhat.com/products/openshift-dev-spaces/overview), built on the
 upstream [Eclipse Che](https://eclipse.dev/che/docs/stable/overview/introduction-to-eclipse-che/)
@@ -26,7 +26,7 @@ Dev Spaces removes that variance. Every workspace starts from the same image, ha
 access to the cluster it develops for, and never needs an outbound connection to fetch a
 plugin or a dependency.
 
-Who provides it matters too. Dev Spaces is
+Dev Spaces is
 [operator](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)-installed and run
 by the DCS platform team. You do not install it, upgrade it or manage its lifecycle, in the
 same way that you do not manage the cluster it runs on. You open the tab, launch a workspace
@@ -36,13 +36,13 @@ for how your tenant gets access.
 
 ![A laptop IDE compared with an in-cluster Dev Spaces workspace](dev-spaces-architecture.svg)
 
-## What a workspace actually is
+## What a workspace is
 
-A **workspace** is a set of containers running in your namespace, one of them is
-your dev environment (a full toolchain image), with your project's source code
+A **workspace** is a set of containers running in your namespace. One of them is
+your dev environment (a full toolchain image), and your project's source code is
 cloned into a shared volume so every container in the workspace can see it. You
-reach it entirely through the browser: no SSH key, no VPN, no local `git clone`. When you
-close the tab the workspace keeps running, or stops, depending on configuration. The code
+reach it through the browser, without an SSH key, a VPN or a local `git clone`. When you
+close the tab the workspace keeps running or stops, depending on configuration. The code
 lives in the cluster rather than on your machine.
 
 ## What defines a workspace

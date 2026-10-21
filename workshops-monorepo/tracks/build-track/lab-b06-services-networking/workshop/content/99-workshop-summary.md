@@ -2,7 +2,7 @@
 title: Summary
 ---
 
-"Expose it" is now five specific decisions.
+You have used all five Service types and seen which ones work on {{< param product_short >}}.
 
 Open the closing slide (📊 **Slides** tab):
 
@@ -45,19 +45,19 @@ object they want is a **Route** in a PROD-type namespace.
 {{< note >}}
 **❓ Answer:** it only creates a **name**. {{< param product_short >}} is air-gapped and egress
 is deny-by-default, so the destination still has to be allowed through the **managed egress
-proxy** — a request, not a manifest.
+proxy**, which you request from the platform team.
 {{< /note >}}
 
 4. What does a headless Service give a StatefulSet that a ClusterIP Service cannot?
 
 {{< note >}}
-**❓ Answer:** a **stable per-Pod name** — `db-0.<service>.<namespace>.svc.cluster.local` —
-because DNS answers per Pod rather than with one shared virtual IP. That is how a client
+**❓ Answer:** a **stable per-Pod name**, such as
+`db-0.<service>.<namespace>.svc.cluster.local`, because DNS answers per Pod rather than with one shared virtual IP. That is how a client
 addresses one specific replica.
 {{< /note >}}
 
 ## Next Steps
 
-You now have a name per Pod that survives a restart. **Stateful Workloads** uses exactly that:
-a **StatefulSet** with its own headless Service, a **PersistentVolumeClaim per replica**, and
-an ordered rollout — the pieces an app needs when its replicas are not interchangeable.
+You now have a name per Pod that survives a restart. **Stateful Workloads** builds on it: a
+**StatefulSet** with its own headless Service, a **PersistentVolumeClaim per replica**, and an
+ordered rollout. An app needs these when its replicas are not interchangeable.

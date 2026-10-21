@@ -19,7 +19,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   title: Your Workshop Environment
-  description: A quick tour of the DCS Academy lab environment — the split terminals, the code editor, the Kubernetes Dashboard console tab, and the feedback form — so the tools never get in the way of the learning.
+  description: A short tour of the DCS Academy lab environment, covering the split terminals, the code editor, the Kubernetes Dashboard console tab and the feedback form.
   duration: 10m
   difficulty: beginner
   labels:

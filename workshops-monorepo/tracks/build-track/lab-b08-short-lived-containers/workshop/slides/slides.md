@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Short-Lived & Helper Containers
 
-Not every container should run forever. A migration has to finish, a report runs nightly, a setup step must complete first, a log shipper lives alongside.
+Some containers are meant to stop or to run beside the app: a migration that must finish, a nightly report, a setup step that runs first, a log shipper.
 
 **In this lab:** Jobs · a Job that fails · CronJobs · init containers and sidecars.
 
@@ -37,7 +37,7 @@ oc logs job/db-migrate
 - `restartPolicy: Never` — each attempt is a new Pod, so each attempt keeps its logs.
 - `backoffLimit` — how many retries before the Job is marked Failed.
 - `ttlSecondsAfterFinished` — the finished Job deletes itself, so they do not pile up.
-- The Pod stays `Completed` — it is the record of the work, not litter.
+- The Pod stays `Completed` so you can read its logs.
 - `completions` + `parallelism` turn a Job into a small batch worker.
 
 ---
@@ -45,7 +45,7 @@ oc logs job/db-migrate
 <!-- id: fails -->
 ## When a Job fails
 
-A crash-looping Deployment never reaches a verdict. A Job does.
+A Deployment keeps restarting a failing container, but a Job stops and reports `Failed`.
 
 ```
 oc wait --for=condition=failed job/db-migrate-broken --timeout=180s
@@ -54,7 +54,7 @@ oc describe job db-migrate-broken           # BackoffLimitExceeded
 ```
 
 - Both attempts survive, so the first failure is not overwritten by the retry.
-- The log says `cannot reach the database` — the actual reason.
+- The log gives the reason: `cannot reach the database`.
 - Giving up means somebody gets a clear failure instead of a Pod restarting all night.
 - `backoffLimit` counts **retries**, and the delay between them doubles.
 
@@ -70,17 +70,17 @@ oc create job report-now --from=cronjob/nightly-report
 oc patch cronjob nightly-report -p '{"spec":{"suspend":true}}' --type=merge
 ```
 
-- `--from=cronjob/…` copies the real `jobTemplate`, so you test what will actually run.
+- `--from=cronjob/…` copies the real `jobTemplate`, so you test the template that will run.
 - `concurrencyPolicy: Forbid` — skip a run if the last one is still going.
 - History limits keep finished Jobs around to inspect.
-- `suspend` pauses without deleting — but **missed runs are not caught up**.
+- `suspend` pauses without deleting, but **missed runs are not caught up**.
 
 ---
 
 <!-- id: helpers -->
 ## Helpers in the same Pod
 
-Both are declared under `initContainers`. One line separates them.
+Both are declared under `initContainers`; only `restartPolicy: Always` differs.
 
 ```
 initContainers:
@@ -90,7 +90,7 @@ initContainers:
 ```
 
 - **Init** — the app cannot start correctly without this first. Fails → the app never starts.
-- **Sidecar** — the app neither knows nor cares. Logs, metrics, proxying.
+- **Sidecar** — work the app does not depend on, such as logs, metrics, proxying.
 - Declared as init containers because that gives **ordering**: started before the app, stopped after it.
 - They share a volume with the app: the app reads a file from a container that already exited.
 - Every container draws its own requests and limits from the namespace budget.
@@ -102,6 +102,6 @@ initContainers:
 
 You can now run work that ends, schedule it, and put helpers beside your app.
 
-**Next lab, Resilience & Scheduling:** PodDisruptionBudgets that survive a node drain, graceful shutdown when the platform sends SIGTERM, and spreading replicas so one node's failure is not your outage.
+**Next lab, Resilience & Scheduling:** PodDisruptionBudgets that limit what a node drain may evict, graceful shutdown when the platform sends SIGTERM, and spreading replicas so losing one node does not take the app down.
 
 Digital Container Service · DCS Academy

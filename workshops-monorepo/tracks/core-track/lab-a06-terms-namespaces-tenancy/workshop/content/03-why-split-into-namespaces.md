@@ -2,8 +2,8 @@
 title: Why Split Into Namespaces?
 ---
 
-You just saw isolation work. So why would a real tenant run more than one namespace? Here
-are four common reasons, each one something you saw in the demo.
+Tenants run more than one namespace for four common reasons, each one something you saw
+in the demo.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -15,31 +15,30 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/wh
 ## Separate instances of one app
 
 The most common reason: **DEV / QA / PROD** copies of the same service, each in its own
-namespace, each with the same object names, each on its own lifecycle. This is the same as
+namespace with the same object names and its own lifecycle. This is the same as
 the `hello`-in-two-namespaces demo you ran, applied to a real delivery pipeline.
 
 {{< note >}}
-**📌 Note:** DEV and PROD are not just naming conventions on {{< param product_short >}} — they're
-namespace **types** with different rules. You'll see how they're enforced in the
-Developer track (**DEV vs PROD Namespaces & Policies**).
+**📌 Note:** on {{< param product_short >}}, DEV and PROD are namespace **types** with
+different rules. The **DEV vs PROD Namespaces** lab (Operate & Observe track) shows how
+they are enforced.
 {{< /note >}}
 
 ## Team and blast-radius isolation
 
 A mistake in one namespace — a bad rollout, a workload consuming too much, an accidental
-delete — **cannot reach another**. Scaling `app-a` to zero did not touch `app-b`. Each
-team's mistakes stay within their own namespace.
+delete — **cannot reach another**. Scaling `app-a` to zero did not touch `app-b`.
 
 ## Independent quotas and RBAC
 
 Each namespace gets its **own** resource budget and its **own** access rules. One team's
-namespace can be generous and open; another's can be locked down and small — independently.
-(The deep dive on access is the Developer-track lab **RBAC, Tenancy & Namespaces**.)
+namespace can have a large quota and wide access while another's is small and locked down.
+(The **RBAC & Tenancy** lab in the Operate & Observe track covers access in full.)
 
 ## Naming freedom
 
-The absence of a name clash is the point. Two teams can both call their app `hello`,
-`api`, or `db` without coordinating — because the namespace keeps the names apart.
+Because namespaces keep names apart, two teams can both call their app `hello`, `api` or
+`db` without coordinating.
 
 ## Check your understanding
 

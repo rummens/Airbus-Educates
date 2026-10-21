@@ -86,8 +86,8 @@ spec:
       title: Read the details block
       description: >-
         The ring counts pods that are ready. Beside it are the update strategy and the
-        selector that decides which pods belong to this Deployment. None of this says
-        anything yet about probes or resource numbers, which is the point of the next step.
+        selector that decides which pods belong to this Deployment. Probes and resource
+        numbers are not shown here. The next step shows where to find them.
       target: { type: consoleElement, id: detailsSection, value: Deployment details }
       complete:
         operation: { type: none }
@@ -109,7 +109,7 @@ spec:
         gets traffic. livenessProbe decides whether the kubelet restarts it. resources
         holds requests, what the scheduler reserves for the pod, and limits, the ceiling
         it may not exceed. These four blocks are what you wrote by hand in the terminal
-        lab; reading them back here is how you check what is actually deployed.
+        lab; reading them back here shows what is deployed.
       target: { type: consoleElement, id: pageContent }
       complete:
         operation: { type: none }
@@ -128,7 +128,7 @@ spec:
       title: Open Pods
       description: >-
         Back to the menu, this time for every pod in the namespace. Your namespace has one
-        more pod than this Deployment owns, and it is the interesting one.
+        more pod than this Deployment owns: lab-probe, which is not Ready.
       target: { type: consoleElement, id: navigationLink, value: Pods }
       complete:
         operation: { type: activateTarget }
@@ -228,8 +228,8 @@ spec:
         when its manifest asks for nothing, which is why an unsized workload still spends
         quota, and why four defaulted pods can fill a namespace that would have held twenty
         sized ones. Min and Max are the range a manifest may ask for: below Min or above
-        Max the object is rejected. Between the two tables you have the whole budget story,
-        one namespace ceiling and one per-container default.
+        Max the object is rejected. The ResourceQuota sets the namespace ceiling, and the
+        LimitRange sets the per-container defaults.
       target: { type: consoleElement, id: detailsSection, value: Limits }
       complete:
         operation: { type: none }

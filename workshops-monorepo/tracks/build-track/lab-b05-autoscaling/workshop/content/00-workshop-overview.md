@@ -2,11 +2,10 @@
 title: "Autoscaling"
 ---
 
-Setting the replica count by hand only works while somebody is watching.
-
-A [**HorizontalPodAutoscaler**](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
-(HPA) takes that decision over. It reads how hard your Pods are working, compares that with
-the `requests` you gave them, and changes the replica count to hold a target.
+If you set the replica count by hand, someone has to change it when the load changes. A
+[**HorizontalPodAutoscaler**](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
+(HPA) does that for you. It reads your Pods' CPU use, compares it with the `requests` you
+gave them, and changes the replica count to hold a target.
 
 In this lab you hand the replica count to an HPA on **{{< param product_name >}}**, drive
 the app under load from your own terminal, and watch it react.

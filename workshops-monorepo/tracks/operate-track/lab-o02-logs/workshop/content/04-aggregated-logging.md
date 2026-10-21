@@ -2,7 +2,8 @@
 title: When the Pod Is Gone
 ---
 
-`oc logs` reads a file on a node. Aggregation exists because incidents outlive nodes.
+`oc logs` reads a file on a node. You often investigate an incident after its Pod or node is
+gone, so the platform keeps a copy of every line centrally.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -17,17 +18,17 @@ On **{{< param product_name >}}** a **collector** runs on every node. It reads t
 files `oc logs` reads and ships each line, with labels attached, to a central **log store**,
 which on OpenShift is a **LokiStack**.
 
-Three things change the moment that exists:
+A central store changes three things:
 
 - **Logs outlive their Pod.** Last night's crash is still there this morning.
 - **You can search across workloads**, instead of one Pod at a time.
-- **Retention is a policy** rather than an accident of file rotation. Somebody decides how
-  long, and storage is paid for accordingly.
+- **Retention is set by a policy**, not by when the node rotates its files. Somebody decides
+  how long lines are kept, and storage is sized for it.
 
 {{< warning >}}
 **⚠️ Watch out:** this Academy session has no log store attached, so the queries below are
 not runnable here. They are written the way you would run them on a cluster that has one. The
-`oc logs` half of this lab is the part you practised for real.
+`oc logs` half of this lab is the part you ran yourself.
 {{< /warning >}}
 
 ## What a query looks like
@@ -39,7 +40,7 @@ The query language is **LogQL**, and its shape follows the metrics lab: pick ser
 {namespace="my-team-dev", app="hello-dcs"}
 ```
 
-Everything from that app in that namespace. Then narrow it:
+That selects every line from that app in that namespace. To narrow it:
 
 ```
 {namespace="my-team-dev", app="hello-dcs"} |= "FATAL"
@@ -61,13 +62,11 @@ to log lines instead of samples.
 ## The same boundary as metrics
 
 A log query is authorized per namespace, exactly like a metric query: you can read your own
-tenant's logs and not another's.
-
-That matters because logs are where secrets leak.
+tenant's logs and not another's. This matters because secrets often leak through logs.
 
 {{< warning >}}
-**⚠️ Never log a secret.** Not a token, not a password, not a full request body containing
-either. Anything your app prints is copied to a central store, kept for the retention period,
+**⚠️ Never log a secret.** That includes tokens, passwords and request bodies that contain
+them. Anything your app prints is copied to a central store, kept for the retention period,
 and readable by everyone entitled to your namespace's logs.
 {{< /warning >}}
 

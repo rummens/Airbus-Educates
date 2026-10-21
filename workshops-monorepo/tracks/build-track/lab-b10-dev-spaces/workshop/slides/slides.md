@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Dev Spaces
 
-*Optional.* The track used git as a build source. Dev Spaces uses it as an **in-cluster IDE** — a workspace on the cluster, defined by a file in your repo.
+*Optional.* The track used git as a build source. Dev Spaces uses it as an **in-cluster IDE**: a workspace on the cluster, defined by a file in your repo.
 
 **In this lab:** what Dev Spaces is · the devfile · launching a workspace · working inside one · where it fits.
 
@@ -16,10 +16,10 @@ Digital Container Service · DCS Academy
 
 A browser IDE running **on the cluster**, in your namespace, under the same rules as anything else you deploy.
 
-- The workspace is a **Pod**: same registry, same SCC, same quota.
+- The workspace is a **Pod**, with the same registry, SCC and quota as your other workloads.
 - Its definition lives **in the repository**, so every developer gets the same environment.
-- Nothing is installed on your laptop, and nothing depends on what your laptop has.
-- Operator-provided: the platform owns it, you own your workspace.
+- Nothing is installed on your laptop.
+- Operator-provided: the platform team runs Dev Spaces, and you manage your own workspaces.
 
 ![Dev Spaces runs the IDE and the app in the cluster, from a devfile in the repository](dev-spaces-architecture.svg)
 
@@ -28,7 +28,7 @@ A browser IDE running **on the cluster**, in your namespace, under the same rule
 <!-- id: devfile -->
 ## The devfile
 
-The environment as code, next to the code it builds.
+The devfile defines the workspace and lives in the same repository as the code.
 
 ```
 schemaVersion: 2.2.0
@@ -43,7 +43,7 @@ commands:
 
 - **components** — what you develop *in*. On DCS, an image from the platform registry.
 - **endpoints** — how you reach the app you are running, from the browser.
-- **commands** — build, run, test, as named actions rather than tribal knowledge.
+- **commands** — named build, run and test actions.
 - Air-gapped applies here too: no public registry, no public git host.
 
 ---
@@ -51,11 +51,11 @@ commands:
 <!-- id: launch -->
 ## Launching a workspace
 
-A URL, a repository, and the devfile decides the rest.
+You point Dev Spaces at a repository, and the devfile defines the rest.
 
 - The workspace starts as Pods in **your** namespace and counts against **your** quota.
 - Source is cloned in; endpoints become routes you can open.
-- Idle workspaces are stopped — they are compute, not a desk you keep.
+- Idle workspaces are stopped to free their compute.
 
 ![A devfile plus a repository produce a running workspace with endpoints](workspace-launch-flow.svg)
 
@@ -64,11 +64,11 @@ A URL, a repository, and the devfile decides the rest.
 <!-- id: inside -->
 ## Working inside one
 
-Edit, run, reach — without leaving the cluster.
+Edit the code, run it and open the app, all inside the cluster.
 
-- The app runs **next to** the IDE, in the same workspace, so "works on my machine" stops being a category.
+- The app runs **next to** the IDE, in the same workspace, so every developer runs it in the same environment.
 - Its endpoint is reachable in the browser while you work.
-- What you push is what the BuildConfig will build: same source, same base image.
+- What you push is what the BuildConfig builds. The source is the same, but the workspace runs on the UDI image, not on the app's runtime image.
 
 ![Editing, running and reaching the app inside one workspace](edit-run-reach.svg)
 
@@ -77,10 +77,10 @@ Edit, run, reach — without leaving the cluster.
 <!-- id: compare -->
 ## Four jobs, one repository
 
-The track has now used a git repository four different ways. Knowing which one you need is the point.
+The track has now used a git repository four different ways. This slide shows which one to use when.
 
 - **The Educates editor** — this session's files. A teaching tool, gone when the session ends.
-- **Your laptop** — full control, and entirely your problem to keep consistent.
+- **Your laptop** — full control, and you keep the tools consistent yourself.
 - **A BuildConfig** — git as a **build source**: code in, image out.
 - **Dev Spaces** — git as a **development environment**: same rules as production, nothing local.
 
@@ -91,7 +91,7 @@ The track has now used a git repository four different ways. Knowing which one y
 <!-- id: next -->
 ## What is next
 
-That is **Build & Run** complete: from a Docker mental model to an image you built, a registry that governs it, and a workload that is sized, scaled, reachable, stateful and survivable.
+That completes **Build & Run**: from a Docker mental model to an image you built, a registry that controls it, and a workload that is sized, scaled, reachable, stateful and able to survive maintenance.
 
 **Operate & Observe** is the other half: metrics, logs, the RBAC and tenancy model underneath, DEV to PROD promotion, and the operators behind the platform's services.
 

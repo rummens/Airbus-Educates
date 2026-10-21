@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # Operators on DCS
 
-Every platform service you are offered arrives the same way: as an operator. This lab opens one up and uses it.
+This lab uses one operator to show the pattern behind every DCS platform service.
 
 **In this lab:** the pattern · CRDs and CRs · create an instance · who owns what.
 
@@ -14,12 +14,12 @@ Digital Container Service · DCS Academy
 <!-- id: pattern -->
 ## The pattern
 
-An operator is a **controller** watching for objects of a kind it understands, making reality match them. The same reconcile loop a Deployment runs, applied to something bigger than a Pod.
+An operator is a **controller** watching for objects of a kind it understands, and making the cluster match them. The same reconcile loop a Deployment runs, applied to something bigger than a Pod.
 
 - You write **desired state**; the operator does the work and keeps doing it.
 - It encodes the operational knowledge a human would otherwise apply by hand.
 - Failover, backups and upgrades become fields rather than runbooks.
-- It is not magic: it is a Pod, watching the API, reconciling.
+- An operator runs as a Pod that watches the API and reconciles.
 
 ![A controller watching custom resources and reconciling the objects underneath them](operator-loop.svg)
 
@@ -31,7 +31,6 @@ An operator is a **controller** watching for objects of a kind it understands, m
 A **CustomResourceDefinition** teaches the cluster a new **kind**. A **Custom Resource** is one object of that kind, which is your instance.
 
 ```
-oc get crds | grep postgresql
 oc api-resources --api-group=postgresql.cnpg.io
 oc explain cluster.spec --api-version=postgresql.cnpg.io/v1
 ```
@@ -45,16 +44,16 @@ oc explain cluster.spec --api-version=postgresql.cnpg.io/v1
 <!-- id: instance -->
 ## Create an instance
 
-A PostgreSQL cluster, in a few lines. Count what you did **not** have to write.
+A PostgreSQL cluster in a few lines of YAML; the operator creates the rest.
 
 ```
-oc apply -f sample-cr.yaml
-oc get cluster sample-db
-oc get all
+oc apply -f sample-cr.yaml -n $DB_NS
+oc get cluster.postgresql.cnpg.io sample-db -n $DB_NS
+oc get clusters.postgresql.cnpg.io,pods,pvc,svc,secret -n $DB_NS
 ```
 
 - No image, no StatefulSet, no PVC, no Service, no probes — the operator creates them.
-- `status.phase` is the operator reporting back: *Cluster in healthy state*.
+- `status.phase` is how the operator reports progress. On a tenant namespace it reaches *Cluster in healthy state*; in this training session it stops short.
 - No `imageName` on purpose: the platform configures which operand image the operator may run.
 
 ---
@@ -65,7 +64,7 @@ oc get all
 The split that matters on DCS, and the one people get wrong during an incident.
 
 - **The platform owns the operator** — installing it, upgrading it, the CRDs, the operand images it may use.
-- **You own the instance** — its configuration, its data, its backups, its day-2.
+- **You own the instance** — configuration, data, backups and day-2 operations.
 - "The database is down" is usually your instance, not the operator.
 - It is not a managed service: nobody is watching your database for you.
 

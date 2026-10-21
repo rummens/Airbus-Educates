@@ -2,8 +2,8 @@
 title: Summary
 ---
 
-The platform can move your Pods whenever it needs to. You have now told it how much of your
-app has to stay up while it does.
+The platform can move your Pods whenever it needs to. Your PodDisruptionBudget sets how much of
+your app has to stay up while it does.
 
 Open the closing slide (📊 **Slides** tab):
 
@@ -50,7 +50,7 @@ just-routed requests still find a Pod that is serving.
 
 {{< note >}}
 **❓ Answer:** it does not handle `SIGTERM`. A well-behaved app catches it, stops accepting new
-connections, finishes what it has and exits — so the Pod goes **early**. Waiting the full
+connections, finishes what it has and exits, so the Pod is gone **early**. Waiting the full
 period means the kubelet had to `SIGKILL` it. That is a property of the image, not something a
 manifest can fix.
 {{< /note >}}
@@ -58,15 +58,15 @@ manifest can fix.
 4. When would you choose `DoNotSchedule` over `ScheduleAnyway`?
 
 {{< note >}}
-**❓ Answer:** when co-location is genuinely unacceptable — quorum members that must not share
-a failure domain — and you accept the cost: a Pod that cannot satisfy the spread stays
+**❓ Answer:** when two replicas must never share a node, for example quorum members that must
+not share a failure domain, and you accept the cost: a Pod that cannot satisfy the spread stays
 **Pending** rather than running in the wrong place.
 {{< /note >}}
 
 ## Next Steps
 
-That is the **Build & Run** track: your app is built, configured, sized, autoscaled, reachable,
-stateful where it needs to be, and now survivable.
+That completes the **Build & Run** track. Your app is built, configured, sized, autoscaled,
+reachable, stateful where needed, and can survive node maintenance.
 
-**Operate & Observe** picks up from here — metrics and logs for the app you just made
+**Operate & Observe** comes next: metrics and logs for the app you just made
 resilient, the tenancy and RBAC model underneath it, and the DEV to PROD promotion path.

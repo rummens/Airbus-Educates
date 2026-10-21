@@ -3,7 +3,7 @@
 <!-- id: intro -->
 # RBAC & Tenancy
 
-"Why can't I see the other team's Pods?" has an exact answer, and it is readable. This lab opens the mechanism behind Tenant and Namespace.
+This lab opens the mechanism behind Tenant and Namespace: the RBAC objects that decide who may do what, and where.
 
 **In this lab:** the two-level model · can-i · the objects behind the answer · build the chain yourself · quotas.
 
@@ -31,7 +31,7 @@ oc get namespace $(oc project -q) -o jsonpath='{.metadata.labels}'
 <!-- id: can-i -->
 ## Start from "can I?"
 
-Before reading a single Role, ask the cluster directly. It answers from the objects it has already computed.
+Before reading any Role, ask the cluster directly.
 
 ```
 oc auth can-i --list
@@ -41,14 +41,14 @@ oc auth can-i get pods -n kube-system
 
 - `--list` prints every permission you hold in this namespace.
 - A direct question gets `yes` or `no`.
-- Pointed at someone else's namespace, the answer is **no** — that is tenancy, enforced.
+- Pointed at someone else's namespace, the answer is **no**, because your access stops at your tenant's namespaces.
 
 ---
 
 <!-- id: objects -->
 ## The objects behind the answer
 
-Four object types, two scopes — and the answer is just the chain read end to end.
+Four object types, two scopes. Each `can-i` answer comes from the chain read end to end.
 
 - **Role** — permissions inside one namespace. **ClusterRole** — cluster-wide, or reusable per namespace.
 - **RoleBinding** — grants a role to a subject in one namespace. **ClusterRoleBinding** — cluster-wide.
@@ -73,8 +73,8 @@ envsubst < rolebinding-viewer.yaml | oc apply -f -
 oc auth can-i get pods --as=system:serviceaccount:$SESSION_NAMESPACE:viewer-bot   # yes
 ```
 
-- A Role on its own grants nothing — it is a shelf of permissions with nobody assigned.
-- The **before/after** pair is the proof, and `--as` is how you get it.
+- A Role on its own grants nothing until a RoleBinding names a subject.
+- `--as` gives you the **before/after** pair that shows what the binding changed.
 - Read-only verbs only: `delete pods` still answers **no**.
 
 ---
@@ -86,12 +86,12 @@ Your namespace came with limits you did not set, and they are readable.
 
 ```
 oc describe quota
-oc get limitrange -o yaml
+oc describe limitrange
 ```
 
 - **ResourceQuota** — the ceiling for the whole namespace.
 - **LimitRange** — the per-container defaults applied when a manifest sets none.
-- More quota is an **ITSM request**, not a field you edit — it costs real capacity somebody pays for.
+- More quota is an **ITSM request**, because it uses real capacity. You cannot edit the field yourself.
 
 ---
 

@@ -2,7 +2,7 @@
 title: Shutting Down Well
 ---
 
-A Pod being taken away is a **sequence** rather than a single event. Most dropped requests
+Deleting a Pod runs a **sequence** of steps. Most dropped requests
 during maintenance come from an app that ignored part of it.
 
 Open the slide for this page (📊 **Slides** tab):
@@ -23,7 +23,7 @@ When a Pod is marked for deletion, two things start **at the same time**:
 Neither is instant, and they are not coordinated with each other. Traffic already in
 flight, and routing that has not caught up, can still arrive after shutdown has started.
 
-Then the clock: after `terminationGracePeriodSeconds`, anything still running gets `SIGKILL`.
+Once `terminationGracePeriodSeconds` has passed, anything still running gets `SIGKILL`.
 
 ## Read the settings you deployed
 
@@ -99,8 +99,8 @@ retries: .INF
 delay: 3
 ```
 
-Back to three, exactly as in **Health & Resources**, and now you know what the 30 seconds in
-the middle were spent on.
+Back to three, as in **Health & Resources**. The deleted Pod took about 30 seconds because the
+app ignored `SIGTERM` and waited out the grace period.
 
 {{< warning >}}
 **⚠️ Watch out:** a grace period that is too **short** costs more than one that is too long.

@@ -11,7 +11,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
     academy.dcs/icon: database
     academy.dcs/details: |
-      **On DCS the registry decides what may run. An image it will not serve cannot start.**
+      **On DCS a Pod can only start from an image that Harbor will serve.**
 
       You inspect an image without pulling it, request a **Harbor project** as a Kubernetes
       object through Crossplane's Harbor provider, copy an image between registries with

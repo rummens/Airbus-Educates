@@ -2,8 +2,8 @@
 title: Catalogs, Projects and the Asymmetry
 ---
 
-Three rules govern what you may pull and push. The third one is the one people are
-surprised by.
+Three rules govern what you may pull and push. The third rule, the DEV/PROD difference, is
+the one most teams do not expect.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -44,13 +44,12 @@ This is the rule to remember:
 - **A PROD namespace's project takes no pushes at all**, and it pulls only images whose
   vulnerabilities are **below CVE severity 9**.
 
-You therefore cannot build straight into production. It is not blocked after the fact; there
-is no route.
+So you cannot build straight into production: there is no push path into a PROD project.
 
 {{< note >}}
-**📌 If an image genuinely cannot meet the threshold**, for example an unfixable finding in
-a dependency you need, there is a **security exception process**. It is a conversation with a
-decision at the end, not a flag you set.
+**📌 If an image cannot meet the threshold**, for example an unfixable finding in
+a dependency you need, there is a **security exception process**. You request it and someone
+reviews it. You cannot set it yourself.
 {{< /note >}}
 
 ## Prove the pull path works
@@ -67,7 +66,7 @@ retries: .INF
 delay: 5
 ```
 
-That is every other lab's first step, seen as what it is: a **pull** from a registry your
-namespace is allowed to pull from.
+Every lab starts with this step: a **pull** from a registry your namespace is allowed to pull
+from.
 
 Next, look at an image without running it at all.

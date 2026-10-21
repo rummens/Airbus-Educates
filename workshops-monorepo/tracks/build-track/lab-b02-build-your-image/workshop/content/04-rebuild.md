@@ -2,8 +2,8 @@
 title: Change It, Build It Again
 ---
 
-An image is a snapshot. The moment the source changes it is out of date, and the question
-is what makes a new one appear.
+An image does not change after it is built. When the source changes you need a new build,
+and something has to start it.
 
 Open the slide for this page (📊 **Slides** tab):
 
@@ -95,7 +95,7 @@ Doing it by hand is fine once. On a real project, two mechanisms connect the pie
   `rollout restart`.
 
 {{< warning >}}
-**⚠️ Watch out:** an automatic image trigger is exactly as safe as the build behind it. A
+**⚠️ Watch out:** an automatic image trigger rolls out whatever the build produced, tested or not. A
 pipeline that builds and immediately promotes puts an untested image into a running app. That
 is why PROD does not accept pushes, which the **DEV vs PROD Namespaces** lab covers.
 {{< /warning >}}

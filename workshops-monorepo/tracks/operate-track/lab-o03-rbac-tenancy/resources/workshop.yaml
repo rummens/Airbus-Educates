@@ -24,7 +24,7 @@ metadata:
       The last page covers quotas: what your namespace was given, and why an increase is a request
       rather than a setting.
 
-      > **💡 Tip:** `oc auth can-i --as` is the most useful RBAC command there is. You can test any
+      > **💡 Tip:** `oc auth can-i --as` is the RBAC command you will use most. You can test any
       > subject's access without logging in as them.
 spec:
   title: "RBAC & Tenancy"
@@ -86,7 +86,7 @@ spec:
       examiner:
         enabled: true
       # RBAC is read and written in the learner's own namespace; a vcluster would put
-      # them somewhere with different bindings than the platform actually gave them.
+      # them somewhere with different bindings than the platform gave them.
       vcluster:
         enabled: false
     dashboards:
