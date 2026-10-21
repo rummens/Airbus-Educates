@@ -105,7 +105,7 @@ In the **lower** terminal pane, watch for the Pod the Operator schedules to run 
 instance:
 
 ```terminal:execute
-command: watch oc get pods -l cnpg.io/cluster=sample-db
+command: watch oc get pods -l cnpg.io/cluster=sample-db -n $DB_NS
 session: 2
 ```
 

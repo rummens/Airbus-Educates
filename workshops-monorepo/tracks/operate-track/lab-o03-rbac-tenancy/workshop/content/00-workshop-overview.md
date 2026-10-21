@@ -2,7 +2,7 @@
 title: "RBAC & Tenancy"
 ---
 
-The Core lab **Terms. Namespaces & Tenancy** gave you the words: Tenant, Namespace, and the
+The Core lab **Terms — Namespaces & Tenancy** gave you the words: Tenant, Namespace, and the
 fact that "project" is not a separate layer.
 
 This lab opens the mechanism underneath: the RBAC objects that decide who can do what, in
@@ -26,7 +26,7 @@ By the end of this workshop you will be able to:
 
 ## Prerequisites
 
-This lab assumes the Core lab **Terms. Namespaces & Tenancy**, so you know the terms
+This lab assumes the Core lab **Terms — Namespaces & Tenancy**, so you know the terms
 Namespace and Tenant and that access is scoped to your tenant's namespaces. It also assumes
 basic comfort with
 [`oc`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#cli-getting-started)

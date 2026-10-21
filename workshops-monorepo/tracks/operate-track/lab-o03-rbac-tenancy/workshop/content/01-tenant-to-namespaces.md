@@ -2,7 +2,7 @@
 title: Tenant to Namespaces, in Depth
 ---
 
-The Core lab **Terms. Namespaces & Tenancy** gave you two words: **Tenant** and
+The Core lab **Terms — Namespaces & Tenancy** gave you two words: **Tenant** and
 **Namespace**. This page is the model behind them, which the rest of the lab builds on.
 
 Open the slide for this page (📊 **Slides** tab):

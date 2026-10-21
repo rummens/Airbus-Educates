@@ -7,6 +7,7 @@ synced `main`; workshop content is live on the next session start.
 ## 2026-10-21
 
 - **OpenShift documentation links work again.** Red Hat retired the old OpenShift docs site, so every "read more" link to it ended on a "page not found". All of them now open the matching page on Red Hat's current documentation site.
+- **Operators on DCS: the Pod watch now shows the database Pods.** The watch in the lower pane looked in the wrong namespace and stayed empty while the Operator was provisioning; it now watches the database namespace.
 
 ## 2026-09-12
 
