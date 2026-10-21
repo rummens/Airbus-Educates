@@ -22,7 +22,7 @@ By the end of this workshop you will be able to:
 
 - Explain the path a metric takes from your container to a query, and who owns each hop.
 - Read the [Prometheus exposition format](https://prometheus.io/docs/instrumenting/exposition_formats/) your app serves on `/metrics`.
-- Ask to be scraped with a [**ServiceMonitor**](https://docs.openshift.com/container-platform/latest/observability/monitoring/enabling-monitoring-for-user-defined-projects.html), and confirm it worked.
+- Ask to be scraped with a [**ServiceMonitor**](https://docs.redhat.com/en/documentation/monitoring_stack_for_red_hat_openshift/latest/html/configuring_user_workload_monitoring/preparing-to-configure-the-monitoring-stack-uwm#enabling-monitoring-for-user-defined-projects_preparing-to-configure-the-monitoring-stack-uwm), and confirm it worked.
 - Query your own series with **PromQL** from the terminal.
 - Explain why the same query about another tenant's namespace is refused.
 
@@ -52,4 +52,4 @@ lets you use for **your own** namespace.
 
 - [Exposition formats](https://prometheus.io/docs/instrumenting/exposition_formats/) — what a `/metrics` endpoint must look like.
 - [Querying basics (PromQL)](https://prometheus.io/docs/prometheus/latest/querying/basics/) — selectors, ranges and functions.
-- [Managing metrics](https://docs.openshift.com/container-platform/latest/observability/monitoring/enabling-monitoring-for-user-defined-projects.html) — ServiceMonitors and user-workload monitoring on OpenShift.
+- [Managing metrics](https://docs.redhat.com/en/documentation/monitoring_stack_for_red_hat_openshift/latest/html/configuring_user_workload_monitoring/preparing-to-configure-the-monitoring-stack-uwm#enabling-monitoring-for-user-defined-projects_preparing-to-configure-the-monitoring-stack-uwm) — ServiceMonitors and user-workload monitoring on OpenShift.

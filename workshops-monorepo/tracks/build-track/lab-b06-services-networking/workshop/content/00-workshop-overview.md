@@ -54,4 +54,4 @@ namespace. All commands run with `oc`.
 
 - [Service](https://kubernetes.io/docs/concepts/services-networking/service/) — the types, selectors and ports.
 - [DNS for Services and Pods](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/) — the names this lab resolves by hand.
-- [Configuring Routes](https://docs.openshift.com/container-platform/latest/networking/routes/route-configuration.html) — the OpenShift object that replaces a LoadBalancer Service here.
+- [Configuring Routes](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/ingress_and_load_balancing/routes) — the OpenShift object that replaces a LoadBalancer Service here.

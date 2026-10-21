@@ -4,7 +4,7 @@ title: Your Session
 
 Time to get hands-on. On the right you have a **terminal** already connected to
 {{< param product_short >}} and pointed at your own project. Every command in this
-academy is run with [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html),
+academy is run with [`oc`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#cli-getting-started),
 the OpenShift command line tool. Click the command blocks below to run them — you never
 have to type them by hand.
 

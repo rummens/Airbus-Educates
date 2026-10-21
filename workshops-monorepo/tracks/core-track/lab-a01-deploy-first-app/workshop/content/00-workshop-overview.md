@@ -27,9 +27,9 @@ for the terminal, editor and clickable actions.
 
 By the end of this workshop you will be able to:
 
-- Deploy a Harbor image with [`oc create deployment`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/developer_cli_commands.html).
+- Deploy a Harbor image with [`oc create deployment`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#oc-create-deployment).
 - Customise the running app with an environment variable (`oc set env`).
-- Reach the app locally with [`oc port-forward`](https://docs.openshift.com/container-platform/latest/nodes/containers/nodes-containers-port-forwarding.html) and `curl`.
+- Reach the app locally with [`oc port-forward`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/nodes/working-with-containers#nodes-containers-port-forwarding) and `curl`.
 - Change config and watch the [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) roll out a new version.
 - Read the generated YAML and explain the Deployment → ReplicaSet → Pod chain.
 

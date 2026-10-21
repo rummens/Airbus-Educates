@@ -3,7 +3,7 @@ title: The Control Behind Three of Them
 ---
 
 Three of the four rejected lines came from the same control, so it is worth meeting properly:
-the [**Security Context Constraint**](https://docs.openshift.com/container-platform/latest/authentication/managing-security-context-constraints.html).
+the [**Security Context Constraint**](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/authentication_and_authorization/managing-pod-security-policies).
 
 An SCC is an **admission** policy that answers one question about every Pod: *is this workload
 allowed to ask for what it is asking for?*

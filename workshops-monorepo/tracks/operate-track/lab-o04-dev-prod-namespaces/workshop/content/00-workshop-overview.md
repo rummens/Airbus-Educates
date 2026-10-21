@@ -6,7 +6,7 @@ On **{{< param product_name >}}** a DEV namespace and a PROD namespace are not s
 naming convention. They differ in **policy posture**.
 
 PROD enforces rules DEV does not, and only PROD may publish a
-[**Route**](https://docs.openshift.com/container-platform/latest/networking/routes/route-configuration.html).
+[**Route**](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/ingress_and_load_balancing/routes).
 
 This session gives you **one of each**. You will apply the same manifests to both and read the
 two different answers.
@@ -54,5 +54,5 @@ your two namespaces. The rejections you get are genuine.
 ## Further Reading
 
 - [Admission controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/) — where a rejection like this comes from.
-- [Route configuration](https://docs.openshift.com/container-platform/latest/networking/routes/route-configuration.html) — the object PROD may publish and DEV may not.
+- [Route configuration](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/ingress_and_load_balancing/routes) — the object PROD may publish and DEV may not.
 - [{{< param product_short >}} namespace types]({{< param dcs_docs_base_url >}}/concepts/namespace-types) — the platform's own description of the split.

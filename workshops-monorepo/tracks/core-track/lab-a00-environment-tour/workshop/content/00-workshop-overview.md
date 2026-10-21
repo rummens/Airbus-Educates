@@ -42,7 +42,7 @@ editor** and a **Console** tab, all on one screen.
 
 Nothing to install, no login to do.
 
-All commands run with [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html),
+All commands run with [`oc`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#cli-getting-started),
 the OpenShift command line. You already have your own {{< param product_short >}} project,
 scoped to you alone.
 

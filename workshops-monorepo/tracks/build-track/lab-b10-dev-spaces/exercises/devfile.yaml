@@ -1,6 +1,6 @@
 # Devfile for the hello-dcs sample app — the environment spec OpenShift Dev
 # Spaces reads to build a workspace: what image to develop in, what source to
-# clone, and what command starts the app. See https://devfile.io/docs/ for the
+# clone, and what command starts the app. See https://devfile.io/docs/2.2.0/what-is-a-devfile for the
 # full schema.
 #
 # ${DCS_REGISTRY} / ${WORKSPACE_SOURCE_REPO} are this session's placeholders

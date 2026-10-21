@@ -97,4 +97,4 @@ produced every `yes` and `no` on the last page. Next you build the same chain yo
 subject you create.
 
 - [Kubernetes RBAC reference](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
-- [OpenShift default cluster roles](https://docs.openshift.com/container-platform/latest/authentication/using-rbac.html)
+- [OpenShift default cluster roles](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/authentication_and_authorization/using-rbac)

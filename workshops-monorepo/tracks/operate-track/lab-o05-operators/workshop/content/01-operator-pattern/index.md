@@ -47,4 +47,4 @@ You watch that loop run when you create your own Custom Resource on page 03. Fir
 more terms: CRD against CR, and how an Operator gets onto the cluster.
 
 - [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
-- [OpenShift Operators overview](https://docs.openshift.com/container-platform/latest/operators/understanding/olm-what-operators-are.html)
+- [OpenShift Operators overview](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/operators/understanding-operators#olm-what-operators-are)

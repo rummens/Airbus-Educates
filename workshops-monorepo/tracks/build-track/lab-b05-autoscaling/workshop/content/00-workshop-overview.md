@@ -51,5 +51,5 @@ namespace, which carries a **`medium`** budget. All commands run with `oc`.
 ## Further Reading
 
 - [Horizontal Pod Autoscaling](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) — the controller, the algorithm and the stabilisation windows.
-- [Automatically scaling pods with the HPA](https://docs.openshift.com/container-platform/latest/nodes/pods/nodes-pods-autoscaling.html) — the OpenShift view, including `oc autoscale`.
-- [Vertical Pod Autoscaler](https://docs.openshift.com/container-platform/latest/nodes/pods/nodes-pods-vertical-autoscaler.html) — the other autoscaler, for `requests` rather than replicas.
+- [Automatically scaling pods with the HPA](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/nodes/working-with-pods#nodes-pods-autoscaling) — the OpenShift view, including `oc autoscale`.
+- [Vertical Pod Autoscaler](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/nodes/working-with-pods#nodes-pods-vpa) — the other autoscaler, for `requests` rather than replicas.

@@ -5,7 +5,7 @@ title: The Other Autoscaler
 The HPA changes **how many** Pods you run. It never touches what each Pod asks for.
 
 That is the other autoscaler's job. A
-[**VerticalPodAutoscaler**](https://docs.openshift.com/container-platform/latest/nodes/pods/nodes-pods-vertical-autoscaler.html)
+[**VerticalPodAutoscaler**](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/nodes/working-with-pods#nodes-pods-vpa)
 (VPA) watches actual consumption over time and recommends better `requests` and `limits`,
 or applies them.
 

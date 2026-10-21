@@ -49,5 +49,5 @@ commands run with `oc`.
 
 - [Operator pattern](https://kubernetes.io/docs/concepts/extend-kubernetes/operator/)
 - [Custom Resources](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources/)
-- [OpenShift Operators overview](https://docs.openshift.com/container-platform/latest/operators/understanding/olm-what-operators-are.html)
+- [OpenShift Operators overview](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/operators/understanding-operators#olm-what-operators-are)
 - [CloudNativePG](https://cloudnative-pg.io/docs/)

@@ -42,7 +42,7 @@ the pinned version.
 ## `user: root`
 
 Docker containers run as root unless told otherwise. {{< param product_short >}} enforces a
-**restricted** [Security Context Constraint](https://docs.openshift.com/container-platform/latest/authentication/managing-security-context-constraints.html):
+**restricted** [Security Context Constraint](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/authentication_and_authorization/managing-pod-security-policies):
 
 - no container may run as **UID 0**;
 - every container must tolerate an **arbitrary non-zero UID** assigned at deploy time.

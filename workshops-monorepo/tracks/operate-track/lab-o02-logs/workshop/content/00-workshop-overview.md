@@ -21,7 +21,7 @@ for the terminal, editor and clickable actions.
 By the end of this workshop you will be able to:
 
 - Explain where a container's logs actually live, and who rotates them.
-- Read logs with intent: [`oc logs`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/openshift-cli-commands.html) with `-f`, `--tail`, `--since`, `-c` and label selectors.
+- Read logs with intent: [`oc logs`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#oc-logs) with `-f`, `--tail`, `--since`, `-c` and label selectors.
 - Recover the output of a container that has already **crashed and restarted**.
 - Say exactly when `oc logs` can no longer help you.
 - Describe how aggregated logging works on {{< param product_short >}}, and what LogQL asks for.
@@ -48,5 +48,5 @@ A browser-based session with a split **terminal** and an **editor**. All command
 ## Further Reading
 
 - [Logging architecture](https://kubernetes.io/docs/concepts/cluster-administration/logging/) — where container output goes, and what rotates it.
-- [Viewing logs](https://docs.openshift.com/container-platform/latest/support/troubleshooting/investigating-pod-issues.html) — the OpenShift view of investigating a Pod.
+- [Viewing logs](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/support/troubleshooting#investigating-pod-issues) — the OpenShift view of investigating a Pod.
 - [LogQL](https://grafana.com/docs/loki/latest/query/) — the query language the aggregated store uses.

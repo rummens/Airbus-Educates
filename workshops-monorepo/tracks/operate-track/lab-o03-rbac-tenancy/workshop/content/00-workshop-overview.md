@@ -29,7 +29,7 @@ By the end of this workshop you will be able to:
 This lab assumes the Core lab **Terms. Namespaces & Tenancy**, so you know the terms
 Namespace and Tenant and that access is scoped to your tenant's namespaces. It also assumes
 basic comfort with
-[`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
+[`oc`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#cli-getting-started)
 and the idea of a [namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/).
 No prior RBAC knowledge is required.
 
@@ -47,5 +47,5 @@ here (ServiceAccount, Role, RoleBinding) lives inside it. All commands run with 
 ## Further Reading
 
 - [Kubernetes RBAC documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
-- [OpenShift using RBAC](https://docs.openshift.com/container-platform/latest/authentication/using-rbac.html)
+- [OpenShift using RBAC](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/authentication_and_authorization/using-rbac)
 - [ResourceQuota documentation](https://kubernetes.io/docs/concepts/policy/resource-quotas/)

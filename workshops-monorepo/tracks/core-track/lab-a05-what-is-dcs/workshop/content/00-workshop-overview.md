@@ -32,7 +32,7 @@ By the end of this workshop you will be able to:
 - Describe containers and images at a high level.
 - Say why Kubernetes beats plain Docker for running applications.
 - Navigate your session environment (terminal and editor).
-- Run your first [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html) commands and confirm your access.
+- Run your first [`oc`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#cli-getting-started) commands and confirm your access.
 
 ## Prerequisites
 

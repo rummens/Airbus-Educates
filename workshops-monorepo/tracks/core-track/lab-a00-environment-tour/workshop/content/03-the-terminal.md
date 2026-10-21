@@ -6,7 +6,7 @@ The **Terminal** tab on the right is a shell connected to your {{< param product
 session.
 
 It starts in the `~/exercises` directory, where each lab's files live. Every command runs
-with [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html),
+with [`oc`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#cli-getting-started),
 the OpenShift command line.
 
 Notice it is **split** into two panes, one above the other:

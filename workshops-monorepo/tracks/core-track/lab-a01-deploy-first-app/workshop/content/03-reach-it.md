@@ -5,7 +5,7 @@ title: Reach It
 Your app is running, but nothing outside the cluster can talk to it yet.
 
 For a quick local test, open a **tunnel** from your terminal straight to the Pod with
-[`oc port-forward`](https://docs.openshift.com/container-platform/latest/nodes/containers/nodes-containers-port-forwarding.html).
+[`oc port-forward`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/nodes/working-with-containers#nodes-containers-port-forwarding).
 No public address required.
 
 Open the slide for this page (📊 **Slides** tab):
