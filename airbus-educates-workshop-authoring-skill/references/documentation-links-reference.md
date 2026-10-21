@@ -12,6 +12,9 @@ This gives learners an immediate path to authoritative depth without the worksho
 - **Prefer version-stable URLs.** Use `.../latest/...` or the docs site's canonical path so links do not rot. Avoid deep-linking to a specific patch version unless the workshop pins that version.
 - **Inline Markdown links.** `[Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)`. In the introduction page's Prerequisites and Further Reading, links are expected; in body pages, weave them into the prose naturally.
 - **Don't over-link.** One link per concept per page. A paragraph with ten links helps no one — link the concepts that matter to the exercise.
+- **Never link `docs.openshift.com`.** Red Hat retired it in 2026; every old URL redirects to a 404. OpenShift docs live at `https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/<book>/<chapter>#<section-id>` (`latest` redirects to the current release). Monitoring moved to its own product: `https://docs.redhat.com/en/documentation/monitoring_stack_for_red_hat_openshift/latest/...`.
+- **Verify every external link before committing.** Run `test/workshops/link_check.py <lab>`; it must pass. For a deep link, also confirm the page is the one you meant and the `#anchor` exists — `curl -sL <url> | grep -c 'id="<anchor>"'` must print `1`. A redirect that lands on a landing page, or a missing anchor, returns HTTP 200 and passes the link checker while still sending the learner to the wrong place.
+- **Prefer the canonical URL over a redirect.** If `curl -sL -o /dev/null -w '%{url_effective}' <url>` shows a different final URL (a moved page), link the final URL.
 
 ## Two link classes: standard vs DCS-specific (hybrid)
 
@@ -47,10 +50,10 @@ Use these roots to construct links. Confirm the exact deep path when in doubt; t
 
 | Concept area | Canonical documentation base |
 |---|---|
-| OpenShift Container Platform | https://docs.openshift.com/container-platform/latest/ |
-| OpenShift CLI (`oc`) | https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html |
-| OpenShift Routes | https://docs.openshift.com/container-platform/latest/networking/routes/route-configuration.html |
-| OpenShift Security Context Constraints | https://docs.openshift.com/container-platform/latest/authentication/managing-security-context-constraints.html |
+| OpenShift Container Platform | https://docs.redhat.com/en/documentation/openshift_container_platform/latest |
+| OpenShift CLI (`oc`) | https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#cli-getting-started |
+| OpenShift Routes | https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/ingress_and_load_balancing/routes |
+| OpenShift Security Context Constraints | https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/authentication_and_authorization/managing-pod-security-policies |
 | Kubernetes concepts (Pods, Deployments, Services, etc.) | https://kubernetes.io/docs/concepts/ |
 | Kubernetes API reference | https://kubernetes.io/docs/reference/kubernetes-api/ |
 | `kubectl`/CLI reference | https://kubernetes.io/docs/reference/kubectl/ |
@@ -60,7 +63,7 @@ Use these roots to construct links. Confirm the exact deep path when in doubt; t
 | Prometheus | https://prometheus.io/docs/ |
 | Grafana | https://grafana.com/docs/ |
 | Argo CD | https://argo-cd.readthedocs.io/en/stable/ |
-| Tekton / OpenShift Pipelines | https://docs.openshift.com/pipelines/latest/ |
+| Tekton / OpenShift Pipelines | https://docs.redhat.com/en/documentation/red_hat_openshift_pipelines/latest |
 | Educates platform | https://docs.educates.dev/ |
 
 For subject matter outside this table (a programming language, a framework, a specific product), link that project's official documentation site. When a course exists, prefer the links recorded in the course's `planning/resources.md` — they have already been vetted for the course subject.
@@ -77,7 +80,7 @@ to run the application. The Deployment ensures the desired number of replicas st
 Good — OpenShift resource linked:
 
 ```markdown
-Expose the service with a [Route](https://docs.openshift.com/container-platform/latest/networking/routes/route-configuration.html).
+Expose the service with a [Route](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/ingress_and_load_balancing/routes).
 ```
 
 Avoid — no link on a concept's first mention:
@@ -94,3 +97,5 @@ Create a Deployment to run the application.   <!-- missing docs link -->
 - [ ] No standard construct is mislinked to the DCS portal, and no DCS concept to upstream
 - [ ] No concept is linked more than once per page
 - [ ] Introduction page Prerequisites/Further Reading use these links
+- [ ] No `docs.openshift.com` link (retired); OpenShift links use `docs.redhat.com/.../latest/html/...`
+- [ ] `link_check.py <lab>` passes; deep links land on the intended page and their `#anchor` exists

@@ -32,7 +32,7 @@ The page must contain the following, in this order. Use `##` headings (never `#`
 
    ```markdown
    This workshop assumes familiarity with [containers](https://kubernetes.io/docs/concepts/containers/)
-   and basic [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html) usage.
+   and basic [`oc`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#cli-getting-started) usage.
    ```
 
 4. **Your environment.** A brief description of what the session provides — the embedded terminal, editor, and any session applications this workshop enables (Kubernetes/OpenShift access, image registry, git server, etc.). Keep it factual and short; describe capabilities the learner will use, not Educates internals. Mention that commands are run with `oc` on OpenShift.
@@ -79,7 +79,7 @@ By the end of this workshop you will be able to:
 This workshop assumes you are comfortable with:
 
 - [<concept>](<official-docs-url>)
-- Basic [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html) command usage
+- Basic [`oc`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#cli-getting-started) command usage
 
 No prior experience with <advanced thing> is required.
 

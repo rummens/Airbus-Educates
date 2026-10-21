@@ -19,7 +19,7 @@ command: oc get pods
 **When first mentioning the CLI in instructions**, link the docs (see [documentation-links-reference.md](documentation-links-reference.md)):
 
 ```markdown
-Inspect the running pods with the [`oc`](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html) command line tool.
+Inspect the running pods with the [`oc`](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/cli_tools/openshift-cli-oc#cli-getting-started) command line tool.
 ```
 
 Do **not** mix `kubectl` and `oc` in the same workshop. If a learner already knows `kubectl`, add a single one-line note that `oc` accepts the same subcommands — do not switch back and forth.

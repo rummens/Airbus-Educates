@@ -88,6 +88,7 @@ Write for a beginner audience that includes many non-native English speakers. **
 - Reject phrasings like "earns its keep", "under the hood", "read the console before you rebuild the machine", "guess-and-poke", "the play-by-play", "fire-and-forget". State the thing plainly instead ("configuration in a ConfigMap is useful because you can change it without rebuilding the image").
 - This does **not** ban the sanctioned VM-world analogies above — a labelled, honest analogy is a teaching device. The rule is against *stray* idioms and figurative flourishes that carry no teaching value.
 - One clear, literal sentence beats a witty one. When in doubt, cut the metaphor.
+- The wider set of AI-voice tells (reveal formulas, mic-drop fragments, personification, "that is the point", teaser hand-offs, intensifiers) is catalogued with before/after examples in [writing-voice-reference.md](writing-voice-reference.md).
 
 ## Name declarative vs imperative explicitly
 
@@ -143,6 +144,64 @@ Beginners struggle with dense one-liners. **Prefer several short, explained comm
 - Explain every flag and every shell operator (`|`, `-`, `--from`, `--sort-by`) on first use. Assume no prior CLI knowledge.
 - See [clickable-actions-reference.md](clickable-actions-reference.md) for why complex shell also breaks the clickable action itself.
 
+### Every complex command gets a collapsed breakdown
+
+Some commands cannot be split without losing what they demonstrate: a `watch` loop, an
+`envsubst < f | oc apply -f -` render, a jsonpath query. **Every such command is followed by
+a collapsed "Breakdown" section** that explains each part. It is closed by default, so the
+page stays short for learners who follow and the detail is one click away for those who
+want it. Educates renders it natively with the `section:begin` / `section:end` clickable
+actions (see [clickable-actions/section-actions.md](clickable-actions/section-actions.md));
+raw `<details>` HTML does **not** work — the Hugo renderer strips raw HTML.
+
+**A command is complex — and needs a breakdown — if it contains any of:** a pipe `|`;
+chaining with `&&`, `||` or `;`; a command substitution `$(…)` or variable assignment; a
+loop (`for`, `while`); `sh -c`, `timeout`, `watch` with a compound command; a heredoc
+`<<`; a redirect `2>&1`; or an expression language — `-o jsonpath=`, `-o go-template=`,
+`-o custom-columns=`, `--sort-by`, `jq`, `awk`, `sed`, a regex, PromQL or LogQL.
+
+Place it **directly after the `terminal:execute` block**, before the expected output:
+
+````markdown
+```terminal:execute
+command: envsubst < ~/exercises/deployment.yaml | oc apply -f - && oc rollout status deployment/hello-dcs --timeout=90s
+```
+
+```section:begin
+name: breakdown-apply-deployment
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < ~/exercises/deployment.yaml`** — reads the file and replaces each `${VAR}`
+  with the value from your session, so the registry host is never hard-coded.
+- **`| oc apply -f -`** — the pipe hands that output to `oc apply`; `-f -` means "read the
+  manifest from the pipe" instead of from a file.
+- **`&&`** — run the next command only if `oc apply` succeeded.
+- **`oc rollout status … --timeout=90s`** — waits until the new Pods are ready, or gives up
+  after 90 seconds.
+
+```section:end
+name: breakdown-apply-deployment
+```
+````
+
+Rules:
+
+- **One bullet per part**, in the order the shell reads them, led by the part in bold code.
+  Say what it does and, where it is not obvious, why it is there.
+- **`name:` is unique on the page** (`breakdown-<what-it-does>`) and repeated on `section:end`.
+- **`prefix: Breakdown`** and **`title: What each part of the command does`** — the same on
+  every page, so learners recognise it. Plain text: no emoji, no bold (the header is static,
+  like an examiner title).
+- **Repeat the breakdown on each page that uses the pattern** (it is collapsed, so it costs
+  nothing); do not write "see page 2".
+- **A breakdown supplements the teaching, it does not replace it.** If a part of the command
+  *is* the concept of the page (the PDB columns on the PDB page, the PromQL on the query page),
+  explain it in the page prose as before; the breakdown covers the syntax around it.
+- An inline bullet breakdown that only explains syntax moves into the collapsed section.
+- `test/workshops/style_check.py <lab>` flags a complex command with no breakdown after it.
+
 ## Estimating duration realistically
 
 Do not over-estimate. Learners move through guided, clickable content faster than the page count suggests — most click through a page in **~2–4 minutes**, and reading-only pages faster. Estimate roughly `pages × ~3 min` plus real wait time (image pulls, rollouts), then round to a friendly figure; when unsure, err **lower** — an over-long estimate deters learners. A ~10-page guided Foundations workshop is typically **30–40 minutes**, not 60+. Validate against a real click-through when you can, and correct the estimate to what it actually took.
@@ -157,6 +216,8 @@ Do not over-estimate. Learners move through guided, clickable content faster tha
 - Cutting explanation to stay under a time target.
 - Idioms, metaphors, or witty phrasing where a plain sentence would do.
 - Chained one-liner commands (`a | b && c && sleep`) a beginner cannot parse.
+- A complex command with no collapsed **Breakdown** section after it.
+- AI-voice tells — reveal formulas, mic-drop fragments, personification, "that is the point" (see [writing-voice-reference.md](writing-voice-reference.md)).
 - Using "declarative"/"imperative" (or similar) before defining them.
 
 ## Checklist
@@ -171,9 +232,10 @@ Do not over-estimate. Learners move through guided, clickable content faster tha
 - [ ] No foundational concept for the topic is skipped
 - [ ] Structural/relational concepts have a diagram (SVG in the page bundle); UI steps have screenshots where helpful — err toward adding one
 - [ ] New abstractions are grounded in an analogy (VM world for DCS), tapering with skill level
-- [ ] Plain language throughout — no stray idioms, metaphors, or figurative flourishes
+- [ ] Plain language throughout — no stray idioms, metaphors, or figurative flourishes; no AI-voice tells ([writing-voice-reference.md](writing-voice-reference.md))
 - [ ] "Declarative"/"imperative" (and similar term pairs) are defined the first time they appear
 - [ ] Commands are short and explained (no dense chained one-liners); every flag/operator explained on first use
+- [ ] Every complex command (pipe, `&&`, `$(…)`, loop, `sh -c`, jsonpath/jq/awk/sed, …) is followed by a collapsed `section:begin` **Breakdown**
 - [ ] Lab has a slide deck (`slides.md`, one slide per page) and each page links to its slide
 - [ ] Each foundational concept offers multiple ways in (prose + visual/analogy + hands-on)
 - [ ] Duration estimate is realistic (~3 min/guided page + waits) and errs low, not inflated
