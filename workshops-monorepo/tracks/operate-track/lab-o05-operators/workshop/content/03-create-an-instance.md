@@ -148,6 +148,19 @@ Read the CR's own status, which is how an operator reports back:
 command: oc get cluster.postgresql.cnpg.io sample-db -n $DB_NS -o jsonpath='{.status.phase}{"\n"}'
 ```
 
+```section:begin
+name: breakdown-cluster-phase
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get cluster.postgresql.cnpg.io sample-db -n $DB_NS`** — reads your `Cluster`, using the full kind name so `oc` does not confuse it with another `Cluster` type.
+- **`-o jsonpath='{.status.phase}{"\n"}'`** — prints only the phase the operator wrote into the resource's status, followed by a newline.
+
+```section:end
+name: breakdown-cluster-phase
+```
+
 ```examiner:execute-test
 name: verify-cr-status-reported
 title: Verify the Cluster reports a status of its own

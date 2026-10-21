@@ -26,6 +26,21 @@ yet — it's on the roadmap. So here you *inspect* one rather than author it.
 command: oc describe networkpolicy allow-hello-dcs-ingress | tee ~/exercises/netpol.txt
 ```
 
+```section:begin
+name: breakdown-describe-policy
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc describe networkpolicy allow-hello-dcs-ingress`** — prints the policy: which Pods it
+  selects and which traffic it lets in.
+- **`| tee ~/exercises/netpol.txt`** — shows the output in the terminal and also saves a copy to
+  that file, so the check below can read it.
+
+```section:end
+name: breakdown-describe-policy
+```
+
 ```examiner:execute-test
 name: verify-networkpolicy
 prefix: After the describe
@@ -39,13 +54,32 @@ traffic to port 8080 on the app's Pods is allowed in.
 ## Air-gapped means no outbound internet access
 
 {{< param product_short >}} is air-gapped: workloads have **no route to the public
-internet**. Confirm this by trying to reach an external site from inside the app's Pod.
-`oc exec` runs a command inside a running container; `deploy/hello-dcs` selects a Pod from
-that Deployment; everything after `--` is the command to run in the container (here a short
-Python one-liner, where `-c` passes the code as a string):
+internet**. Confirm this by trying to reach an external site from inside the app's Pod:
 
 ```terminal:execute
 command: oc exec deploy/hello-dcs -- python3 -c "import urllib.request; urllib.request.urlopen('https://example.com', timeout=5)" > ~/exercises/egress.txt 2>&1; echo "exit=$?" >> ~/exercises/egress.txt; cat ~/exercises/egress.txt
+```
+
+```section:begin
+name: breakdown-try-egress
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc exec deploy/hello-dcs --`** — runs the rest of the line inside a Pod of the
+  Deployment; `--` ends the `oc` options.
+- **`python3 -c "…urlopen('https://example.com', timeout=5)"`** — runs a one-line Python
+  program (`-c` passes the code as a string) that tries to open an internet site and gives
+  up after 5 seconds.
+- **`> ~/exercises/egress.txt 2>&1`** — writes the output, including error messages
+  (`2>&1`), to a file in your session.
+- **`;`** — runs the next command whatever the result of the one before.
+- **`echo "exit=$?" >> ~/exercises/egress.txt`** — `$?` is the exit code of the `oc exec`
+  call (`0` means the site was reached); `>>` appends it to the file.
+- **`cat ~/exercises/egress.txt`** — prints the file so you can read the result.
+
+```section:end
+name: breakdown-try-egress
 ```
 
 It **fails** (it times out or is refused), which is the intended result. By default an app

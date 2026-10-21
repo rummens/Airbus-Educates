@@ -58,6 +58,22 @@ reviews it. You cannot set it yourself.
 command: envsubst < pod-from-registry.yaml | oc apply -f - && oc wait --for=condition=Ready pod/from-registry --timeout=180s
 ```
 
+```section:begin
+name: breakdown-create-and-wait
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < pod-from-registry.yaml`** — reads the manifest and replaces `${DCS_REGISTRY}` with the registry address from your session.
+- **`| oc apply -f -`** — the pipe hands the result to `oc apply`. The `-f -` means "read the manifest from the pipe" instead of from a file.
+- **`&& oc wait`** — if the apply succeeded, waits on the Pod.
+- **`--for=condition=Ready pod/from-registry`** — returns as soon as the Pod is Ready, which means the image was pulled and the container started.
+- **`--timeout=180s`** — fails after three minutes instead of waiting forever.
+
+```section:end
+name: breakdown-create-and-wait
+```
+
 ```examiner:execute-test
 name: verify-pull-works
 title: Verify your namespace can pull and run a registry image

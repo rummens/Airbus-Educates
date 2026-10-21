@@ -45,6 +45,23 @@ cluster without it, nothing acts on a ServiceMonitor.
 command: envsubst < deployment.yaml | oc apply -f - && oc apply -f service.yaml && oc rollout status deploy/hello-dcs --timeout=180s
 ```
 
+```section:begin
+name: breakdown-deploy-app
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < deployment.yaml`** — reads the file and replaces `${DCS_REGISTRY}` with its value from your session, so the registry host is not hard-coded.
+- **`| oc apply -f -`** — the pipe hands that output to `oc apply`; `-f -` means "read the manifest from the pipe" instead of from a file.
+- **`&&`** — runs the next command only if `oc apply` succeeded.
+- **`oc apply -f service.yaml`** — creates the Service in front of the Pods.
+- **`&&`** — again, continues only if that succeeded.
+- **`oc rollout status deploy/hello-dcs --timeout=180s`** — waits until the Deployment's Pods are ready, or gives up after 180 seconds.
+
+```section:end
+name: breakdown-deploy-app
+```
+
 ```examiner:execute-test
 name: verify-app-ready
 title: Verify the app is running behind a Service

@@ -27,6 +27,26 @@ command: |-
   echo
 ```
 
+```section:begin
+name: breakdown-query-up
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)`** — reads your session's ServiceAccount token from the file every Pod gets, and stores it in the variable `TOKEN`.
+- **`NS=$(oc project -q)`** — stores your namespace name in the variable `NS`; `-q` prints only the name.
+- **`curl -sk`** — `-s` hides the progress bar; `-k` skips TLS certificate verification for this in-cluster endpoint.
+- **`-H "Authorization: Bearer $TOKEN"`** — sends the token, so the endpoint knows who is asking and checks your permissions.
+- **`--get "$THANOS_URL/api/v1/query"`** — calls the query API with a GET request; `$THANOS_URL` is already set in your session and points at the platform's tenant query endpoint. `--get` turns the `--data-urlencode` values below into URL parameters.
+- **`--data-urlencode "namespace=$NS"`** — names the namespace you are asking about. The endpoint authorizes the query against this namespace.
+- **`--data-urlencode 'query=hello_dcs_up'`** — the PromQL query, URL-encoded so its characters survive the trip.
+- **`| head -c 400`** — shows only the first 400 characters of the JSON answer.
+- **`echo`** — prints a newline, because the cut-off output does not end with one.
+
+```section:end
+name: breakdown-query-up
+```
+
 ```examiner:execute-test
 name: verify-metric-queryable
 title: Verify your app's metric can be queried back
@@ -60,6 +80,26 @@ command: |-
   echo
 ```
 
+```section:begin
+name: breakdown-query-rate
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)`** — reads your session's ServiceAccount token from the file every Pod gets, and stores it in the variable `TOKEN`.
+- **`NS=$(oc project -q)`** — stores your namespace name in the variable `NS`; `-q` prints only the name.
+- **`curl -sk`** — `-s` hides the progress bar; `-k` skips TLS certificate verification for this in-cluster endpoint.
+- **`-H "Authorization: Bearer $TOKEN"`** — sends the token, so the endpoint knows who is asking and checks your permissions.
+- **`--get "$THANOS_URL/api/v1/query"`** — calls the query API with a GET request; `$THANOS_URL` is already set in your session and points at the platform's tenant query endpoint. `--get` turns the `--data-urlencode` values below into URL parameters.
+- **`--data-urlencode "namespace=$NS"`** — names the namespace you are asking about. The endpoint authorizes the query against this namespace.
+- **`--data-urlencode 'query=…'`** — the PromQL query (explained below the command), URL-encoded so its spaces, brackets and parentheses survive the trip.
+- **`| head -c 400`** — shows only the first 400 characters of the JSON answer.
+- **`echo`** — prints a newline, because the cut-off output does not end with one.
+
+```section:end
+name: breakdown-query-rate
+```
+
 ```examiner:execute-test
 name: verify-promql-rate
 title: Verify the PromQL rate query returns a result
@@ -88,6 +128,25 @@ command: |-
     --get "$THANOS_URL/api/v1/query" \
     --data-urlencode "namespace=openshift-monitoring" \
     --data-urlencode 'query=up'
+```
+
+```section:begin
+name: breakdown-query-other-namespace
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)`** — reads your session's ServiceAccount token from the file every Pod gets, and stores it in the variable `TOKEN`.
+- **`curl -sk`** — `-s` hides the progress bar; `-k` skips TLS certificate verification for this in-cluster endpoint.
+- **`-o /dev/null`** — throws away the response body.
+- **`-w 'HTTP %{http_code}\n'`** — after the request, prints only the HTTP status code.
+- **`-H "Authorization: Bearer $TOKEN"`** — sends the token, so the endpoint knows who is asking and checks your permissions.
+- **`--get "$THANOS_URL/api/v1/query"`** — the same query API as before, called with a GET request.
+- **`--data-urlencode "namespace=openshift-monitoring"`** — a namespace that is not yours. This is what the endpoint refuses.
+- **`--data-urlencode 'query=up'`** — a simple query; the namespace decides the answer, not the query.
+
+```section:end
+name: breakdown-query-other-namespace
 ```
 
 ```examiner:execute-test

@@ -22,6 +22,20 @@ file: ~/exercises/service-nodeport.yaml
 command: oc apply -f service-nodeport.yaml && oc get svc hello-dcs-nodeport
 ```
 
+```section:begin
+name: breakdown-apply-nodeport
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc apply -f service-nodeport.yaml`** — creates the NodePort Service from the file.
+- **`&&`** — run the next command only if `oc apply` succeeded.
+- **`oc get svc hello-dcs-nodeport`** — shows the new Service; the `PORT(S)` column includes the node port it was given.
+
+```section:end
+name: breakdown-apply-nodeport
+```
+
 It is **created**, and the `PORT(S)` column shows something like `8080:30113/TCP`. That
 second number is a port now listening on **every node in the cluster**.
 
@@ -49,6 +63,20 @@ file: ~/exercises/service-loadbalancer.yaml
 
 ```terminal:execute
 command: oc apply -f service-loadbalancer.yaml && oc get svc hello-dcs-lb
+```
+
+```section:begin
+name: breakdown-apply-loadbalancer
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc apply -f service-loadbalancer.yaml`** — creates the LoadBalancer Service from the file.
+- **`&&`** — run the next command only if `oc apply` succeeded.
+- **`oc get svc hello-dcs-lb`** — shows the new Service, including its `EXTERNAL-IP` column.
+
+```section:end
+name: breakdown-apply-loadbalancer
 ```
 
 Look at `EXTERNAL-IP`:

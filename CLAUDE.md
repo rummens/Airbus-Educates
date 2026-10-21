@@ -66,6 +66,7 @@ cd test/workshops
 ./run_track.sh workshops-monorepo/tracks/core-track     # whole track (ArgoCD pause/restore + per-lab logs)
 ./coverage_check.py --all    # (no cluster) every command has a smoke test
 ./link_check.py     --all    # (no cluster) every content link resolves
+./style_check.py    --all    # (no cluster) complex commands have a Breakdown; no retired links; voice tells
 ```
 The CRC git-source reads `origin/main`, so **push content changes before re-deploying**.
 The portal **does** run on CRC arm64 (`OPENSSL_armcap=0`, enabled in

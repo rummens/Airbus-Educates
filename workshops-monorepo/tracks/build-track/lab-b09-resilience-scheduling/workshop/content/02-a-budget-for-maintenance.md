@@ -15,6 +15,21 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/pd
 command: envsubst < deployment.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=180s
 ```
 
+```section:begin
+name: breakdown-deploy-app
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < deployment.yaml`** — reads the file and replaces each `${VAR}` placeholder (here the Harbor registry, `${DCS_REGISTRY}`) with the value from your session, so the registry host is never hard-coded.
+- **`| oc apply -f -`** — the pipe passes that output to `oc apply`; `-f -` means "read the manifest from the pipe" instead of from a file.
+- **`&&`** — run the next command only if `oc apply` succeeded.
+- **`oc rollout status deploy/hello-dcs --timeout=180s`** — waits until every replica is ready, or gives up after 180 seconds.
+
+```section:end
+name: breakdown-deploy-app
+```
+
 ```examiner:execute-test
 name: verify-app-ready
 title: Verify hello-dcs is running with three ready replicas
@@ -51,6 +66,21 @@ A PDB's **status** is the useful part, and it is easy to miss:
 command: oc get pdb hello-dcs -o custom-columns=NAME:.metadata.name,MIN:.spec.minAvailable,ALLOWED:.status.disruptionsAllowed,HEALTHY:.status.currentHealthy,DESIRED:.status.desiredHealthy,EXPECTED:.status.expectedPods
 ```
 
+```section:begin
+name: breakdown-pdb-columns
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get pdb hello-dcs`** — shows the PodDisruptionBudget called `hello-dcs`.
+- **`-o custom-columns=`** — prints a table with the columns you name instead of the default ones. Each column is written `TITLE:field-path`, separated by commas.
+- **`.spec.…` fields** — what you asked for in `pdb.yaml`, here `minAvailable`.
+- **`.status.…` fields** — what the cluster calculated from the Pods it can see right now.
+
+```section:end
+name: breakdown-pdb-columns
+```
+
 Read the columns together:
 
 - **EXPECTED 3** is how many Pods the selector matches.
@@ -77,8 +107,37 @@ Scale down to exactly the floor:
 command: oc scale deploy/hello-dcs --replicas=2 && oc rollout status deploy/hello-dcs --timeout=120s
 ```
 
+```section:begin
+name: breakdown-scale-to-floor
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc scale deploy/hello-dcs --replicas=2`** — sets the desired number of replicas to 2.
+- **`&&`** — run the next command only if the scale request was accepted.
+- **`oc rollout status deploy/hello-dcs --timeout=120s`** — waits until every replica is ready, or gives up after 120 seconds.
+
+```section:end
+name: breakdown-scale-to-floor
+```
+
 ```terminal:execute
 command: oc get pdb hello-dcs -o custom-columns=MIN:.spec.minAvailable,ALLOWED:.status.disruptionsAllowed,HEALTHY:.status.currentHealthy,EXPECTED:.status.expectedPods
+```
+
+```section:begin
+name: breakdown-pdb-columns-again
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get pdb hello-dcs`** — shows the PodDisruptionBudget called `hello-dcs`.
+- **`-o custom-columns=`** — prints a table with the columns you name instead of the default ones. Each column is written `TITLE:field-path`, separated by commas.
+- **`.spec.…` fields** — what you asked for in `pdb.yaml`, here `minAvailable`.
+- **`.status.…` fields** — what the cluster calculated from the Pods it can see right now.
+
+```section:end
+name: breakdown-pdb-columns-again
 ```
 
 **ALLOWED is now 0.** You have two Pods and you promised that two must stay, so the platform
@@ -102,6 +161,20 @@ To fix it, keep the budget and run **more replicas than your floor**:
 
 ```terminal:execute
 command: oc scale deploy/hello-dcs --replicas=3 && oc rollout status deploy/hello-dcs --timeout=120s
+```
+
+```section:begin
+name: breakdown-scale-back-up
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc scale deploy/hello-dcs --replicas=3`** — sets the desired number of replicas to 3.
+- **`&&`** — run the next command only if the scale request was accepted.
+- **`oc rollout status deploy/hello-dcs --timeout=120s`** — waits until every replica is ready, or gives up after 120 seconds.
+
+```section:end
+name: breakdown-scale-back-up
 ```
 
 ```examiner:execute-test

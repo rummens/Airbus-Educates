@@ -87,6 +87,23 @@ command: |-
   yq '{"schemaVersion": .schemaVersion, "components": (.components | length), "commands": (.commands | length)}' ~/exercises/devfile.yaml
 ```
 
+```section:begin
+name: breakdown-devfile-structure
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`yq '…'`** — reads a YAML file and prints the result of the expression in quotes.
+- **`{ … }`** — builds a new map with the three keys listed inside it.
+- **`"schemaVersion": .schemaVersion`** — copies the devfile's `schemaVersion` value.
+- **`"components": (.components | length)`** — takes the `components` list and counts its items.
+- **`"commands": (.commands | length)`** — counts the items in the `commands` list the same way.
+- **`~/exercises/devfile.yaml`** — the file to read.
+
+```section:end
+name: breakdown-devfile-structure
+```
+
 ```examiner:execute-test
 name: verify-devfile-structure
 title: Verify the devfile declares a container to develop in and commands to run
@@ -99,6 +116,19 @@ Now resolve it the way the session does, substituting the real registry host:
 
 ```terminal:execute
 command: envsubst < ~/exercises/devfile.yaml | grep 'image:'
+```
+
+```section:begin
+name: breakdown-resolve-placeholder
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < ~/exercises/devfile.yaml`** — reads the devfile and replaces each `${VAR}` placeholder with the value from your session; `${DCS_REGISTRY}` becomes your Harbor registry host.
+- **`| grep 'image:'`** — keeps only the line with `image:`, so you can compare it with the raw line above.
+
+```section:end
+name: breakdown-resolve-placeholder
 ```
 
 The file you hand to Dev Spaces never names a registry. Once `envsubst` fills in the

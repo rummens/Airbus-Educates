@@ -38,6 +38,20 @@ List the storage classes available to you:
 command: oc get storageclass | tee ~/exercises/storageclasses.txt
 ```
 
+```section:begin
+name: breakdown-list-storage-classes
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get storageclass`** — lists the storage classes the cluster offers.
+- **`| tee ~/exercises/storageclasses.txt`** — shows the output in the terminal and also saves a copy to
+  that file, so the check below can read it.
+
+```section:end
+name: breakdown-list-storage-classes
+```
+
 ```examiner:execute-test
 name: verify-storageclass
 title: Verify storage classes are available

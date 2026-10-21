@@ -37,6 +37,23 @@ command: |-
   YAML
 ```
 
+```section:begin
+name: breakdown-request-root
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`cat <<YAML` … `YAML`** — a heredoc: the lines between the two `YAML` markers are passed to `cat` as its input. The shell fills in `${DCS_REGISTRY}` on the way.
+- **`| oc apply -f -`** — applies that Pod manifest from the pipe.
+- **`2>&1`** — sends the error message to the normal output, so the next command can read it.
+- **`| tail -4`** — keeps only the last four lines of the long refusal.
+- **`|| true`** — the refusal is expected, so this keeps the step from being reported as a failure.
+- **`runAsUser: 0`** — the line in the manifest that asks for root, which the SCC refuses.
+
+```section:end
+name: breakdown-request-root
+```
+
 ```examiner:execute-test
 name: verify-root-rejected
 title: Verify the platform refused to create a root container
@@ -72,6 +89,21 @@ You cannot read the SCCs themselves. They are cluster-scoped and platform-owned:
 command: oc get scc 2>&1 | tail -2 || true
 ```
 
+```section:begin
+name: breakdown-list-scc
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get scc`** — tries to list the cluster's SCCs. You are expected to get a Forbidden error.
+- **`2>&1`** — sends that error to the normal output.
+- **`| tail -2`** — shows only the last two lines.
+- **`|| true`** — keeps the step from being reported as a failure.
+
+```section:end
+name: breakdown-list-scc
+```
+
 You can ask whether you may **use** a particular one:
 
 ```terminal:execute
@@ -79,6 +111,22 @@ command: |-
   for s in restricted-v2 anyuid privileged; do
     printf '%-14s %s\n' "$s" "$(oc auth can-i use scc/$s 2>/dev/null | tail -1)"
   done
+```
+
+```section:begin
+name: breakdown-can-i-use-scc
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`for s in restricted-v2 anyuid privileged; do` … `done`** — runs the lines in between once for each of the three SCC names, with `$s` set to the current name.
+- **`oc auth can-i use scc/$s`** — asks the API server whether you may use that SCC. It answers `yes` or `no`.
+- **`2>/dev/null | tail -1`** — hides warnings and keeps only the answer line.
+- **`"$( … )"`** — puts that answer into the `printf` line.
+- **`printf '%-14s %s\n'`** — prints the SCC name padded to 14 characters, then the answer, so the three lines form a table.
+
+```section:end
+name: breakdown-can-i-use-scc
 ```
 
 ```examiner:execute-test

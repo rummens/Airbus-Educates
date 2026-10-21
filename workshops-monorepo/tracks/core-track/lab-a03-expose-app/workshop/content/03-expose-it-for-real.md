@@ -39,12 +39,24 @@ retries: .INF
 delay: 2
 ```
 
-See the host DCS assigned. The `-o jsonpath='...'` flag extracts one field from the object
-instead of printing all of it; `{.spec.host}` selects the host name, and `{"\n"}` adds a
-line break after it:
+See the host DCS assigned:
 
 ```terminal:execute
 command: oc get route hello-dcs -o jsonpath='{.spec.host}{"\n"}'
+```
+
+```section:begin
+name: breakdown-show-route-host
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get route hello-dcs`** — reads the Route object.
+- **`-o jsonpath='{.spec.host}{"\n"}'`** — prints one field instead of the whole object:
+  `{.spec.host}` is the host name, and `{"\n"}` adds a line break after it.
+
+```section:end
+name: breakdown-show-route-host
 ```
 
 ```examiner:execute-test
@@ -58,20 +70,33 @@ delay: 2
 ## Reach it from outside the session
 
 That host is on public DCS DNS, reachable from a normal browser — not just from this
-session. Call it.
-
-The command has two lines and two new flags:
-
-- **line 1** — stores the Route host in a shell variable named `HOST`.
-- **line 2** — calls it with `curl`.
-- **`-k`** — skips TLS certificate checks. This URL is plain `http://`, so it has no
-  effect here.
-- **`%{http_code} from "$HOST"`** — prints the status code and the host it reached.
+session. Call it:
 
 ```terminal:execute
 command: |-
   HOST=$(oc get route hello-dcs -o jsonpath='{.spec.host}')
   curl -sk -o /dev/null -w 'HTTP %{http_code} from '"$HOST"'\n' "http://$HOST"
+```
+
+```section:begin
+name: breakdown-call-route
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`HOST=$( … )`** — runs the command inside `$( )` and stores its output in a shell
+  variable named `HOST`.
+- **`oc get route hello-dcs -o jsonpath='{.spec.host}'`** — prints only the Route's host
+  name.
+- **`curl -sk`** — `-s` calls the URL quietly, without a progress bar; `-k` skips TLS
+  certificate checks, which has no effect on this plain `http://` URL.
+- **`-o /dev/null`** — throws away the page body.
+- **`-w 'HTTP %{http_code} from '"$HOST"'\n'`** — prints the status code and the host. The
+  quotes switch from single to double around `$HOST`, so the shell fills in its value.
+- **`"http://$HOST"`** — the URL to call, built from the variable.
+
+```section:end
+name: breakdown-call-route
 ```
 
 ```examiner:execute-test

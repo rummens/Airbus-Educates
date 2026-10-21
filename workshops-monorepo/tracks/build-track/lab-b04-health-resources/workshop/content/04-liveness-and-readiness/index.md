@@ -81,6 +81,22 @@ command: timeout 60 oc get pods -o wide -l app=hello-dcs --watch
 session: 2
 ```
 
+```section:begin
+name: breakdown-watch-pods
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`timeout 60`** — stops the command after 60 seconds, so nothing is left running in the pane.
+- **`oc get pods`** — lists Pods.
+- **`-o wide`** — adds columns such as the Pod IP and the node it runs on.
+- **`-l app=hello-dcs`** — shows only Pods with the label `app=hello-dcs`.
+- **`--watch`** — keeps the command running and prints a new line each time a Pod changes.
+
+```section:end
+name: breakdown-watch-pods
+```
+
 In the **upper** pane, point readiness at a path that does not exist. `oc set probe` edits a
 running Deployment's probes directly, with no manifest edit:
 
@@ -123,6 +139,19 @@ others keep serving, and nothing is restarted.
 
 ```terminal:execute
 command: envsubst < deployment-probes.yaml | oc apply -f -
+```
+
+```section:begin
+name: breakdown-restore-probes
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < deployment-probes.yaml`** — reads the manifest and replaces `${DCS_REGISTRY}` with the registry address from your session.
+- **`| oc apply -f -`** — the pipe hands the result to `oc apply`. The `-f -` means "read the manifest from the pipe" instead of from a file.
+
+```section:end
+name: breakdown-restore-probes
 ```
 
 ```examiner:execute-test

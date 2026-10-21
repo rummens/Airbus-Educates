@@ -56,6 +56,24 @@ Trigger a rollout so new Pods start and read the updated ConfigMap:
 command: oc rollout restart deploy/hello-dcs && oc rollout status deploy/hello-dcs --timeout=90s
 ```
 
+```section:begin
+name: breakdown-restart-and-wait
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc rollout restart deploy/hello-dcs`** — starts a new rollout: the Deployment replaces
+  its Pods with new ones from the same template, and the new Pods read the ConfigMap again.
+- **`&&`** — runs the next command only if the restart was accepted.
+- **`oc rollout status deploy/hello-dcs`** — waits until the new Pod is Ready and the
+  rollout is complete.
+- **`--timeout=90s`** — stops waiting after 90 seconds and reports an error,
+  instead of waiting forever.
+
+```section:end
+name: breakdown-restart-and-wait
+```
+
 Now ask the **new** container the same question:
 
 ```terminal:execute

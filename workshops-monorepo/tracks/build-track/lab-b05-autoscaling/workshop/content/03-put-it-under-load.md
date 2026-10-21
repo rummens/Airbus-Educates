@@ -23,6 +23,26 @@ command: timeout 240 sh -c 'while true; do date +%T; oc get hpa hello-dcs --no-h
 session: 2
 ```
 
+```section:begin
+name: breakdown-watch-hpa
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`timeout 240`** — stops everything after four minutes.
+- **`sh -c '…'`** — runs the quoted loop in its own small shell, so `timeout` can stop all of it at once.
+- **`while true; do` … `done`** — repeats the commands in between until `timeout` stops it.
+- **`date +%T`** — prints the time, so you can see when each change happened.
+- **`oc get hpa hello-dcs --no-headers`** — one line with the current and target CPU and the replica numbers, without the column titles.
+- **`oc get pods -l app=hello-dcs --no-headers | wc -l`** — counts the app's Pods: one line per Pod, and `wc -l` counts the lines.
+- **`| sed "s/^/pods: /"`** — puts `pods: ` in front of that count.
+- **`echo`** — prints a blank line between samples.
+- **`sleep 10`** — waits ten seconds before the next sample.
+
+```section:end
+name: breakdown-watch-hpa
+```
+
 ## Drive the load
 
 In the **upper** pane, run a two-minute burst of traffic with `ab`:
@@ -32,14 +52,20 @@ command: ab -t 120 -c 16 "http://hello-dcs.$(oc project -q).svc:8080/"
 session: 1
 ```
 
-What that does:
+```section:begin
+name: breakdown-load-test
+prefix: Breakdown
+title: What each part of the command does
+```
 
-- **`ab`** — sends plain HTTP GET requests in a steady stream and prints a summary when it
-  stops.
-- **`-t 120`** — run for two minutes, then stop by itself. Nothing is left running.
-- **`-c 16`** — sixteen requests in flight at once, over reused connections.
-- **the URL** — the Service address in this namespace; `ab` resolves the name once, at
-  start.
+- **`ab`** — sends plain HTTP GET requests in a steady stream and prints a summary when it stops.
+- **`-t 120`** — runs for two minutes, then stops by itself, so nothing is left running.
+- **`-c 16`** — keeps sixteen requests in flight at once, over reused connections.
+- **`"http://hello-dcs.$(oc project -q).svc:8080/"`** — the Service address in this namespace. `$(oc project -q)` is replaced by your namespace name, and `ab` resolves the name once, at start.
+
+```section:end
+name: breakdown-load-test
+```
 
 Why a load tool instead of eight `curl` loops: every `curl` is a new process and a fresh
 DNS lookup, and that per-request overhead can keep your terminal container busier than the

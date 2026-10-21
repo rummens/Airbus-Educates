@@ -45,6 +45,21 @@ prints the active namespace and the cluster server it is on:
 command: oc project | tee ~/exercises/project.txt
 ```
 
+```section:begin
+name: breakdown-active-namespace
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc project`** — prints your active namespace (OpenShift calls it a project) and the
+  cluster server.
+- **`| tee ~/exercises/project.txt`** — shows the output in the terminal and also saves a copy to
+  that file, so the check below can read it.
+
+```section:end
+name: breakdown-active-namespace
+```
+
 ```examiner:execute-test
 name: verify-active-namespace
 title: Verify you have an active namespace
@@ -59,12 +74,28 @@ above it. We'll come back to that on the Tenancy page.
 
 ## What's in it
 
-Everything you create lands here unless you say otherwise. List your workloads. Passing
-a comma-separated list of kinds (`deployments,pods,services`) asks `oc` for all three at
-once, so you see the whole picture in a single command:
+Everything you create lands here unless you say otherwise. List your workloads:
 
 ```terminal:execute
 command: oc get deployments,pods,services 2>&1 | tee ~/exercises/workloads.txt
+```
+
+```section:begin
+name: breakdown-list-workloads
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get deployments,pods,services`** — lists three kinds of object in one request; the
+  comma-separated list asks for all three at once.
+- **`2>&1`** — sends error messages to the same place as normal output. In an empty
+  namespace `oc` reports "No resources found" as an error message, so this keeps it in the
+  saved file.
+- **`| tee ~/exercises/workloads.txt`** — shows the output in the terminal and also saves a copy to
+  that file, so the check below can read it.
+
+```section:end
+name: breakdown-list-workloads
 ```
 
 ```examiner:execute-test

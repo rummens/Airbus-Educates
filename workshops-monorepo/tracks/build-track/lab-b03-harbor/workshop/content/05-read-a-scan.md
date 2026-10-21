@@ -28,6 +28,23 @@ file: ~/exercises/scan-report.json
 command: jq '{artifact, scanner: .scanner.name, summary}' exercises/scan-report.json 2>/dev/null || jq '{artifact, scanner: .scanner.name, summary}' ~/exercises/scan-report.json
 ```
 
+```section:begin
+name: breakdown-summarise-report
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`jq '{…}'`** — builds a smaller JSON object from the report.
+- **`artifact`, `summary`** — copies those two fields across unchanged.
+- **`scanner: .scanner.name`** — adds a field `scanner` holding only the scanner's name.
+- **`exercises/scan-report.json`** — the report, by a path relative to your home directory.
+- **`2>/dev/null`** — hides the error if the terminal is not in your home directory.
+- **`|| jq … ~/exercises/scan-report.json`** — if the first attempt failed, runs the same filter on the full path.
+
+```section:end
+name: breakdown-summarise-report
+```
+
 ```examiner:execute-test
 name: verify-clean-summary
 title: Verify you can read the clean image's severity summary
@@ -48,6 +65,19 @@ decides what you can do about each finding.
 command: jq '{artifact, summary}' ~/exercises/scan-report-flagged.json
 ```
 
+```section:begin
+name: breakdown-summarise-flagged
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`jq '{artifact, summary}'`** — prints a smaller JSON object with only the `artifact` and `summary` fields.
+- **`~/exercises/scan-report-flagged.json`** — the second report, for the image that fails the gate.
+
+```section:end
+name: breakdown-summarise-flagged
+```
+
 ```examiner:execute-test
 name: verify-flagged-summary
 title: Verify the flagged image's Critical findings are visible
@@ -64,6 +94,22 @@ image is refused there. It can sit in a DEV project without any trouble.
 
 ```terminal:execute
 command: jq -r '.vulnerabilities[] | select(.severity=="Critical") | "\(.id)  \(.package) \(.installedVersion) → \(.FixedVersion // "no fix")"' ~/exercises/scan-report-flagged.json
+```
+
+```section:begin
+name: breakdown-list-criticals
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`jq -r`** — runs the filter and prints plain text, without JSON quotes.
+- **`.vulnerabilities[]`** — goes through each finding in the list.
+- **`| select(.severity=="Critical")`** — keeps only the findings rated Critical.
+- **`| "\(.id)  \(.package) \(.installedVersion) → …"`** — prints one line per finding. Each `\( … )` inserts a field: the CVE id, the package and its installed version.
+- **`.FixedVersion // "no fix"`** — the version that fixes it, or `no fix` when the field is missing or empty.
+
+```section:end
+name: breakdown-list-criticals
 ```
 
 ```examiner:execute-test

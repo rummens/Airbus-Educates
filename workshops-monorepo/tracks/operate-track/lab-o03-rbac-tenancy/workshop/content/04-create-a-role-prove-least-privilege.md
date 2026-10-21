@@ -93,6 +93,19 @@ the same substitution pattern used for `${DCS_REGISTRY}` elsewhere in these labs
 command: envsubst < rolebinding-viewer.yaml | oc apply -f -
 ```
 
+```section:begin
+name: breakdown-apply-binding
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < rolebinding-viewer.yaml`** — reads the file and replaces `${SESSION_NAMESPACE}` with your namespace name.
+- **`| oc apply -f -`** — the pipe hands that output to `oc apply`; `-f -` means "read the manifest from the pipe" instead of from a file.
+
+```section:end
+name: breakdown-apply-binding
+```
+
 ```examiner:execute-test
 name: verify-rolebinding-viewer-created
 title: Verify the rolebinding-viewer RoleBinding exists and binds viewer-bot

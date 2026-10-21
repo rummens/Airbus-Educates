@@ -34,6 +34,21 @@ Three fields control overlapping runs, history and pausing:
 command: envsubst < cronjob-report.yaml | oc apply -f - && oc get cronjob nightly-report
 ```
 
+```section:begin
+name: breakdown-create-cronjob
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < cronjob-report.yaml`** — reads the file and replaces each `${VAR}` placeholder (here the Harbor registry, `${DCS_REGISTRY}`) with the value from your session, so the registry host is never hard-coded.
+- **`| oc apply -f -`** — the pipe passes that output to `oc apply`; `-f -` means "read the manifest from the pipe" instead of from a file.
+- **`&&`** — run the next command only if `oc apply` succeeded.
+- **`oc get cronjob nightly-report`** — shows the CronJob's schedule, whether it is suspended, and when it last fired.
+
+```section:end
+name: breakdown-create-cronjob
+```
+
 ```examiner:execute-test
 name: verify-cronjob-created
 title: Verify the CronJob exists with its schedule and concurrency policy
@@ -50,6 +65,20 @@ Do not wait until 03:00. Create a Job **from** the CronJob's template:
 
 ```terminal:execute
 command: oc create job report-now --from=cronjob/nightly-report && oc wait --for=condition=complete job/report-now --timeout=120s
+```
+
+```section:begin
+name: breakdown-trigger-cronjob
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc create job report-now --from=cronjob/nightly-report`** — creates a Job called `report-now` from the CronJob's `jobTemplate`.
+- **`&&`** — run the next command only if the Job was created.
+- **`oc wait --for=condition=complete job/report-now --timeout=120s`** — blocks until that Job reports `Complete`, or fails after 120 seconds.
+
+```section:end
+name: breakdown-trigger-cronjob
 ```
 
 `--from=cronjob/<name>` copies the CronJob's `jobTemplate`, so you are testing the **real**
@@ -81,6 +110,22 @@ A CronJob you no longer want firing does not have to be deleted:
 
 ```terminal:execute
 command: oc patch cronjob nightly-report -p '{"spec":{"suspend":true}}' --type=merge && oc get cronjob nightly-report
+```
+
+```section:begin
+name: breakdown-suspend-cronjob
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc patch cronjob nightly-report`** — changes fields on the existing CronJob without editing its YAML file.
+- **`-p '{"spec":{"suspend":true}}'`** — the change, written as JSON: set `spec.suspend` to `true`.
+- **`--type=merge`** — merges that JSON into the object and leaves every other field as it is.
+- **`&&`** — run the next command only if the patch succeeded.
+- **`oc get cronjob nightly-report`** — shows the CronJob again, so you can read the `SUSPEND` column.
+
+```section:end
+name: breakdown-suspend-cronjob
 ```
 
 ```examiner:execute-test

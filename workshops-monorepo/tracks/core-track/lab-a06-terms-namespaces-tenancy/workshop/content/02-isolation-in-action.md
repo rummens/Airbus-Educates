@@ -19,15 +19,25 @@ On {{< param product_name >}} that is your own, never the whole cluster — so i
 command to reach for instead of `oc get namespaces`, which needs cluster-wide rights nobody
 gets here.
 
-Two shell features appear as well:
-
-- **`$(oc project -q)`** — runs `oc project -q` first and substitutes its output: your
-  active namespace, with `-q` for the quiet, name-only form.
-- **`|`** — the pipe sends that list into `grep`, which keeps only the lines matching your
-  two peer namespaces.
-
 ```terminal:execute
 command: oc get projects | grep "$(oc project -q)-app-" | tee ~/exercises/peers.txt
+```
+
+```section:begin
+name: breakdown-list-peer-namespaces
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get projects`** — lists the namespaces you are allowed to see.
+- **`| grep "$(oc project -q)-app-"`** — keeps only the lines that contain your namespace
+  name followed by `-app-`: your two peer namespaces. `$(oc project -q)` runs first and
+  inserts your namespace name (`-q` prints the name alone).
+- **`| tee ~/exercises/peers.txt`** — shows the output in the terminal and also saves a copy to
+  that file, so the check below can read it.
+
+```section:end
+name: breakdown-list-peer-namespaces
 ```
 
 ```examiner:execute-test
@@ -59,18 +69,29 @@ exactly one namespace, and `-n` is how you pick which.
 The command and the manifest stay the same. Only the `-n` value changes where the app is
 created.
 
-The deploy command combines three parts:
-
-1. **`envsubst < app.yaml`** — reads `app.yaml` (the `<` feeds the file in as input) and
-   replaces `${DCS_REGISTRY}` with the registry value.
-2. **`|`** — the pipe sends that filled-in manifest to `oc apply`.
-3. **`-f -`** — tells `oc apply` to read the manifest from that piped input instead of from
-   a file. The `-` means "standard input".
-
 You will use the **split terminal**. In the **upper** pane, deploy into `app-a`:
 
 ```terminal:execute
 command: envsubst < app.yaml | oc apply -n "$(oc project -q)-app-a" -f -
+```
+
+```section:begin
+name: breakdown-deploy-app-a
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < app.yaml`** — reads `app.yaml` (`<` feeds the file in) and replaces
+  `${DCS_REGISTRY}` with the registry address from your session.
+- **`| oc apply`** — the pipe hands the filled-in manifest to `oc apply`.
+- **`-n "$(oc project -q)-app-a"`** — runs the command in the `app-a` namespace:
+  `$(oc project -q)` inserts your session namespace name, and `-app-a` is added to
+  the end.
+- **`-f -`** — reads the manifest from the pipe (standard input) instead of from a
+  file.
+
+```section:end
+name: breakdown-deploy-app-a
 ```
 
 ```examiner:execute-test
@@ -86,6 +107,25 @@ Now the **lower** pane — the identical manifest into `app-b`, changing only th
 ```terminal:execute
 command: envsubst < app.yaml | oc apply -n "$(oc project -q)-app-b" -f -
 session: 2
+```
+
+```section:begin
+name: breakdown-deploy-app-b
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < app.yaml`** — reads `app.yaml` (`<` feeds the file in) and replaces
+  `${DCS_REGISTRY}` with the registry address from your session.
+- **`| oc apply`** — the pipe hands the filled-in manifest to `oc apply`.
+- **`-n "$(oc project -q)-app-b"`** — runs the command in the `app-b` namespace:
+  `$(oc project -q)` inserts your session namespace name, and `-app-b` is added to
+  the end.
+- **`-f -`** — reads the manifest from the pipe (standard input) instead of from a
+  file.
+
+```section:end
+name: breakdown-deploy-app-b
 ```
 
 ```examiner:execute-test
@@ -110,10 +150,40 @@ Read the one in `app-a`:
 command: oc get deploy hello -n "$(oc project -q)-app-a"
 ```
 
+```section:begin
+name: breakdown-read-app-a
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get deploy hello`** — shows the Deployment named `hello`.
+- **`-n "$(oc project -q)-app-a"`** — runs the command in the `app-a` namespace:
+  `$(oc project -q)` inserts your session namespace name, and `-app-a` is added to
+  the end.
+
+```section:end
+name: breakdown-read-app-a
+```
+
 Now read the one in `app-b`:
 
 ```terminal:execute
 command: oc get deploy hello -n "$(oc project -q)-app-b"
+```
+
+```section:begin
+name: breakdown-read-app-b
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get deploy hello`** — shows the Deployment named `hello`.
+- **`-n "$(oc project -q)-app-b"`** — runs the command in the `app-b` namespace:
+  `$(oc project -q)` inserts your session namespace name, and `-app-b` is added to
+  the end.
+
+```section:end
+name: breakdown-read-app-b
 ```
 
 ```examiner:execute-test
@@ -136,6 +206,22 @@ copies to zero, so the platform stops the Pod in `app-a`:
 command: oc scale deploy/hello --replicas=0 -n "$(oc project -q)-app-a"
 ```
 
+```section:begin
+name: breakdown-scale-app-a
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc scale deploy/hello --replicas=0`** — sets the desired number of copies of `hello`
+  to zero.
+- **`-n "$(oc project -q)-app-a"`** — runs the command in the `app-a` namespace:
+  `$(oc project -q)` inserts your session namespace name, and `-app-a` is added to
+  the end.
+
+```section:end
+name: breakdown-scale-app-a
+```
+
 Now read both Deployments and confirm that only `app-a` changed. First `app-a`, which
 should show `0/0` (scaled to zero):
 
@@ -143,10 +229,40 @@ should show `0/0` (scaled to zero):
 command: oc get deploy hello -n "$(oc project -q)-app-a"
 ```
 
+```section:begin
+name: breakdown-recheck-app-a
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get deploy hello`** — shows the Deployment named `hello`.
+- **`-n "$(oc project -q)-app-a"`** — runs the command in the `app-a` namespace:
+  `$(oc project -q)` inserts your session namespace name, and `-app-a` is added to
+  the end.
+
+```section:end
+name: breakdown-recheck-app-a
+```
+
 Then `app-b`, which should still show `1/1` — unchanged by the action you took in `app-a`:
 
 ```terminal:execute
 command: oc get deploy hello -n "$(oc project -q)-app-b"
+```
+
+```section:begin
+name: breakdown-recheck-app-b
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get deploy hello`** — shows the Deployment named `hello`.
+- **`-n "$(oc project -q)-app-b"`** — runs the command in the `app-b` namespace:
+  `$(oc project -q)` inserts your session namespace name, and `-app-b` is added to
+  the end.
+
+```section:end
+name: breakdown-recheck-app-b
 ```
 
 The check below confirms it:

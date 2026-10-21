@@ -115,6 +115,12 @@ LINK_ARGS+=(--summary-csv "$LINK_CSV")
 python3 "$W/link_check.py" "${LINK_ARGS[@]}" || fail=1
 
 echo
+echo "########## style: command breakdowns, retired links, voice tells ##########"
+# Errors (complex command with no collapsed Breakdown, docs.openshift.com, raw <details>)
+# fail the job; AI-voice tells are printed as warnings for the reviewer, not gated.
+python3 "$W/style_check.py" --all --quiet || fail=1
+
+echo
 echo "########## lifecycle labels: dev/prod matches Route usage ##########"
 python3 "$W/label_check.py" --all || fail=1
 

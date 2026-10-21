@@ -24,6 +24,21 @@ LimitRange defaults.
 command: envsubst < hello-dcs-unsized.yaml | oc apply -f - -n $DEV_NS && oc rollout status deploy/hello-dcs -n $DEV_NS --timeout=120s
 ```
 
+```section:begin
+name: breakdown-deploy-dev
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < hello-dcs-unsized.yaml`** — reads the file and replaces `${DCS_REGISTRY}` with its value from your session, so the registry host is not hard-coded.
+- **`| oc apply -f - -n $DEV_NS`** — the pipe hands that output to `oc apply`; `-f -` means "read the manifest from the pipe", and `-n $DEV_NS` applies it in that namespace.
+- **`&&`** — runs the next command only if the one before it succeeded.
+- **`oc rollout status deploy/hello-dcs -n $DEV_NS --timeout=120s`** — waits until the Deployment's Pods are ready, or gives up after 120 seconds.
+
+```section:end
+name: breakdown-deploy-dev
+```
+
 ```examiner:execute-test
 name: verify-dev-accepts-unsized
 title: Verify DEV accepted the unsized workload
@@ -59,6 +74,19 @@ An ordinary Route. Apply it to DEV:
 
 ```terminal:execute
 command: oc apply -f route.yaml -n $DEV_NS || true
+```
+
+```section:begin
+name: breakdown-route-dev
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc apply -f route.yaml -n $DEV_NS`** — tries to create the Route in the DEV namespace.
+- **`|| true`** — the refusal is expected; this keeps the step from being marked as failed.
+
+```section:end
+name: breakdown-route-dev
 ```
 
 It is **refused**, and the message says exactly why:

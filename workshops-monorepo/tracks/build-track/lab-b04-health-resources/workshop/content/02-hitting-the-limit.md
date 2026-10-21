@@ -29,6 +29,19 @@ file: ~/exercises/deployment-oversized.yaml
 command: envsubst < deployment-oversized.yaml | oc apply -f -
 ```
 
+```section:begin
+name: breakdown-apply-oversized
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < deployment-oversized.yaml`** — reads the manifest and replaces `${DCS_REGISTRY}` with the registry address from your session.
+- **`| oc apply -f -`** — the pipe hands the result to `oc apply`. The `-f -` means "read the manifest from the pipe" instead of from a file.
+
+```section:end
+name: breakdown-apply-oversized
+```
+
 {{< note >}}
 **⏳ This takes a moment:** the changed Pod template starts a rolling update, so
 {{< param product_short >}} tries to create bigger Pods alongside the running ones. The
@@ -59,6 +72,19 @@ record what the platform tried, and why it failed:
 
 ```terminal:execute
 command: oc get events --sort-by=.lastTimestamp
+```
+
+```section:begin
+name: breakdown-sorted-events
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get events`** — lists the recent events in your namespace.
+- **`--sort-by=.lastTimestamp`** — sorts them by when they last happened, so the newest are at the bottom, next to your prompt.
+
+```section:end
+name: breakdown-sorted-events
 ```
 
 Look for a `FailedCreate` event naming the ReplicaSet, with a message shaped like this:

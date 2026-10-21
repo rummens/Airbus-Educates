@@ -17,6 +17,20 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/pr
 command: envsubst < hello-dcs-unsized.yaml | oc apply -f - -n $PROD_NS || true
 ```
 
+```section:begin
+name: breakdown-unsized-prod
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < hello-dcs-unsized.yaml`** — reads the same unsized manifest and replaces `${DCS_REGISTRY}` with its value from your session.
+- **`| oc apply -f - -n $PROD_NS`** — the pipe hands that output to `oc apply`; `-f -` reads the manifest from the pipe, and `-n $PROD_NS` applies it in the PROD namespace.
+- **`|| true`** — the refusal is expected; this keeps the step from being marked as failed.
+
+```section:end
+name: breakdown-unsized-prod
+```
+
 PROD refuses it. Read the message before you change anything:
 
 ```
@@ -59,6 +73,21 @@ one container.
 command: envsubst < hello-dcs-sized.yaml | oc apply -f - -n $PROD_NS && oc rollout status deploy/hello-dcs -n $PROD_NS --timeout=120s
 ```
 
+```section:begin
+name: breakdown-deploy-prod
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < hello-dcs-sized.yaml`** — reads the file and replaces `${DCS_REGISTRY}` with its value from your session, so the registry host is not hard-coded.
+- **`| oc apply -f - -n $PROD_NS`** — the pipe hands that output to `oc apply`; `-f -` means "read the manifest from the pipe", and `-n $PROD_NS` applies it in that namespace.
+- **`&&`** — runs the next command only if the one before it succeeded.
+- **`oc rollout status deploy/hello-dcs -n $PROD_NS --timeout=120s`** — waits until the Deployment's Pods are ready, or gives up after 120 seconds.
+
+```section:end
+name: breakdown-deploy-prod
+```
+
 ```examiner:execute-test
 name: verify-prod-accepts-sized
 title: Verify PROD accepted the sized workload
@@ -76,6 +105,20 @@ runs.
 command: oc apply -f service.yaml -n $PROD_NS && oc apply -f route.yaml -n $PROD_NS
 ```
 
+```section:begin
+name: breakdown-publish-prod
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc apply -f service.yaml -n $PROD_NS`** — creates the Service in the PROD namespace.
+- **`&&`** — runs the next command only if that succeeded.
+- **`oc apply -f route.yaml -n $PROD_NS`** — creates the same Route that DEV refused, this time in PROD.
+
+```section:end
+name: breakdown-publish-prod
+```
+
 ```examiner:execute-test
 name: verify-prod-route-created
 title: Verify the Route was admitted in PROD and has a host
@@ -89,6 +132,19 @@ real hostname:
 
 ```terminal:execute
 command: oc get route hello-dcs -n $PROD_NS -o jsonpath='{.spec.host}{"\n"}'
+```
+
+```section:begin
+name: breakdown-route-host
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get route hello-dcs -n $PROD_NS`** — reads the Route in the PROD namespace.
+- **`-o jsonpath='{.spec.host}{"\n"}'`** — prints only the hostname the platform assigned, followed by a newline.
+
+```section:end
+name: breakdown-route-host
 ```
 
 ```examiner:execute-test

@@ -27,6 +27,20 @@ First, confirm who you are logged in as:
 command: oc whoami | tee ~/exercises/whoami.txt
 ```
 
+```section:begin
+name: breakdown-whoami
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc whoami`** — prints the user name you are logged in as.
+- **`| tee ~/exercises/whoami.txt`** — shows the output in the terminal and also saves a copy to
+  that file, so the check below can read it.
+
+```section:end
+name: breakdown-whoami
+```
+
 ```examiner:execute-test
 name: verify-whoami
 title: Verify you are authenticated
@@ -39,6 +53,21 @@ Check that your `oc` client can talk to the {{< param product_short >}} cluster:
 
 ```terminal:execute
 command: oc version | tee ~/exercises/version.txt
+```
+
+```section:begin
+name: breakdown-version
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc version`** — prints the version of your `oc` client and of the cluster it is
+  connected to.
+- **`| tee ~/exercises/version.txt`** — shows the output in the terminal and also saves a copy to
+  that file, so the check below can read it.
+
+```section:end
+name: breakdown-version
 ```
 
 ```examiner:execute-test
@@ -54,6 +83,21 @@ On {{< param product_short >}}, your work lives in a **namespace**. OpenShift ca
 
 ```terminal:execute
 command: oc project -q | tee ~/exercises/project.txt
+```
+
+```section:begin
+name: breakdown-project
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc project -q`** — prints the name of your current namespace; `-q` (quiet) prints the
+  name alone.
+- **`| tee ~/exercises/project.txt`** — shows the output in the terminal and also saves a copy to
+  that file, so the check below can read it.
+
+```section:end
+name: breakdown-project
 ```
 
 ```examiner:execute-test
@@ -74,6 +118,20 @@ its own fresh session namespace, so this one starts clean:
 
 ```terminal:execute
 command: oc status | tee ~/exercises/status.txt
+```
+
+```section:begin
+name: breakdown-status
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc status`** — summarises what is running in your namespace.
+- **`| tee ~/exercises/status.txt`** — shows the output in the terminal and also saves a copy to
+  that file, so the check below can read it.
+
+```section:end
+name: breakdown-status
 ```
 
 ```examiner:execute-test

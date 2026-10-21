@@ -18,6 +18,22 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/sp
 command: oc get pods -l app=hello-dcs -o custom-columns=NAME:.metadata.name,NODE:.spec.nodeName,STATUS:.status.phase
 ```
 
+```section:begin
+name: breakdown-pod-nodes
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get pods -l app=hello-dcs`** — lists only the Pods with the label `app=hello-dcs`.
+- **`-o custom-columns=`** — prints a table with the columns you name instead of the default ones. Each column is written `TITLE:field-path`, separated by commas.
+- **`NAME:.metadata.name`** — the Pod's name.
+- **`NODE:.spec.nodeName`** — the node the scheduler placed the Pod on.
+- **`STATUS:.status.phase`** — the Pod's phase, such as `Running` or `Pending`.
+
+```section:end
+name: breakdown-pod-nodes
+```
+
 Read the **NODE** column. The scheduler packs workloads by default, because it is
 optimising for efficient use of the cluster rather than for your availability.
 
@@ -39,6 +55,21 @@ Two mechanisms, both asking for the same thing:
 command: envsubst < deployment-spread.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=180s
 ```
 
+```section:begin
+name: breakdown-apply-spread
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < deployment-spread.yaml`** — reads the file and replaces each `${VAR}` placeholder (here the Harbor registry, `${DCS_REGISTRY}`) with the value from your session, so the registry host is never hard-coded.
+- **`| oc apply -f -`** — the pipe passes that output to `oc apply`; `-f -` means "read the manifest from the pipe" instead of from a file.
+- **`&&`** — run the next command only if `oc apply` succeeded.
+- **`oc rollout status deploy/hello-dcs --timeout=180s`** — waits until every replica is ready, or gives up after 180 seconds.
+
+```section:end
+name: breakdown-apply-spread
+```
+
 ```examiner:execute-test
 name: verify-spread-constraints
 title: Verify the Pod template now asks to be spread across nodes
@@ -58,6 +89,22 @@ delay: 3
 
 ```terminal:execute
 command: oc get pods -l app=hello-dcs -o custom-columns=NAME:.metadata.name,NODE:.spec.nodeName,STATUS:.status.phase
+```
+
+```section:begin
+name: breakdown-pod-nodes-after
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get pods -l app=hello-dcs`** — lists only the Pods with the label `app=hello-dcs`.
+- **`-o custom-columns=`** — prints a table with the columns you name instead of the default ones. Each column is written `TITLE:field-path`, separated by commas.
+- **`NAME:.metadata.name`** — the Pod's name.
+- **`NODE:.spec.nodeName`** — the node the scheduler placed the Pod on.
+- **`STATUS:.status.phase`** — the Pod's phase, such as `Running` or `Pending`.
+
+```section:end
+name: breakdown-pod-nodes-after
 ```
 
 ```examiner:execute-test

@@ -49,6 +49,21 @@ command: oc get svc -o wide
 command: getent hosts hello-dcs-peers.$(oc project -q).svc.cluster.local
 ```
 
+```section:begin
+name: breakdown-resolve-headless
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`getent hosts`** — asks the terminal's resolver, which is cluster DNS, for the addresses of a name, the same lookup an app does before it connects.
+- **`hello-dcs-peers.`** — the headless Service name, followed by your namespace.
+- **`$(oc project -q)`** — runs first and puts your namespace name into the hostname (`-q` prints only the name).
+- **`.svc.cluster.local`** — the cluster DNS suffix every Service name ends in.
+
+```section:end
+name: breakdown-resolve-headless
+```
+
 This time you get **one line per ready Pod**:
 
 ```

@@ -32,6 +32,21 @@ command: timeout 60 oc get pods -l app=hello-dcs --watch
 session: 2
 ```
 
+```section:begin
+name: breakdown-watch-pods
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`timeout 60`** — stops the command after 60 seconds, so nothing is left running in the pane.
+- **`oc get pods`** — lists Pods.
+- **`-l app=hello-dcs`** — shows only Pods with the label `app=hello-dcs`.
+- **`--watch`** — keeps the command running and prints a new line each time a Pod changes.
+
+```section:end
+name: breakdown-watch-pods
+```
+
 ## Delete one Pod
 
 In the **upper** pane, pick exactly one running Pod and delete it:
@@ -42,11 +57,21 @@ command: |-
   oc delete "$(cat /tmp/deleted-pod.txt)"
 ```
 
-What that does, piece by piece:
+```section:begin
+name: breakdown-delete-one-pod
+prefix: Breakdown
+title: What each part of the command does
+```
 
-- **`-o name`** prints `pod/<name>` lines instead of the full table.
-- **`head -n 1`** keeps one line, so exactly one Pod is targeted.
-- **`> /tmp/deleted-pod.txt`** saves the name, so the check can prove *that* Pod is gone.
+- **`oc get pods -l app=hello-dcs`** — lists the app's Pods.
+- **`-o name`** — prints `pod/<name>` lines instead of the full table.
+- **`| head -n 1`** — keeps one line, so exactly one Pod is targeted.
+- **`> /tmp/deleted-pod.txt`** — saves that name, so the check can prove *that* Pod is gone.
+- **`oc delete "$(cat /tmp/deleted-pod.txt)"`** — reads the saved name back and deletes that Pod.
+
+```section:end
+name: breakdown-delete-one-pod
+```
 
 ```examiner:execute-test
 name: verify-pod-replaced

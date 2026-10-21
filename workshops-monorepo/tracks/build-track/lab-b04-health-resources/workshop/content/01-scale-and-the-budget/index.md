@@ -31,6 +31,22 @@ Apply it, together with a Service so later pages have an endpoint list to watch.
 command: envsubst < deployment-base.yaml | oc apply -f - && oc apply -f service.yaml && oc rollout status deploy/hello-dcs --timeout=120s
 ```
 
+```section:begin
+name: breakdown-deploy-and-wait
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < deployment-base.yaml`** — reads the manifest and replaces `${DCS_REGISTRY}` with the registry address from your session.
+- **`| oc apply -f -`** — the pipe hands the result to `oc apply`. The `-f -` means "read the manifest from the pipe" instead of from a file.
+- **`&& oc apply -f service.yaml`** — if that succeeded, creates the Service from its file. It has no `${DCS_REGISTRY}` in it, so it needs no `envsubst`.
+- **`&& oc rollout status deploy/hello-dcs`** — if that succeeded too, waits until the Deployment's Pods are ready.
+- **`--timeout=120s`** — gives up after two minutes instead of waiting forever.
+
+```section:end
+name: breakdown-deploy-and-wait
+```
+
 ```examiner:execute-test
 name: verify-app-deployed
 title: Verify hello-dcs is running with one replica and a Service

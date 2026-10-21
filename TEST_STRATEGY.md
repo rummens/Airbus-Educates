@@ -13,10 +13,11 @@ Three layers, matched to what breaks: **portal code**, **user flow**, **workshop
 | **2. User flow** | real session (namespace + vcluster) comes up, URL 200, basic commands run | `test/workshops/flow_test.py` | yes | no |
 | **3a. Coverage** | every workshop command has a smoke test (or explicit exclude) | `test/workshops/coverage_check.py` | no | yes |
 | **3b. Links** | every content link resolves 200 / target exists | `test/workshops/link_check.py` | no | yes |
+| **3e. Style** | every complex command has a collapsed Breakdown; no retired `docs.openshift.com`; voice tells listed | `test/workshops/style_check.py` | no | yes (errors only) |
 | **3d. Labels** | each lab's dev/prod lifecycle label matches its Route usage | `test/workshops/label_check.py` | no | yes |
 | **3c. Smoke** | examiner graders pass end-to-end on a live cluster | `test/workshops/smoke_test.py` | yes | no |
 
-Fast lanes (1, 3a, 3b, 3d) need no cluster and gate merges. Cluster lanes (2, 3c) run
+Fast lanes (1, 3a, 3b, 3d, 3e) need no cluster and gate merges. Cluster lanes (2, 3c) run
 manual-on-MR / automatic-on-schedule and report without blocking (cluster flakiness ≠ code bug).
 
 ---
@@ -68,13 +69,14 @@ air-gapped `dcs_docs_base_url` links. That base URL comes from the shared chart 
 since the committed value is the `docs.example.dcs` placeholder those links are only
 fetched when a real host is given plus `--check-internal`. In CI, set the
 `DCS_DOCS_BASE_URL` variable and `run-workshops.sh` passes both. Bot-blocked 401/403
-(docs.openshift.com) are tolerated, not failed. Every failure is repeated in one flat
+are tolerated, not failed. Every failure is repeated in one flat
 `file:line  reason  url  [lab]` list at the end of the run, so a CI log is readable
 without scrolling back through the per-lab output.
 
 ```bash
 test/workshops/coverage_check.py --all
 test/workshops/link_check.py --all
+test/workshops/style_check.py --all          # --strict also fails on voice warnings
 test/workshops/smoke_test.py lab-a02-kubernetes-essentials   # needs cluster
 ```
 

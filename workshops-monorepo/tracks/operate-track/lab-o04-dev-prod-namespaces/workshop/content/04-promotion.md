@@ -22,6 +22,21 @@ command: |-
   oc get deploy hello-dcs -n $PROD_NS -o jsonpath='{.spec.template.spec.containers[0].resources}{"\n"}'
 ```
 
+```section:begin
+name: breakdown-compare-resources
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`echo "--- DEV ---"`** — prints a heading, so you can tell the two outputs apart.
+- **`oc get deploy hello-dcs -n $DEV_NS`** — reads the Deployment in the DEV namespace.
+- **`-o jsonpath='{.spec.template.spec.containers[0].resources}{"\n"}'`** — prints only the `resources` block of the first container in the Pod template, followed by a newline.
+- **`echo "--- PROD ---"` and the second `oc get`** — the same read for the PROD namespace.
+
+```section:end
+name: breakdown-compare-resources
+```
+
 ```examiner:execute-test
 name: verify-both-running
 title: Verify the app is running in both namespaces
@@ -30,7 +45,8 @@ retries: .INF
 delay: 3
 ```
 
-DEV took the namespace defaults. PROD carries the numbers you declared. **Two different
+DEV prints `{}`: its Deployment declares no resources, so its Pods get the namespace
+defaults when they are created. PROD carries the numbers you declared. **Two different
 running states from two different manifests**, which is what promotion exists to prevent.
 
 ## What promotion is

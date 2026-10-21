@@ -57,12 +57,21 @@ The Service answers in-cluster at `hello-dcs.<namespace>.svc`. Call it from your
 command: curl -s -o /dev/null -w 'HTTP %{http_code}\n' "http://hello-dcs.$(oc project -q).svc:8080"
 ```
 
-Each part of that command does one thing:
+```section:begin
+name: breakdown-call-service
+prefix: Breakdown
+title: What each part of the command does
+```
 
-- **`-s`** turns off the progress bar.
-- **`-o /dev/null`** throws the page body away.
-- **`-w 'HTTP %{http_code}\n'`** prints just the status code.
-- **`$(oc project -q)`** substitutes your own namespace name.
+- **`curl`** — sends an HTTP request from your terminal.
+- **`-s`** — turns off the progress bar.
+- **`-o /dev/null`** — throws the page body away.
+- **`-w 'HTTP %{http_code}\n'`** — prints only the HTTP status code after the request.
+- **`"http://hello-dcs.$(oc project -q).svc:8080"`** — the Service's cluster DNS name and port. `$(oc project -q)` is replaced by your namespace name before `curl` runs.
+
+```section:end
+name: breakdown-call-service
+```
 
 ```examiner:execute-test
 name: verify-service-dns

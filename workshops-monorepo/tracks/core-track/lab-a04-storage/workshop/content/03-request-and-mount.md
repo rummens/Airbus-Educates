@@ -51,23 +51,46 @@ process can only write where it owns the path.
 {{< /note >}}
 
 The manifest names its image as `${DCS_REGISTRY}/...` instead of a hard-coded registry, so
-the same file works on any DCS environment.
-
-Applying it therefore takes two steps, joined by a pipe:
-
-1. **`envsubst`** — replaces `${DCS_REGISTRY}` with the real value and prints the finished
-   manifest.
-2. **`| oc apply -f -`** — hands that output straight to `oc`. The `-` means "read the
-   manifest from the pipe, not a file".
+the same file works on any DCS environment:
 
 ```terminal:execute
 command: envsubst < hello-dcs-with-volume.yaml | oc apply -f -
+```
+
+```section:begin
+name: breakdown-apply-deployment
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < hello-dcs-with-volume.yaml`** — reads the file and replaces `${DCS_REGISTRY}` with the
+  registry address from your session, then prints the finished manifest.
+- **`| oc apply -f -`** — the pipe hands that output to `oc apply`; `-f -` means "read
+  the manifest from the pipe" instead of from a file.
+
+```section:end
+name: breakdown-apply-deployment
 ```
 
 Now wait for the new Pod to be ready:
 
 ```terminal:execute
 command: oc rollout status deploy/hello-dcs --timeout=120s
+```
+
+```section:begin
+name: breakdown-wait-for-rollout
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc rollout status deploy/hello-dcs`** — waits until the new Pod is Ready and the
+  rollout is complete.
+- **`--timeout=120s`** — stops waiting after 120 seconds and reports an error,
+  instead of waiting forever.
+
+```section:end
+name: breakdown-wait-for-rollout
 ```
 
 Once the Pod is scheduled, DCS provisions a PV and **binds** it to your claim. Confirm both
@@ -95,6 +118,24 @@ Write a marker into the mounted volume — this goes onto the PV, not the contai
 
 ```terminal:execute
 command: oc exec deploy/hello-dcs -- sh -c 'echo persisted-marker-42 > /opt/app-root/src/data/marker && cat /opt/app-root/src/data/marker'
+```
+
+```section:begin
+name: breakdown-write-marker
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc exec deploy/hello-dcs`** — runs a command inside a Pod of the Deployment.
+- **`--`** — separates the `oc` options from the command to run in the container.
+- **`sh -c '…'`** — starts a shell in the container to run the quoted commands, so the `>`
+  and `&&` happen inside the container.
+- **`echo persisted-marker-42 > /opt/app-root/src/data/marker`** — writes the marker into a
+  file on the mounted volume.
+- **`&& cat /opt/app-root/src/data/marker`** — if the write succeeded, prints the file back.
+
+```section:end
+name: breakdown-write-marker
 ```
 
 ```examiner:execute-test

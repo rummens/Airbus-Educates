@@ -24,7 +24,27 @@ new one fails, so `-l app=hello-dcs` would describe both and the failure could s
 The inner command picks the **newest** Pod — the broken one — and describes that:
 
 ```terminal:execute
-command: oc describe pod $(oc get pod -l app=hello-dcs --sort-by=.metadata.creationTimestamp -o name | tail -1) | tail -n 30
+command: oc describe $(oc get pod -l app=hello-dcs --sort-by=.metadata.creationTimestamp -o name | tail -1) | tail -n 30
+```
+
+```section:begin
+name: breakdown-describe-newest-pod
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc describe`** — prints the full report for the object named after it (here
+  `pod/<name>`), ending with its Events.
+- **`$( … )`** — runs the inner command first and puts its output, the name of the newest
+  Pod, into the `describe` command.
+- **`oc get pod -l app=hello-dcs`** — lists the Pods that carry the label `app=hello-dcs`.
+- **`--sort-by=.metadata.creationTimestamp`** — sorts them by creation time, oldest first.
+- **`-o name`** — prints each Pod only as `pod/<name>`, with no other columns.
+- **`| tail -1`** — keeps the last line: the newest Pod.
+- **`| tail -n 30`** — keeps only the last 30 lines of the report, where the Events are.
+
+```section:end
+name: breakdown-describe-newest-pod
 ```
 
 Look for a line naming what's missing. Here you'll see the container can't be configured
@@ -33,12 +53,25 @@ because a **ConfigMap it references doesn't exist** — the name it's looking fo
 
 ## 2. Cluster events — the same story, cluster-wide
 
-This lists events for the whole namespace. `--sort-by=.lastTimestamp` orders them oldest to
-newest, and `| tail -n 15` keeps the **15 most recent** so the latest problem is at the
-bottom:
+This lists events for the whole namespace, with the **15 most recent** last, so the latest
+problem is at the bottom:
 
 ```terminal:execute
 command: oc get events --sort-by=.lastTimestamp | tail -n 15
+```
+
+```section:begin
+name: breakdown-recent-events
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get events`** — lists the events recorded in your namespace.
+- **`--sort-by=.lastTimestamp`** — sorts them by when each one last happened, oldest first.
+- **`| tail -n 15`** — keeps the last 15 lines, so you see the most recent events.
+
+```section:end
+name: breakdown-recent-events
 ```
 
 Events confirm it: a reference to `configmap "hello-dcs-conf" not found`.

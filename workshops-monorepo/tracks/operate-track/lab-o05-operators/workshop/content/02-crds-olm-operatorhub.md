@@ -56,6 +56,20 @@ unfamiliar kind accepts without looking for documentation:
 command: oc explain cluster.spec --api-version=postgresql.cnpg.io/v1 | head -25
 ```
 
+```section:begin
+name: breakdown-explain-cluster
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc explain cluster.spec`** — prints the schema of the `spec` field of a `Cluster`, with a description of each field.
+- **`--api-version=postgresql.cnpg.io/v1`** — picks the CloudNativePG `Cluster`, in case another API group also has a kind named `Cluster`.
+- **`| head -25`** — shows only the first 25 lines.
+
+```section:end
+name: breakdown-explain-cluster
+```
+
 ```examiner:execute-test
 name: verify-api-resource-present
 title: Verify the Cluster (CNPG) kind is registered as an API resource

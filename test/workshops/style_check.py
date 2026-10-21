@@ -29,7 +29,7 @@ RED, YEL, GREEN, DIM, RST = "\033[31m", "\033[33m", "\033[32m", "\033[2m", "\033
 
 # A command needs a breakdown if it pipes, chains, substitutes, loops, wraps a shell, or
 # carries an expression language. Keep in sync with content-depth-reference.md.
-COMPLEX = re.compile(r"\||&&|;|\$\(|\b(for|while)\b|\bsh -c\b|\btimeout\b|<<|2>&1|"
+COMPLEX = re.compile(r"\||&&|;|\$\(|\b(for|while)\b|\bsh -c\b|(?<![-\w])timeout\b|<<|2>&1|"
                      r"jsonpath=|go-template|custom-columns|--sort-by|\bjq\b|\bawk\b|\bsed\b")
 EXEC_FENCE = re.compile(r"^```terminal:execute(-[12])?\s*$")
 BOUNDARY = re.compile(r"^(```terminal:execute|## )")
@@ -85,7 +85,7 @@ def check_voice(rel, lines, is_md):
         if ln.startswith("```"):
             in_fence = not in_fence
             continue
-        if in_fence:
+        if in_fence or (not is_md and ln.lstrip().startswith("#")):   # code, YAML comments
             continue
         text = re.sub(r"`[^`]*`|\]\([^)]*\)|\{\{<[^>]*>\}\}", "", ln)   # code, link targets, shortcodes
         for rx, why in VOICE:

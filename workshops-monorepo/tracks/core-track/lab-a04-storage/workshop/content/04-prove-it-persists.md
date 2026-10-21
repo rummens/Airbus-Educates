@@ -26,6 +26,21 @@ Wait for the new Pod to be ready:
 command: oc rollout status deploy/hello-dcs --timeout=90s
 ```
 
+```section:begin
+name: breakdown-wait-for-rollout
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc rollout status deploy/hello-dcs`** — waits until the new Pod is Ready and the
+  rollout is complete.
+- **`--timeout=90s`** — stops waiting after 90 seconds and reports an error,
+  instead of waiting forever.
+
+```section:end
+name: breakdown-wait-for-rollout
+```
+
 {{< note >}}
 **💡 Want to watch it?** In the **lower** terminal run `oc get pods,pvc -w` — you'll see the old
 Pod terminate, a new one start, and the PVC stay `Bound` throughout. `Ctrl-C` when done.

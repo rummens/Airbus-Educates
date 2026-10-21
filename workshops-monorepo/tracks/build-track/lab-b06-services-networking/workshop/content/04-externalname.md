@@ -50,6 +50,21 @@ to have endpoints for.
 command: getent hosts api-alias.$(oc project -q).svc.cluster.local
 ```
 
+```section:begin
+name: breakdown-resolve-alias
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`getent hosts`** — asks the terminal's resolver, which is cluster DNS, for the addresses of a name, the same lookup an app does before it connects.
+- **`api-alias.`** — the ExternalName Service name, followed by your namespace.
+- **`$(oc project -q)`** — runs first and puts your namespace name into the hostname (`-q` prints only the name).
+- **`.svc.cluster.local`** — the cluster DNS suffix every Service name ends in.
+
+```section:end
+name: breakdown-resolve-alias
+```
+
 The answer comes back as the **target's** address, with the target's own name in the output:
 
 ```

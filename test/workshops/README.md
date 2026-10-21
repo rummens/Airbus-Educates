@@ -25,7 +25,7 @@ Deploy, run examiner graders, and tear down one lab against the real dev OpenShi
 
 | Stage | What |
 |---|---|
-| `test` (fast) | portal pytest + workshop coverage / link / label checks. Required on MRs. |
+| `test` (fast) | portal pytest + workshop coverage / link / style / label checks. Required on MRs. |
 | `e2e` (cluster) | `smoke_test.py` for changed labs + `flow_test.py --mode both`. Required on MRs. |
 
 The cluster smoke jobs run on any available runner: they use `$CI_BASE_IMAGE` (which carries `oc`) and log into the dev OpenShift cluster via the `CI_OC_*` variables (`CI_OC_HOST`, `CI_OC_TOKEN`, `CI_OC_INSECURE`, …). No dedicated runner tag is required.

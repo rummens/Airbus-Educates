@@ -22,6 +22,21 @@ same two-step way as before:
 command: envsubst < broken-deployment.yaml | oc apply -f -
 ```
 
+```section:begin
+name: breakdown-apply-broken
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < broken-deployment.yaml`** — reads the file and replaces `${DCS_REGISTRY}` with the
+  registry address from your session, then prints the finished manifest.
+- **`| oc apply -f -`** — the pipe hands that output to `oc apply`; `-f -` means "read
+  the manifest from the pipe" instead of from a file.
+
+```section:end
+name: breakdown-apply-broken
+```
+
 Now list the Pods for this app to see the result:
 
 ```terminal:execute

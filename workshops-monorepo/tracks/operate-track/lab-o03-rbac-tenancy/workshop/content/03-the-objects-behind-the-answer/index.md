@@ -82,6 +82,20 @@ this namespace. Now trace it in full:
 command: oc describe rolebinding $(oc get rolebindings -o jsonpath='{.items[0].metadata.name}')
 ```
 
+```section:begin
+name: breakdown-describe-binding
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get rolebindings -o jsonpath='{.items[0].metadata.name}'`** — prints the name of the first RoleBinding in your namespace.
+- **`$(…)`** — runs that command first and puts the name into the outer command.
+- **`oc describe rolebinding <name>`** — shows that RoleBinding, including the role it grants and the subjects it grants it to.
+
+```section:end
+name: breakdown-describe-binding
+```
+
 ```examiner:execute-test
 name: verify-rolebinding-described
 title: Verify the RoleBinding's subject and role reference are traced

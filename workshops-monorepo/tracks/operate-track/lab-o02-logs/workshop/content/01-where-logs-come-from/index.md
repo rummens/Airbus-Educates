@@ -39,6 +39,21 @@ the container's disk, and it is gone with the Pod. Write to standard output inst
 command: envsubst < deployment.yaml | oc apply -f - && oc rollout status deploy/hello-dcs --timeout=180s
 ```
 
+```section:begin
+name: breakdown-deploy-app
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < deployment.yaml`** — reads the file and replaces `${DCS_REGISTRY}` with its value from your session, so the registry host is not hard-coded.
+- **`| oc apply -f -`** — the pipe hands that output to `oc apply`; `-f -` means "read the manifest from the pipe" instead of from a file.
+- **`&&`** — runs the next command only if the one before it succeeded.
+- **`oc rollout status deploy/hello-dcs --timeout=180s`** — waits until the Deployment's Pods are ready, or gives up after 180 seconds.
+
+```section:end
+name: breakdown-deploy-app
+```
+
 ```examiner:execute-test
 name: verify-app-ready
 title: Verify the app is running with two replicas
@@ -55,6 +70,22 @@ command: |-
   oc apply -f service.yaml 2>/dev/null || true
   for i in $(seq 1 20); do curl -s -o /dev/null "$url" 2>/dev/null; done
   echo "sent 20 requests"
+```
+
+```section:begin
+name: breakdown-send-requests
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`url="http://hello-dcs.$(oc project -q).svc:8080"`** — stores the Service's in-cluster address in the variable `url`; `$(oc project -q)` inserts your namespace name.
+- **`oc apply -f service.yaml 2>/dev/null || true`** — creates the Service; `2>/dev/null` hides any error message, and `|| true` lets the step carry on even if the apply fails.
+- **`for i in $(seq 1 20); do … done`** — `seq 1 20` prints the numbers 1 to 20, so the loop body runs 20 times.
+- **`curl -s -o /dev/null "$url" 2>/dev/null`** — sends one request and throws away the response and any error, so the loop keeps going if the app is not reachable yet.
+- **`echo "sent 20 requests"`** — prints a confirmation when the loop is done.
+
+```section:end
+name: breakdown-send-requests
 ```
 
 If that could not reach the app yet, it does not matter. The app logs its own startup

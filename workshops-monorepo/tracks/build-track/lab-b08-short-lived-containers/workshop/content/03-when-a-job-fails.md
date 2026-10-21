@@ -25,6 +25,21 @@ Same shape as before, except that the command writes an error and exits 1, and
 command: envsubst < job-failing.yaml | oc apply -f - && oc wait --for=condition=failed job/db-migrate-broken --timeout=180s
 ```
 
+```section:begin
+name: breakdown-run-failing-job
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < job-failing.yaml`** — reads the file and replaces each `${VAR}` placeholder (here the Harbor registry, `${DCS_REGISTRY}`) with the value from your session, so the registry host is never hard-coded.
+- **`| oc apply -f -`** — the pipe passes that output to `oc apply`; `-f -` means "read the manifest from the pipe" instead of from a file.
+- **`&&`** — run the next command only if `oc apply` succeeded.
+- **`oc wait --for=condition=failed job/db-migrate-broken --timeout=180s`** — blocks until the Job reports the `Failed` condition, or gives up after 180 seconds.
+
+```section:end
+name: breakdown-run-failing-job
+```
+
 Here you wait for the **`failed`** condition. The Job is expected to fail, so that is the
 outcome you are asserting.
 
@@ -49,6 +64,19 @@ attempts survive for you to inspect and the first failure is not overwritten by 
 command: oc describe job db-migrate-broken | tail -20
 ```
 
+```section:begin
+name: breakdown-describe-tail
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc describe job db-migrate-broken`** — prints the Job's settings, status and recent events.
+- **`| tail -20`** — keeps only the last 20 lines, where the events are listed.
+
+```section:end
+name: breakdown-describe-tail
+```
+
 At the bottom, the `BackoffLimitExceeded` event records that the Job stopped, and why.
 
 ```examiner:execute-test
@@ -63,6 +91,19 @@ delay: 3
 
 ```terminal:execute
 command: oc logs job/db-migrate-broken | tail -5
+```
+
+```section:begin
+name: breakdown-logs-tail
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc logs job/db-migrate-broken`** — prints the logs of one of the Job's Pods, without you looking up its name.
+- **`| tail -5`** — keeps only the last five lines.
+
+```section:end
+name: breakdown-logs-tail
 ```
 
 The log shows `cannot reach the database`, from the attempt that produced it.

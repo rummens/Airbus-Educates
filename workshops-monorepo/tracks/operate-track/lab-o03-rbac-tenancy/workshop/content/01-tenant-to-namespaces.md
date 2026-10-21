@@ -66,11 +66,20 @@ records which Tenant a namespace belongs to and what type it is:
 command: oc get namespace $(oc project -q) -o jsonpath='{.metadata.labels}'
 ```
 
-Here, `oc project -q` prints **just** the current project's name with no extra text (the
-`-q` flag means "quiet", no headers, no decoration, only the value), and `$(...)` runs that
-command first and substitutes its output into the outer command. `-o jsonpath='{...}'`
-extracts one specific field from the full object instead of dumping the whole thing: here,
-the `metadata.labels` map.
+```section:begin
+name: breakdown-namespace-labels
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc project -q`** — prints only the current project's name. `-q` means "quiet": no headers and no extra text.
+- **`$(…)`** — runs that command first and puts its output into the outer command.
+- **`oc get namespace <name>`** — reads your namespace object.
+- **`-o jsonpath='{.metadata.labels}'`** — prints one field instead of the whole object: here, the `metadata.labels` map.
+
+```section:end
+name: breakdown-namespace-labels
+```
 
 ```examiner:execute-test
 name: verify-namespace-labels

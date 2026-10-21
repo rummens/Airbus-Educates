@@ -33,6 +33,20 @@ Click the box below. It types and runs the command for you in the **upper** term
 command: oc whoami | tee ~/exercises/whoami.txt
 ```
 
+```section:begin
+name: breakdown-whoami
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc whoami`** — prints the user name you are logged in as.
+- **`| tee ~/exercises/whoami.txt`** — shows the output in the terminal and also saves a copy to
+  that file, so the check below can read it.
+
+```section:end
+name: breakdown-whoami
+```
+
 You should see a username. That confirms your session is authenticated — you never had to
 log in by hand.
 
@@ -50,6 +64,20 @@ the terminal area:
 ```terminal:execute
 command: oc status | tee ~/exercises/status.txt
 session: 2
+```
+
+```section:begin
+name: breakdown-status
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc status`** — summarises what is running in your namespace.
+- **`| tee ~/exercises/status.txt`** — shows the output in the terminal and also saves a copy to
+  that file, so the check below can read it.
+
+```section:end
+name: breakdown-status
 ```
 
 `oc status` gives a quick overview of what's running in your namespace. It is empty for

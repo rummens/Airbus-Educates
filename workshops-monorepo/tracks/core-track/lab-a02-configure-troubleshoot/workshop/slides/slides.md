@@ -87,7 +87,7 @@ Three commands, in order — each narrows the problem. Read what the platform re
 - **Logs** — and *no* logs is itself a clue: the container never started, so the failure is config, not code.
 
 ```
-oc describe pod $(oc get pod -l app=hello-dcs --sort-by=.metadata.creationTimestamp -o name | tail -1) | tail -n 30
+oc describe $(oc get pod -l app=hello-dcs --sort-by=.metadata.creationTimestamp -o name | tail -1) | tail -n 30
 oc get events --sort-by=.lastTimestamp | tail -n 15
 oc logs -l app=hello-dcs --tail=20
 ```

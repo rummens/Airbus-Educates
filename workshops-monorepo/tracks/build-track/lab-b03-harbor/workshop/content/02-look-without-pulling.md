@@ -18,6 +18,21 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/in
 command: skopeo inspect docker://${DCS_REGISTRY}/samples/hello-dcs:1.0 | head -25
 ```
 
+```section:begin
+name: breakdown-inspect-image
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`skopeo inspect`** — reads the image's metadata from the registry API without downloading its layers.
+- **`docker://`** — the transport: it tells `skopeo` the image is in a registry, not in a local file or directory.
+- **`${DCS_REGISTRY}/samples/hello-dcs:1.0`** — the registry, the repository and the tag.
+- **`| head -25`** — shows only the first 25 lines of the JSON output.
+
+```section:end
+name: breakdown-inspect-image
+```
+
 ```examiner:execute-test
 name: verify-inspect-works
 title: Verify you can read an image's metadata without pulling it
@@ -42,6 +57,19 @@ Four fields are worth knowing by name:
 command: skopeo inspect docker://${DCS_REGISTRY}/samples/hello-dcs:1.0 --format '{{ "{{" }} .Digest {{ "}}" }}'
 ```
 
+```section:begin
+name: breakdown-read-digest
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`skopeo inspect docker://…/hello-dcs:1.0`** — reads the image's metadata from the registry, as before.
+- **`--format '…'`** — a Go template. `.Digest` selects one field, so only the digest is printed instead of the full JSON.
+
+```section:end
+name: breakdown-read-digest
+```
+
 ```examiner:execute-test
 name: verify-digest-readable
 title: Verify the image digest can be read on its own
@@ -64,6 +92,21 @@ run are not provably the same bytes.
 
 ```terminal:execute
 command: skopeo inspect --config docker://${DCS_REGISTRY}/samples/hello-dcs:1.0 | head -20
+```
+
+```section:begin
+name: breakdown-inspect-config
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`skopeo inspect`** — reads image metadata from the registry without pulling the image.
+- **`--config`** — returns the image's runtime configuration (user, environment, command, ports) instead of its manifest summary.
+- **`docker://${DCS_REGISTRY}/samples/hello-dcs:1.0`** — the image, in the registry.
+- **`| head -20`** — shows only the first 20 lines.
+
+```section:end
+name: breakdown-inspect-config
 ```
 
 ```examiner:execute-test

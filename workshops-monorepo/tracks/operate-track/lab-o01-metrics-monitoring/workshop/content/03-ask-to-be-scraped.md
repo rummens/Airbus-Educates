@@ -54,6 +54,20 @@ command: |-
   oc get svc -l app=hello-dcs
 ```
 
+```section:begin
+name: breakdown-check-selector
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get servicemonitor hello-dcs`** — reads the ServiceMonitor you just created.
+- **`-o jsonpath='{.spec.selector.matchLabels}{"\n"}'`** — prints only the labels its selector matches on, followed by a newline.
+- **`oc get svc -l app=hello-dcs`** — lists the Services that carry the label `app=hello-dcs`. If this list is empty, the selector matches nothing.
+
+```section:end
+name: breakdown-check-selector
+```
+
 ```examiner:execute-test
 name: verify-selector-matches
 title: Verify the selector actually matches a Service with a named port

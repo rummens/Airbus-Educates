@@ -45,6 +45,20 @@ tune it:
 command: oc get hpa hello-dcs -o jsonpath='{.spec.behavior}{"\n"}'
 ```
 
+```section:begin
+name: breakdown-read-behavior
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get hpa hello-dcs`** — reads the HPA object.
+- **`-o jsonpath='{.spec.behavior}'`** — prints only its `behavior` section, where scale-up and scale-down timing is set.
+- **`{"\n"}`** — adds a newline so your prompt starts on its own line.
+
+```section:end
+name: breakdown-read-behavior
+```
+
 An empty value means the defaults apply: no delay scaling out, 300 seconds of stabilisation
 scaling in.
 

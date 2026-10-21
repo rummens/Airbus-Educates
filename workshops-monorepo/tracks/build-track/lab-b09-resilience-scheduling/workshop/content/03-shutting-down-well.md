@@ -31,6 +31,23 @@ Once `terminationGracePeriodSeconds` has passed, anything still running gets `SI
 command: oc get deploy hello-dcs -o jsonpath='{.spec.template.spec.terminationGracePeriodSeconds}{"  preStop: "}{.spec.template.spec.containers[0].lifecycle.preStop.exec.command}{"\n"}'
 ```
 
+```section:begin
+name: breakdown-grace-settings
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get deploy hello-dcs`** — reads the Deployment.
+- **`-o jsonpath='…'`** — prints only the fields named inside `{…}`, instead of the whole object.
+- **`{.spec.template.spec.terminationGracePeriodSeconds}`** — the grace period from the Pod template.
+- **`{"  preStop: "}`** — literal text printed between the two values, as a label.
+- **`{.spec.template.spec.containers[0].lifecycle.preStop.exec.command}`** — the `preStop` command of the first container.
+- **`{"\n"}`** — a line break at the end.
+
+```section:end
+name: breakdown-grace-settings
+```
+
 ```examiner:execute-test
 name: verify-grace-settings
 title: Verify the grace period and preStop hook are configured
@@ -54,6 +71,23 @@ command: |-
   end=$(date +%s)
   echo $(( end - start )) > /tmp/shutdown-seconds.txt
   echo "deleting $pod took $(cat /tmp/shutdown-seconds.txt) seconds"
+```
+
+```section:begin
+name: breakdown-time-deletion
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`pod=$(oc get pods -l app=hello-dcs -o name | head -1)`** — stores the name of the first app Pod, as `pod/<name>`, in the variable `pod`.
+- **`start=$(date +%s)`** — stores the current time, in seconds since 1970.
+- **`oc delete "$pod"`** — deletes the Pod and, by default, waits until it is gone. That wait is what the timing measures.
+- **`end=$(date +%s)`** — stores the time again, once the Pod is gone.
+- **`echo $(( end - start )) > /tmp/shutdown-seconds.txt`** — `$(( … ))` is shell arithmetic; the elapsed seconds are written to a file the check below reads.
+- **`echo "deleting $pod took …"`** — prints the result; `$(cat …)` reads the number back from the file.
+
+```section:end
+name: breakdown-time-deletion
 ```
 
 ```examiner:execute-test

@@ -80,6 +80,20 @@ command: timeout 30 oc logs -f deploy/hello-dcs --tail=5
 session: 2
 ```
 
+```section:begin
+name: breakdown-follow-logs
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`timeout 30`** — runs the command that follows and stops it after 30 seconds, so the pane is free again without you pressing Ctrl+C.
+- **`oc logs -f deploy/hello-dcs`** — streams the log of one of the Deployment's Pods as new lines arrive.
+- **`--tail=5`** — starts with only the last 5 existing lines.
+
+```section:end
+name: breakdown-follow-logs
+```
+
 In the **upper** pane, send ten requests, one per second:
 
 ```terminal:execute
@@ -87,6 +101,22 @@ command: |-
   url="http://hello-dcs.$(oc project -q).svc:8080"
   for i in $(seq 1 10); do curl -s -o /dev/null "$url"; sleep 1; done
   echo "done"
+```
+
+```section:begin
+name: breakdown-send-slow-requests
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`url="http://hello-dcs.$(oc project -q).svc:8080"`** — stores the Service's in-cluster address in the variable `url`; `$(oc project -q)` inserts your namespace name.
+- **`for i in $(seq 1 10); do … done`** — `seq 1 10` prints the numbers 1 to 10, so the loop body runs 10 times.
+- **`curl -s -o /dev/null "$url"`** — sends one request and throws the response away.
+- **`sleep 1`** — waits one second between requests, so you can watch the lines arrive one by one in the lower pane.
+- **`echo "done"`** — prints a confirmation when the loop is done.
+
+```section:end
+name: breakdown-send-slow-requests
 ```
 
 New lines appear in the lower pane as the requests arrive. `-f` behaves like `tail -f`, and

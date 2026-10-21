@@ -62,6 +62,19 @@ environment, then the `|` pipe hands the finished manifest to `oc apply -f -` (t
 command: envsubst < deployment.yaml | oc apply -f -
 ```
 
+```section:begin
+name: breakdown-render-and-apply
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < deployment.yaml`** — reads the manifest and replaces `${DCS_REGISTRY}` with the registry address from your session.
+- **`| oc apply -f -`** — the pipe hands the result to `oc apply`. The `-f -` means "read the manifest from the pipe" instead of from a file.
+
+```section:end
+name: breakdown-render-and-apply
+```
+
 ```examiner:execute-test
 name: verify-deployment-image
 title: Verify the Deployment uses the Harbor image, not the placeholder

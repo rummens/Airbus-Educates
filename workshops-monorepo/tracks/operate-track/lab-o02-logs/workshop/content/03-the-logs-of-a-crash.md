@@ -25,6 +25,22 @@ Deployment starts it again.
 command: envsubst < crashing.yaml | oc apply -f - && sleep 20 && oc get pods -l app=flaky
 ```
 
+```section:begin
+name: breakdown-deploy-flaky
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < crashing.yaml`** — reads the file and replaces `${DCS_REGISTRY}` with its value from your session, so the registry host is not hard-coded.
+- **`| oc apply -f -`** — the pipe hands that output to `oc apply`; `-f -` means "read the manifest from the pipe" instead of from a file.
+- **`&&`** — runs the next command only if the one before it succeeded.
+- **`sleep 20`** — waits 20 seconds, so the container has time to start, crash and be restarted.
+- **`oc get pods -l app=flaky`** — lists the app's Pods, with their `STATUS` and `RESTARTS` columns.
+
+```section:end
+name: breakdown-deploy-flaky
+```
+
 ```examiner:execute-test
 name: verify-flaky-restarting
 title: Verify the flaky app is crash-looping
@@ -41,6 +57,19 @@ delay: 5
 command: oc logs deploy/flaky --tail=10 || true
 ```
 
+```section:begin
+name: breakdown-read-current
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc logs deploy/flaky --tail=10`** — prints the last 10 lines of the current container in one of the Deployment's Pods.
+- **`|| true`** — between restarts there may be no running container to read, so this command can fail. `|| true` keeps the step from being marked as failed.
+
+```section:end
+name: breakdown-read-current
+```
+
 Depending on when you catch it, you get the new container's few lines, or an error, because
 between restarts there is no running container to read.
 
@@ -50,6 +79,21 @@ between restarts there is no running container to read.
 command: |-
   pod=$(oc get pods -l app=flaky -o name | head -1)
   oc logs "$pod" --previous --tail=20
+```
+
+```section:begin
+name: breakdown-read-previous
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get pods -l app=flaky -o name`** — lists the app's Pods as `pod/<name>`, one per line.
+- **`| head -1`** — keeps only the first one.
+- **`pod=$(…)`** — stores that Pod name in the variable `pod`.
+- **`oc logs "$pod" --previous --tail=20`** — prints the last 20 lines of that Pod's previous container, the one that crashed.
+
+```section:end
+name: breakdown-read-previous
 ```
 
 ```examiner:execute-test
@@ -95,6 +139,21 @@ You just deleted that Deployment. Try to read its logs now:
 
 ```terminal:execute
 command: oc logs deploy/flaky --previous 2>&1 | tail -2 || true
+```
+
+```section:begin
+name: breakdown-read-deleted
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc logs deploy/flaky --previous`** — asks for the previous container's log of a Deployment you have already deleted.
+- **`2>&1`** — sends the error message to the same output as normal text, so the pipe passes it on.
+- **`| tail -2`** — shows only the last two lines.
+- **`|| true`** — the read is expected to fail; this keeps the step from being marked as failed.
+
+```section:end
+name: breakdown-read-deleted
 ```
 
 ```examiner:execute-test

@@ -18,6 +18,20 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/sc
 command: oc scale statefulset/hello-dcs --replicas=3 && oc rollout status statefulset/hello-dcs --timeout=180s
 ```
 
+```section:begin
+name: breakdown-scale-up
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc scale statefulset/hello-dcs --replicas=3`** — sets the desired number of replicas to 3.
+- **`&&`** — run the next command only if the scale request was accepted.
+- **`oc rollout status statefulset/hello-dcs --timeout=180s`** — waits until every replica is ready, or gives up after 180 seconds.
+
+```section:end
+name: breakdown-scale-up
+```
+
 ```examiner:execute-test
 name: verify-scaled-up-with-pvc
 title: Verify the new replica came with its own new volume
@@ -46,10 +60,38 @@ the `-l` to see every claim in the namespace.
 command: oc scale statefulset/hello-dcs --replicas=2 && oc rollout status statefulset/hello-dcs --timeout=120s
 ```
 
+```section:begin
+name: breakdown-scale-down
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc scale statefulset/hello-dcs --replicas=2`** — sets the desired number of replicas to 2.
+- **`&&`** — run the next command only if the scale request was accepted.
+- **`oc rollout status statefulset/hello-dcs --timeout=120s`** — waits until every replica is ready, or gives up after 120 seconds.
+
+```section:end
+name: breakdown-scale-down
+```
+
 The highest ordinal goes first, so `hello-dcs-2` is the one removed.
 
 ```terminal:execute
 command: oc get pods -l app=hello-dcs && oc get pvc
+```
+
+```section:begin
+name: breakdown-pods-and-claims
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get pods -l app=hello-dcs`** — lists the app's Pods.
+- **`&&`** — run the next command only if the first one succeeded.
+- **`oc get pvc`** — lists every claim in the namespace, with no label filter.
+
+```section:end
+name: breakdown-pods-and-claims
 ```
 
 `hello-dcs-2` is gone. **`data-hello-dcs-2` is still there, still `Bound`.**

@@ -46,6 +46,26 @@ Secret, and rolls out a new Pod:
 command: oc set env deploy/hello-dcs --from=secret/hello-dcs-secret && oc rollout status deploy/hello-dcs --timeout=120s
 ```
 
+```section:begin
+name: breakdown-inject-secret
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc set env deploy/hello-dcs`** — changes the environment variables in the
+  Deployment's Pod template.
+- **`--from=secret/hello-dcs-secret`** — adds one variable for each key in the Secret (here
+  `API_TOKEN`), with the value taken from the Secret.
+- **`&&`** — runs the next command only if `oc set env` succeeded.
+- **`oc rollout status deploy/hello-dcs`** — waits until the new Pod with the variable is Ready and the
+  rollout is complete.
+- **`--timeout=120s`** — stops waiting after 120 seconds and reports an error,
+  instead of waiting forever.
+
+```section:end
+name: breakdown-inject-secret
+```
+
 {{< note >}}
 **⚠️ Order matters.** You create the Secret **first**, then reference it. A workload that
 references a Secret (or ConfigMap) that doesn't exist yet won't start.
@@ -63,6 +83,24 @@ reaches your screen:
 
 ```terminal:execute
 command: oc exec deploy/hello-dcs -- printenv API_TOKEN | wc -c
+```
+
+```section:begin
+name: breakdown-count-token
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc exec deploy/hello-dcs`** — runs a command inside a running Pod of the Deployment.
+- **`--`** — ends the `oc` options; everything after it is the command to run in the
+  container.
+- **`printenv API_TOKEN`** — prints the value of the `API_TOKEN` variable inside the
+  container.
+- **`| wc -c`** — counts the characters it receives and prints only that number, so the
+  value never reaches your screen.
+
+```section:end
+name: breakdown-count-token
 ```
 
 You see a number (around `41` — the token's length plus the line ending). A number greater

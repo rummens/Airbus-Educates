@@ -77,6 +77,22 @@ The cluster enforces the SCC on every Pod. Ask which SCC admitted your own workl
 command: oc get pod -l app=hello-dcs -o jsonpath='{.items[0].metadata.annotations.openshift\.io/scc}{"\n"}'
 ```
 
+```section:begin
+name: breakdown-read-scc-annotation
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get pod -l app=hello-dcs`** — selects the Pods with the label `app=hello-dcs`.
+- **`-o jsonpath='…'`** — prints one field instead of the table.
+- **`.items[0]`** — the first Pod in that list.
+- **`.metadata.annotations.openshift\.io/scc`** — the annotation OpenShift adds to record which SCC admitted the Pod. The `\.` escapes the dot in the annotation name, so it is not read as a path separator.
+- **`{"\n"}`** — adds a newline so your prompt starts on its own line.
+
+```section:end
+name: breakdown-read-scc-annotation
+```
+
 That prints the SCC the running Pod was admitted under. `restricted-v2` is the one described
 above.
 

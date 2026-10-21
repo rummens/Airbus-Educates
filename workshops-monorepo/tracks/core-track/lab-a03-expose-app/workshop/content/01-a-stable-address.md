@@ -23,20 +23,47 @@ steps; run them one after another and read what each does.
 
 **Step 1 — fill in the registry, then apply.** The manifest names its image as
 `${DCS_REGISTRY}/...` instead of a hard-coded registry, so the same file works on any DCS
-environment. `envsubst` replaces `${DCS_REGISTRY}` with the real value from your environment
-and prints the finished manifest; the `|` pipe hands that output to `oc apply -f -` (the `-`
-means "read the manifest from the pipe, not from a file"):
+environment:
 
 ```terminal:execute
 command: envsubst < deployment.yaml | oc apply -f -
 ```
 
+```section:begin
+name: breakdown-apply-deployment
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < deployment.yaml`** — reads the file and replaces `${DCS_REGISTRY}` with the
+  registry address from your session, then prints the finished manifest.
+- **`| oc apply -f -`** — the pipe hands that output to `oc apply`; `-f -` means "read
+  the manifest from the pipe" instead of from a file.
+
+```section:end
+name: breakdown-apply-deployment
+```
+
 **Step 2 — wait for the rollout.** `oc rollout status` waits until the new Pod is Ready, so
-you know the app is running before moving on. `--timeout=90s` makes it give up after 90
-seconds instead of waiting forever:
+you know the app is running before moving on:
 
 ```terminal:execute
 command: oc rollout status deploy/hello-dcs --timeout=90s
+```
+
+```section:begin
+name: breakdown-wait-for-rollout
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc rollout status deploy/hello-dcs`** — waits until the new Pod is Ready and the
+  rollout is complete.
+- **`--timeout=90s`** — stops waiting after 90 seconds and reports an error,
+  instead of waiting forever.
+
+```section:end
+name: breakdown-wait-for-rollout
 ```
 
 ```examiner:execute-test
@@ -71,18 +98,27 @@ delay: 2
 ## Reach it by cluster DNS
 
 The Service is reachable inside the cluster at `hello-dcs.<namespace>.svc`. Call it from
-your terminal.
-
-Each part of the command does one thing:
-
-- **`-s`** — run quietly, with no progress bar.
-- **`-o /dev/null`** — throw away the page body.
-- **`-w 'HTTP %{http_code}\n'`** — print just the HTTP status code.
-- **`$(oc project -q)`** — run `oc project -q` first and insert your current namespace name
-  into the address.
+your terminal:
 
 ```terminal:execute
 command: curl -s -o /dev/null -w 'HTTP %{http_code}\n' "http://hello-dcs.$(oc project -q).svc:8080"
+```
+
+```section:begin
+name: breakdown-call-service
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`curl -s`** — calls the URL quietly, without a progress bar.
+- **`-o /dev/null`** — throws away the page body.
+- **`-w 'HTTP %{http_code}\n'`** — prints `HTTP` and the response's status code, then a line
+  break.
+- **`"http://hello-dcs.$(oc project -q).svc:8080"`** — the Service's in-cluster DNS name and
+  port. `$(oc project -q)` runs first and inserts your namespace name.
+
+```section:end
+name: breakdown-call-service
 ```
 
 ```examiner:execute-test

@@ -41,6 +41,19 @@ also adds the two probes the next page is about, which you can ignore for now.
 command: envsubst < deployment-probes.yaml | oc apply -f -
 ```
 
+```section:begin
+name: breakdown-apply-right-sized
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < deployment-probes.yaml`** — reads the manifest and replaces `${DCS_REGISTRY}` with the registry address from your session.
+- **`| oc apply -f -`** — the pipe hands the result to `oc apply`. The `-f -` means "read the manifest from the pipe" instead of from a file.
+
+```section:end
+name: breakdown-apply-right-sized
+```
+
 {{< note >}}
 **💡 Tip:** this applies a known-good desired state **over** a stuck rollout. When a rollout
 is stuck, apply the manifest you know is right rather than patching the broken object.

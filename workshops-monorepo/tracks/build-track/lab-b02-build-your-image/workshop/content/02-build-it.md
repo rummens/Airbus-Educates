@@ -47,6 +47,21 @@ command: |-
   oc apply -f ~/exercises/buildconfig.yaml
 ```
 
+```section:begin
+name: breakdown-resolve-and-create
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`cd ~/exercises/app`** — moves to the directory that holds the build input.
+- **`envsubst < Containerfile > Containerfile.resolved`** — writes a copy of the Containerfile with `${DCS_REGISTRY}` replaced by the registry address from your session.
+- **`&& mv Containerfile.resolved Containerfile`** — if that worked, replaces the original with the resolved copy. The BuildConfig reads the file named `Containerfile`.
+- **`oc apply -f ~/exercises/buildconfig.yaml`** — creates the ImageStream and the BuildConfig.
+
+```section:end
+name: breakdown-resolve-and-create
+```
+
 ```examiner:execute-test
 name: verify-buildconfig-created
 title: Verify the BuildConfig and its ImageStream exist

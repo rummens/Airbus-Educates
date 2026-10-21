@@ -19,6 +19,20 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/ex
 command: curl -s "http://hello-dcs.$(oc project -q).svc:8080/metrics"
 ```
 
+```section:begin
+name: breakdown-read-metrics
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`curl -s`** — fetches a URL; `-s` hides the progress bar.
+- **`hello-dcs.$(oc project -q).svc:8080`** — the Service's in-cluster DNS name and port; `$(oc project -q)` inserts your namespace name.
+- **`/metrics`** — the path the app serves its metrics on.
+
+```section:end
+name: breakdown-read-metrics
+```
+
 ```examiner:execute-test
 name: verify-metrics-endpoint
 title: Verify the app serves Prometheus exposition format
@@ -61,6 +75,22 @@ command: |-
   for i in $(seq 1 60); do curl -s -o /dev/null "$url"; done
   echo "sent 60 requests"
   curl -s "$url/metrics" | grep hello_dcs_requests_total
+```
+
+```section:begin
+name: breakdown-generate-traffic
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`url="http://hello-dcs.$(oc project -q).svc:8080"`** — stores the Service's in-cluster address in the variable `url`; `$(oc project -q)` inserts your namespace name.
+- **`for i in $(seq 1 60); do … done`** — `seq 1 60` prints the numbers 1 to 60, so the loop body runs 60 times.
+- **`curl -s -o /dev/null "$url"`** — sends one request to the app; `-o /dev/null` throws the response away.
+- **`echo "sent 60 requests"`** — prints a confirmation when the loop is done.
+- **`curl -s "$url/metrics" | grep hello_dcs_requests_total`** — fetches the metrics page and keeps only the lines for the request counter.
+
+```section:end
+name: breakdown-generate-traffic
 ```
 
 ```examiner:execute-test

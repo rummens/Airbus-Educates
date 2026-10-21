@@ -37,6 +37,32 @@ command: |-
 session: 2
 ```
 
+```section:begin
+name: breakdown-open-tunnel
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc rollout status deploy/hello-dcs --timeout=60s`** — waits until the app is Ready,
+  for at most 60 seconds, so the tunnel has a Pod to connect to.
+- **`kill "$(cat /tmp/pf.pid 2>/dev/null)"`** — `$(…)` reads the process ID that an earlier
+  run saved, and `kill` stops that old tunnel.
+- **`2>/dev/null || true`** — hides the error when there is no old tunnel, and `|| true`
+  lets the block carry on anyway.
+- **`oc port-forward deploy/hello-dcs 8080:8080`** — opens the tunnel: port 8080 in your
+  session forwards to port 8080 of a Pod in the Deployment.
+- **`>/tmp/pf.log 2>&1`** — writes the tunnel's output and error messages to a log file,
+  so they do not fill the pane.
+- **`&`** — runs the tunnel in the background, so the pane stays free for other commands.
+- **`echo $! > /tmp/pf.pid`** — `$!` is the process ID of the background tunnel; saving it
+  lets the next run stop this tunnel.
+- **`sleep 2 && echo "port-forward ready on localhost:8080"`** — waits two seconds for the
+  tunnel to open, then (`&&`: only if the wait succeeded) prints a ready message.
+
+```section:end
+name: breakdown-open-tunnel
+```
+
 ```examiner:execute-test
 name: verify-portforward
 title: Verify the tunnel reaches the app (HTTP 200)

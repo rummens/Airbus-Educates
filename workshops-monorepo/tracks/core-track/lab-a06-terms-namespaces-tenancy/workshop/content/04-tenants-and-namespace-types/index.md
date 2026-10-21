@@ -44,14 +44,28 @@ Observe track) shows how the difference is enforced.
 Look at the labels on your own namespace. The command reads them and formats them one per
 line:
 
-- **`-o jsonpath='{.metadata.labels}'`** — extracts just the labels field from the namespace
-  object.
-- **`tr ',' '\n'`** — puts each label on its own line. `tr` replaces one character with
-  another; here a comma with a newline.
-- **`tr -d '{}"'`** — deletes the braces and quotes, so the output is easy to read.
-
 ```terminal:execute
 command: oc get namespace "$(oc project -q)" -o jsonpath='{.metadata.labels}' | tr ',' '\n' | tr -d '{}"' | tee ~/exercises/ns-labels.txt
+```
+
+```section:begin
+name: breakdown-namespace-labels
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get namespace "$(oc project -q)"`** — reads your own namespace object;
+  `$(oc project -q)` inserts its name.
+- **`-o jsonpath='{.metadata.labels}'`** — prints only the labels field, as one line of
+  JSON.
+- **`| tr ',' '\n'`** — `tr` replaces each comma with a line break, so each label gets its
+  own line.
+- **`| tr -d '{}"'`** — deletes the braces and quotes, so the output is easy to read.
+- **`| tee ~/exercises/ns-labels.txt`** — shows the output in the terminal and also saves a copy to
+  that file, so the check below can read it.
+
+```section:end
+name: breakdown-namespace-labels
 ```
 
 ```examiner:execute-test

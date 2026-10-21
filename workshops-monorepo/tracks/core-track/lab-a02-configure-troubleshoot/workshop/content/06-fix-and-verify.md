@@ -38,10 +38,40 @@ Apply the good manifest (same two steps as before — fill in the registry and a
 command: envsubst < deployment-configured.yaml | oc apply -f -
 ```
 
+```section:begin
+name: breakdown-apply-deployment
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < deployment-configured.yaml`** — reads the file and replaces `${DCS_REGISTRY}` with the
+  registry address from your session, then prints the finished manifest.
+- **`| oc apply -f -`** — the pipe hands that output to `oc apply`; `-f -` means "read
+  the manifest from the pipe" instead of from a file.
+
+```section:end
+name: breakdown-apply-deployment
+```
+
 Then wait for the new Pod to become Ready:
 
 ```terminal:execute
 command: oc rollout status deploy/hello-dcs --timeout=90s
+```
+
+```section:begin
+name: breakdown-wait-for-rollout
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc rollout status deploy/hello-dcs`** — waits until the new Pod is Ready and the
+  rollout is complete.
+- **`--timeout=90s`** — stops waiting after 90 seconds and reports an error,
+  instead of waiting forever.
+
+```section:end
+name: breakdown-wait-for-rollout
 ```
 
 ```examiner:execute-test

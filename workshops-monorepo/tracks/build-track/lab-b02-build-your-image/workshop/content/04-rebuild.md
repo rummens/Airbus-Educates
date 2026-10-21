@@ -21,6 +21,21 @@ command: |-
   grep GREETING Containerfile
 ```
 
+```section:begin
+name: breakdown-edit-greeting
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`cd ~/exercises/app`** — moves to the directory that holds the Containerfile.
+- **`sed -i`** — edits the file in place instead of printing the result.
+- **`'s/Built on DCS, by me/Rebuilt, and it shows/'`** — replaces the old greeting text with the new text.
+- **`grep GREETING Containerfile`** — prints the changed line, so you can see the edit worked.
+
+```section:end
+name: breakdown-edit-greeting
+```
+
 ## Build again
 
 ```terminal:execute
@@ -67,6 +82,20 @@ running the image it pulled when its Pod started, and nothing has told it to loo
 
 ```terminal:execute
 command: oc rollout restart deploy/hello-built && oc rollout status deploy/hello-built --timeout=180s
+```
+
+```section:begin
+name: breakdown-restart-and-wait
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc rollout restart deploy/hello-built`** — replaces every Pod of the Deployment. The new Pods pull `hello-built:latest` again and get the rebuilt image.
+- **`&&`** — runs the next command only if the restart was accepted.
+- **`oc rollout status deploy/hello-built --timeout=180s`** — waits until the new Pods are ready, or gives up after three minutes.
+
+```section:end
+name: breakdown-restart-and-wait
 ```
 
 ```examiner:execute-test

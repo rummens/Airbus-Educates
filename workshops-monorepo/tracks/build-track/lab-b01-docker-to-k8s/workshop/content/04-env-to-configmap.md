@@ -85,6 +85,21 @@ command: timeout 30 oc get pods -l app=hello-dcs --watch
 session: 2
 ```
 
+```section:begin
+name: breakdown-watch-pods
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`timeout 30`** — stops the command after 30 seconds, so nothing is left running in the pane.
+- **`oc get pods`** — lists Pods.
+- **`-l app=hello-dcs`** — shows only Pods with the label `app=hello-dcs`.
+- **`--watch`** — keeps the command running and prints a new line each time a Pod changes.
+
+```section:end
+name: breakdown-watch-pods
+```
+
 You see the old Pod go `Terminating` while a new one starts and reaches `Running`.
 
 ```examiner:execute-test

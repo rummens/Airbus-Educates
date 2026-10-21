@@ -17,6 +17,23 @@ url: {{< param ingress_protocol >}}://{{< param session_hostname >}}/slides/#/re
 command: oc get pod hello-dcs-0 -o custom-columns=NAME:.metadata.name,UID:.metadata.uid,IP:.status.podIP,NODE:.spec.nodeName
 ```
 
+```section:begin
+name: breakdown-pod-identity
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get pod hello-dcs-0`** — shows only replica 0.
+- **`-o custom-columns=`** — prints a table with the columns you name instead of the default ones. Each column is written `TITLE:field-path`, separated by commas.
+- **`NAME:.metadata.name`** — the Pod's name.
+- **`UID:.metadata.uid`** — the unique ID the cluster gave this Pod object.
+- **`IP:.status.podIP`** — the Pod's current IP address.
+- **`NODE:.spec.nodeName`** — the node it runs on.
+
+```section:end
+name: breakdown-pod-identity
+```
+
 The **UID** is the Pod's unique identity to the cluster. The Pod that comes back will have
 a different UID, so it is a new Pod rather than the same one restarted.
 
@@ -29,10 +46,38 @@ command: timeout 120 oc get pods -l app=hello-dcs --watch
 session: 2
 ```
 
+```section:begin
+name: breakdown-watch-pods
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`timeout 120`** — stops the command after 120 seconds, so the lower pane is free again without pressing Ctrl+C.
+- **`oc get pods -l app=hello-dcs`** — lists only the Pods with the label `app=hello-dcs`.
+- **`--watch`** — keeps running and prints a new line each time one of those Pods changes.
+
+```section:end
+name: breakdown-watch-pods
+```
+
 In the **upper** pane:
 
 ```terminal:execute
 command: oc delete pod hello-dcs-0 && oc rollout status statefulset/hello-dcs --timeout=120s
+```
+
+```section:begin
+name: breakdown-delete-replica
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc delete pod hello-dcs-0`** — deletes replica 0; the StatefulSet creates a replacement.
+- **`&&`** — run the next command only if the delete succeeded.
+- **`oc rollout status statefulset/hello-dcs --timeout=120s`** — waits until the StatefulSet has all its replicas ready again, or gives up after 120 seconds.
+
+```section:end
+name: breakdown-delete-replica
 ```
 
 ```examiner:execute-test

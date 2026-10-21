@@ -29,6 +29,21 @@ Three fields are worth knowing before you run it:
 command: envsubst < job-migrate.yaml | oc apply -f - && oc wait --for=condition=complete job/db-migrate --timeout=120s
 ```
 
+```section:begin
+name: breakdown-run-job
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`envsubst < job-migrate.yaml`** — reads the file and replaces each `${VAR}` placeholder (here the Harbor registry, `${DCS_REGISTRY}`) with the value from your session, so the registry host is never hard-coded.
+- **`| oc apply -f -`** — the pipe passes that output to `oc apply`; `-f -` means "read the manifest from the pipe" instead of from a file.
+- **`&&`** — run the next command only if `oc apply` succeeded.
+- **`oc wait --for=condition=complete job/db-migrate --timeout=120s`** — blocks until the Job reports the `Complete` condition, or fails after 120 seconds.
+
+```section:end
+name: breakdown-run-job
+```
+
 `oc wait` blocks until the Job reports the `complete` condition, which is how to wait for
 work whose duration you do not control.
 
@@ -44,6 +59,20 @@ delay: 3
 
 ```terminal:execute
 command: oc get jobs && oc get pods -l job-name=db-migrate
+```
+
+```section:begin
+name: breakdown-job-and-pod
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get jobs`** — lists the Jobs, with their `COMPLETIONS` column.
+- **`&&`** — run the next command only if the first one succeeded.
+- **`oc get pods -l job-name=db-migrate`** — lists the Pods with the label `job-name=db-migrate`, which the Job controller adds to every Pod it creates. You do not need to know the Pod's generated name.
+
+```section:end
+name: breakdown-job-and-pod
 ```
 
 Two things to notice:

@@ -26,6 +26,23 @@ command: |-
     docker://image-registry.openshift-image-registry.svc:5000/${SESSION_NAMESPACE}/mirrored:1.0
 ```
 
+```section:begin
+name: breakdown-copy-image
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`skopeo copy`** — copies an image's manifest and layers from one registry to another. The two image references at the end are the source and the destination.
+- **`--dest-tls-verify=false`** — skips certificate checks on the destination. The training cluster's internal registry uses a certificate this terminal does not trust.
+- **`--dest-creds "unused:$(oc whoami -t)"`** — the destination's username and password. `$(oc whoami -t)` is replaced by your session token. The note below explains the username.
+- **`\`** at the end of a line — continues the command on the next line.
+- **`docker://${DCS_REGISTRY}/samples/hello-dcs:1.0`** — the source image.
+- **`docker://image-registry.openshift-image-registry.svc:5000/${SESSION_NAMESPACE}/mirrored:1.0`** — the destination: the cluster's internal registry, a repository in your session namespace, and the new name and tag.
+
+```section:end
+name: breakdown-copy-image
+```
+
 ```examiner:execute-test
 name: verify-image-copied
 title: Verify the image was copied into your namespace's registry
@@ -57,6 +74,24 @@ issued to a system rather than a person, and scoped to one project.
 
 ```terminal:execute
 command: oc get imagestream mirrored -o jsonpath='{range .status.tags[*]}{.tag}{"  →  "}{.items[0].dockerImageReference}{"\n"}{end}'
+```
+
+```section:begin
+name: breakdown-read-mirrored-tag
+prefix: Breakdown
+title: What each part of the command does
+```
+
+- **`oc get imagestream mirrored`** — reads the ImageStream object.
+- **`-o jsonpath='…'`** — prints only the fields named in the expression, instead of the table.
+- **`{range .status.tags[*]}` … `{end}`** — repeats the part in between once for every tag the ImageStream tracks.
+- **`{.tag}`** — the tag name, for example `latest`.
+- **`{"  →  "}`** — a literal arrow between the two columns.
+- **`{.items[0].dockerImageReference}`** — the newest image the tag points at, written with its `@sha256:` digest.
+- **`{"\n"}`** — ends each tag's output with a newline.
+
+```section:end
+name: breakdown-read-mirrored-tag
 ```
 
 ```examiner:execute-test
