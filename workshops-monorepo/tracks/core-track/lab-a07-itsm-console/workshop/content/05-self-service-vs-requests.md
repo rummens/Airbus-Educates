@@ -53,7 +53,8 @@ Route (in a PROD namespace) · create a PVC.
 
 **Raise an ITSM request:** request a new Tenant · request a second Namespace · increase
 your namespace quota · mirror an external image to Harbor · request an S3 bucket · add a
-new Harbor catalog/repo · request a security exception.
+new Harbor catalog/repo · add a colleague to your namespace (user management) · request a
+security exception.
 {{< /note >}}
 
 ## Quick check

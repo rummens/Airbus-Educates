@@ -40,7 +40,8 @@ container (compilers, `git`, common language runtimes) that Red Hat ships for De
 Spaces. On DCS it is mirrored into Harbor like every other image. The component's
 `image` is `${DCS_REGISTRY}/devspaces/udi:latest`, the same placeholder the other
 labs' manifests use, so no public registry is involved. The placeholder is filled
-in with `envsubst` before the file is used, as in every other lab.
+in with `envsubst` before the file is used, as in every other lab. Here `envsubst` is told
+which placeholders to replace, for the reason shown below.
 
 **`projects`** say what you develop: the git source Dev Spaces clones into the
 workspace when it starts, so your editor opens with the `hello-dcs` code already
@@ -115,7 +116,7 @@ delay: 2
 Now resolve it the way the session does, substituting the real registry host:
 
 ```terminal:execute
-command: envsubst < ~/exercises/devfile.yaml | grep 'image:'
+command: envsubst '$DCS_REGISTRY $WORKSPACE_SOURCE_REPO' < ~/exercises/devfile.yaml | grep 'image:'
 ```
 
 ```section:begin
@@ -124,7 +125,8 @@ prefix: Breakdown
 title: What each part of the command does
 ```
 
-- **`envsubst < ~/exercises/devfile.yaml`** — reads the devfile and replaces each `${VAR}` placeholder with the value from your session; `${DCS_REGISTRY}` becomes your Harbor registry host.
+- **`envsubst '$DCS_REGISTRY $WORKSPACE_SOURCE_REPO'`** — replaces only the two placeholders named in quotes with their values from your session; `${DCS_REGISTRY}` becomes your Harbor registry host. Naming them matters here: the devfile also contains `${PROJECTS_ROOT}`, which Dev Spaces fills in inside the workspace, and a bare `envsubst` would replace it with an empty string.
+- **`< ~/exercises/devfile.yaml`** — reads the devfile as the input.
 - **`| grep 'image:'`** — keeps only the line with `image:`, so you can compare it with the raw line above.
 
 ```section:end

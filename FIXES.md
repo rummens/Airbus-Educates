@@ -12,6 +12,10 @@ synced `main`; workshop content is live on the next session start.
 - **Every longer command now has a "Breakdown" you can open.** Under each command that chains, pipes or filters, a collapsed box explains each part in order (what `envsubst … | oc apply -f -` does, what `$( … )` or `-o jsonpath` mean, and so on). It is closed by default, so the page stays short if you don't need it.
 - **Configure & Troubleshoot: the "describe the newest Pod" command works.** It named the type twice (`pod pod/<name>`), which `oc` refuses; it now describes the Pod directly.
 - **DEV vs PROD Namespaces: the comparison explains the empty `{}` for DEV.** DEV's Deployment declares no resources; the namespace defaults are added to its Pods, not to the Deployment.
+- **Expose Your App: the Route now serves HTTPS.** It uses the platform's `*.apps` certificate, plain `http://` is redirected to `https://`, and the page explains the `tls` block. Before, the Route was plain HTTP, although the lab says DCS handles TLS for you.
+- **Harbor: the first scan-report command is one plain `jq` call.** It no longer tries a path that never exists first and quietly falls back.
+- **Dev Spaces: resolving the devfile no longer blanks `${PROJECTS_ROOT}`.** The command now names the two placeholders to fill in, and the breakdown explains why that matters.
+- **Requesting via ITSM: "Add a colleague to your namespace" is in the answers.** The worksheet asked it but the answer list left it out. It is an ITSM request (user management).
 - **Operators on DCS: the Pod watch now shows the database Pods.** The watch in the lower pane looked in the wrong namespace and stayed empty while the Operator was provisioning; it now watches the database namespace.
 
 ## 2026-09-12

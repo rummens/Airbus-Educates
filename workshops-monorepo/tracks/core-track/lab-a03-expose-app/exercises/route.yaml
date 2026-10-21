@@ -14,3 +14,8 @@ spec:
     name: hello-dcs
   port:
     targetPort: 8080
+  # Serve HTTPS. TLS ends at the platform router ("edge") with the *.apps certificate
+  # DCS manages, and a plain-HTTP request is redirected to HTTPS.
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

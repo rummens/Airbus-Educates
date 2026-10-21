@@ -27,6 +27,10 @@ namespace, on the DCS `*.apps` domain:
 file: ~/exercises/route.yaml
 ```
 
+The **`tls`** block asks for HTTPS. TLS ends at the platform router (`termination: edge`),
+using the `*.apps` certificate DCS manages, and a plain `http://` request is redirected to
+`https://` (`insecureEdgeTerminationPolicy: Redirect`).
+
 ```terminal:execute
 command: oc apply -f route.yaml
 ```
@@ -75,7 +79,7 @@ session. Call it:
 ```terminal:execute
 command: |-
   HOST=$(oc get route hello-dcs -o jsonpath='{.spec.host}')
-  curl -sk -o /dev/null -w 'HTTP %{http_code} from '"$HOST"'\n' "http://$HOST"
+  curl -sk -o /dev/null -w 'HTTP %{http_code} from '"$HOST"'\n' "https://$HOST"
 ```
 
 ```section:begin
@@ -88,12 +92,13 @@ title: What each part of the command does
   variable named `HOST`.
 - **`oc get route hello-dcs -o jsonpath='{.spec.host}'`** — prints only the Route's host
   name.
-- **`curl -sk`** — `-s` calls the URL quietly, without a progress bar; `-k` skips TLS
-  certificate checks, which has no effect on this plain `http://` URL.
+- **`curl -sk`** — `-s` calls the URL quietly, without a progress bar; `-k` skips the
+  certificate check, because this terminal may not trust the authority that signed the
+  router's certificate (on a training cluster it is often self-signed).
 - **`-o /dev/null`** — throws away the page body.
 - **`-w 'HTTP %{http_code} from '"$HOST"'\n'`** — prints the status code and the host. The
   quotes switch from single to double around `$HOST`, so the shell fills in its value.
-- **`"http://$HOST"`** — the URL to call, built from the variable.
+- **`"https://$HOST"`** — the URL to call, built from the variable.
 
 ```section:end
 name: breakdown-call-route

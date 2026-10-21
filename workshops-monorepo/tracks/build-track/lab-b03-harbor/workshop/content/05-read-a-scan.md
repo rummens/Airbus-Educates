@@ -25,7 +25,7 @@ file: ~/exercises/scan-report.json
 ```
 
 ```terminal:execute
-command: jq '{artifact, scanner: .scanner.name, summary}' exercises/scan-report.json 2>/dev/null || jq '{artifact, scanner: .scanner.name, summary}' ~/exercises/scan-report.json
+command: jq '{artifact, scanner: .scanner.name, summary}' ~/exercises/scan-report.json
 ```
 
 ```section:begin
@@ -37,9 +37,7 @@ title: What each part of the command does
 - **`jq '{…}'`** — builds a smaller JSON object from the report.
 - **`artifact`, `summary`** — copies those two fields across unchanged.
 - **`scanner: .scanner.name`** — adds a field `scanner` holding only the scanner's name.
-- **`exercises/scan-report.json`** — the report, by a path relative to your home directory.
-- **`2>/dev/null`** — hides the error if the terminal is not in your home directory.
-- **`|| jq … ~/exercises/scan-report.json`** — if the first attempt failed, runs the same filter on the full path.
+- **`~/exercises/scan-report.json`** — the report, by its full path, so the command works whichever directory the terminal is in.
 
 ```section:end
 name: breakdown-summarise-report

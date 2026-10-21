@@ -57,7 +57,7 @@ A **Route** gives the app a real external URL. With no explicit `host`, OpenShif
 oc apply -f route.yaml
 oc get route hello-dcs -o jsonpath='{.spec.host}{"\n"}'
 HOST=$(oc get route hello-dcs -o jsonpath='{.spec.host}')
-curl -sk -o /dev/null -w 'HTTP %{http_code}\n' "http://$HOST"
+curl -sk -o /dev/null -w 'HTTP %{http_code}\n' "https://$HOST"
 ```
 
 - Expected: `HTTP 200` from outside the session.
